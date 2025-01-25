@@ -17,11 +17,11 @@ function App() {
 				</a>
 			</div>
 			<h1>Vite + React</h1>
-			<div className="card">
+			<div className="card text-primary-500 text-kor-heading1">
 				<button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-				<p>
-					Edit <code>src/App.tsx</code> and save to test HMR
-				</p>
+				<p>한글 English</p>
+				<p>한글</p>
+				<p>English</p>
 			</div>
 			<p className="read-the-docs">Click on the Vite and React logos to learn more</p>
 		</>
