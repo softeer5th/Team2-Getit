@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@font-face {
+	font-family: "AppleSDGothicNeoB";
+	font-style: normal;
+	font-weight: 400;
+	src: url("/fonts/AppleSDGothicNeoB/AppleSDGothicNeoB.woff") format("woff");
+	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
+}
+
+@font-face {
+	font-family: "SF Pro Display";
+	font-style: normal;
+	font-weight: 400;
+	src: url("/fonts/SF_Pro_Display/SF-Pro-Display-Regular.woff") format("woff");
+}
+
+* {
+	font-family: "SF Pro Display", "AppleSDGothicNeoB";
+}
+
+@theme {
+	--color-primary-100: #cde1fe;
+	--color-primary-200: #9ac2fd;
+	--color-primary-300: #68a4fd;
+	--color-primary-400: #3585fc;
+	--color-primary-500: #0367fb;
+	--color-primary-600: #0252c9;
+	--color-primary-700: #023e97;
+	--color-primary-800: #012964;
+	--color-primary-900: #011532;
+
+	--color-gray-100: #ffffff;
+	--color-gray-200: #f5f5f5;
+	--color-gray-300: #eaeaea;
+	--color-gray-400: #dbdbdb;
+	--color-gray-500: #b0b0b0;
+	--color-gray-600: #999999;
+	--color-gray-700: #808080;
+	--color-gray-800: #4d4d4d;
+	--color-gray-900: #161616;
+
+	--color-system-black: #000000;
+	--color-system-red: #ff2d55;
+	--color-system-orange: #ff8000;
+	--color-system-skyblue: #f0f5fe;
+	--color-system-lightred: #fff5f7;
+	--color-system-lightorange: #fff7ef;
+
+	--radius-100: 10px;
+	--radius-200: 16px;
+	--radius-300: 18px;
+	--radius-400: 20px;
+	--radius-500: 28px;
+
+	--text-kor-heading1: 24px;
+	--text-kor-heading1--line-height: 160%;
+
+	--text-kor-heading2: 20px;
+	--text-kor-heading2--line-height: 160%;
+
+	--text-kor-body1: 18px;
+	--text-kor-body1--line-height: 160%;
+
+	--text-kor-body2: 16px;
+	--text-kor-body2--line-height: 160%;
+
+	--text-kor-body3: 14px;
+	--text-kor-body3--line-height: 160%;
+
+	--text-kor-caption: 12px;
+	--text-kor-caption--line-height: 120%;
+
+	--text-eng-heading1: 32px;
+	--text-eng-heading1--line-height: 70%;
+
+	--text-eng-heading2: 24px;
+	--text-eng-heading2--line-height: 160%;
+
+	--text-eng-heading3: 20px;
+	--text-eng-heading3--line-height: 160%;
+
+	--text-eng-body1: 16px;
+	--text-eng-body1--line-height: 160%;
+
+	--text-eng-body2: 14px;
+	--text-eng-body2--line-height: 160%;
+
+	--text-eng-caption: 12px;
+	--text-eng-caption--line-height: 160%;
+}
