@@ -1,4 +1,3 @@
-import React, { useEffect, useRef } from "react";
 import useMap from "../hooks/useMap";
 
 const Map = () => {
