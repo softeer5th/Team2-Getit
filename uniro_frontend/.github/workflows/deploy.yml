@@ -4,7 +4,7 @@ on:
     push:
         branches:
             - fe
-            - fe/*
+            - feat/UNI-34
 
 jobs:
     CI:
