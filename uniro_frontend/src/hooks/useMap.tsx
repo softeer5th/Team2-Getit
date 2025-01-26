@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { initializeMap } from "../map/initializer/googleMapInitializer";
 
 const useMap = () => {
