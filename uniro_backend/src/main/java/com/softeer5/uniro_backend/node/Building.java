@@ -14,15 +14,21 @@ import lombok.NoArgsConstructor;
 public class Building {
 	@Id
 	private Long id;
+
 	@Column(length = 20)
 	private String phoneNumber;
+
 	@Column(length = 100)
 	private String address;
+
 	@Column(length = 30)
 	private String name;
+
 	@Column(length = 200)
 	private String imageUrl;
+
 	private int level;
+
 	private Long nodeId;
 
 	@Builder

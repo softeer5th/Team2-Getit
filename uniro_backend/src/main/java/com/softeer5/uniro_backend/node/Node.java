@@ -17,10 +17,14 @@ public class Node {
 
 	@Id
 	private Long id;
+
 	private Point coordinates;
+
 	private double height;
+
 	@Column(name = "is_core")
 	private boolean isCore;
+
 	@Column(name = "univ_id")
 	@NotNull
 	private Long univId;

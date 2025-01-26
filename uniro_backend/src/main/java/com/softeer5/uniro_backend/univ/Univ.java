@@ -11,8 +11,10 @@ import lombok.NoArgsConstructor;
 public class Univ {
 	@Id
 	private Long id;
+
 	@Column(length = 20)
 	private String name;
+
 	@Column(length = 200)
 	private String imageUrl;
 
