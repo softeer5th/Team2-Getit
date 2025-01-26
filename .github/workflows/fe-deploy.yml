@@ -27,6 +27,10 @@ jobs:
       - name: Docker를 위한 gcloud 인증 설정
         run: gcloud auth configure-docker --quiet
 
+      - name: Create .env from secret
+        run: |
+          echo "${{ secrets.FE_ENV }}" > uniro_frontend/.env
+
       - name: Docker 이미지 빌드 및 푸시
         run: |
           docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} -f uniro_frontend/Dockerfile .
