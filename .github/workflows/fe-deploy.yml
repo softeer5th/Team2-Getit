@@ -53,7 +53,7 @@ jobs:
           script: |
             cd ${DEPLOY_PATH}
             sudo docker ps -a --format '{{.ID}} {{.Names}}' \
-                | grep -v 'nginx$' \
+                | grep -v 'nginx-container' \
                 | awk '{print $1}' \
                 | xargs -r sudo docker stop || true
             sudo docker rm $(sudo docker ps -a -q) || true
