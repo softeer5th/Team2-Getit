@@ -27,7 +27,6 @@ function App() {
 			<div className="h-[500px] w-[500px]">
 				<Map />
 			</div>
-			
 			<p className="read-the-docs">Click on the Vite and React logos to learn more</p>
 		</>
 	);
