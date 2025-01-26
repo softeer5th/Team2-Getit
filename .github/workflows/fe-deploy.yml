@@ -57,4 +57,4 @@ jobs:
             sudo docker login -u _json_key --password-stdin https://gcr.io <<< '${{ secrets.GCP_SA_KEY }}'
             sudo docker pull gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:${IMAGE_TAG}
             sudo docker run -d --name ${IMAGE_NAME} --env-file ./.env -p 3000:3000 gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:${IMAGE_TAG}
-            sudo docker network connect compose_app-network ${IMAGE_NAME}
+            sudo docker network connect nginx_app-network ${IMAGE_NAME}
