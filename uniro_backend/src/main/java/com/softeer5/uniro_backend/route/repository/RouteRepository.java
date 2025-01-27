@@ -2,19 +2,28 @@ package com.softeer5.uniro_backend.route.repository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.softeer5.uniro_backend.route.entity.Route;
 
-public interface RouteRepository extends JpaRepository<Route, Long> {
-	@Query("SELECT r "
-		+ "FROM Route r "
-		+ "JOIN FETCH r.node1 n1 "
-		+ "JOIN FETCH r.node2 n2 "
-		+ "WHERE r.univId = :univId "
-		+ "AND (r.cautionFactors IS NOT NULL OR r.dangerFactors IS NOT NULL)"
-	)
-	List<Route> findRiskRouteByUnivIdWithNode(@Param("univId") Long univId);
+@Repository
+public interface RouteRepository extends JpaRepository<Route, Integer> {
+
+    @EntityGraph(attributePaths = {"node1", "node2"})
+    @Query("SELECT r FROM Route r WHERE r.univId = :univId")
+    List<Route> findAllRouteByUnivIdWithNodes(Long univId);
+
+    @Query("SELECT r "
+            + "FROM Route r "
+            + "JOIN FETCH r.node1 n1 "
+            + "JOIN FETCH r.node2 n2 "
+            + "WHERE r.univId = :univId "
+            + "AND (r.cautionFactors IS NOT NULL OR r.dangerFactors IS NOT NULL)"
+    )
+    List<Route> findRiskRouteByUnivIdWithNode(@Param("univId") Long univId);
+
 }
