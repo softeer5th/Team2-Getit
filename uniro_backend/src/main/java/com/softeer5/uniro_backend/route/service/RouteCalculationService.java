@@ -1,5 +1,8 @@
 package com.softeer5.uniro_backend.route.service;
 
+import com.softeer5.uniro_backend.common.error.ErrorCode;
+import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
+import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
@@ -37,7 +40,7 @@ public class RouteCalculationService {
     public FastestRouteResDTO calculateFastestRoute(Long univId, Long startNodeId, Long endNodeId){
 
         if(startNodeId.equals(endNodeId)){
-            throw new RuntimeException(); // 추후 처리예정
+            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", ErrorCode.SAME_START_AND_END_POINT);
         }
 
         //인접 리스트
@@ -126,7 +129,7 @@ public class RouteCalculationService {
         }
         //길 없는 경우
         if(!costMap.containsKey(endNode.getId())){
-            throw new RuntimeException(); // 추후 처리예정
+            throw new UnreachableDestinationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
         }
 
         return prevRoute;
