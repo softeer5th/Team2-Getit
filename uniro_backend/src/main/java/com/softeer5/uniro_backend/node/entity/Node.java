@@ -1,4 +1,9 @@
-package com.softeer5.uniro_backend.node;
+package com.softeer5.uniro_backend.node.entity;
+
+
+import java.util.Map;
+
+import org.locationtech.jts.geom.Point;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,19 +14,19 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Point;
-
-import java.util.Map;
+import lombok.ToString;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@ToString
 public class Node {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotNull
 	private Point coordinates;
 
 	private double height;
