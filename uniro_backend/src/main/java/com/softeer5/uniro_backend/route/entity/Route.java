@@ -52,9 +52,6 @@ public class Route {
 	@Column(name = "core_route_id")
 	private Long coreRouteId;
 
-	@Column(name = "has_risk")
-	private boolean hasRisk;
-
 	@Convert(converter = CautionListConverter.class)
 	@Column(name = "caution_factors")
 	private Set<CautionType> cautionFactors;

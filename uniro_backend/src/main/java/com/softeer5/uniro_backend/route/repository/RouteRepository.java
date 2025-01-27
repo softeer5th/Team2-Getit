@@ -14,8 +14,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 		+ "JOIN FETCH r.node1 n1 "
 		+ "JOIN FETCH r.node2 n2 "
 		+ "WHERE r.univId = :univId "
-		+ "AND r.hasRisk IS TRUE"
+		+ "AND (r.cautionFactors IS NOT NULL OR r.dangerFactors IS NOT NULL)"
 	)
 	List<Route> findRiskRouteByUnivIdWithNode(@Param("univId") Long univId);
-
 }
