@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:uniro-local-db;DATABASE_TO_UPPER=FALSE;mode=mysql
+    url: jdbc:h2:mem:uniro-local-db;mode=mysql
     driverClassName: org.h2.Driver
     username: sa
     password:
