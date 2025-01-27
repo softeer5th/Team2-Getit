@@ -15,10 +15,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class GetDangerResDTO {
 
-	@Schema(description = "노드 1", example = "[127.123456, 37.123456]")
+	@Schema(description = "노드 1의 좌표", example = "{\"lag\": 127.123456, \"lat\": 37.123456}")
 	private final Map<String, Double> node1;
 
-	@Schema(description = "노드 2", example = "[127.654321, 37.654321]")
+	@Schema(description = "노드 2의 좌표", example = "{\"lag\": 127.123456, \"lat\": 37.123456}")
 	private final Map<String, Double> node2;
 
 	@Schema(description = "간선 id", example = "3")
