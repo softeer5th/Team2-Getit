@@ -6,5 +6,6 @@ public enum DirectionType {
     LEFT,  // 좌회전
     SHARP_RIGHT, // 큰 우회전
     SHARP_LEFT, // 큰 좌회전
-    FINISH; // 도착점
+    FINISH, // 도착점
+    CAUTION; //위험요소
 }

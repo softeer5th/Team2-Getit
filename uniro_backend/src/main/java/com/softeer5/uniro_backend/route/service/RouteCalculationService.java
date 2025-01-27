@@ -130,6 +130,12 @@ public class RouteCalculationService {
             totalDistance += calculateDistance(nowRoute);
             accumulatedDistance += calculateDistance(nowRoute);
             totalCost += nowRoute.getCost();
+
+            if(!nowRoute.getCautionFactors().isEmpty()){
+                details.add(new RouteDetailDTO(accumulatedDistance, DirectionType.CAUTION));
+                accumulatedDistance = 0.0;
+            }
+
             if(nxt.equals(endNode)){
                 details.add(new RouteDetailDTO(accumulatedDistance, DirectionType.FINISH));
                 break;
