@@ -6,7 +6,7 @@ import com.softeer5.uniro_backend.route.DirectionType;
 import com.softeer5.uniro_backend.route.Route;
 import com.softeer5.uniro_backend.route.dto.RouteDetailDTO;
 import com.softeer5.uniro_backend.route.dto.RouteInfoDTO;
-import com.softeer5.uniro_backend.route.dto.ShortestRouteDTO;
+import com.softeer5.uniro_backend.route.dto.ShortestRouteResDTO;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class RouteCalculationService {
         }
     }
 
-    public ShortestRouteDTO calculateFastestRoute(Long startNodeId, Long endNodeId){
+    public ShortestRouteResDTO calculateFastestRoute(Long startNodeId, Long endNodeId){
 
         if(startNodeId.equals(endNodeId)){
             throw new RuntimeException(); // 추후 처리예정
@@ -148,7 +148,7 @@ public class RouteCalculationService {
         }
 
 
-        return ShortestRouteDTO.builder()
+        return ShortestRouteResDTO.builder()
                 .totalDistance(totalDistance)
                 .totalCost(totalCost)
                 .hasCaution(hasCaution)
