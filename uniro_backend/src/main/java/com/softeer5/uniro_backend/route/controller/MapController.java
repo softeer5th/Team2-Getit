@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.route.controller;
 
-import com.softeer5.uniro_backend.route.dto.ShortestRouteDTO;
+import com.softeer5.uniro_backend.route.dto.ShortestRouteResDTO;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +16,9 @@ public class MapController {
     private final RouteCalculationService routeCalculationService;
 
     @GetMapping("/route")
-    public ResponseEntity<ShortestRouteDTO> calculateFastestRoute(@RequestParam Long startNodeId,
-                                                                  @RequestParam Long endNodeId) {
-        ShortestRouteDTO shortestRouteDTO = routeCalculationService.calculateFastestRoute(startNodeId, endNodeId);
-        return ResponseEntity.ok(shortestRouteDTO);
+    public ResponseEntity<ShortestRouteResDTO> calculateFastestRoute(@RequestParam Long startNodeId,
+                                                                     @RequestParam Long endNodeId) {
+        ShortestRouteResDTO shortestRouteResDTO = routeCalculationService.calculateFastestRoute(startNodeId, endNodeId);
+        return ResponseEntity.ok(shortestRouteResDTO);
     }
 }

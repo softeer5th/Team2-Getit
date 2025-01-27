@@ -1,7 +1,5 @@
 package com.softeer5.uniro_backend.node;
 
-import org.springframework.data.geo.Point;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +9,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Point;
+
+import java.util.Map;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -31,5 +32,9 @@ public class Node {
 	@Column(name = "univ_id")
 	@NotNull
 	private Long univId;
+
+	public Map<String, Double> getXY(){
+		return Map.of("lat", coordinates.getY(), "lng", coordinates.getX());
+	}
 
 }
