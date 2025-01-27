@@ -1,10 +1,34 @@
 @import "tailwindcss";
 
 @font-face {
-	font-family: "AppleSDGothicNeoB";
+	font-family: "AppleSDGothicNeo";
+	font-style: normal;
+	font-weight: 700;
+	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoB.woff") format("woff");
+	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
+}
+
+@font-face {
+	font-family: "AppleSDGothicNeo";
+	font-style: normal;
+	font-weight: 500;
+	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoM.woff") format("woff");
+	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
+}
+
+@font-face {
+	font-family: "AppleSDGothicNeo";
 	font-style: normal;
 	font-weight: 400;
-	src: url("/fonts/AppleSDGothicNeoB/AppleSDGothicNeoB.woff") format("woff");
+	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoR.woff") format("woff");
+	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
+}
+
+@font-face {
+	font-family: "AppleSDGothicNeo";
+	font-style: normal;
+	font-weight: 600;
+	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoSB.woff") format("woff");
 	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
 }
 
@@ -16,7 +40,8 @@
 }
 
 * {
-	font-family: "SF Pro Display", "AppleSDGothicNeoB";
+	font-family: "SF Pro Display", "AppleSDGothicNeo";
+	outline: none;
 }
 
 @theme {
