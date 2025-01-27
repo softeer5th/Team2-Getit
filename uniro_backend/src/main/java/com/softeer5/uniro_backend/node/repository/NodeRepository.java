@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.node.repository;
 
-import com.softeer5.uniro_backend.node.Node;
+import com.softeer5.uniro_backend.node.entity.Node;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

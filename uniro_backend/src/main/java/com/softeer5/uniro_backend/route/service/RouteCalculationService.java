@@ -1,9 +1,9 @@
 package com.softeer5.uniro_backend.route.service;
 
-import com.softeer5.uniro_backend.node.Node;
+import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
 import com.softeer5.uniro_backend.route.DirectionType;
-import com.softeer5.uniro_backend.route.Route;
+import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.dto.RouteDetailDTO;
 import com.softeer5.uniro_backend.route.dto.RouteInfoDTO;
 import com.softeer5.uniro_backend.route.dto.ShortestRouteResDTO;
