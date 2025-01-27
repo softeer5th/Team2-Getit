@@ -22,9 +22,15 @@ public class NodeController implements NodeApi {
 	@GetMapping("/{univId}/nodes/buildings")
 	public ResponseEntity<List<GetBuildingResDTO>> getBuildings(
 		@PathVariable("univId") Long univId,
-		@RequestParam(value = "level", required = false, defaultValue = "1") int level) {
+		@RequestParam(value = "level", required = false, defaultValue = "1") int level,
+		@RequestParam(value = "left-up-lng") double leftUpLng,
+		@RequestParam(value = "left-up-lat") double leftUpLat,
+		@RequestParam(value = "right-down-lng") double rightDownLng,
+		@RequestParam(value = "right-down-lat") double rightDownLat
+	) {
 
-		List<GetBuildingResDTO> buildingResDTOS = nodeService.getBuildings(univId, level);
+		List<GetBuildingResDTO> buildingResDTOS = nodeService.getBuildings(univId, level, leftUpLng, leftUpLat,
+			rightDownLng, rightDownLat);
 		return ResponseEntity.ok().body(buildingResDTOS);
 	}
 

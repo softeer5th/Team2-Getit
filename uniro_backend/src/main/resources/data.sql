@@ -24,7 +24,7 @@ INSERT INTO
 VALUES
     (1, '010-1234-5678', '123 Main St', '공학관', 'http://example.com/image1.jpg', 5, 1, 1001),
     (2, '010-2345-6789', '456 Maple Ave', '인문관', 'http://example.com/image2.jpg', 3, 2, 1001),
-    (3, '010-3456-7890', '789 Oak St', '소프트웨어융합관', 'http://example.com/image3.jpg', 7, 3, 1001),
+    (3, '010-3456-7890', '789 Oak St', '소프트웨어융합관', 'http://example.com/image3.jpg', 1, 3, 1001),
     (4, '010-4567-8901', '101 Pine St', '공대관', 'http://example.com/image4.jpg', 4, 4, 1002),
-    (5, '010-5678-9012', '202 Cedar Rd', '예술관', 'http://example.com/image5.jpg', 6, 5, 1002),
+    (5, '010-5678-9012', '202 Cedar Rd', '예술관', 'http://example.com/image5.jpg', 2, 5, 1002),
     (6, '010-6789-0123', '303 Birch Ln', '강당', 'http://example.com/image6.jpg', 2, 6, 1003);

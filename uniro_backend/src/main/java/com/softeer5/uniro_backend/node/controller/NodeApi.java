@@ -21,6 +21,12 @@ public interface NodeApi {
 		@ApiResponse(responseCode = "200", description = "건물 노드 조회 성공"),
 		@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
-	ResponseEntity<List<GetBuildingResDTO>> getBuildings(@PathVariable("univId") Long univId,
-		@RequestParam(value = "level", required = false, defaultValue = "1") int level);
+	ResponseEntity<List<GetBuildingResDTO>> getBuildings(
+		@PathVariable("univId") Long univId,
+		@RequestParam(value = "level", required = false, defaultValue = "1") int level,
+		@RequestParam(value = "left-up-lng") double leftUpLng,
+		@RequestParam(value = "left-up-lat") double leftUpLat,
+		@RequestParam(value = "right-down-lng") double rightDownLng,
+		@RequestParam(value = "right-down-lat") double rightDownLat
+	);
 }

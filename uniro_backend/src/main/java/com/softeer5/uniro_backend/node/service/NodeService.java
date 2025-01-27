@@ -17,8 +17,12 @@ import lombok.RequiredArgsConstructor;
 public class NodeService {
 	private final BuildingRepository buildingRepository;
 
-	public List<GetBuildingResDTO> getBuildings(Long univId, int level){
-		List<BuildingNode> buildingNodes = buildingRepository.findByUnivIdAndLevelWithNode(univId, level);
+	public List<GetBuildingResDTO> getBuildings(
+		Long univId, int level,
+		double leftUpLng, double leftUpLat, double rightDownLng , double rightDownLat) {
+
+		List<BuildingNode> buildingNodes = buildingRepository.findByUnivIdAndLevelWithNode(
+			univId, level, leftUpLng, leftUpLat, rightDownLng, rightDownLat);
 
 		return buildingNodes.stream()
 			.map(buildingNode -> GetBuildingResDTO.of(buildingNode.getBuilding(), buildingNode.getNode()))
