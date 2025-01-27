@@ -1,11 +1,12 @@
-package com.softeer5.uniro_backend.route;
+package com.softeer5.uniro_backend.route.entity;
 
 import static jakarta.persistence.FetchType.*;
 
-import java.util.List;
+import java.util.Set;
 
-import com.softeer5.uniro_backend.common.RiskListConverter;
-import com.softeer5.uniro_backend.node.Node;
+import com.softeer5.uniro_backend.resolve.CautionListConverter;
+import com.softeer5.uniro_backend.resolve.DangerListConverter;
+import com.softeer5.uniro_backend.node.entity.Node;
 import org.locationtech.jts.geom.LineString;
 
 import jakarta.persistence.Column;
@@ -48,11 +49,14 @@ public class Route {
 	@Column(name = "univ_id")
 	private Long univId;
 
+	@Column(name = "core_route_id")
 	private Long coreRouteId;
 
-	@Convert(converter = RiskListConverter.class)
-	private List<RiskType> cautionFactors;
+	@Convert(converter = CautionListConverter.class)
+	@Column(name = "caution_factors")
+	private Set<CautionType> cautionFactors;
 
-	@Convert(converter = RiskListConverter.class)
-	private List<RiskType> dangerFactors;
+	@Convert(converter = DangerListConverter.class)
+	@Column(name = "danger_factors")
+	private Set<DangerType> dangerFactors;
 }
