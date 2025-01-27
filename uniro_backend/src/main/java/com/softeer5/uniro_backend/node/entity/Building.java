@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,15 +34,12 @@ public class Building {
 
 	private int level;
 
+	@Column(name = "node_id")
+	@NotNull
 	private Long nodeId;
 
-	@Builder
-	private Building(String phoneNumber, String address, String name, String imageUrl, int level, Long nodeId) {
-		this.phoneNumber = phoneNumber;
-		this.address = address;
-		this.name = name;
-		this.imageUrl = imageUrl;
-		this.level = level;
-		this.nodeId = nodeId;
-	}
+	@Column(name = "univ_id")
+	@NotNull
+	private Long univId;
+
 }
