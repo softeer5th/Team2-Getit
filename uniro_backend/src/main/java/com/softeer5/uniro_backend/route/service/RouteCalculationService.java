@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,20 +42,66 @@ public class RouteCalculationService {
 
         //인접 리스트
         Map<Long, List<Route>> adjMap = new HashMap<>();
+        Map<Long, Node> nodeMap = new HashMap<>();
+
         routeRepository.findAllRouteByUnivIdWithNodes(univId).forEach(route -> {
             adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
             adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
+
+            nodeMap.putIfAbsent(route.getNode1().getId(), route.getNode1());
+            nodeMap.putIfAbsent(route.getNode2().getId(), route.getNode2());
         });
 
 
-        PriorityQueue<CostToNextNode> pq = new PriorityQueue<>();
-        // startNode로부터 각 노드까지 걸리는 cost를 저장하는 자료구조
-        Map<Long, Double> costMap = new HashMap<>();
+        Node startNode = nodeMap.get(startNodeId);
+        Node endNode = nodeMap.get(endNodeId);
+
+        //길찾기 알고리즘 수행
+        Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap);
+
+        //길찾기 경로 결과 정리
+        List<Route> shortestRoutes = reorderRoute(startNode, endNode, prevRoute);
+
+        boolean hasCaution = false;
+        double totalCost = 0.0;
+        double totalDistance = 0.0;
+
+        List<RouteInfoDTO> routeInfoDTOS = new ArrayList<>();
+
+        // 외부 변수를 수정해야하기 때문에 for-loop문 사용
+        for (Route route : shortestRoutes) {
+            totalCost += route.getCost();
+            totalDistance += calculateDistance(route);
+
+            if (!route.getCautionFactors().isEmpty()) {
+                hasCaution = true;
+            }
+
+            routeInfoDTOS.add(RouteInfoDTO.builder()
+                    .routeId(route.getId())
+                    .node1(route.getNode1().getXY())
+                    .node2(route.getNode2().getXY())
+                    .cautionFactors(route.getCautionFactors())
+                    .build());
+        }
+
+        List<RouteDetailDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
+
+        return FastestRouteResDTO.builder()
+                .totalDistance(totalDistance)
+                .totalCost(totalCost)
+                .hasCaution(hasCaution)
+                .routes(routeInfoDTOS)
+                .routeDetails(details)
+                .build();
+    }
+
+    private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap){
         //key : nodeId, value : 최단거리 중 해당 노드를 향한 route
         Map<Long, Route> prevRoute = new HashMap<>();
-
-        Node startNode = nodeRepository.findByIdAndUnivId(startNodeId, univId).orElseThrow();
-        Node endNode = nodeRepository.findByIdAndUnivId(endNodeId, univId).orElseThrow();
+        // startNode로부터 각 노드까지 걸리는 cost를 저장하는 자료구조
+        Map<Long, Double> costMap = new HashMap<>();
+        PriorityQueue<CostToNextNode> pq = new PriorityQueue<>();
         pq.add(new CostToNextNode(0.0, startNode));
         costMap.put(startNode.getId(), 0.0);
 
@@ -79,88 +124,30 @@ public class RouteCalculationService {
                 }
             }
         }
-
-
-
         //길 없는 경우
         if(!costMap.containsKey(endNode.getId())){
             throw new RuntimeException(); // 추후 처리예정
         }
 
-        //길찾기 경로 결과 정리
+        return prevRoute;
+    }
 
+    // 길찾기 결과를 파싱하여 출발지 -> 도착지 형태로 재배열하는 메서드
+    private List<Route> reorderRoute(Node startNode, Node endNode, Map<Long, Route> prevRoute){
         List<Route> shortestRoutes = new ArrayList<>();
-        Node node = endNode;
-        boolean hasCaution = false;
+        Node currentNode = endNode;
 
         //endNode부터 역순회하여 배열에 저장
-        while(!node.getId().equals(startNode.getId())){
-            Route previousRoute = prevRoute.get(node.getId());
+        while(!currentNode.getId().equals(startNode.getId())){
+            Route previousRoute = prevRoute.get(currentNode.getId());
             shortestRoutes.add(previousRoute);
-            if(!previousRoute.getCautionFactors().isEmpty()){
-                hasCaution = true;
-            }
-
-            node = previousRoute.getNode1().getId().equals(node.getId()) ? previousRoute.getNode2() : previousRoute.getNode1();
+            currentNode = previousRoute.getNode1().getId().equals(currentNode.getId()) ? previousRoute.getNode2() : previousRoute.getNode1();
         }
 
         //이후 reverse를 통해 시작점 -> 도착점 방향으로 재정렬
         Collections.reverse(shortestRoutes);
 
-        List<RouteInfoDTO> routeInfoDTOS = shortestRoutes.stream()
-                .map(route -> RouteInfoDTO.builder()
-                        .routeId(route.getId())
-                        .node1(route.getNode1().getXY())
-                        .node2(route.getNode2().getXY())
-                        .cautionFactors(route.getCautionFactors())
-                        .build())
-                .collect(Collectors.toList());
-
-
-        List<RouteDetailDTO> details = new ArrayList<>();
-        double totalDistance = 0.0;
-        double accumulatedDistance = 0.0;
-        double totalCost = 0.0;
-        Node now = startNode;
-
-        // 길찾기 결과 상세정보 정리
-        for(int i=0;i<shortestRoutes.size();i++){
-            Route nowRoute = shortestRoutes.get(i);
-            Node nxt = nowRoute.getNode1().equals(now) ? nowRoute.getNode2() : nowRoute.getNode1();
-            totalDistance += calculateDistance(nowRoute);
-            accumulatedDistance += calculateDistance(nowRoute);
-            totalCost += nowRoute.getCost();
-
-            if(!nowRoute.getCautionFactors().isEmpty()){
-                details.add(new RouteDetailDTO(accumulatedDistance, DirectionType.CAUTION));
-                accumulatedDistance = 0.0;
-            }
-
-            if(nxt.equals(endNode)){
-                details.add(new RouteDetailDTO(accumulatedDistance, DirectionType.FINISH));
-                break;
-            }
-            if(nxt.isCore()){
-                DirectionType directionType = calculateDirection(nxt, nowRoute, shortestRoutes.get(i+1));
-                if(directionType == DirectionType.STRAIGHT){
-                    now = nxt;
-                    continue;
-                }
-                details.add(new RouteDetailDTO(accumulatedDistance, directionType));
-                accumulatedDistance = 0.0;
-            }
-
-            now = nxt;
-        }
-
-
-        return FastestRouteResDTO.builder()
-                .totalDistance(totalDistance)
-                .totalCost(totalCost)
-                .hasCaution(hasCaution)
-                .routes(routeInfoDTOS)
-                .routeDetails(details)
-                .build();
+        return shortestRoutes;
     }
 
     // 두 route 간의 각도를 통한 계산으로 방향성을 정하는 메서드
@@ -198,6 +185,7 @@ public class RouteCalculationService {
         }
     }
 
+    // 길의 길이를 리턴하는 메서드
     private double calculateDistance(Route route) {
         Point p1 = route.getNode1().getCoordinates();
         Point p2 = route.getNode2().getCoordinates();
@@ -206,6 +194,43 @@ public class RouteCalculationService {
         double deltaY = p2.getY() - p1.getY();
 
         return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
+
+    // 길 상세정보를 추출하는 메서드
+    private List<RouteDetailDTO> getRouteDetail(Node startNode, Node endNode, List<Route> shortestRoutes){
+        List<RouteDetailDTO> details = new ArrayList<>();
+        double accumulatedDistance = 0.0;
+        Node now = startNode;
+
+        // 길찾기 결과 상세정보 정리
+        for(int i=0;i<shortestRoutes.size();i++){
+            Route nowRoute = shortestRoutes.get(i);
+            Node nxt = nowRoute.getNode1().equals(now) ? nowRoute.getNode2() : nowRoute.getNode1();
+            accumulatedDistance += calculateDistance(nowRoute);
+
+            if(!nowRoute.getCautionFactors().isEmpty()){
+                details.add(new RouteDetailDTO(accumulatedDistance, DirectionType.CAUTION));
+                accumulatedDistance = 0.0;
+            }
+
+            if(nxt.equals(endNode)){
+                details.add(new RouteDetailDTO(accumulatedDistance, DirectionType.FINISH));
+                break;
+            }
+            if(nxt.isCore()){
+                DirectionType directionType = calculateDirection(nxt, nowRoute, shortestRoutes.get(i+1));
+                if(directionType == DirectionType.STRAIGHT){
+                    now = nxt;
+                    continue;
+                }
+                details.add(new RouteDetailDTO(accumulatedDistance, directionType));
+                accumulatedDistance = 0.0;
+            }
+
+            now = nxt;
+        }
+
+        return details;
     }
 
 
