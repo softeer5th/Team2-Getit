@@ -6,7 +6,7 @@ import com.softeer5.uniro_backend.route.DirectionType;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.dto.RouteDetailDTO;
 import com.softeer5.uniro_backend.route.dto.RouteInfoDTO;
-import com.softeer5.uniro_backend.route.dto.ShortestRouteResDTO;
+import com.softeer5.uniro_backend.route.dto.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class RouteCalculationService {
         }
     }
 
-    public ShortestRouteResDTO calculateFastestRoute(Long startNodeId, Long endNodeId){
+    public FastestRouteResDTO calculateFastestRoute(Long univId, Long startNodeId, Long endNodeId){
 
         if(startNodeId.equals(endNodeId)){
             throw new RuntimeException(); // 추후 처리예정
@@ -43,7 +43,7 @@ public class RouteCalculationService {
 
         //인접 리스트
         Map<Long, List<Route>> adjMap = new HashMap<>();
-        routeRepository.findAll().forEach(route -> {
+        routeRepository.findAllRouteByUnivIdWithNodes(univId).forEach(route -> {
             adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
             adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
         });
@@ -55,8 +55,8 @@ public class RouteCalculationService {
         //key : nodeId, value : 최단거리 중 해당 노드를 향한 route
         Map<Long, Route> prevRoute = new HashMap<>();
 
-        Node startNode = nodeRepository.findById(startNodeId).orElseThrow();
-        Node endNode = nodeRepository.findById(endNodeId).orElseThrow();
+        Node startNode = nodeRepository.findByIdAndUnivId(startNodeId, univId).orElseThrow();
+        Node endNode = nodeRepository.findByIdAndUnivId(endNodeId, univId).orElseThrow();
         pq.add(new CostToNextNode(0.0, startNode));
         costMap.put(startNode.getId(), 0.0);
 
@@ -148,7 +148,7 @@ public class RouteCalculationService {
         }
 
 
-        return ShortestRouteResDTO.builder()
+        return FastestRouteResDTO.builder()
                 .totalDistance(totalDistance)
                 .totalCost(totalCost)
                 .hasCaution(hasCaution)

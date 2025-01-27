@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class ShortestRouteResDTO {
+public class FastestRouteResDTO {
     private boolean hasCaution;
     private double totalDistance;
     private double totalCost;

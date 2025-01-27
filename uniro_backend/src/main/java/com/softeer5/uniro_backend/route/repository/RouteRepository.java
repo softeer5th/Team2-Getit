@@ -14,8 +14,8 @@ import com.softeer5.uniro_backend.route.entity.Route;
 public interface RouteRepository extends JpaRepository<Route, Integer> {
 
     @EntityGraph(attributePaths = {"node1", "node2"})
-    @Query("SELECT r FROM Route r")
-    List<Route> findAllWithNodes();
+    @Query("SELECT r FROM Route r WHERE r.univId = :univId")
+    List<Route> findAllRouteByUnivIdWithNodes(Long univId);
 
     @Query("SELECT r "
             + "FROM Route r "
