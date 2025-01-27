@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.route;
+package com.softeer5.uniro_backend.route.entity;
 
 import org.locationtech.jts.geom.LineString;
 
