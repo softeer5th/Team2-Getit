@@ -80,23 +80,12 @@ public class RouteCalculationService {
                 hasCaution = true;
             }
 
-            routeInfoDTOS.add(RouteInfoDTO.builder()
-                    .routeId(route.getId())
-                    .node1(route.getNode1().getXY())
-                    .node2(route.getNode2().getXY())
-                    .cautionFactors(route.getCautionFactors())
-                    .build());
+            routeInfoDTOS.add(RouteInfoDTO.of(route));
         }
 
         List<RouteDetailDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
-        return FastestRouteResDTO.builder()
-                .totalDistance(totalDistance)
-                .totalCost(totalCost)
-                .hasCaution(hasCaution)
-                .routes(routeInfoDTOS)
-                .routeDetails(details)
-                .build();
+        return FastestRouteResDTO.of(hasCaution, totalDistance, totalCost, routeInfoDTOS, details);
     }
 
     private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap){
@@ -180,9 +169,9 @@ public class RouteCalculationService {
         if (angle < 30) {
             return DirectionType.STRAIGHT;
         } else if (angle >= 30 && angle < 150) {
-            return (crossProduct < 0) ? DirectionType.RIGHT : DirectionType.LEFT;
+            return (crossProduct > 0) ? DirectionType.RIGHT : DirectionType.LEFT;
         } else if (angle >= 150 && angle < 180) {
-            return (crossProduct < 0) ? DirectionType.SHARP_RIGHT : DirectionType.SHARP_LEFT;
+            return (crossProduct > 0) ? DirectionType.SHARP_RIGHT : DirectionType.SHARP_LEFT;
         } else {
             return DirectionType.STRAIGHT;
         }
@@ -212,12 +201,12 @@ public class RouteCalculationService {
             accumulatedDistance += calculateDistance(nowRoute);
 
             if(!nowRoute.getCautionFactors().isEmpty()){
-                details.add(new RouteDetailDTO(accumulatedDistance, DirectionType.CAUTION));
+                details.add(RouteDetailDTO.of(accumulatedDistance, DirectionType.CAUTION));
                 accumulatedDistance = 0.0;
             }
 
             if(nxt.equals(endNode)){
-                details.add(new RouteDetailDTO(accumulatedDistance, DirectionType.FINISH));
+                details.add(RouteDetailDTO.of(accumulatedDistance, DirectionType.FINISH));
                 break;
             }
             if(nxt.isCore()){
@@ -226,7 +215,7 @@ public class RouteCalculationService {
                     now = nxt;
                     continue;
                 }
-                details.add(new RouteDetailDTO(accumulatedDistance, directionType));
+                details.add(RouteDetailDTO.of(accumulatedDistance, directionType));
                 accumulatedDistance = 0.0;
             }
 
