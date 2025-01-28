@@ -1,6 +1,7 @@
 import LandingButton from "../components/landingButton";
 import Logo from "../assets/logo.svg?react";
 import UNIRO from "../assets/UNIRO.svg?react";
+import { Link } from "react-router";
 
 export default function LandingPage() {
 	return (
@@ -14,7 +15,9 @@ export default function LandingPage() {
 					<Logo />
 					<UNIRO />
 				</div>
-				<LandingButton />
+				<Link to="/university" className="w-full">
+					<LandingButton />
+				</Link>
 			</div>
 		</div>
 	);
