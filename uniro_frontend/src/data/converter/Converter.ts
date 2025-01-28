@@ -24,8 +24,8 @@ export const convertToPath = (pathKey: string, nodesData: { id: string; lat: num
 	const startNode = convertToCoreNode(nodesData[0]);
 	const endNode = convertToCoreNode(nodesData[nodesData.length - 1]);
 
-	nodeList.unshift(startNode);
-	nodeList.push(endNode);
+	nodeList[0] = startNode;
+	nodeList[nodeList.length - 1] = endNode;
 
 	return {
 		id: pathKey,
