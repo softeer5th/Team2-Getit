@@ -4,8 +4,8 @@ import static jakarta.persistence.FetchType.*;
 
 import java.util.Set;
 
-import com.softeer5.uniro_backend.resolve.CautionListConverter;
-import com.softeer5.uniro_backend.resolve.DangerListConverter;
+import com.softeer5.uniro_backend.resolver.CautionListConverter;
+import com.softeer5.uniro_backend.resolver.DangerListConverter;
 import com.softeer5.uniro_backend.node.entity.Node;
 import org.locationtech.jts.geom.LineString;
 
