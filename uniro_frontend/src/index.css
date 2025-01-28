@@ -42,6 +42,15 @@
 * {
 	font-family: "SF Pro Display", "AppleSDGothicNeo";
 	outline: none;
+	--webkit-scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+	display: none;
+}
+
+* {
+	scrollbar-width: none;
 }
 
 @theme {
