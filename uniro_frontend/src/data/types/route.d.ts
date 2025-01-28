@@ -1,10 +1,10 @@
 import { HazardEdge } from "./edge";
 
-export interface Routes {
-	routes: HazardEdge[];
+export interface Route {
+	route: HazardEdge[];
 }
 
-export interface NavigationRoutes extends Routes {
+export interface NavigationRoute extends Route {
 	hasCaution: boolean;
 	totalDistance: number;
 	totalCost: number;

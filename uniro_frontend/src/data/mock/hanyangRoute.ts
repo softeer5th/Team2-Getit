@@ -1,5 +1,5 @@
 import { createHazardEdge } from "../factory/edgeFactory";
-import { createNavigationRoutes } from "../factory/navigationFactory";
+import { createNavigationRoute } from "../factory/navigationFactory";
 import { createNode } from "../factory/nodeFactory";
 import { HazardEdge } from "../types/edge";
 import { CustomNode } from "../types/node";
@@ -19,4 +19,4 @@ const edges: HazardEdge[] = [
 	createHazardEdge("route4", nodes[3], nodes[4]),
 ];
 
-export const mockNavigationRoute = createNavigationRoutes(edges);
+export const mockNavigationRoute = createNavigationRoute(edges);

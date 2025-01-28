@@ -1,9 +1,9 @@
 import { HazardEdge } from "../types/edge";
-import { NavigationRoutes } from "../types/route";
+import { NavigationRoute } from "../types/route";
 
-export const createNavigationRoutes = (edges: HazardEdge[]): NavigationRoutes => {
+export const createNavigationRoute = (edges: HazardEdge[]): NavigationRoute => {
 	return {
-		routes: edges,
+		route: edges,
 		hasCaution: edges.some((edge) => edge.cautionFactors !== undefined),
 		totalDistance: 1.5,
 		totalCost: 10,
