@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.softeer5.uniro_backend.node.dto.GetBuildingResDTO;
+import com.softeer5.uniro_backend.node.dto.SearchBuildingResDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,5 +29,17 @@ public interface NodeApi {
 		@RequestParam(value = "left-up-lat") double leftUpLat,
 		@RequestParam(value = "right-down-lng") double rightDownLng,
 		@RequestParam(value = "right-down-lat") double rightDownLat
+	);
+
+	@Operation(summary = "건물 노드 검색")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "건물 노드 검색 성공"),
+		@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	ResponseEntity<SearchBuildingResDTO> searchBuildings(
+		@PathVariable("univId") Long univId,
+		@RequestParam(value = "name", required = false) String name,
+		@RequestParam(value = "cursor-id", required = false) Long cursorId,
+		@RequestParam(value = "page-size", required = false) Integer pageSize
 	);
 }

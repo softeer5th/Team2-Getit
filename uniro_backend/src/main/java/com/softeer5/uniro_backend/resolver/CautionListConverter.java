@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.resolve;
+package com.softeer5.uniro_backend.resolver;
 
 import java.io.IOException;
 import java.util.Set;
