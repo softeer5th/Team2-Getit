@@ -2,6 +2,9 @@ package com.softeer5.uniro_backend.route.service;
 
 import java.util.List;
 
+import com.softeer5.uniro_backend.route.dto.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.route.entity.CoreRoute;
+import com.softeer5.uniro_backend.route.repository.CoreRouteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,13 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class RouteService {
 	private final RouteRepository routeRepository;
+	private final CoreRouteRepository coreRouteRepository;
+
+
+	public List<GetAllRoutesResDTO> GetAllRoutes(Long univId) {
+		List<CoreRoute> coreRoutes = coreRouteRepository.findByUnivId(univId);
+		return coreRoutes.stream().map(GetAllRoutesResDTO::of).toList();
+	}
 
 	public GetRiskRoutesResDTO getRiskRoutes(Long univId) {
 		List<Route> riskRoutes = routeRepository.findRiskRouteByUnivIdWithNode(univId);
