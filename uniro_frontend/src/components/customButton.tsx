@@ -26,7 +26,7 @@ export default function Button({ children, variant = "primary", ...rest }: Custo
 	return (
 		<button
 			{...rest}
-			className={`w-full max-w-[365px] h-[58px] px-[24px] font-semibold text-kor-body1 rounded-300 ${buttonStyle}`}
+			className={`w-full max-w-[450px] h-[58px] px-[24px] font-semibold text-kor-body1 rounded-300 ${buttonStyle}`}
 			disabled={variant === "disabled"}
 		>
 			{children}
