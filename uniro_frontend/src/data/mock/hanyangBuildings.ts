@@ -1,12 +1,12 @@
 import { Building } from "../types/node";
 
-export const buildings: Building[] = [
+export const hanyangBuildings: Building[] = [
 	{
 		id: "101",
 		lng: 127.044755,
 		lat: 37.555994,
 		isCore: true,
-		buildingName: "역사관",
+		buildingName: "한양대학교 법학관",
 		buildingImageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/69/Hanyang_University_008.JPG",
 		phoneNumber: "02-2220-0114",
 		address: "서울특별시 성동구 왕십리로 222",
@@ -16,7 +16,7 @@ export const buildings: Building[] = [
 		lng: 127.0455,
 		lat: 37.5565,
 		isCore: true,
-		buildingName: "본관",
+		buildingName: "한양대학교 제2공학관",
 		buildingImageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/69/Hanyang_University_008.JPG",
 		phoneNumber: "02-2220-0114",
 		address: "서울특별시 성동구 왕십리로 222",
