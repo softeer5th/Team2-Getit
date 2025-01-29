@@ -4,7 +4,6 @@ import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
 import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
 import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.node.repository.NodeRepository;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.dto.RouteDetailDTO;
@@ -24,7 +23,6 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class RouteCalculationService {
     private final RouteRepository routeRepository;
-    private final NodeRepository nodeRepository;
 
     @AllArgsConstructor
     private class CostToNextNode implements Comparable<CostToNextNode> {

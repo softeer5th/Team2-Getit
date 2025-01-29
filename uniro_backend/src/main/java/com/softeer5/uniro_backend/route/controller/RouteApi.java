@@ -1,6 +1,7 @@
 package com.softeer5.uniro_backend.route.controller;
 
 import com.softeer5.uniro_backend.route.dto.FastestRouteResDTO;
+import com.softeer5.uniro_backend.route.dto.GetAllRoutesResDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -13,8 +14,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Tag(name = "간선 및 위험&주의 요소 관련 Api")
 public interface RouteApi {
+
+	@Operation(summary = "모든 지도(노드,루트) 조회")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "모든 지도 조회 성공"),
+			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	public ResponseEntity<List<GetAllRoutesResDTO>> getAllRoutesAndNodes(@PathVariable("univId") Long univId);
+
 	@Operation(summary = "위험&주의 요소 조회")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "위험&주의 요소 조회 성공"),

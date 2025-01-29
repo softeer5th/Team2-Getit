@@ -1,6 +1,7 @@
 package com.softeer5.uniro_backend.route.controller;
 
 import com.softeer5.uniro_backend.route.dto.FastestRouteResDTO;
+import com.softeer5.uniro_backend.route.dto.GetAllRoutesResDTO;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,12 +14,22 @@ import com.softeer5.uniro_backend.route.service.RouteService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 public class RouteController implements RouteApi {
 
 	private final RouteService routeService;
 	private final RouteCalculationService routeCalculationService;
+
+	@Override
+	@GetMapping("/{univId}/routes")
+	public ResponseEntity<List<GetAllRoutesResDTO>> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
+		List<GetAllRoutesResDTO> allRoutes = routeService.GetAllRoutes(univId);
+		return ResponseEntity.ok().body(allRoutes);
+	}
+
 	@Override
 	@GetMapping("/{univId}/routes/risks")
 	public ResponseEntity<GetRiskRoutesResDTO> getRiskRoutes(@PathVariable("univId") Long univId) {
