@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.univ;
+package com.softeer5.uniro_backend.univ.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
