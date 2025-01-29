@@ -25,6 +25,7 @@ export const initializeMap = async (mapElement: HTMLElement | null): Promise<Map
 		scrollwheel: true,
 		disableDoubleClickZoom: false,
 		gestureHandling: "auto",
+		disableDefaultUI: true,
 		restriction: {
 			latLngBounds: HanyangUniversityBounds,
 			strictBounds: false,
