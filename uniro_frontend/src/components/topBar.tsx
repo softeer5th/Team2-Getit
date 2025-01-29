@@ -8,7 +8,7 @@ import ResultDividier from "../assets/icon/resultDivider.svg?react";
 
 const TopBar = () => {
 	return (
-		<div className="max-w-[450px] w-full min-h-[143px] bg-gray-100 pt-[16px] pb-5 px-[29px] flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
+		<div className="absolute top-0 z-10 max-w-[450px] w-full min-h-[143px] bg-gray-100 pt-[16px] pb-5 px-[29px] flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
 			<div className="w-full flex flex-row items-center justify-between">
 				<span className="text-left text-kor-body3 text-primary-500 flex-1 font-semibold">
 					전동휠체어 예상소요시간
