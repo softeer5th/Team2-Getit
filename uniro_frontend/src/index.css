@@ -123,3 +123,7 @@
 	--text-eng-caption: 12px;
 	--text-eng-caption--line-height: 160%;
 }
+
+@utility translate-marker {
+	transform: translateY(calc(100% - 10px));
+}
