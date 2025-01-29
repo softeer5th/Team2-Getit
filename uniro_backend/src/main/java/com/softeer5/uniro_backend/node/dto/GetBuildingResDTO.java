@@ -6,12 +6,13 @@ import com.softeer5.uniro_backend.node.entity.Building;
 import com.softeer5.uniro_backend.node.entity.Node;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Schema(name = "GetBuildingResDTO", description = "건물 노드 조회 DTO")
 @Getter
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class GetBuildingResDTO {
 
 	@Schema(description = "노드 ID", example = "4")

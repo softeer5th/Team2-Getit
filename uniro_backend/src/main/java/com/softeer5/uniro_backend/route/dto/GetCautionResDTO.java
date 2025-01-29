@@ -7,11 +7,12 @@ import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.route.entity.CautionType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Schema(name = "GetDangerResDTO", description = "위험 요소 조회 DTO")
 public class GetCautionResDTO {
