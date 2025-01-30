@@ -62,7 +62,7 @@ const MergedRoutePage = () => {
 			>
 				<NavigationMap
 					style={{ width: "100%", height: "100%" }}
-					route={route.route}
+					routes={route}
 					startBuilding={route.startBuilding}
 					destinationBuilding={route.destinationBuilding}
 				/>
