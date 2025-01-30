@@ -5,8 +5,12 @@ import LocationIcon from "../../../public/icons/location-thick.svg?react";
 import SwitchIcon from "../../assets/switch.svg?react";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
+import useSearchRoute from "../../hooks/useSearchRoute";
+import { useEffect } from "react";
 
 export default function TopSheet({ open }: { open: boolean }) {
+	const { origin, setOrigin, destination, setDestination, switchBuilding } = useSearchRoute();
+
 	return (
 		<motion.div
 			animate={{ y: open ? 0 : -200 }}
@@ -21,15 +25,23 @@ export default function TopSheet({ open }: { open: boolean }) {
 			</p>
 			<div className="flex flex-row space-x-1">
 				<div className="flex-1 flex flex-col space-y-[10px]">
-					<RouteInput placeholder="출발지를 입력하세요">
+					<RouteInput
+						placeholder="출발지를 입력하세요"
+						value={origin ? origin.buildingName : ""}
+						onCancel={() => setOrigin(undefined)}
+					>
 						<OriginIcon />
 					</RouteInput>
-					<RouteInput placeholder="도착지를 입력하세요">
+					<RouteInput
+						placeholder="도착지를 입력하세요"
+						value={destination ? destination.buildingName : ""}
+						onCancel={() => setDestination(undefined)}
+					>
 						<Destination />
 					</RouteInput>
 				</div>
 				<div className="flex items-center">
-					<button className="cursor-pointer p-1 rounded-[8px] active:bg-gray-200">
+					<button onClick={switchBuilding} className="cursor-pointer p-1 rounded-[8px] active:bg-gray-200">
 						<SwitchIcon />
 					</button>
 				</div>

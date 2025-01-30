@@ -6,16 +6,18 @@ import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import { BottomSheet, BottomSheetRef } from "react-spring-bottom-sheet";
 import { Building } from "../data/types/node";
 import "react-spring-bottom-sheet/dist/style.css";
-import MapBottomSheet from "../components/map/mapBottomSheet";
+import { MapBottomSheetFromList, MapBottomSheetFromMarker } from "../components/map/mapBottomSheet";
 import TopSheet from "../components/map/TopSheet";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 import ReportButton from "../components/map/reportButton";
+import useSearchRoute from "../hooks/useSearchRoute";
 
 type MarkerTypes = "building" | "caution" | "danger";
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
 	element: google.maps.marker.AdvancedMarkerElement;
 	property?: Building;
+	from: "Marker" | "List";
 };
 
 function createAdvancedMarker(
@@ -47,6 +49,8 @@ export default function MapPage() {
 
 	const [cautionMarkers, setCautionMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([]);
 	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
+
+	const { origin, setOrigin, destination, setDestination, switchBuilding } = useSearchRoute();
 
 	const initMap = () => {
 		if (map === null) return;
@@ -88,7 +92,12 @@ export default function MapPage() {
 						center: { lat, lng },
 						zoom: 19,
 					});
-					setSelectedMarker({ type: "building", element: buildingMarker, property: building });
+					setSelectedMarker({
+						type: "building",
+						element: buildingMarker,
+						property: building,
+						from: "Marker",
+					});
 				},
 			);
 		}
@@ -110,7 +119,11 @@ export default function MapPage() {
 					hazardMarker.content = dangerFactors
 						? dangerMarkerContent(dangerFactors)
 						: cautionMarkerContent(cautionFactors);
-					setSelectedMarker({ type: dangerFactors ? "danger" : "caution", element: hazardMarker });
+					setSelectedMarker({
+						type: dangerFactors ? "danger" : "caution",
+						element: hazardMarker,
+						from: "Marker",
+					});
 				},
 			);
 			if (dangerFactors) {
@@ -146,6 +159,23 @@ export default function MapPage() {
 		});
 	};
 
+	const selectOriginNDestination = (type?: "origin" | "destination") => {
+		if (!selectedMarker || !selectedMarker.property || selectedMarker.type !== "building") return;
+
+		if (selectedMarker.from === "Marker" && type) {
+			switch (type) {
+				case "origin":
+					setOrigin(selectedMarker.property);
+					break;
+				case "destination":
+					setDestination(selectedMarker.property);
+					break;
+			}
+		}
+
+		setSheetOpen(false);
+	};
+
 	useEffect(() => {
 		initMap();
 		addBuildings();
@@ -169,9 +199,20 @@ export default function MapPage() {
 				open={sheetOpen}
 				snapPoints={({ minHeight }) => minHeight}
 			>
-				{selectedMarker && (
-					<MapBottomSheet onClick={() => {}} buttonText="출발지 설정" building={selectedMarker} />
-				)}
+				{selectedMarker &&
+					(selectedMarker.from === "Marker" ? (
+						<MapBottomSheetFromMarker
+							building={selectedMarker}
+							onClickLeft={() => selectOriginNDestination("origin")}
+							onClickRight={() => selectOriginNDestination("destination")}
+						/>
+					) : (
+						<MapBottomSheetFromList
+							onClick={selectOriginNDestination}
+							buttonText={!origin ? "출발지 설정" : "도착지 설정"}
+							building={selectedMarker}
+						/>
+					))}
 			</BottomSheet>
 		</div>
 	);
