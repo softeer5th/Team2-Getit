@@ -46,4 +46,14 @@ public class NodeController implements NodeApi {
 		return ResponseEntity.ok().body(searchBuildingResDTO);
 	}
 
+	@Override
+	@GetMapping("{univId}/nodes/buildings/{nodeId}")
+	public ResponseEntity<GetBuildingResDTO> getBuilding(
+		@PathVariable("univId") Long univId,
+		@PathVariable("nodeId") Long nodeId) {
+
+		GetBuildingResDTO buildingResDTO = nodeService.getBuilding(nodeId);
+		return ResponseEntity.ok().body(buildingResDTO);
+	}
+
 }

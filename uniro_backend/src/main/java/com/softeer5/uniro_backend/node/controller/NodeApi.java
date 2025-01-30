@@ -42,4 +42,14 @@ public interface NodeApi {
 		@RequestParam(value = "cursor-id", required = false) Long cursorId,
 		@RequestParam(value = "page-size", required = false) Integer pageSize
 	);
+
+	@Operation(summary = "상세 건물 노드 조회")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "상세 건물 노드 조회 성공"),
+		@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	ResponseEntity<GetBuildingResDTO> getBuilding(
+		@PathVariable("univId") Long univId,
+		@PathVariable("nodeId") Long nodeId
+	);
 }

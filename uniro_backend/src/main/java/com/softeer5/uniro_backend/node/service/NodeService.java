@@ -42,4 +42,9 @@ public class NodeService {
 		return SearchBuildingResDTO.of(data, buildingNodes.getNextCursor(), buildingNodes.isHasNext());
 	}
 
+	public GetBuildingResDTO getBuilding(Long nodeId){
+		BuildingNode buildingNode = buildingRepository.findByNodeIdWithNodeOrThrow(nodeId);
+		return GetBuildingResDTO.of(buildingNode.getBuilding(), buildingNode.getNode());
+	}
+
 }
