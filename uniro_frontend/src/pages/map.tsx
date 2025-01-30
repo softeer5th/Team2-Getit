@@ -42,6 +42,12 @@ export default function MapPage() {
 	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
+	const [dangerMarkers, setDangerMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([]);
+	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(true);
+
+	const [cautionMarkers, setCautionMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([]);
+	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
+
 	const initMap = () => {
 		if (map === null) return;
 		map.addListener("click", (e: unknown) => {
@@ -107,7 +113,37 @@ export default function MapPage() {
 					setSelectedMarker({ type: dangerFactors ? "danger" : "caution", element: hazardMarker });
 				},
 			);
+			if (dangerFactors) {
+				setDangerMarkers((prevMarkers) => [...prevMarkers, hazardMarker]);
+			} else {
+				setCautionMarkers((prevMarkers) => [...prevMarkers, hazardMarker]);
+			}
 		}
+	};
+
+	const toggleMarkers = (isActive: boolean, markers: google.maps.marker.AdvancedMarkerElement[]) => {
+		if (isActive) {
+			for (const marker of markers) {
+				marker.map = map;
+			}
+		} else {
+			for (const marker of markers) {
+				marker.map = null;
+			}
+		}
+	};
+
+	const toggleCautionButton = () => {
+		setIsCautionActive((isActive) => {
+			toggleMarkers(!isActive, cautionMarkers);
+			return !isActive;
+		});
+	};
+	const toggleDangerButton = () => {
+		setIsDangerActive((isActive) => {
+			toggleMarkers(!isActive, dangerMarkers);
+			return !isActive;
+		});
 	};
 
 	useEffect(() => {
@@ -124,8 +160,8 @@ export default function MapPage() {
 				<ReportButton />
 			</div>
 			<div className="absolute right-4 bottom-[90px] space-y-2">
-				<CautionToggleButton isActive={false} />
-				<DangerToggleButton isActive={false} />
+				<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
+				<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
 			</div>
 			<BottomSheet
 				ref={bottomSheetRef}

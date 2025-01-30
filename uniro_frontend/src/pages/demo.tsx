@@ -31,13 +31,13 @@ export default function Demo() {
 				<div className="w-1/3 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
 					<ReportButton />
 					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
-						<DangerToggleButton isActive={false} />
-						<DangerToggleButton isActive={true} />
+						<DangerToggleButton onClick={() => {}} isActive={false} />
+						<DangerToggleButton onClick={() => {}} isActive={true} />
 					</div>
 
 					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
-						<CautionToggleButton isActive={false} />
-						<CautionToggleButton isActive={true} />
+						<CautionToggleButton onClick={() => {}} isActive={false} />
+						<CautionToggleButton onClick={() => {}} isActive={true} />
 					</div>
 				</div>
 
