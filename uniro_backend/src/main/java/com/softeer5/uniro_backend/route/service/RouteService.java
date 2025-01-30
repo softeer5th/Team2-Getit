@@ -45,7 +45,7 @@ public class RouteService {
 				route.getNode1(),
 				route.getNode2(),
 				route.getId(),
-				route.getDangerFactors().stream().toList()
+				route.getDangerFactorsByList()
 			)).toList();
 	}
 
@@ -56,7 +56,7 @@ public class RouteService {
 				route.getNode1(),
 				route.getNode2(),
 				route.getId(),
-				route.getCautionFactors().stream().toList()
+				route.getCautionFactorsByList()
 			)).toList();
 	}
 
