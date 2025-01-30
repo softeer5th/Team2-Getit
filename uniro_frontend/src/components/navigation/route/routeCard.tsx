@@ -1,19 +1,11 @@
-import React, { Fragment } from "react";
-import { RouteEdge } from "../data/types/edge";
-import { Building } from "../data/types/node";
-
-import StartIcon from "../assets/route/start.svg?react";
-import DestinationIcon from "../assets/route/dest.svg?react";
-import StraightIcon from "../assets/route/straight.svg?react";
-import RightIcon from "../assets/route/right.svg?react";
-import LeftIcon from "../assets/route/left.svg?react";
-
-type Props = {
-	routes: RouteEdge[];
-	startBuilding: Building;
-	destBuilding: Building;
-};
-const Divider = () => <div className="border-[0.5px] border-gray-200 w-full"></div>;
+import StartIcon from "../../../assets/route/start.svg?react";
+import DestinationIcon from "../../../assets/route/dest.svg?react";
+import StraightIcon from "../../../assets/route/straight.svg?react";
+import RightIcon from "../../../assets/route/right.svg?react";
+import LeftIcon from "../../../assets/route/left.svg?react";
+import CautionText from "../../../assets/icon/cautionText.svg?react";
+import { RouteEdge } from "../../../data/types/edge";
+import { Building } from "../../../data/types/node";
 
 const NumberIcon = ({ index }: { index: number }) => {
 	return (
@@ -23,7 +15,7 @@ const NumberIcon = ({ index }: { index: number }) => {
 	);
 };
 
-const Route = ({
+export const RouteCard = ({
 	index,
 	route,
 	startBuilding,
@@ -113,6 +105,19 @@ const Route = ({
 					</div>
 				</div>
 			);
+		case "caution":
+			return (
+				<div className="flex flex-row items-center justify-start ml-8 my-5">
+					<div className="flex flex-col items-center justify-start space-y-1">
+						<CautionText />
+						<div className="text-system-orange text-kor-body3 text-[12px]">{route.distance}m</div>
+					</div>
+					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
+						<NumberIcon index={index} />
+						<div className="text-kor-body1 text-gray-900">턱이 있어요</div>
+					</div>
+				</div>
+			);
 		default:
 			return (
 				<div className="flex flex-row items-start justify-start">
@@ -121,20 +126,3 @@ const Route = ({
 			);
 	}
 };
-
-const RouteList = ({ routes, startBuilding, destBuilding }: Props) => {
-	return (
-		<div className="w-full">
-			{routes.map((route, index) => (
-				<Fragment key={`${route.id}-fragment`}>
-					<Divider key={`${route.id}-divider`} />
-					<div key={route.id} className="flex flex-col">
-						<Route index={index} route={route} startBuilding={startBuilding} destBuilding={destBuilding} />
-					</div>
-				</Fragment>
-			))}
-		</div>
-	);
-};
-
-export default RouteList;

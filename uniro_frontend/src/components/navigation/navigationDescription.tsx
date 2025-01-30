@@ -17,7 +17,7 @@ const NavigationDescription = ({ isDetailView }: TopBarProps) => {
 	const [route, _] = useState<NavigationRoute>(mockNavigationRoute);
 
 	return (
-		<div className="w-full p-4">
+		<div className="w-full p-5">
 			<div className={`w-full flex flex-row items-center ${isDetailView ? "justify-start" : "justify-between"}`}>
 				<span className="text-left text-kor-body3 text-primary-500 flex-1 font-semibold">{TITLE}</span>
 				{!isDetailView && <Cancel />}
@@ -35,9 +35,9 @@ const NavigationDescription = ({ isDetailView }: TopBarProps) => {
 					<span>{`${route.totalDistance}m`}</span>
 				</div>
 				<div className="h-[11px] border-[0.5px] border-gray-600" />
-				<div className="flex flex-1 flex-row items-center justify-center ">
+				<div className="flex flex-1 flex-row items-center justify-start ">
 					{route.hasCaution ? <CautionIcon /> : <SafeIcon />}
-					<span className="ml-1 text-kor-body3 text-gray-700 whitespace-nowrap">
+					<span className="ml-1 text-kor-body3 text-gray-700">
 						가는 길에 주의 요소가 {route.hasCaution ? "있어요" : "없어요"}
 					</span>
 				</div>

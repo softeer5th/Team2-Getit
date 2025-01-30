@@ -53,11 +53,6 @@
 	scrollbar-width: none;
 }
 
-.animated-container {
-	will-change: transform; /* 하드웨어 가속 활성화 */
-	contain: strict; /* 리플로우 범위 제한 */
-}
-
 @theme {
 	--color-primary-100: #cde1fe;
 	--color-primary-200: #9ac2fd;

@@ -1,9 +1,8 @@
 import React, { useCallback, useState } from "react";
 import { PanInfo, useDragControls } from "framer-motion";
-import TopBar from "../components/topBar";
 import Button from "../components/customButton";
 import GoBack from "../assets/icon/goBack.svg?react";
-import RouteList from "../components/routeList";
+import RouteList from "../components/navigation/route/routeList";
 
 import { mockNavigationRoute } from "../data/mock/hanyangRoute";
 import { NavigationRoute } from "../data/types/route";
@@ -11,28 +10,28 @@ import useScrollControl from "../hooks/useScrollControl";
 import AnimatedContainer from "../container/animatedContainer";
 import NavigationMap from "../component/NavgationMap";
 import NavigationDescription from "../components/navigation/navigationDescription";
-import BottomSheetHandle from "../components/navigation/bottomSheetHandle";
-
-const TITLE = "전동휠체어 예상소요시간";
+import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetHandle";
 
 // 1. 돌아가면 위치 reset ✅
 // 2. 상세경로 scroll 끝까지 가능하게 하기 ❎
-// 3. 레이아웃 맞추기
-// 4. 코드 리팩토링 하기
+// 3. 코드 리팩토링 하기
+
+const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
+const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
+const CLOSED_SHEET_HEIGHT = 0;
+
+const INITIAL_TOP_BAR_HEIGHT = 143;
+const BOTTOM_SHEET_HANDLE_HEIGHT = 40;
+
+const PADDING_FOR_MAP_BOUNDARY = 50;
 
 const NavigationResultPage = () => {
-	const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
-	const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
-
-	const HEADER_HEIGHT = 40;
-
 	const [isDetailView, setIsDetailView] = useState(false);
 
-	const [sheetHeight, setSheetHeight] = useState(0);
-	const [topBarHeight, setTopBarHeight] = useState(143);
+	const [sheetHeight, setSheetHeight] = useState(CLOSED_SHEET_HEIGHT);
+	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
 
 	const [route, setRoute] = useState<NavigationRoute>(mockNavigationRoute);
-	const [totalHeight, setTotalHeight] = useState(0);
 
 	useScrollControl();
 
@@ -40,25 +39,36 @@ const NavigationResultPage = () => {
 
 	const showDetailView = () => {
 		setSheetHeight(MAX_SHEET_HEIGHT);
-		setTopBarHeight(50);
+		setTopBarHeight(PADDING_FOR_MAP_BOUNDARY);
 		setIsDetailView(true);
 	};
 	const hideDetailView = () => {
-		setSheetHeight(0);
-		setTopBarHeight(143);
+		setSheetHeight(CLOSED_SHEET_HEIGHT);
+		setTopBarHeight(INITIAL_TOP_BAR_HEIGHT);
 		setIsDetailView(false);
 	};
 
-	const handleDrag = useCallback((event: Event, info: PanInfo) => {
-		setSheetHeight((prev) => {
-			const newHeight = prev - info.delta.y;
-			return Math.min(Math.max(newHeight, MIN_SHEET_HEIGHT), MAX_SHEET_HEIGHT);
-		});
-	}, []);
+	const handleDrag = useCallback(
+		(event: Event, info: PanInfo) => {
+			setSheetHeight((prev) => {
+				const newHeight = prev - info.delta.y;
+				return Math.min(Math.max(newHeight, MIN_SHEET_HEIGHT), MAX_SHEET_HEIGHT);
+			});
+		},
+		[setSheetHeight, MAX_SHEET_HEIGHT, MIN_SHEET_HEIGHT],
+	);
 
 	return (
 		<div className="relative h-svh w-full max-w-[450px] mx-auto">
-			<TopBar isVisible={!isDetailView} />
+			<AnimatedContainer
+				isVisible={!isDetailView}
+				positionDelta={286}
+				className="absolute top-0 z-10 max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg"
+				isTop={true}
+				transition={{ type: "spring", damping: 20, duration: 0.3 }}
+			>
+				<NavigationDescription isDetailView={!isDetailView} />
+			</AnimatedContainer>
 			<NavigationMap
 				style={{ width: "100%", height: "100%" }}
 				routes={route}
@@ -107,8 +117,7 @@ const NavigationResultPage = () => {
 				<div
 					className="w-full overflow-y-auto"
 					style={{
-						height: MAX_SHEET_HEIGHT - HEADER_HEIGHT - totalHeight,
-						maxHeight: MAX_SHEET_HEIGHT - HEADER_HEIGHT,
+						height: MAX_SHEET_HEIGHT - BOTTOM_SHEET_HANDLE_HEIGHT,
 					}}
 				>
 					<NavigationDescription isDetailView={isDetailView} />

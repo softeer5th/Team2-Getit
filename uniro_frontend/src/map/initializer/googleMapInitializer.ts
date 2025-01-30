@@ -1,5 +1,4 @@
 import { HanyangUniversity } from "../../constant/university";
-import { HanyangUniversityBounds } from "../../constant/bounds";
 
 import loadGoogleMapsLibraries from "../loader/googleMapLoader";
 

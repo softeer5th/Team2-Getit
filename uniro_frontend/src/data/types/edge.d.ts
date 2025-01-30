@@ -7,7 +7,7 @@ export interface Edge {
 	endNode: CustomNode;
 }
 
-export type Direction = "start" | "right" | "straight" | "left" | "uturn" | "destination";
+export type Direction = "start" | "right" | "straight" | "left" | "uturn" | "destination" | "caution";
 
 // 위험 요소 & 주의 요소
 // 마커를 표시하거나, 길 찾기 결과의 경로를 그릴 때 사용

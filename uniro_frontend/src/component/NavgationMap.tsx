@@ -27,7 +27,7 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 		if (!routeList || routeList.length === 0) return;
 		const bounds = new google.maps.LatLngBounds();
 
-		routeList.forEach((route, index) => {
+		routeList.forEach((route) => {
 			const { startNode, endNode } = route;
 			new Polyline({
 				path: [startNode, endNode],

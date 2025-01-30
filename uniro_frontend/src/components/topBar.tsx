@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import AnimatedContainer from "../container/animatedContainer";
 import NavigationDescription from "./navigation/navigationDescription";
 type TopBarProps = {
