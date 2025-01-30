@@ -116,7 +116,7 @@ export default function MapPage() {
 
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
-			{!sheetOpen && <TopSheet />}
+			<TopSheet open={!sheetOpen} />
 			<div ref={mapRef} className="w-full h-full" />
 			<BottomSheet
 				ref={bottomSheetRef}

@@ -2,23 +2,38 @@ import RouteInput from "../map/routeSearchInput";
 import OriginIcon from "../../assets/map/origin.svg?react";
 import Destination from "../../assets/map/destination.svg?react";
 import LocationIcon from "../../../public/icons/location-thick.svg?react";
+import SwitchIcon from "../../assets/switch.svg?react";
 import { Link } from "react-router";
+import { motion } from "framer-motion";
 
-export default function TopSheet() {
+export default function TopSheet({ open }: { open: boolean }) {
 	return (
-		<div className="absolute top-0 w-full bg-gray-100 py-[18px] px-5 z-10 rounded-b-[24px]">
+		<motion.div
+			animate={{ y: open ? 0 : -200 }}
+			initial={{ y: -200 }}
+			exit={{ y: -200 }}
+			transition={{ type: "tween", duration: 0.3 }}
+			className="absolute top-0 w-full bg-gray-100 py-[18px] px-5 z-10 rounded-b-[24px]"
+		>
 			<p className="flex flex-row items-center mb-[10px] text-kor-body2 font-medium text-gray-800 underline underline-offset-4">
 				<LocationIcon stroke="#4D4D4D" className="mr-1" />
 				<Link to="/university">한양대학교</Link>
 			</p>
-			<div className="flex flex-col space-y-[10px]">
-				<RouteInput placeholder="출발지를 입력하세요">
-					<OriginIcon />
-				</RouteInput>
-				<RouteInput placeholder="도착지를 입력하세요">
-					<Destination />
-				</RouteInput>
+			<div className="flex flex-row space-x-1">
+				<div className="flex-1 flex flex-col space-y-[10px]">
+					<RouteInput placeholder="출발지를 입력하세요">
+						<OriginIcon />
+					</RouteInput>
+					<RouteInput placeholder="도착지를 입력하세요">
+						<Destination />
+					</RouteInput>
+				</div>
+				<div className="flex items-center">
+					<button className="cursor-pointer p-1 rounded-[8px] active:bg-gray-200">
+						<SwitchIcon />
+					</button>
+				</div>
 			</div>
-		</div>
+		</motion.div>
 	);
 }
