@@ -3,10 +3,15 @@ import Button from "../components/customButton";
 import LandingButton from "../components/landingButton";
 import Input from "../components/customInput";
 import Map from "../component/Map";
+import RouteInput from "../components/map/routeSearchInput";
+import StartIcon from "../assets/map/origin.svg?react";
+import EndIcon from "../assets/map/destination.svg?react";
+import { useState } from "react";
 
 export default function Demo() {
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
+	const [destination, setDestination] = useState<string>("역사관");
 
 	return (
 		<>
@@ -29,6 +34,17 @@ export default function Demo() {
 							console.log(e);
 						}}
 					/>
+					<RouteInput placeholder="출발지를 입력하세요">
+						<StartIcon />
+					</RouteInput>
+
+					<RouteInput
+						placeholder="도착지를 입력하세요"
+						value={destination}
+						onCancel={() => setDestination("")}
+					>
+						<EndIcon />
+					</RouteInput>
 				</div>
 				<SuccessModal>
 					<p className="text-kor-body1 font-bold text-primary-500">불편한 길 제보가 완료되었습니다!</p>
