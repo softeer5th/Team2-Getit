@@ -189,13 +189,14 @@ export default function MapPage() {
 		}
 
 		setSheetOpen(false);
+		setSelectedMarker(undefined);
 	};
 
-	const changeMarkerStyle = (isSelect: boolean) => {
+	const changeMarkerStyle = (marker: google.maps.marker.AdvancedMarkerElement, isSelect: boolean) => {
 		if (!selectedMarker || selectedMarker.type !== "building" || !selectedMarker.property) return;
 
 		if (isSelect) {
-			selectedMarker.element.content = selectedBuildingMarkerContent({
+			marker.content = selectedBuildingMarkerContent({
 				title: selectedMarker.property.buildingName,
 			});
 			map?.setOptions({
@@ -204,7 +205,7 @@ export default function MapPage() {
 			});
 			setSheetOpen(true);
 		} else
-			selectedMarker.element.content = buildingMarkerContent({
+			marker.content = buildingMarkerContent({
 				title: selectedMarker.property.buildingName,
 			});
 	};
@@ -217,9 +218,9 @@ export default function MapPage() {
 
 	useEffect(() => {
 		if (selectedMarker === undefined) return;
-		changeMarkerStyle(true);
+		changeMarkerStyle(selectedMarker.element, true);
 		return () => {
-			changeMarkerStyle(false);
+			changeMarkerStyle(selectedMarker.element, false);
 		};
 	}, [selectedMarker]);
 
