@@ -1,11 +1,10 @@
-import React from "react";
 import Input from "../components/customInput";
 import { buildings } from "../data/mock/hanyangBuildings";
 import BuildingList from "../components/building/buildingList";
-import useSearchMode from "../hooks/useSearchMode";
+import useSearchBuilding from "../hooks/useSearchBuilding";
 
 export default function BuildingSearchPage() {
-	const { setBuilding } = useSearchMode();
+	const { setBuilding } = useSearchBuilding();
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
 			<div className="px-[14px] py-4 border-b-[1px] border-gray-400">

@@ -5,13 +5,13 @@ import LocationIcon from "../../../public/icons/location-thick.svg?react";
 import SwitchIcon from "../../assets/switch.svg?react";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
-import useSearchRoute from "../../hooks/useSearchRoute";
-import { useEffect } from "react";
-import useSearchMode from "../../hooks/useSearchMode";
+import useRoutePoint from "../../hooks/useRoutePoint";
+import useSearchBuilding from "../../hooks/useSearchBuilding";
+import { RoutePoint } from "../../constant/enums";
 
 export default function TopSheet({ open }: { open: boolean }) {
-	const { origin, setOrigin, destination, setDestination, switchBuilding } = useSearchRoute();
-	const { setMode } = useSearchMode();
+	const { origin, setOrigin, destination, setDestination, switchBuilding } = useRoutePoint();
+	const { setMode } = useSearchBuilding();
 
 	return (
 		<motion.div
@@ -28,9 +28,7 @@ export default function TopSheet({ open }: { open: boolean }) {
 			<div className="flex flex-row space-x-1">
 				<div className="flex-1 flex flex-col space-y-[10px]">
 					<RouteInput
-						onClick={() => {
-							setMode("origin");
-						}}
+						onClick={() => setMode(RoutePoint.ORIGIN)}
 						placeholder="출발지를 입력하세요"
 						value={origin ? origin.buildingName : ""}
 						onCancel={() => setOrigin(undefined)}
@@ -38,9 +36,7 @@ export default function TopSheet({ open }: { open: boolean }) {
 						<OriginIcon />
 					</RouteInput>
 					<RouteInput
-						onClick={() => {
-							setMode("destination");
-						}}
+						onClick={() => setMode(RoutePoint.DESTINATION)}
 						placeholder="도착지를 입력하세요"
 						value={destination ? destination.buildingName : ""}
 						onCancel={() => setDestination(undefined)}

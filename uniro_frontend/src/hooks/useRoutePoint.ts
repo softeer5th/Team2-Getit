@@ -9,7 +9,8 @@ interface RouteStore {
 	switchBuilding: () => void;
 }
 
-const useSearchRoute = create<RouteStore>((set) => ({
+/** 출발지, 도착지 관리 전역 상태 */
+const useRoutePoint = create<RouteStore>((set) => ({
 	origin: undefined,
 	setOrigin: (newOrigin: Building | undefined) => set(() => ({ origin: newOrigin })),
 	destination: undefined,
@@ -17,4 +18,4 @@ const useSearchRoute = create<RouteStore>((set) => ({
 	switchBuilding: () => set(({ origin, destination }) => ({ origin: destination, destination: origin })),
 }));
 
-export default useSearchRoute;
+export default useRoutePoint;

@@ -17,14 +17,17 @@ import { MapBottomSheetFromList, MapBottomSheetFromMarker } from "../components/
 import TopSheet from "../components/map/TopSheet";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 import ReportButton from "../components/map/reportButton";
-import useSearchRoute from "../hooks/useSearchRoute";
-import useSearchMode from "../hooks/useSearchMode";
+import useRoutePoint from "../hooks/useRoutePoint";
+import useSearchBuilding from "../hooks/useSearchBuilding";
 import Button from "../components/customButton";
+import { AdvancedMarker, MarkerTypes } from "../data/types/marker";
+import { RoutePointType } from "../data/types/route";
+import { RoutePoint } from "../constant/enums";
+import { Markers } from "../constant/enums";
 
-type MarkerTypes = "building" | "caution" | "danger";
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
-	element: google.maps.marker.AdvancedMarkerElement;
+	element: AdvancedMarker;
 	property?: Building;
 	from: "Marker" | "List";
 };
@@ -34,7 +37,7 @@ function createAdvancedMarker(
 	map: google.maps.Map,
 	position: google.maps.LatLng,
 	content: HTMLElement,
-	clickCallback: () => void,
+	onClick: () => void,
 ) {
 	const newMarker = new AdvancedMarker({
 		map: map,
@@ -42,7 +45,7 @@ function createAdvancedMarker(
 		content: content,
 	});
 
-	newMarker.addListener("click", clickCallback);
+	newMarker.addListener("click", onClick);
 
 	return newMarker;
 }
@@ -53,20 +56,15 @@ export default function MapPage() {
 	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
-	const [buildingMarkers, setBuildingMarkers] = useState<
-		{
-			element: google.maps.marker.AdvancedMarkerElement;
-			id: string;
-		}[]
-	>([]);
-	const [dangerMarkers, setDangerMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([]);
+	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; id: string }[]>([]);
+	const [dangerMarkers, setDangerMarkers] = useState<AdvancedMarker[]>([]);
 	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(true);
 
-	const [cautionMarkers, setCautionMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([]);
+	const [cautionMarkers, setCautionMarkers] = useState<AdvancedMarker[]>([]);
 	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
 
-	const { origin, setOrigin, destination, setDestination, switchBuilding } = useSearchRoute();
-	const { mode, setMode, building, setBuilding } = useSearchMode();
+	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
+	const { mode, building: selectedBuilding } = useSearchBuilding();
 
 	const initMap = () => {
 		if (map === null) return;
@@ -77,10 +75,10 @@ export default function MapPage() {
 					const { type, element } = marker;
 
 					switch (type) {
-						case "caution":
+						case Markers.CAUTION:
 							element.content = cautionMarkerContent();
 							break;
-						case "danger":
+						case Markers.DANGER:
 							element.content = dangerMarkerContent();
 							break;
 					}
@@ -93,7 +91,7 @@ export default function MapPage() {
 	const addBuildings = () => {
 		if (AdvancedMarker === null || map === null) return;
 
-		const markersWithId: { id: string; element: google.maps.marker.AdvancedMarkerElement }[] = [];
+		const markersWithId: { id: string; element: AdvancedMarker }[] = [];
 		for (const building of buildings) {
 			const { id, lat, lng, buildingName } = building;
 
@@ -104,7 +102,7 @@ export default function MapPage() {
 				buildingMarkerContent({ title: buildingName }),
 				() => {
 					setSelectedMarker({
-						type: "building",
+						type: Markers.BUILDING,
 						element: buildingMarker,
 						property: building,
 						from: "Marker",
@@ -135,7 +133,7 @@ export default function MapPage() {
 						? dangerMarkerContent(dangerFactors)
 						: cautionMarkerContent(cautionFactors);
 					setSelectedMarker({
-						type: dangerFactors ? "danger" : "caution",
+						type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
 						element: hazardMarker,
 						from: "Marker",
 					});
@@ -149,7 +147,8 @@ export default function MapPage() {
 		}
 	};
 
-	const toggleMarkers = (isActive: boolean, markers: google.maps.marker.AdvancedMarkerElement[]) => {
+	/** Marker 보이기 안보이기 토글 */
+	const toggleMarkers = (isActive: boolean, markers: AdvancedMarker[]) => {
 		if (isActive) {
 			for (const marker of markers) {
 				marker.map = map;
@@ -174,15 +173,16 @@ export default function MapPage() {
 		});
 	};
 
-	const selectOriginNDestination = (type?: "origin" | "destination") => {
-		if (!selectedMarker || !selectedMarker.property || selectedMarker.type !== "building") return;
+	/** 선택된 마커의 출처 (Marker, List), Type을 비교하여 출발지, 도착지 지정 */
+	const selectRoutePoint = (type?: RoutePointType) => {
+		if (!selectedMarker || !selectedMarker.property || selectedMarker.type !== Markers.BUILDING) return;
 
 		if (selectedMarker.from === "Marker" && type) {
 			switch (type) {
-				case "origin":
+				case RoutePoint.ORIGIN:
 					setOrigin(selectedMarker.property);
 					break;
-				case "destination":
+				case RoutePoint.DESTINATION:
 					setDestination(selectedMarker.property);
 					break;
 			}
@@ -195,14 +195,15 @@ export default function MapPage() {
 		setSelectedMarker(undefined);
 	};
 
-	const changeMarkerStyle = (marker: google.maps.marker.AdvancedMarkerElement, isSelect: boolean) => {
-		if (!selectedMarker || selectedMarker.type !== "building" || !selectedMarker.property) return;
+	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
+	const changeMarkerStyle = (marker: AdvancedMarker, isSelect: boolean) => {
+		if (!map || !selectedMarker || selectedMarker.type !== Markers.BUILDING || !selectedMarker.property) return;
 
 		if (isSelect) {
 			marker.content = selectedBuildingMarkerContent({
 				title: selectedMarker.property.buildingName,
 			});
-			map?.setOptions({
+			map.setOptions({
 				center: { lat: selectedMarker.property.lat, lng: selectedMarker.property.lng },
 				zoom: 19,
 			});
@@ -213,18 +214,20 @@ export default function MapPage() {
 			});
 	};
 
-	const findBuildingMarker = (id: string): google.maps.marker.AdvancedMarkerElement | undefined => {
+	const findBuildingMarker = (id: string): AdvancedMarker | undefined => {
 		const matchedMarker = buildingMarkers.find((el) => el.id === id)?.element;
 
 		return matchedMarker;
 	};
 
+	/** 초기 렌더링 시, 건물 | 위험 | 주의 마커 생성 */
 	useEffect(() => {
 		initMap();
 		addBuildings();
 		addHazardMarker();
 	}, [map]);
 
+	/** 선택된 마커가 있는 경우 */
 	useEffect(() => {
 		if (selectedMarker === undefined) return;
 		changeMarkerStyle(selectedMarker.element, true);
@@ -233,22 +236,25 @@ export default function MapPage() {
 		};
 	}, [selectedMarker]);
 
+	/** 빌딩 리스트에서 넘어온 경우, 일치하는 BuildingMarkerElement를 탐색 */
 	useEffect(() => {
-		if (buildingMarkers.length === 0 || !building || !building.id) return;
+		if (buildingMarkers.length === 0 || !selectedBuilding || !selectedBuilding.id) return;
 
-		const matchedMarker = findBuildingMarker(building.id);
+		const matchedMarker = findBuildingMarker(selectedBuilding.id);
 
 		if (matchedMarker)
 			setSelectedMarker({
-				type: "building",
+				type: Markers.BUILDING,
 				element: matchedMarker,
 				from: "List",
-				property: building,
+				property: selectedBuilding,
 			});
-	}, [building, buildingMarkers]);
+	}, [selectedBuilding, buildingMarkers]);
 
+	/** 출발지 결정 시, Marker Content 변경 */
 	useEffect(() => {
 		if (!origin || !origin.id) return;
+
 		const originMarker = findBuildingMarker(origin.id);
 		if (!originMarker) return;
 
@@ -259,8 +265,10 @@ export default function MapPage() {
 		};
 	}, [origin]);
 
+	/** 도착지 결정 시, Marker Content 변경 */
 	useEffect(() => {
 		if (!destination || !destination.id) return;
+
 		const destinationMarker = findBuildingMarker(destination.id);
 		if (!destinationMarker) return;
 
@@ -270,11 +278,11 @@ export default function MapPage() {
 			destinationMarker.content = buildingMarkerContent({ title: destination.buildingName });
 		};
 	}, [destination]);
+
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
 			<TopSheet open={!sheetOpen} />
 			<div ref={mapRef} className="w-full h-full" />
-
 			<BottomSheet
 				ref={bottomSheetRef}
 				blocking={false}
@@ -283,24 +291,28 @@ export default function MapPage() {
 			>
 				{selectedMarker &&
 					(selectedMarker.from === "Marker" ? (
+						/** 선택된 마커가 Marker 클릭에서 온 경우 */
 						<MapBottomSheetFromMarker
 							building={selectedMarker}
-							onClickLeft={() => selectOriginNDestination("origin")}
-							onClickRight={() => selectOriginNDestination("destination")}
+							onClickLeft={() => selectRoutePoint(RoutePoint.ORIGIN)}
+							onClickRight={() => selectRoutePoint(RoutePoint.DESTINATION)}
 						/>
 					) : (
+						/** 선택된 마커가 리스트에서 온 경우 */
 						<MapBottomSheetFromList
-							onClick={selectOriginNDestination}
-							buttonText={mode === "origin" ? "출발지 설정" : "도착지 설정"}
 							building={selectedMarker}
+							onClick={selectRoutePoint}
+							buttonText={mode === RoutePoint.ORIGIN ? "출발지 설정" : "도착지 설정"}
 						/>
 					))}
 			</BottomSheet>
 			{origin && destination && origin.id !== destination.id ? (
+				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */
 				<div className="absolute bottom-6 space-y-2 w-full px-4">
 					<Button variant="primary">길찾기</Button>
 				</div>
 			) : (
+				/** 출발지랑 도착지가 존재하지 않거나, 같은 경우 기존 Button UI 보이기 */
 				<>
 					<div className="absolute right-4 bottom-6 space-y-2">
 						<ReportButton />

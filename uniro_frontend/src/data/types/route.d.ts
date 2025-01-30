@@ -1,3 +1,4 @@
+import { RoutePoint } from "../../constant/enums";
 import { HazardEdge } from "./edge";
 
 export interface Route {
@@ -9,3 +10,5 @@ export interface NavigationRoute extends Route {
 	totalDistance: number;
 	totalCost: number;
 }
+
+export type RoutePointType = RoutePoint.ORIGIN | RoutePoint.DESTINATION;
