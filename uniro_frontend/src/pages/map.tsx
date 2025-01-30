@@ -16,6 +16,7 @@ import TopSheet from "../components/map/TopSheet";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 import ReportButton from "../components/map/reportButton";
 import useSearchRoute from "../hooks/useSearchRoute";
+import useSearchMode from "../hooks/useSearchMode";
 
 type MarkerTypes = "building" | "caution" | "danger";
 export type SelectedMarkerTypes = {
@@ -49,6 +50,12 @@ export default function MapPage() {
 	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
+	const [buildingMarkers, setBuildingMarkers] = useState<
+		{
+			element: google.maps.marker.AdvancedMarkerElement;
+			id: string;
+		}[]
+	>([]);
 	const [dangerMarkers, setDangerMarkers] = useState<google.maps.marker.AdvancedMarkerElement[]>([]);
 	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(true);
 
@@ -56,10 +63,12 @@ export default function MapPage() {
 	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
 
 	const { origin, setOrigin, destination, setDestination, switchBuilding } = useSearchRoute();
+	const { mode, setMode, building, setBuilding } = useSearchMode();
 
 	const initMap = () => {
 		if (map === null) return;
 		map.addListener("click", (e: unknown) => {
+			setSheetOpen(false);
 			setSelectedMarker((marker) => {
 				if (marker) {
 					const { type, element } = marker;
@@ -71,9 +80,6 @@ export default function MapPage() {
 						case "danger":
 							element.content = dangerMarkerContent();
 							break;
-						case "building":
-							setSheetOpen(false);
-							break;
 					}
 				}
 				return undefined;
@@ -83,6 +89,8 @@ export default function MapPage() {
 
 	const addBuildings = () => {
 		if (AdvancedMarker === null || map === null) return;
+
+		const markersWithId: { id: string; element: google.maps.marker.AdvancedMarkerElement }[] = [];
 		for (const building of buildings) {
 			const { id, lat, lng, buildingName } = building;
 
@@ -92,7 +100,6 @@ export default function MapPage() {
 				new google.maps.LatLng(lat, lng),
 				buildingMarkerContent({ title: buildingName }),
 				() => {
-					setSheetOpen(true);
 					setSelectedMarker({
 						type: "building",
 						element: buildingMarker,
@@ -101,7 +108,11 @@ export default function MapPage() {
 					});
 				},
 			);
+
+			markersWithId.push({ id: id ? id : "", element: buildingMarker });
 		}
+
+		setBuildingMarkers(markersWithId);
 	};
 
 	const addHazardMarker = () => {
@@ -172,6 +183,9 @@ export default function MapPage() {
 					setDestination(selectedMarker.property);
 					break;
 			}
+		} else {
+			if (!origin) setOrigin(selectedMarker.property);
+			else setDestination(selectedMarker.property);
 		}
 
 		setSheetOpen(false);
@@ -179,6 +193,7 @@ export default function MapPage() {
 
 	const changeMarkerStyle = (isSelect: boolean) => {
 		if (!selectedMarker || selectedMarker.type !== "building" || !selectedMarker.property) return;
+
 		if (isSelect) {
 			selectedMarker.element.content = selectedBuildingMarkerContent({
 				title: selectedMarker.property.buildingName,
@@ -187,6 +202,7 @@ export default function MapPage() {
 				center: { lat: selectedMarker.property.lat, lng: selectedMarker.property.lng },
 				zoom: 19,
 			});
+			setSheetOpen(true);
 		} else
 			selectedMarker.element.content = buildingMarkerContent({
 				title: selectedMarker.property.buildingName,
@@ -200,11 +216,26 @@ export default function MapPage() {
 	}, [map]);
 
 	useEffect(() => {
+		if (selectedMarker === undefined) return;
 		changeMarkerStyle(true);
 		return () => {
 			changeMarkerStyle(false);
 		};
 	}, [selectedMarker]);
+
+	useEffect(() => {
+		if (buildingMarkers.length === 0 || !building) return;
+
+		const matchedMarker = buildingMarkers.find((el) => el.id === building.id)?.element;
+
+		if (matchedMarker)
+			setSelectedMarker({
+				type: "building",
+				element: matchedMarker,
+				from: "List",
+				property: building,
+			});
+	}, [building, buildingMarkers]);
 
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
@@ -233,7 +264,7 @@ export default function MapPage() {
 					) : (
 						<MapBottomSheetFromList
 							onClick={selectOriginNDestination}
-							buttonText={!origin ? "출발지 설정" : "도착지 설정"}
+							buttonText={mode === "origin" ? "출발지 설정" : "도착지 설정"}
 							building={selectedMarker}
 						/>
 					))}
