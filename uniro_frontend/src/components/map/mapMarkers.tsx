@@ -75,3 +75,39 @@ export function dangerMarkerContent(factors?: string[]): HTMLElement {
 
 	return container;
 }
+
+export function originMarkerContent({ title }: { title: string }): HTMLElement {
+	const container = document.createElement("div");
+	container.className = "translate-routemarker flex flex-col items-center space-y-[7px]";
+
+	const markerImage = document.createElement("img");
+	markerImage.src = "/src/assets/map/originMarker.svg";
+
+	const markerTitle = document.createElement("p");
+	markerTitle.innerText = title;
+	markerTitle.className =
+		"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
+
+	container.appendChild(markerImage);
+	container.appendChild(markerTitle);
+
+	return container;
+}
+
+export function destinationMarkerContent({ title }: { title: string }): HTMLElement {
+	const container = document.createElement("div");
+	container.className = "translate-routemarker flex flex-col items-center space-y-[7px]";
+
+	const markerImage = document.createElement("img");
+	markerImage.src = "/src/assets/map/destinationMarker.svg";
+
+	const markerTitle = document.createElement("p");
+	markerTitle.innerText = title;
+	markerTitle.className =
+		"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
+
+	container.appendChild(markerImage);
+	container.appendChild(markerTitle);
+
+	return container;
+}

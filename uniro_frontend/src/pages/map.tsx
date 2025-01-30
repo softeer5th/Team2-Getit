@@ -5,6 +5,8 @@ import {
 	buildingMarkerContent,
 	cautionMarkerContent,
 	dangerMarkerContent,
+	destinationMarkerContent,
+	originMarkerContent,
 	selectedBuildingMarkerContent,
 } from "../components/map/mapMarkers";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
@@ -17,6 +19,7 @@ import { CautionToggleButton, DangerToggleButton } from "../components/map/float
 import ReportButton from "../components/map/reportButton";
 import useSearchRoute from "../hooks/useSearchRoute";
 import useSearchMode from "../hooks/useSearchMode";
+import Button from "../components/customButton";
 
 type MarkerTypes = "building" | "caution" | "danger";
 export type SelectedMarkerTypes = {
@@ -210,6 +213,12 @@ export default function MapPage() {
 			});
 	};
 
+	const findBuildingMarker = (id: string): google.maps.marker.AdvancedMarkerElement | undefined => {
+		const matchedMarker = buildingMarkers.find((el) => el.id === id)?.element;
+
+		return matchedMarker;
+	};
+
 	useEffect(() => {
 		initMap();
 		addBuildings();
@@ -225,9 +234,9 @@ export default function MapPage() {
 	}, [selectedMarker]);
 
 	useEffect(() => {
-		if (buildingMarkers.length === 0 || !building) return;
+		if (buildingMarkers.length === 0 || !building || !building.id) return;
 
-		const matchedMarker = buildingMarkers.find((el) => el.id === building.id)?.element;
+		const matchedMarker = findBuildingMarker(building.id);
 
 		if (matchedMarker)
 			setSelectedMarker({
@@ -238,17 +247,34 @@ export default function MapPage() {
 			});
 	}, [building, buildingMarkers]);
 
+	useEffect(() => {
+		if (!origin || !origin.id) return;
+		const originMarker = findBuildingMarker(origin.id);
+		if (!originMarker) return;
+
+		originMarker.content = originMarkerContent({ title: origin.buildingName });
+
+		return () => {
+			originMarker.content = buildingMarkerContent({ title: origin.buildingName });
+		};
+	}, [origin]);
+
+	useEffect(() => {
+		if (!destination || !destination.id) return;
+		const destinationMarker = findBuildingMarker(destination.id);
+		if (!destinationMarker) return;
+
+		destinationMarker.content = destinationMarkerContent({ title: destination.buildingName });
+
+		return () => {
+			destinationMarker.content = buildingMarkerContent({ title: destination.buildingName });
+		};
+	}, [destination]);
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
 			<TopSheet open={!sheetOpen} />
 			<div ref={mapRef} className="w-full h-full" />
-			<div className="absolute right-4 bottom-6 space-y-2">
-				<ReportButton />
-			</div>
-			<div className="absolute right-4 bottom-[90px] space-y-2">
-				<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
-				<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
-			</div>
+
 			<BottomSheet
 				ref={bottomSheetRef}
 				blocking={false}
@@ -270,6 +296,21 @@ export default function MapPage() {
 						/>
 					))}
 			</BottomSheet>
+			{origin && destination && origin.id !== destination.id ? (
+				<div className="absolute bottom-6 space-y-2 w-full px-4">
+					<Button variant="primary">길찾기</Button>
+				</div>
+			) : (
+				<>
+					<div className="absolute right-4 bottom-6 space-y-2">
+						<ReportButton />
+					</div>
+					<div className="absolute right-4 bottom-[90px] space-y-2">
+						<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
+						<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
+					</div>
+				</>
+			)}
 		</div>
 	);
 }
