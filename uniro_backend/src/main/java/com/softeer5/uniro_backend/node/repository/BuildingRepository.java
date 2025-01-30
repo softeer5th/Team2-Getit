@@ -1,6 +1,7 @@
 package com.softeer5.uniro_backend.node.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +21,12 @@ public interface BuildingRepository extends JpaRepository<Building, Long>, Build
         AND ST_Within(n.coordinates, ST_MakeEnvelope(:lux, :luy, :rdx, :rdy, 4326))
     """)
 	List<BuildingNode> findByUnivIdAndLevelWithNode(Long univId, int level, double lux , double luy, double rdx , double rdy);
+
+	@Query("""
+        SELECT new com.softeer5.uniro_backend.node.dto.BuildingNode(b, n)
+        FROM Building b 
+        JOIN FETCH Node n ON b.nodeId = n.id
+        WHERE b.nodeId = :nodeId
+    """)
+	Optional<BuildingNode> findByNodeIdWithNode(Long nodeId);
 }

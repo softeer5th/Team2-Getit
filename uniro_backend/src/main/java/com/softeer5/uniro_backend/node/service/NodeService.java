@@ -1,11 +1,14 @@
 package com.softeer5.uniro_backend.node.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.softeer5.uniro_backend.common.CursorPage;
+import com.softeer5.uniro_backend.common.error.ErrorCode;
+import com.softeer5.uniro_backend.common.exception.custom.BuildingNotFoundException;
 import com.softeer5.uniro_backend.node.dto.BuildingNode;
 import com.softeer5.uniro_backend.node.dto.GetBuildingResDTO;
 import com.softeer5.uniro_backend.node.dto.SearchBuildingResDTO;
@@ -40,6 +43,15 @@ public class NodeService {
 			.toList();
 
 		return SearchBuildingResDTO.of(data, buildingNodes.getNextCursor(), buildingNodes.isHasNext());
+	}
+
+	public GetBuildingResDTO getBuilding(Long nodeId){
+		Optional<BuildingNode> buildingNode = buildingRepository.findByNodeIdWithNode(nodeId);
+		if(buildingNode.isEmpty()){
+			throw new BuildingNotFoundException("Building Not Found", ErrorCode.BUILDING_NOT_FOUND);
+		}
+
+		return GetBuildingResDTO.of(buildingNode.get().getBuilding(), buildingNode.get().getNode());
 	}
 
 }
