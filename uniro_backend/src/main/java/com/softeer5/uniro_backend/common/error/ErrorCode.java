@@ -12,6 +12,9 @@ public enum ErrorCode {
     FASTEST_ROUTE_NOT_FOUND(422, "경로가 없습니다."),
     SAME_START_AND_END_POINT(400, "출발지와 도착지가 같습니다."),
 
+    // 루트
+    ROUTE_NOT_FOUND(404, "루트를 찾을 수 없습니다."),
+
     // 건물 노드
     BUILDING_NOT_FOUND(404, "유효한 건물을 찾을 수 없습니다."),
     ;

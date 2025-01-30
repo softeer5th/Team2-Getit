@@ -2,6 +2,7 @@ package com.softeer5.uniro_backend.route.controller;
 
 import com.softeer5.uniro_backend.route.dto.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.dto.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.route.dto.GetRiskResDTO;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,10 +39,21 @@ public class RouteController implements RouteApi {
 	}
 
 	@Override
+	@GetMapping("/{univId}/route/risk")
+	public ResponseEntity<GetRiskResDTO> getRisk(@PathVariable("univId") Long univId,
+												 @RequestParam(value = "start-lat") double startLat,
+												 @RequestParam(value = "start-lng") double startLng,
+												 @RequestParam(value = "end-lat") double endLat,
+												 @RequestParam(value = "end-lng") double endLng){
+		GetRiskResDTO riskResDTO = routeService.getRisk(univId,startLat,startLng,endLat,endLng);
+		return ResponseEntity.ok().body(riskResDTO);
+	}
+
+	@Override
 	@GetMapping("/{univId}/routes/fastest")
 	public ResponseEntity<FastestRouteResDTO> calculateFastestRoute(@PathVariable("univId") Long univId,
-																	@RequestParam Long startNodeId,
-																	@RequestParam Long endNodeId) {
+																	@RequestParam(value = "start-node-id") Long startNodeId,
+																	@RequestParam(value = "end-node-id") Long endNodeId) {
 		FastestRouteResDTO fastestRouteResDTO = routeCalculationService.calculateFastestRoute(univId, startNodeId, endNodeId);
 		return ResponseEntity.ok(fastestRouteResDTO);
 	}

@@ -2,15 +2,15 @@ package com.softeer5.uniro_backend.route.service;
 
 import java.util.List;
 
-import com.softeer5.uniro_backend.route.dto.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.common.error.ErrorCode;
+import com.softeer5.uniro_backend.common.exception.custom.RouteNotFoundException;
+import com.softeer5.uniro_backend.common.utils.Utils;
+import com.softeer5.uniro_backend.route.dto.*;
 import com.softeer5.uniro_backend.route.entity.CoreRoute;
 import com.softeer5.uniro_backend.route.repository.CoreRouteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.softeer5.uniro_backend.route.dto.GetCautionResDTO;
-import com.softeer5.uniro_backend.route.dto.GetDangerResDTO;
-import com.softeer5.uniro_backend.route.dto.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 
@@ -59,4 +59,16 @@ public class RouteService {
 				route.getCautionFactors().stream().toList()
 			)).toList();
 	}
+
+
+	public GetRiskResDTO getRisk(Long univId, double startLat, double startLng, double endLat, double endLng) {
+		String startWTK = Utils.convertDoubleToWTK(startLat, startLng);
+		String endWTK = Utils.convertDoubleToWTK(endLat, endLng);
+
+		Route route = routeRepository.findRouteByPointsAndUnivId(univId, startWTK ,endWTK)
+				.orElseThrow(() -> new RouteNotFoundException("Route Not Found", ErrorCode.ROUTE_NOT_FOUND));
+
+		return GetRiskResDTO.of(route);
+	}
+
 }

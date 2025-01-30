@@ -1,6 +1,7 @@
 package com.softeer5.uniro_backend.route.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,5 +26,24 @@ public interface RouteRepository extends JpaRepository<Route, Integer> {
             + "AND (r.cautionFactors IS NOT NULL OR r.dangerFactors IS NOT NULL)"
     )
     List<Route> findRiskRouteByUnivIdWithNode(@Param("univId") Long univId);
+
+    @Query(value = """
+    SELECT r.* FROM route r
+    JOIN node n1 ON r.node1_id = n1.id
+    JOIN node n2 ON r.node2_id = n2.id
+    WHERE r.univ_id = :univId
+      AND (
+        (ST_Equals(n1.coordinates, ST_SRID(ST_GeomFromText(:point1), 4326))
+        AND ST_Equals(n2.coordinates, ST_SRID(ST_GeomFromText(:point2), 4326)))
+        OR
+        (ST_Equals(n1.coordinates, ST_SRID(ST_GeomFromText(:point2), 4326))
+        AND ST_Equals(n2.coordinates, ST_SRID(ST_GeomFromText(:point1), 4326)))
+      )
+    """, nativeQuery = true)
+    Optional<Route> findRouteByPointsAndUnivId(
+            @Param("univId") Long univId,
+            @Param("point1") String point1,
+            @Param("point2") String point2
+    );
 
 }
