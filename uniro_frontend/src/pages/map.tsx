@@ -7,6 +7,7 @@ import { BottomSheet, BottomSheetRef } from "react-spring-bottom-sheet";
 import { Building } from "../data/types/node";
 import "react-spring-bottom-sheet/dist/style.css";
 import MapBottomSheet from "../components/map/mapBottomSheet";
+import TopSheet from "../components/map/TopSheet";
 
 type MarkerTypes = "building" | "caution" | "danger";
 export type SelectedMarkerTypes = {
@@ -115,6 +116,7 @@ export default function MapPage() {
 
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
+			{!sheetOpen && <TopSheet />}
 			<div ref={mapRef} className="w-full h-full" />
 			<BottomSheet
 				ref={bottomSheetRef}
