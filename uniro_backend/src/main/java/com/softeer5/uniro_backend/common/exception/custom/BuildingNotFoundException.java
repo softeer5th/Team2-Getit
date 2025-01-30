@@ -6,8 +6,8 @@ import com.softeer5.uniro_backend.common.exception.CustomException;
 import lombok.Getter;
 
 @Getter
-public class NotFoundBuildingException extends CustomException {
-	public NotFoundBuildingException(String message, ErrorCode errorCode) {
+public class BuildingNotFoundException extends CustomException {
+	public BuildingNotFoundException(String message, ErrorCode errorCode) {
 		super(message, errorCode);
 	}
 }
