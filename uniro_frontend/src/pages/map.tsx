@@ -8,6 +8,8 @@ import { Building } from "../data/types/node";
 import "react-spring-bottom-sheet/dist/style.css";
 import MapBottomSheet from "../components/map/mapBottomSheet";
 import TopSheet from "../components/map/TopSheet";
+import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
+import ReportButton from "../components/map/reportButton";
 
 type MarkerTypes = "building" | "caution" | "danger";
 export type SelectedMarkerTypes = {
@@ -118,6 +120,13 @@ export default function MapPage() {
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
 			<TopSheet open={!sheetOpen} />
 			<div ref={mapRef} className="w-full h-full" />
+			<div className="absolute right-4 bottom-6 space-y-2">
+				<ReportButton />
+			</div>
+			<div className="absolute right-4 bottom-[90px] space-y-2">
+				<CautionToggleButton isActive={false} />
+				<DangerToggleButton isActive={false} />
+			</div>
 			<BottomSheet
 				ref={bottomSheetRef}
 				blocking={false}

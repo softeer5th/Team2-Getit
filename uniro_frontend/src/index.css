@@ -43,6 +43,7 @@
 	font-family: "SF Pro Display", "AppleSDGothicNeo";
 	outline: none;
 	--webkit-scrollbar-width: none;
+	box-sizing: border-box;
 }
 
 *::-webkit-scrollbar {

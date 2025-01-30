@@ -7,6 +7,8 @@ import RouteInput from "../components/map/routeSearchInput";
 import StartIcon from "../assets/map/origin.svg?react";
 import EndIcon from "../assets/map/destination.svg?react";
 import { useState } from "react";
+import ReportButton from "../components/map/reportButton";
+import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 
 export default function Demo() {
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
@@ -15,7 +17,7 @@ export default function Demo() {
 
 	return (
 		<>
-			<div>
+			<div className="flex flex-row">
 				<div className="w-1/3 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
 					<Button onClick={openFail}>버튼</Button>
 					<Button onClick={openSuccess} variant="secondary">
@@ -24,6 +26,19 @@ export default function Demo() {
 					<Button variant="disabled">버튼</Button>
 
 					<LandingButton />
+				</div>
+
+				<div className="w-1/3 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
+					<ReportButton />
+					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
+						<DangerToggleButton isActive={false} />
+						<DangerToggleButton isActive={true} />
+					</div>
+
+					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
+						<CautionToggleButton isActive={false} />
+						<CautionToggleButton isActive={true} />
+					</div>
 				</div>
 
 				<div className="w-1/3 rounded-sm border border-dashed border-[#9747FF] flex flex-col justify-start space-y-5 p-5">
