@@ -20,7 +20,9 @@ export const initializeMap = async (mapElement: HTMLElement | null): Promise<Map
 
 	const map = new Map(mapElement, {
 		center: HanyangUniversity,
-		zoom: 17,
+		zoom: 16,
+		minZoom: 15,
+		maxZoom: 19,
 		draggable: true,
 		scrollwheel: true,
 		disableDoubleClickZoom: false,
@@ -29,6 +31,8 @@ export const initializeMap = async (mapElement: HTMLElement | null): Promise<Map
 			latLngBounds: HanyangUniversityBounds,
 			strictBounds: false,
 		},
+		clickableIcons: false,
+		disableDefaultUI: true,
 		mapId: import.meta.env.VITE_REACT_APP_GOOGLE_MAP_ID,
 	});
 
