@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
 import { buildings } from "../data/mock/hanyangBuildings";
-import { buildingMarkerContent, cautionMarkerContent, dangerMarkerContent } from "../components/map/mapMarkers";
+import {
+	buildingMarkerContent,
+	cautionMarkerContent,
+	dangerMarkerContent,
+	selectedBuildingMarkerContent,
+} from "../components/map/mapMarkers";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import { BottomSheet, BottomSheetRef } from "react-spring-bottom-sheet";
 import { Building } from "../data/types/node";
@@ -88,10 +93,6 @@ export default function MapPage() {
 				buildingMarkerContent({ title: buildingName }),
 				() => {
 					setSheetOpen(true);
-					map?.setOptions({
-						center: { lat, lng },
-						zoom: 19,
-					});
 					setSelectedMarker({
 						type: "building",
 						element: buildingMarker,
@@ -176,11 +177,34 @@ export default function MapPage() {
 		setSheetOpen(false);
 	};
 
+	const changeMarkerStyle = (isSelect: boolean) => {
+		if (!selectedMarker || selectedMarker.type !== "building" || !selectedMarker.property) return;
+		if (isSelect) {
+			selectedMarker.element.content = selectedBuildingMarkerContent({
+				title: selectedMarker.property.buildingName,
+			});
+			map?.setOptions({
+				center: { lat: selectedMarker.property.lat, lng: selectedMarker.property.lng },
+				zoom: 19,
+			});
+		} else
+			selectedMarker.element.content = buildingMarkerContent({
+				title: selectedMarker.property.buildingName,
+			});
+	};
+
 	useEffect(() => {
 		initMap();
 		addBuildings();
 		addHazardMarker();
 	}, [map]);
+
+	useEffect(() => {
+		changeMarkerStyle(true);
+		return () => {
+			changeMarkerStyle(false);
+		};
+	}, [selectedMarker]);
 
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
