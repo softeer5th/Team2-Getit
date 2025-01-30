@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { RouteEdge } from "../data/types/edge";
 import { Building } from "../data/types/node";
 
@@ -124,14 +124,14 @@ const Route = ({
 
 const RouteList = ({ routes, startBuilding, destBuilding }: Props) => {
 	return (
-		<div className="">
+		<div className="w-full">
 			{routes.map((route, index) => (
-				<>
+				<Fragment key={`${route.id}-fragment`}>
 					<Divider key={`${route.id}-divider`} />
 					<div key={route.id} className="flex flex-col">
 						<Route index={index} route={route} startBuilding={startBuilding} destBuilding={destBuilding} />
 					</div>
-				</>
+				</Fragment>
 			))}
 		</div>
 	);

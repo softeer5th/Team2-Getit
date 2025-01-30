@@ -26,10 +26,11 @@ export const initializeMap = async (mapElement: HTMLElement | null): Promise<Map
 		disableDoubleClickZoom: false,
 		gestureHandling: "auto",
 		disableDefaultUI: true,
-		restriction: {
-			latLngBounds: HanyangUniversityBounds,
-			strictBounds: false,
-		},
+		// restriction: {
+		// 	latLngBounds: HanyangUniversityBounds,
+		// 	strictBounds: false,
+		// },
+		clickableIcons: false,
 		mapId: import.meta.env.VITE_REACT_APP_GOOGLE_MAP_ID,
 	});
 

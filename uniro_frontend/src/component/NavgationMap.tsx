@@ -1,131 +1,95 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useMap from "../hooks/useMap";
-import startIcon from "../assets/marker/startIcon.svg?raw";
-import arriveMarker from "../assets/marker/arriveMarker.svg?raw";
-import subMarker from "../assets/marker/subMarker.svg?raw";
-import cautionMarker from "../assets/marker/cautionMarker.svg?raw";
 import { NavigationRoute } from "../data/types/route";
+import { generateAdvancedMarker } from "../utils/markers/generateAdvancedMarker";
 
-// props 타입 정의 (필요 시)
 type MapProps = {
 	style?: React.CSSProperties;
-	// route, startBuilding, destinationBuilding 등을 밖에서 받아온다고 가정
 	routes: NavigationRoute;
+	/** 바텀시트나 상단 UI에 의해 가려지는 영역이 있을 경우, 지도 fitBounds에 추가할 패딩값 */
+	topPadding?: number;
+	bottomPadding?: number;
 };
 
-const generateMarker = (
-	map: google.maps.Map,
-	AdvancedMarker: typeof google.maps.marker.AdvancedMarkerElement,
-	type: "start" | "sub" | "end" | "caution",
-	position: { lat: number; lng: number },
-) => {
-	if (type === "start") {
-		const startSvgElement = new DOMParser().parseFromString(startIcon, "image/svg+xml").documentElement;
-		new AdvancedMarker({
-			position: position,
-			map,
-			content: startSvgElement,
-			title: "출발지",
-		});
-	}
-	else if (type === "end") {
-		const endSvgElement = new DOMParser().parseFromString(arriveMarker, "image/svg+xml").documentElement;
-		new AdvancedMarker({
-			position: position,
-			map,
-			content: endSvgElement,
-			title: "도착지",
-		});
-	}
-	else if (type === "caution") {
-		const cautionSvgElement = new DOMParser().parseFromString(cautionMarker, "image/svg+xml").documentElement;
-		new AdvancedMarker({
-			position: position,
-			map,
-			content: cautionSvgElement,
-			title: "주의사항",
-		});
-	}
-	else {
-		const subMarkerElement = new DOMParser().parseFromString(subMarker, "image/svg+xml").documentElement;
-		new AdvancedMarker({
-			position: position,
-			map,
-			content: subMarkerElement,
-		});
-	}
-};
+const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: MapProps) => {
+	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
 
-const NavigationMap = ({ style, routes }: MapProps) => {
-	const { mapRef, map, AdvancedMarker, Polyline, mapLoaded } = useMap();
+	const boundsRef = useRef<google.maps.LatLngBounds | null>(null);
 
 	if (!style) {
 		style = { height: "100%", width: "100%" };
 	}
 
 	useEffect(() => {
-		if (!map) return;
+		if (!map || !AdvancedMarker || !routes || !Polyline) return;
 
+		const { route: routeList } = routes;
+		if (!routeList || routeList.length === 0) return;
+		const bounds = new google.maps.LatLngBounds();
 
-		if (!routes) return;
-
-
-		map.setZoom(18);
-		// 모든 lat와 lng의 평균값을 중심으로 지도를 보여줌
-		const latSum = routes.route.reduce((acc, route) => acc + route.startNode.lat + route.endNode.lat, 0);
-		const lngSum = routes.route.reduce((acc, route) => acc + route.startNode.lng + route.endNode.lng, 0);
-		const latCenter = latSum / (routes.route.length * 2);
-		const lngCenter = lngSum / (routes.route.length * 2);
-		map.setCenter({ lat: latCenter, lng: lngCenter });
-
-		routes.route.forEach((route, index) => {
+		routeList.forEach((route, index) => {
 			const { startNode, endNode } = route;
-
-			if (route.cautionFactors && route.cautionFactors.length > 0) {
-				generateMarker(map, AdvancedMarker, "caution", {
-					lat: (startNode.lat + endNode.lat) / 2,
-					lng: (startNode.lng + endNode.lng) / 2
-				}
-				)
-			}
-			if (index === 0) {
-				generateMarker(map, AdvancedMarker, "start", {
-					lat: startNode.lat,
-					lng: startNode.lng,
-				});
-				generateMarker(map, AdvancedMarker, "sub", {
-					lat: endNode.lat,
-					lng: endNode.lng
-				});
-			}
-			else if (index === routes.route.length - 1) {
-				generateMarker(map, AdvancedMarker, "sub", {
-					lat: startNode.lat,
-					lng: startNode.lng,
-				});
-				generateMarker(map, AdvancedMarker, "end", {
-					lat: endNode.lat,
-					lng: endNode.lng
-				});
-
-			} else {
-				generateMarker(map, AdvancedMarker, "sub", {
-					lat: startNode.lat,
-					lng: startNode.lng,
-				});
-				generateMarker(map, AdvancedMarker, "sub", {
-					lat: endNode.lat,
-					lng: endNode.lng
-				});
-			}
 			new Polyline({
 				path: [startNode, endNode],
 				map,
 				strokeColor: "#000000",
 				strokeOpacity: 2.0,
 			});
+			bounds.extend(new google.maps.LatLng(startNode.lat, startNode.lng));
+			bounds.extend(new google.maps.LatLng(endNode.lat, endNode.lng));
 		});
-	}, [map, routes]);
+
+		routeList.forEach((route, index) => {
+			const { startNode, endNode } = route;
+			if (index !== 0 && index !== routeList.length - 1) {
+				if (index === 1) {
+					generateAdvancedMarker(map, AdvancedMarker, "sub", {
+						lat: startNode.lat,
+						lng: startNode.lng,
+					});
+				}
+				generateAdvancedMarker(map, AdvancedMarker, "sub", {
+					lat: endNode.lat,
+					lng: endNode.lng,
+				});
+			}
+		});
+
+		const edgeRoutes = [routeList[0], routeList[routeList.length - 1]];
+
+		edgeRoutes.forEach((route, index) => {
+			const { startNode, endNode } = route;
+			if (index === 0) {
+				generateAdvancedMarker(map, AdvancedMarker, "start", {
+					lat: startNode.lat,
+					lng: startNode.lng,
+				});
+			} else {
+				generateAdvancedMarker(map, AdvancedMarker, "end", {
+					lat: endNode.lat,
+					lng: endNode.lng,
+				});
+			}
+		});
+
+		boundsRef.current = bounds;
+		map.fitBounds(bounds, {
+			top: topPadding,
+			right: 50,
+			bottom: bottomPadding,
+			left: 50,
+		});
+	}, [map, AdvancedMarker, Polyline, routes]);
+
+	useEffect(() => {
+		if (!map || !boundsRef.current) return;
+		map.fitBounds(boundsRef.current, {
+			top: topPadding,
+			right: 50,
+			bottom: bottomPadding,
+			left: 50,
+		});
+	}, [map, bottomPadding, topPadding]);
 
 	return <div id="map" ref={mapRef} style={style} />;
 };
