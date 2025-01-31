@@ -3,6 +3,7 @@ import "./App.css";
 import Demo from "./pages/demo";
 import LandingPage from "./pages/landing";
 import UniversitySearchPage from "./pages/search";
+import NavigationResultPage from "./pages/navigationResult";
 
 function App() {
 	return (
@@ -10,6 +11,7 @@ function App() {
 			<Route path="/" element={<Demo />} />
 			<Route path="/landing" element={<LandingPage />} />
 			<Route path="/university" element={<UniversitySearchPage />} />
+			<Route path="/result" element={<NavigationResultPage />} />
 		</Routes>
 	);
 }

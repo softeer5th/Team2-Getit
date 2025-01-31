@@ -1,4 +1,4 @@
-import { createHazardEdge } from "../factory/edgeFactory";
+import { createHazardEdge, createRouteEdges } from "../factory/edgeFactory";
 import { createNavigationRoute } from "../factory/navigationFactory";
 import { createNode } from "../factory/nodeFactory";
 import { HazardEdge } from "../types/edge";
@@ -17,6 +17,8 @@ const edges: HazardEdge[] = [
 	createHazardEdge("route2", nodes[1], nodes[2], ["도로에 균열이 있어요"]),
 	createHazardEdge("route3", nodes[2], nodes[3]),
 	createHazardEdge("route4", nodes[3], nodes[4]),
+	createHazardEdge("route5", nodes[3], nodes[4]),
+	createHazardEdge("route6", nodes[3], nodes[4]),
 ];
 
-export const mockNavigationRoute = createNavigationRoute(edges);
+export const mockNavigationRoute = createNavigationRoute(createRouteEdges(edges));

@@ -1,9 +1,19 @@
+import { useEffect } from "react";
 import useMap from "../hooks/useMap";
 
-const Map = () => {
-	const { mapRef } = useMap();
+type MapProps = {
+	style?: React.CSSProperties;
+};
+const Map = ({ style }: MapProps) => {
+	const { mapRef, map, overlay, AdvancedMarker, Polyline, mapLoaded } = useMap();
 
-	return <div id="map" ref={mapRef} style={{ width: "100%", height: "100%" }}></div>;
+	if (!style) {
+		style = { height: "100%", width: "100%" };
+	}
+
+	useEffect(() => {}, []);
+
+	return <div id="map" ref={mapRef} style={{ height: "100%", width: "100%" }}></div>;
 };
 
 export default Map;

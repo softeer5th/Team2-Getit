@@ -1,5 +1,4 @@
 import { HanyangUniversity } from "../../constant/university";
-import { HanyangUniversityBounds } from "../../constant/bounds";
 
 import loadGoogleMapsLibraries from "../loader/googleMapLoader";
 
@@ -25,10 +24,12 @@ export const initializeMap = async (mapElement: HTMLElement | null): Promise<Map
 		scrollwheel: true,
 		disableDoubleClickZoom: false,
 		gestureHandling: "auto",
-		restriction: {
-			latLngBounds: HanyangUniversityBounds,
-			strictBounds: false,
-		},
+		disableDefaultUI: true,
+		// restriction: {
+		// 	latLngBounds: HanyangUniversityBounds,
+		// 	strictBounds: false,
+		// },
+		clickableIcons: false,
 		mapId: import.meta.env.VITE_REACT_APP_GOOGLE_MAP_ID,
 	});
 
