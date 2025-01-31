@@ -1,6 +1,9 @@
 # Team2-Getit
 소프티어 2조 기릿팀입니다.
 
+![Cover](https://github.com/user-attachments/assets/c100fbf1-07ce-4191-a196-245fcdae69d9)
+
+
 # 🙌 그라운드 룰
 
 ## 📞 일정 및 연락

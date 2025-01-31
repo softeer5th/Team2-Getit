@@ -1,0 +1,35 @@
+name: Generate Release Draft
+
+on:
+  push:
+    branches:
+      - 'release/*'  # 🎯 release/로 시작하는 브랜치만 타겟
+
+jobs:
+  update-release-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get the branch name
+        id: get_branch
+        run: |
+          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: Set target branch
+        id: set_target_branch
+        run: |
+          if [[ "${{ env.BRANCH_NAME }}" == release/* ]]; then
+            echo "TARGET_BRANCH=${{ env.BRANCH_NAME }}" >> $GITHUB_ENV
+          else
+            echo "TARGET_BRANCH=main" >> $GITHUB_ENV  # 기본값 설정
+          fi
+
+      - name: Run Release Drafter
+        uses: release-drafter/release-drafter@v5
+        with:
+          config-name: release-drafter-config.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_NOTE_GITHUB_TOKEN }}
+          TARGET_BRANCH: ${{ env.TARGET_BRANCH }}  # 동적으로 설정된 target-branch 전달
