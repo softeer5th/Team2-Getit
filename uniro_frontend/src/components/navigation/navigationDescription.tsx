@@ -3,7 +3,7 @@ import Cancel from "../../assets/icon/close.svg?react";
 import CautionIcon from "../../assets/icon/cautionText.svg?react";
 import SafeIcon from "../../assets/icon/safeText.svg?react";
 import DestinationIcon from "../../assets/icon/destination.svg?react";
-import StartIcon from "../../assets/icon/start.svg?react";
+import OriginIcon from "../../assets/icon/start.svg?react";
 import ResultDivider from "../../assets/icon/resultDivider.svg?react";
 import { NavigationRoute } from "../../data/types/route";
 import { mockNavigationRoute } from "../../data/mock/hanyangRoute";
@@ -44,8 +44,8 @@ const NavigationDescription = ({ isDetailView }: TopBarProps) => {
 			</div>
 			<div className="w-full flex flex-row items-center justify-between mt-4">
 				<div className="flex-1 flex flex-row items-start justify-start">
-					<StartIcon />
-					<span className="">{route.startBuilding.buildingName}</span>
+					<OriginIcon />
+					<span className="">{route.originBuilding.buildingName}</span>
 				</div>
 				<ResultDivider />
 				<div className="flex-1 flex flex-row items-start justify-start">

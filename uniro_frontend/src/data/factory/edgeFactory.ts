@@ -27,7 +27,7 @@ export const createRouteEdges = (edges: HazardEdge[]): RouteEdge[] => {
 		routeEdges.push(routeEdge);
 	});
 
-	routeEdges[0].direction = "start";
+	routeEdges[0].direction = "origin";
 	routeEdges[routeEdges.length - 1].direction = "destination";
 
 	return routeEdges;

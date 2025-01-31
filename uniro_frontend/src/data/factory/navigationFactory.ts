@@ -9,7 +9,7 @@ export const createNavigationRoute = (edges: RouteEdge[]): NavigationRoute => {
 		hasCaution: edges.some((edge) => edge.cautionFactors !== undefined),
 		totalDistance: 635,
 		totalCost: 10,
-		startBuilding: hanyangBuildings[0],
+		originBuilding: hanyangBuildings[0],
 		destinationBuilding: hanyangBuildings[1],
 	};
 };

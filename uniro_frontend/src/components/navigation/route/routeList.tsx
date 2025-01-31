@@ -3,14 +3,15 @@ import { RouteEdge } from "../../../data/types/edge";
 import { Building } from "../../../data/types/node";
 import { RouteCard } from "./routeCard";
 
-type Props = {
+type RouteListProps = {
 	routes: RouteEdge[];
-	startBuilding: Building;
-	destBuilding: Building;
+	originBuilding: Building;
+	destinationBuilding: Building;
 };
+
 const Divider = () => <div className="border-[0.5px] border-gray-200 w-full"></div>;
 
-const RouteList = ({ routes, startBuilding, destBuilding }: Props) => {
+const RouteList = ({ routes, originBuilding, destinationBuilding }: RouteListProps) => {
 	return (
 		<div className="w-full">
 			{routes.map((route, index) => (
@@ -20,8 +21,8 @@ const RouteList = ({ routes, startBuilding, destBuilding }: Props) => {
 						<RouteCard
 							index={index}
 							route={route}
-							startBuilding={startBuilding}
-							destBuilding={destBuilding}
+							originBuilding={originBuilding}
+							destinationBuilding={destinationBuilding}
 						/>
 					</div>
 				</Fragment>

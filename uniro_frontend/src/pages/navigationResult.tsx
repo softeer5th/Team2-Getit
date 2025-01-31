@@ -123,8 +123,8 @@ const NavigationResultPage = () => {
 					<NavigationDescription isDetailView={isDetailView} />
 					<RouteList
 						routes={route.route}
-						startBuilding={route.startBuilding}
-						destBuilding={route.destinationBuilding}
+						originBuilding={route.originBuilding}
+						destinationBuilding={route.destinationBuilding}
 					/>
 				</div>
 			</AnimatedContainer>

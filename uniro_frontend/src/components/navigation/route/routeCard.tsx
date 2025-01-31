@@ -1,4 +1,4 @@
-import StartIcon from "../../../assets/route/start.svg?react";
+import OriginIcon from "../../../assets/route/start.svg?react";
 import DestinationIcon from "../../../assets/route/dest.svg?react";
 import StraightIcon from "../../../assets/route/straight.svg?react";
 import RightIcon from "../../../assets/route/right.svg?react";
@@ -18,13 +18,13 @@ const NumberIcon = ({ index }: { index: number }) => {
 export const RouteCard = ({
 	index,
 	route,
-	startBuilding,
-	destBuilding,
+	originBuilding,
+	destinationBuilding,
 }: {
 	index: number;
 	route: RouteEdge;
-	startBuilding: Building;
-	destBuilding: Building;
+	originBuilding: Building;
+	destinationBuilding: Building;
 }) => {
 	switch (route.direction) {
 		case "straight":
@@ -79,16 +79,16 @@ export const RouteCard = ({
 					</div>
 				</div>
 			);
-		case "start":
+		case "origin":
 			return (
 				<div className="flex flex-row items-center justify-start ml-8 my-5">
 					<div className="flex flex-col items-center justify-start space-y-1">
-						<StartIcon />
+						<OriginIcon />
 						<div className="text-[#5F5F5F] text-kor-body3 text-[12px]">출발</div>
 					</div>
 					<div className="flex flex-col items-start justify-center ml-4">
-						<div className="text-kor-body1 text-gray-900">{startBuilding.buildingName}</div>
-						<div className="text-kor-body3 text-gray-700">{startBuilding.address}</div>
+						<div className="text-kor-body1 text-gray-900">{originBuilding.buildingName}</div>
+						<div className="text-kor-body3 text-gray-700">{originBuilding.address}</div>
 					</div>
 				</div>
 			);
@@ -100,8 +100,8 @@ export const RouteCard = ({
 						<div className="text-[#5F5F5F] text-kor-body3 text-[12px]">도착</div>
 					</div>
 					<div className="flex flex-col items-start justify-center ml-4">
-						<div className="text-kor-body1 text-gray-900">{destBuilding.buildingName}</div>
-						<div className="text-kor-body3 text-gray-700">{destBuilding.address}</div>
+						<div className="text-kor-body1 text-gray-900">{destinationBuilding.buildingName}</div>
+						<div className="text-kor-body3 text-gray-700">{destinationBuilding.address}</div>
 					</div>
 				</div>
 			);

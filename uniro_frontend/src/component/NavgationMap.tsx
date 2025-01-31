@@ -27,8 +27,8 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 		if (!routeList || routeList.length === 0) return;
 		const bounds = new google.maps.LatLngBounds();
 
-		routeList.forEach((route) => {
-			const { startNode, endNode } = route;
+		routeList.forEach((edge) => {
+			const { startNode, endNode } = edge;
 			new Polyline({
 				path: [startNode, endNode],
 				map,
@@ -39,8 +39,8 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 			bounds.extend(new google.maps.LatLng(endNode.lat, endNode.lng));
 		});
 
-		routeList.forEach((route, index) => {
-			const { startNode, endNode } = route;
+		routeList.forEach((edge, index) => {
+			const { startNode, endNode } = edge;
 			if (index !== 0 && index !== routeList.length - 1) {
 				if (index === 1) {
 					generateAdvancedMarker(map, AdvancedMarker, "sub", {
@@ -57,15 +57,15 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 
 		const edgeRoutes = [routeList[0], routeList[routeList.length - 1]];
 
-		edgeRoutes.forEach((route, index) => {
-			const { startNode, endNode } = route;
+		edgeRoutes.forEach((edge, index) => {
+			const { startNode, endNode } = edge;
 			if (index === 0) {
-				generateAdvancedMarker(map, AdvancedMarker, "start", {
+				generateAdvancedMarker(map, AdvancedMarker, "origin", {
 					lat: startNode.lat,
 					lng: startNode.lng,
 				});
 			} else {
-				generateAdvancedMarker(map, AdvancedMarker, "end", {
+				generateAdvancedMarker(map, AdvancedMarker, "destination", {
 					lat: endNode.lat,
 					lng: endNode.lng,
 				});
