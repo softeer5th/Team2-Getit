@@ -43,6 +43,7 @@
 	font-family: "SF Pro Display", "AppleSDGothicNeo" !important;
 	outline: none;
 	--webkit-scrollbar-width: none;
+	box-sizing: border-box;
 }
 
 *::-webkit-scrollbar {
@@ -127,9 +128,11 @@
 @utility translate-marker {
 	transform: translateY(calc(100% - 10px));
 }
+
 @utility translate-routemarker {
 	transform: translateY(calc(100% - 40px));
 }
+
 @utility translate-waypoint {
 	transform: translateY(+4px);
 }

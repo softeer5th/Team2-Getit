@@ -1,3 +1,4 @@
+import { RoutePoint } from "../../constant/enums";
 import { RouteEdge } from "./edge";
 import { Building } from "./node";
 
@@ -12,3 +13,5 @@ export interface NavigationRoute extends Route {
 	originBuilding: Building;
 	destinationBuilding: Building;
 }
+
+export type RoutePointType = RoutePoint.ORIGIN | RoutePoint.DESTINATION;

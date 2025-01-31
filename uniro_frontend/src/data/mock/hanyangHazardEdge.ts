@@ -17,11 +17,11 @@ const nodes: CustomNode[] = [
 ];
 
 const edges: HazardEdge[] = [
-	createHazardEdge("path0", nodes[0], nodes[1], ["도로에 균열이 있어요"], []),
-	createHazardEdge("path1", nodes[2], nodes[3], [], ["계단이 있어요"]),
-	createHazardEdge("path2", nodes[4], nodes[5], ["낮은 턱이 있어요"], []),
-	createHazardEdge("path3", nodes[6], nodes[7], [], ["경사가 높아요"]),
-	createHazardEdge("path4", nodes[8], nodes[9], ["낮은 비탈길이 있어요"], []),
+	createHazardEdge("path0", nodes[0], nodes[1], ["도로에 균열이 있어요"]),
+	createHazardEdge("path1", nodes[2], nodes[3], undefined, ["계단이 있어요"]),
+	createHazardEdge("path2", nodes[4], nodes[5], ["낮은 턱이 있어요"]),
+	createHazardEdge("path3", nodes[6], nodes[7], undefined, ["경사가 높아요"]),
+	createHazardEdge("path4", nodes[8], nodes[9], ["낮은 비탈길이 있어요"]),
 ];
 
 export const mockHazardEdges = edges;
