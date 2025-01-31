@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.route.dto;
 
+import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.route.entity.CautionType;
 import com.softeer5.uniro_backend.route.entity.Route;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,10 +23,10 @@ public class RouteInfoDTO {
     @Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
     private final Set<CautionType> cautionFactors;
 
-    public static RouteInfoDTO of(Route route) {
+    public static RouteInfoDTO of(Route route, Node node1, Node node2) {
         return new RouteInfoDTO(route.getId(),
-                route.getNode1().getXY(),
-                route.getNode2().getXY(),
+                node1.getXY(),
+                node2.getXY(),
                 route.getCautionFactors());
     }
 }
