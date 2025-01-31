@@ -5,6 +5,7 @@ import LandingPage from "./pages/landing";
 import UniversitySearchPage from "./pages/search";
 import MapPage from "./pages/map";
 import BuildingSearchPage from "./pages/buildingSearch";
+import NavigationResultPage from "./pages/navigationResult";
 
 function App() {
 	return (
@@ -14,6 +15,7 @@ function App() {
 			<Route path="/university" element={<UniversitySearchPage />} />
 			<Route path="/building" element={<BuildingSearchPage />} />
 			<Route path="/map" element={<MapPage />} />
+			<Route path="/result" element={<NavigationResultPage />} />
 		</Routes>
 	);
 }
