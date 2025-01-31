@@ -123,3 +123,12 @@
 	--text-eng-caption: 12px;
 	--text-eng-caption--line-height: 160%;
 }
+@utility translate-marker {
+	transform: translateY(calc(100% - 10px));
+}
+@utility translate-routemarker {
+	transform: translateY(calc(100% - 40px));
+}
+@utility translate-waypoint {
+	transform: translateY(+4px);
+}

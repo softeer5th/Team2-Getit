@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import useMap from "../hooks/useMap";
 import { NavigationRoute } from "../data/types/route";
-import { generateAdvancedMarker } from "../utils/markers/generateAdvancedMarker";
+import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
+import createMarkerElement from "../components/map/mapMarkers";
+import { Markers } from "../constant/enums";
 
 type MapProps = {
 	style?: React.CSSProperties;
@@ -27,31 +29,28 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 		if (!routeList || routeList.length === 0) return;
 		const bounds = new google.maps.LatLngBounds();
 
-		routeList.forEach((edge) => {
-			const { startNode, endNode } = edge;
-			new Polyline({
-				path: [startNode, endNode],
-				map,
-				strokeColor: "#000000",
-				strokeOpacity: 2.0,
-			});
-			bounds.extend(new google.maps.LatLng(startNode.lat, startNode.lng));
-			bounds.extend(new google.maps.LatLng(endNode.lat, endNode.lng));
+		new Polyline({
+			path: [...routeList.map((edge) => edge.startNode), routeList[routeList.length - 1].endNode],
+			map,
+			strokeColor: "#000000",
+			strokeOpacity: 2.0,
 		});
 
 		routeList.forEach((edge, index) => {
 			const { startNode, endNode } = edge;
+			const startCoordinate = new google.maps.LatLng(startNode.lat, startNode.lng);
+			const endCoordinate = new google.maps.LatLng(endNode.lat, endNode.lng);
+			bounds.extend(startCoordinate);
+			bounds.extend(endCoordinate);
 			if (index !== 0 && index !== routeList.length - 1) {
-				if (index === 1) {
-					generateAdvancedMarker(map, AdvancedMarker, "sub", {
-						lat: startNode.lat,
-						lng: startNode.lng,
-					});
-				}
-				generateAdvancedMarker(map, AdvancedMarker, "sub", {
-					lat: endNode.lat,
-					lng: endNode.lng,
+				const markerElement = createMarkerElement({
+					type: Markers.WAYPOINT,
+					className: "translate-waypoint",
 				});
+				if (index === 1) {
+					createAdvancedMarker(AdvancedMarker, map, startCoordinate, markerElement);
+				}
+				createAdvancedMarker(AdvancedMarker, map, startCoordinate, markerElement);
 			}
 		});
 
@@ -60,15 +59,23 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 		edgeRoutes.forEach((edge, index) => {
 			const { startNode, endNode } = edge;
 			if (index === 0) {
-				generateAdvancedMarker(map, AdvancedMarker, "origin", {
-					lat: startNode.lat,
-					lng: startNode.lng,
+				const startCoordinate = new google.maps.LatLng(startNode.lat, startNode.lng);
+				const markerElement = createMarkerElement({
+					type: Markers.ORIGIN,
+					title: routes.originBuilding.buildingName,
+					className: "translate-routemarker",
 				});
+				createAdvancedMarker(AdvancedMarker, map, startCoordinate, markerElement);
+				bounds.extend(startCoordinate);
 			} else {
-				generateAdvancedMarker(map, AdvancedMarker, "destination", {
-					lat: endNode.lat,
-					lng: endNode.lng,
+				const endCoordinate = new google.maps.LatLng(endNode.lat, endNode.lng);
+				const markerElement = createMarkerElement({
+					type: Markers.DESTINATION,
+					title: routes.destinationBuilding.buildingName,
+					className: "translate-routemarker",
 				});
+				createAdvancedMarker(AdvancedMarker, map, endCoordinate, markerElement);
+				bounds.extend(endCoordinate);
 			}
 		});
 
