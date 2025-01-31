@@ -2,6 +2,7 @@ package com.softeer5.uniro_backend.route.entity;
 
 import static jakarta.persistence.FetchType.*;
 
+import java.util.List;
 import java.util.Set;
 
 import com.softeer5.uniro_backend.resolver.CautionListConverter;
@@ -59,4 +60,23 @@ public class Route {
 	@Convert(converter = DangerListConverter.class)
 	@Column(name = "danger_factors")
 	private Set<DangerType> dangerFactors;
+
+	public List<CautionType> getCautionFactorsByList(){
+		return cautionFactors.stream().toList();
+	}
+
+	public List<DangerType> getDangerFactorsByList(){
+		return dangerFactors.stream().toList();
+	}
+
+	public void setCautionFactors(List<CautionType> cautionFactors) {
+		this.cautionFactors.clear();
+        this.cautionFactors.addAll(cautionFactors);
+	}
+
+	public void setDangerFactors(List<DangerType> dangerFactors) {
+		this.dangerFactors.clear();
+		this.dangerFactors.addAll(dangerFactors);
+	}
+
 }
