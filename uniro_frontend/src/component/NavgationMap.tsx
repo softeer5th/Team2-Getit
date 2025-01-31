@@ -33,7 +33,7 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 			path: [...routeList.map((edge) => edge.startNode), routeList[routeList.length - 1].endNode],
 			map,
 			strokeColor: "#000000",
-			strokeOpacity: 2.0,
+			strokeWeight: 2.0,
 		});
 
 		routeList.forEach((edge, index) => {
@@ -50,7 +50,7 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 				if (index === 1) {
 					createAdvancedMarker(AdvancedMarker, map, startCoordinate, markerElement);
 				}
-				createAdvancedMarker(AdvancedMarker, map, startCoordinate, markerElement);
+				createAdvancedMarker(AdvancedMarker, map, endCoordinate, markerElement);
 			}
 		});
 
