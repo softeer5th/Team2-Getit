@@ -44,7 +44,6 @@ function createImageElement(type: MarkerTypes): HTMLElement {
 
 function createContainerElement(className?: string) {
 	const container = document.createElement("div");
-	console.log(className);
 	container.className = `flex flex-col items-center space-y-[7px] ${className}`;
 
 	return container;

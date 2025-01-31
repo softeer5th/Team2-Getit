@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
-import { buildings } from "../data/mock/hanyangBuildings";
+import { hanyangBuildings } from "../data/mock/hanyangBuildings";
 import createMarkerElement from "../components/map/mapMarkers";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import { BottomSheet, BottomSheetRef } from "react-spring-bottom-sheet";
@@ -50,7 +50,9 @@ export default function MapPage() {
 				if (marker) {
 					const { type, element } = marker;
 
-					element.content = createMarkerElement({ type });
+					if (type === Markers.BUILDING) return undefined;
+
+					element.content = createMarkerElement({ type, });
 				}
 				return undefined;
 			});
@@ -61,7 +63,7 @@ export default function MapPage() {
 		if (AdvancedMarker === null || map === null) return;
 
 		const markersWithId: { id: string; element: AdvancedMarker }[] = [];
-		for (const building of buildings) {
+		for (const building of hanyangBuildings) {
 			const { id, lat, lng, buildingName } = building;
 
 			const buildingMarker = createAdvancedMarker(
@@ -187,6 +189,7 @@ export default function MapPage() {
 		marker.content = createMarkerElement({
 			type: Markers.BUILDING,
 			title: selectedMarker.property.buildingName,
+			className: "translate-marker",
 		});
 	};
 
