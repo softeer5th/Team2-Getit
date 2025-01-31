@@ -47,7 +47,7 @@ public interface RouteApi {
 			@ApiResponse(responseCode = "200", description = "단일 route의 위험&주의 요소 제보 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
-	ResponseEntity<Void> postRisk(@PathVariable("univId") Long univId,
+	ResponseEntity<Void> updateRisk(@PathVariable("univId") Long univId,
 								  @PathVariable("routeId") Long routeId,
 								  @RequestBody PostRiskReqDTO postRiskReqDTO);
 

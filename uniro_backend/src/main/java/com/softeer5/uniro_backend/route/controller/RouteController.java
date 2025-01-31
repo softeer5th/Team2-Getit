@@ -21,7 +21,7 @@ public class RouteController implements RouteApi {
 	@Override
 	@GetMapping("/{univId}/routes")
 	public ResponseEntity<List<GetAllRoutesResDTO>> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
-		List<GetAllRoutesResDTO> allRoutes = routeService.GetAllRoutes(univId);
+		List<GetAllRoutesResDTO> allRoutes = routeService.getAllRoutes(univId);
 		return ResponseEntity.ok().body(allRoutes);
 	}
 
@@ -45,10 +45,10 @@ public class RouteController implements RouteApi {
 
 	@Override
 	@PostMapping("/{univId}/route/risk/{routeId}")
-	public ResponseEntity<Void> postRisk (@PathVariable("univId") Long univId,
+	public ResponseEntity<Void> updateRisk (@PathVariable("univId") Long univId,
 									   @PathVariable("routeId") Long routeId,
 									   @RequestBody PostRiskReqDTO postRiskReqDTO){
-		routeService.postRisk(univId,routeId,postRiskReqDTO);
+		routeService.updateRisk(univId,routeId,postRiskReqDTO);
 		return ResponseEntity.ok().build();
 	}
 

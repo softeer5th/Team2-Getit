@@ -25,7 +25,7 @@ public class RouteService {
 	private final CoreRouteRepository coreRouteRepository;
 
 
-	public List<GetAllRoutesResDTO> GetAllRoutes(Long univId) {
+	public List<GetAllRoutesResDTO> getAllRoutes(Long univId) {
 		List<CoreRoute> coreRoutes = coreRouteRepository.findByUnivId(univId);
 		return coreRoutes.stream().map(GetAllRoutesResDTO::of).toList();
 	}
@@ -89,7 +89,7 @@ public class RouteService {
 	}
 
 	@Transactional
-	public void postRisk(Long univId, Long routeId, PostRiskReqDTO postRiskReqDTO) {
+	public void updateRisk(Long univId, Long routeId, PostRiskReqDTO postRiskReqDTO) {
 		Route route = routeRepository.findByIdAndUnivId(routeId, univId)
 				.orElseThrow(() -> new RouteNotFoundException("Route not Found", ErrorCode.ROUTE_NOT_FOUND));
 
