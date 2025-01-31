@@ -1,10 +1,9 @@
 package com.softeer5.uniro_backend.route.service;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
+import com.softeer5.uniro_backend.common.exception.custom.DangerCautionConflictException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteNotFoundException;
 import com.softeer5.uniro_backend.common.utils.Utils;
 import com.softeer5.uniro_backend.route.dto.*;
@@ -89,4 +88,16 @@ public class RouteService {
 		return GetRiskResDTO.of(routeWithJoin);
 	}
 
+	public void postRisk(Long univId, Long routeId, PostRiskReqDTO postRiskReqDTO) {
+		Route route = routeRepository.findByIdAndUnivId(univId,routeId)
+				.orElseThrow(() -> new RouteNotFoundException("Route not Found", ErrorCode.ROUTE_NOT_FOUND));
+
+		if(!postRiskReqDTO.getCautionTypes().isEmpty() && !postRiskReqDTO.getDangerTypes().isEmpty()){
+			throw new DangerCautionConflictException("DangerFactors and CautionFactors can't exist simultaneously.",
+					ErrorCode.CAUTION_DANGER_CANT_EXIST_SIMULTANEOUSLY);
+		}
+
+		route.setCautionFactors(postRiskReqDTO.getCautionTypes());
+		route.setDangerFactors(postRiskReqDTO.getDangerTypes());
+	}
 }

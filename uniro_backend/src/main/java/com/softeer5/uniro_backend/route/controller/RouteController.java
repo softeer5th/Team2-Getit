@@ -1,16 +1,10 @@
 package com.softeer5.uniro_backend.route.controller;
 
-import com.softeer5.uniro_backend.route.dto.FastestRouteResDTO;
-import com.softeer5.uniro_backend.route.dto.GetAllRoutesResDTO;
-import com.softeer5.uniro_backend.route.dto.GetRiskResDTO;
+import com.softeer5.uniro_backend.route.dto.*;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.softeer5.uniro_backend.route.dto.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.route.service.RouteService;
 
 import lombok.RequiredArgsConstructor;
@@ -47,6 +41,15 @@ public class RouteController implements RouteApi {
 												 @RequestParam(value = "end-lng") double endLng){
 		GetRiskResDTO riskResDTO = routeService.getRisk(univId,startLat,startLng,endLat,endLng);
 		return ResponseEntity.ok().body(riskResDTO);
+	}
+
+	@Override
+	@PostMapping("/{univId}/route/risk/{routeId}")
+	public ResponseEntity<Void> postRisk (@PathVariable("univId") Long univId,
+									   @PathVariable("routeId") Long routeId,
+									   @RequestBody PostRiskReqDTO postRiskReqDTO){
+		routeService.postRisk(univId,routeId,postRiskReqDTO);
+		return ResponseEntity.ok().build();
 	}
 
 	@Override

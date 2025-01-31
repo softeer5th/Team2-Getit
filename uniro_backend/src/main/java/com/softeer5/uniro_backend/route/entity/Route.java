@@ -69,4 +69,14 @@ public class Route {
 		return dangerFactors.stream().toList();
 	}
 
+	public void setCautionFactors(List<CautionType> cautionFactors) {
+		this.cautionFactors.clear();
+        this.cautionFactors.addAll(cautionFactors);
+	}
+
+	public void setDangerFactors(List<DangerType> dangerFactors) {
+		this.dangerFactors.clear();
+		this.dangerFactors.addAll(dangerFactors);
+	}
+
 }
