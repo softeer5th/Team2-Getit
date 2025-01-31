@@ -88,8 +88,9 @@ public class RouteService {
 		return GetRiskResDTO.of(routeWithJoin);
 	}
 
+	@Transactional
 	public void postRisk(Long univId, Long routeId, PostRiskReqDTO postRiskReqDTO) {
-		Route route = routeRepository.findByIdAndUnivId(univId,routeId)
+		Route route = routeRepository.findByIdAndUnivId(routeId, univId)
 				.orElseThrow(() -> new RouteNotFoundException("Route not Found", ErrorCode.ROUTE_NOT_FOUND));
 
 		if(!postRiskReqDTO.getCautionTypes().isEmpty() && !postRiskReqDTO.getDangerTypes().isEmpty()){
