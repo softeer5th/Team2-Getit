@@ -1,5 +1,6 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
+target-branch: release/v1
 categories:
   - title: '🚀 새로운 기능이 추가되었어요'
     labels: ['🚀 feat']
