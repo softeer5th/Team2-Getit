@@ -1,6 +1,8 @@
 import { MarkerTypes } from "../../data/types/marker";
 import { Markers } from "../../constant/enums";
 
+const markerImages = import.meta.glob("/src/assets/markers/*.svg", { eager: true });
+
 function createTextElement(type: MarkerTypes, title: string): HTMLElement {
 	const markerTitle = document.createElement("p");
 	markerTitle.innerText = title;
@@ -35,10 +37,13 @@ function createTextElement(type: MarkerTypes, title: string): HTMLElement {
 	}
 }
 
+function getImage(type: MarkerTypes): string {
+	return (markerImages[`/src/assets/markers/${type}.svg`] as { default: string })?.default;
+}
+
 function createImageElement(type: MarkerTypes): HTMLElement {
 	const markerImage = document.createElement("img");
-
-	markerImage.src = `/src/assets/markers/${type}.svg`;
+	markerImage.src = getImage(type);
 	return markerImage;
 }
 
