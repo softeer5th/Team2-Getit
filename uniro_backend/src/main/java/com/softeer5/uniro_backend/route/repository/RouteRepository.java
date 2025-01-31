@@ -59,4 +59,6 @@ public interface RouteRepository extends JpaRepository<Route, Integer> {
                                                     @Param("path")String path,
                                                     @Param("rev_path")String revPath);
 
+    Optional<Route> findByIdAndUnivId (Long id, Long univId);
+
 }
