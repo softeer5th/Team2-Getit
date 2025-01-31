@@ -1,6 +1,6 @@
 import Input from "../components/customInput";
 import { hanyangBuildings } from "../data/mock/hanyangBuildings";
-import BuildingList from "../components/building/buildingList";
+import BuildingCard from "../components/building/buildingCard";
 import useSearchBuilding from "../hooks/useSearchBuilding";
 
 export default function BuildingSearchPage() {
@@ -13,7 +13,7 @@ export default function BuildingSearchPage() {
 			<div className="flex-1 overflow-y-scroll">
 				<ul className="px-4 pt-1 space-y-1">
 					{hanyangBuildings.map((building) => (
-						<BuildingList
+						<BuildingCard
 							onClick={() => setBuilding(building)}
 							key={`building-${building.buildingName}`}
 							building={building}

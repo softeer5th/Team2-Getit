@@ -8,7 +8,7 @@ interface BuildingListProps {
 	onClick: () => void;
 }
 
-export default function BuildingList({ building, onClick }: BuildingListProps) {
+export default function BuildingCard({ building, onClick }: BuildingListProps) {
 	const { buildingName, buildingImageUrl, address, phoneNumber } = building;
 	return (
 		<li>
