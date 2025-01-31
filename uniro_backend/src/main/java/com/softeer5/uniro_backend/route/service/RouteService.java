@@ -1,5 +1,7 @@
 package com.softeer5.uniro_backend.route.service;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
@@ -62,13 +64,29 @@ public class RouteService {
 
 
 	public GetRiskResDTO getRisk(Long univId, double startLat, double startLng, double endLat, double endLng) {
-		String startWTK = Utils.convertDoubleToWTK(startLat, startLng);
-		String endWTK = Utils.convertDoubleToWTK(endLat, endLng);
+		String startWTK = Utils.convertDoubleToPointWTK(startLat, startLng);
+		String endWTK = Utils.convertDoubleToPointWTK(endLat, endLng);
 
-		Route route = routeRepository.findRouteByPointsAndUnivId(univId, startWTK ,endWTK)
+		Route routeWithJoin = routeRepository.findRouteByPointsAndUnivId(univId, startWTK ,endWTK)
 				.orElseThrow(() -> new RouteNotFoundException("Route Not Found", ErrorCode.ROUTE_NOT_FOUND));
 
-		return GetRiskResDTO.of(route);
+		/*
+		// LineString 사용버전
+		List<double[]> coordinates = Arrays.asList(
+				new double[]{startLat, startLng},
+				new double[]{endLat, endLng}
+		);
+		String lineStringWTK = Utils.convertDoubleToLineStringWTK(coordinates);
+		Collections.reverse(coordinates);
+		String reverseLineStringWTK = Utils.convertDoubleToLineStringWTK(coordinates);
+
+		Route routeWithoutJoin = routeRepository.findRouteByLineStringAndUnivId(univId,lineStringWTK,reverseLineStringWTK)
+				.orElseThrow(() -> new RouteNotFoundException("Route Not Found", ErrorCode.ROUTE_NOT_FOUND));
+
+		 */
+
+
+		return GetRiskResDTO.of(routeWithJoin);
 	}
 
 }

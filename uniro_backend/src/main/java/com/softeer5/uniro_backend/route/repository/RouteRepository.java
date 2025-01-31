@@ -33,11 +33,11 @@ public interface RouteRepository extends JpaRepository<Route, Integer> {
     JOIN node n2 ON r.node2_id = n2.id
     WHERE r.univ_id = :univId
       AND (
-        (ST_Equals(n1.coordinates, ST_SRID(ST_GeomFromText(:point1), 4326))
-        AND ST_Equals(n2.coordinates, ST_SRID(ST_GeomFromText(:point2), 4326)))
+        (n1.coordinates = ST_SRID(ST_GeomFromText(:point1), 4326)
+        AND n2.coordinates = ST_SRID(ST_GeomFromText(:point2), 4326))
         OR
-        (ST_Equals(n1.coordinates, ST_SRID(ST_GeomFromText(:point2), 4326))
-        AND ST_Equals(n2.coordinates, ST_SRID(ST_GeomFromText(:point1), 4326)))
+        (n1.coordinates = ST_SRID(ST_GeomFromText(:point2), 4326)
+        AND n2.coordinates = ST_SRID(ST_GeomFromText(:point1), 4326))
       )
     """, nativeQuery = true)
     Optional<Route> findRouteByPointsAndUnivId(
@@ -45,5 +45,18 @@ public interface RouteRepository extends JpaRepository<Route, Integer> {
             @Param("point1") String point1,
             @Param("point2") String point2
     );
+
+    @Query(value = """
+    SELECT r.* FROM route r
+    WHERE r.univ_id = :univId
+    AND (
+        r.path = ST_SRID(ST_GeomFromText(:path), 4326)
+        OR
+        r.path = ST_SRID(ST_GeomFromText(:rev_path), 4326)
+    )
+""", nativeQuery = true)
+    Optional<Route> findRouteByLineStringAndUnivId(@Param("univId") Long univId,
+                                                    @Param("path")String path,
+                                                    @Param("rev_path")String revPath);
 
 }
