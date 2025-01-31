@@ -4,8 +4,8 @@ import LandingButton from "../components/landingButton";
 import Input from "../components/customInput";
 import Map from "../component/Map";
 import RouteInput from "../components/map/routeSearchInput";
-import StartIcon from "../assets/map/origin.svg?react";
-import EndIcon from "../assets/map/destination.svg?react";
+import OriginIcon from "../assets/map/origin.svg?react";
+import DestinationIcon from "../assets/map/destination.svg?react";
 import { useState } from "react";
 import ReportButton from "../components/map/reportButton";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
@@ -49,16 +49,17 @@ export default function Demo() {
 							console.log(e);
 						}}
 					/>
-					<RouteInput placeholder="출발지를 입력하세요">
-						<StartIcon />
+					<RouteInput onClick={() => {}} placeholder="출발지를 입력하세요">
+						<OriginIcon />
 					</RouteInput>
 
 					<RouteInput
+						onClick={() => {}}
 						placeholder="도착지를 입력하세요"
 						value={destination}
 						onCancel={() => setDestination("")}
 					>
-						<EndIcon />
+						<DestinationIcon />
 					</RouteInput>
 				</div>
 				<SuccessModal>

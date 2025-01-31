@@ -11,7 +11,7 @@ export default function UniversitySearchPage() {
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto py-5">
 			<div className="w-full px-[14px] pb-[17px] border-b-[1px] border-gray-400">
-				<Input onLengthChange={() => { }} placeholder="우리 학교를 검색해보세요" handleVoiceInput={() => { }} />
+				<Input onLengthChange={() => {}} placeholder="우리 학교를 검색해보세요" handleVoiceInput={() => {}} />
 			</div>
 			<div className="overflow-y-scroll flex-1">
 				<ul
