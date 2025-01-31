@@ -199,6 +199,8 @@ public class RouteCalculationService {
         List<RouteDetailDTO> details = new ArrayList<>();
         double accumulatedDistance = 0.0;
         Node now = startNode;
+        Map<String,Double> checkPointNodeCoordinates = startNode.getXY();
+        DirectionType checkPointType = DirectionType.STRAIGHT;
 
         // 길찾기 결과 상세정보 정리
         for(int i=0;i<shortestRoutes.size();i++){
@@ -207,12 +209,15 @@ public class RouteCalculationService {
             accumulatedDistance += calculateDistance(nowRoute);
 
             if(!nowRoute.getCautionFactors().isEmpty()){
-                details.add(RouteDetailDTO.of(accumulatedDistance, DirectionType.CAUTION));
-                accumulatedDistance = 0.0;
+                details.add(RouteDetailDTO.of(accumulatedDistance - calculateDistance(nowRoute)/2, checkPointType, checkPointNodeCoordinates));
+                accumulatedDistance = calculateDistance(nowRoute)/2;
+                checkPointNodeCoordinates = getCenter(now, nxt);
+                checkPointType = DirectionType.CAUTION;
             }
 
             if(nxt.equals(endNode)){
-                details.add(RouteDetailDTO.of(accumulatedDistance, DirectionType.FINISH));
+                details.add(RouteDetailDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
+                details.add(RouteDetailDTO.of(0, DirectionType.FINISH, nxt.getXY()));
                 break;
             }
             if(nxt.isCore()){
@@ -221,7 +226,9 @@ public class RouteCalculationService {
                     now = nxt;
                     continue;
                 }
-                details.add(RouteDetailDTO.of(accumulatedDistance, directionType));
+                details.add(RouteDetailDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
+                checkPointNodeCoordinates = nxt.getXY();
+                checkPointType = directionType;
                 accumulatedDistance = 0.0;
             }
 
@@ -229,6 +236,11 @@ public class RouteCalculationService {
         }
 
         return details;
+    }
+
+    private Map<String,Double> getCenter(Node n1, Node n2){
+        return Map.of("lat", (n1.getCoordinates().getY() + n2.getCoordinates().getY())/2
+                , "lng", (n1.getCoordinates().getX() + n2.getCoordinates().getX())/2);
     }
 
 
