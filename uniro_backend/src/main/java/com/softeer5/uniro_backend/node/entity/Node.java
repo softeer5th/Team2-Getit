@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor//(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
 public class Node {
@@ -40,6 +40,14 @@ public class Node {
 
 	public Map<String, Double> getXY(){
 		return Map.of("lat", coordinates.getY(), "lng", coordinates.getX());
+	}
+
+	public void setHeight(double height) {
+		this.height = height;
+	}
+
+	public void setCoordinates(Point coordinates) {
+		this.coordinates = coordinates;
 	}
 
 }
