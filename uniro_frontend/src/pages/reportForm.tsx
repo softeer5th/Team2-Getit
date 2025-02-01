@@ -23,14 +23,28 @@ const ReportForm = () => {
 		cautionIssues: [],
 	});
 
+	const [disabled, setDisabled] = useState<boolean>(true);
+
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
 
 	useEffect(() => {
 		setTimeout(() => {
-			setReportMode("create");
+			setReportMode("update");
 		}, 2000);
 	}, []);
+
+	useEffect(() => {
+		if (
+			formData.passableStatus === PassableStatus.INITIAL ||
+			(formData.passableStatus === PassableStatus.DANGER && formData.dangerIssues.length === 0) ||
+			(formData.passableStatus === PassableStatus.CAUTION && formData.cautionIssues.length === 0)
+		) {
+			setDisabled(true);
+			return;
+		}
+		setDisabled(false);
+	}, [formData]);
 
 	const handlePrimarySelect = (status: PassableStatus) => {
 		setFormData((prev) => ({
@@ -84,7 +98,7 @@ const ReportForm = () => {
 				/>
 			</div>
 			<div className="mb-4 w-full px-4">
-				<Button onClick={onReportSubmitSuccess} variant="primary">
+				<Button onClick={onReportSubmitSuccess} variant={disabled ? "disabled" : "primary"}>
 					제보하기
 				</Button>
 			</div>
