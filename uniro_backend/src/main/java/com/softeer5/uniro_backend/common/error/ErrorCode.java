@@ -16,6 +16,9 @@ public enum ErrorCode {
     ROUTE_NOT_FOUND(404, "루트를 찾을 수 없습니다."),
     CAUTION_DANGER_CANT_EXIST_SIMULTANEOUSLY(400, "위험요소와 주의요소는 동시에 존재할 수 없습니다."),
 
+    //길 생성
+    ELEVATION_API_ERROR(500, "구글 해발고도 API에서 오류가 발생했습니다."),
+
     // 건물 노드
     BUILDING_NOT_FOUND(404, "유효한 건물을 찾을 수 없습니다."),
     ;

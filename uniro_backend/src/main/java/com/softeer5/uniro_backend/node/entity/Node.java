@@ -3,6 +3,7 @@ package com.softeer5.uniro_backend.node.entity;
 
 import java.util.Map;
 
+import lombok.*;
 import org.locationtech.jts.geom.Point;
 
 import jakarta.persistence.Column;
@@ -11,13 +12,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
 public class Node {
@@ -40,6 +39,14 @@ public class Node {
 
 	public Map<String, Double> getXY(){
 		return Map.of("lat", coordinates.getY(), "lng", coordinates.getX());
+	}
+
+	public void setHeight(double height) {
+		this.height = height;
+	}
+
+	public void setCoordinates(Point coordinates) {
+		this.coordinates = coordinates;
 	}
 
 }
