@@ -28,13 +28,13 @@ public class MapClientImplTest {
         Point p2 = geometryFactory.createPoint(new Coordinate(-74.0060, 40.7128));
         Point p3 = geometryFactory.createPoint(new Coordinate(126.9780, 37.5665));
 
-        Node node1 = new Node();
+        Node node1 = Node.builder().build();
         node1.setCoordinates(p1);
 
-        Node node2 = new Node();
+        Node node2 = Node.builder().build();
         node2.setCoordinates(p2);
 
-        Node node3 = new Node();
+        Node node3 = Node.builder().build();
         node3.setCoordinates(p3);
 
         List<Node> nodes = List.of(node1, node2, node3);
@@ -55,13 +55,13 @@ public class MapClientImplTest {
         Point p2 = geometryFactory.createPoint(new Coordinate(-74.0060, 40.7128));
         Point p3 = geometryFactory.createPoint(new Coordinate(126.9780, 37.5665));
 
-        Node node1 = new Node();
+        Node node1 = Node.builder().build();
         node1.setCoordinates(p1);
 
-        Node node2 = new Node();
+        Node node2 = Node.builder().build();
         node2.setCoordinates(p2);
 
-        Node node3 = new Node();
+        Node node3 = Node.builder().build();
         node3.setCoordinates(p3);
 
         List<Node> nodes = List.of(node1, node2, node3);
