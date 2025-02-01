@@ -1,4 +1,4 @@
-import { Markers } from "../../constant/enums";
+import { Markers } from "../../constant/enum/markerEnum";
 
 export type AdvancedMarker = google.maps.marker.AdvancedMarkerElement;
 

@@ -1,4 +1,4 @@
-import { PassableStatus } from "../../data/types/report";
+import { PassableStatus } from "../../constant/enum/reportEnum";
 
 export const getThemeByPassableStatus = (status: PassableStatus): string => {
 	const orangeTheme = "border-system-orange text-system-orange bg-[#FFF7EF]";

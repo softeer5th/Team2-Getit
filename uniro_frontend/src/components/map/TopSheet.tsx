@@ -7,7 +7,7 @@ import { Link } from "react-router";
 import { motion } from "framer-motion";
 import useRoutePoint from "../../hooks/useRoutePoint";
 import useSearchBuilding from "../../hooks/useSearchBuilding";
-import { RoutePoint } from "../../constant/enums";
+import { RoutePoint } from "../../constant/enum/routeEnum";
 
 export default function TopSheet({ open }: { open: boolean }) {
 	const { origin, setOrigin, destination, setDestination, switchBuilding } = useRoutePoint();

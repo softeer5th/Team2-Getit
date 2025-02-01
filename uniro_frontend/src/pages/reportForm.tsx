@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
-import {
-	DangerIssueType,
-	PassableStatus,
-	ReportModeType,
-	CautionIssueType,
-	ReportFormData,
-} from "../data/types/report";
+
+import { PassableStatus, DangerIssueType, CautionIssueType } from "../constant/enum/reportEnum";
+import { ReportModeType, ReportFormData } from "../data/types/report";
+
 import { ReportTitle } from "../components/report/reportTitle";
 import { ReportDivider } from "../components/report/reportDivider";
 import { PrimaryForm } from "../components/report/primaryForm";
 import { SecondaryForm } from "../components/report/secondaryForm";
 import Button from "../components/customButton";
+
 import useScrollControl from "../hooks/useScrollControl";
 import useModal from "../hooks/useModal";
 

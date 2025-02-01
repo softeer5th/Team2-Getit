@@ -1,4 +1,6 @@
-import { PassableStatus, PrimaryQuestionButton, ReportModeType } from "../../data/types/report";
+import { PassableStatus } from "../../constant/enum/reportEnum";
+import { PrimaryQuestionButton, ReportModeType } from "../../data/types/report";
+
 import { FormTitle } from "./formTitle";
 import { PrimaryFormButton } from "./primaryButton";
 

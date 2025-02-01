@@ -1,12 +1,6 @@
-import { form } from "framer-motion/client";
-import {
-	CautionIssueType,
-	DangerIssueType,
-	IssueQuestionButtons,
-	PassableStatus,
-	ReportFormData,
-	ReportModeType,
-} from "../../data/types/report";
+import { CautionIssueType, DangerIssueType, PassableStatus } from "../../constant/enum/reportEnum";
+import { IssueQuestionButtons, ReportFormData, ReportModeType } from "../../data/types/report";
+
 import { FormTitle } from "./formTitle";
 import { SecondaryFormButton } from "./secondaryButton";
 

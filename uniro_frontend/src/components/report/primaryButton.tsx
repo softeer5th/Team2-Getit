@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { PassableStatus } from "../../data/types/report";
 import { getThemeByPassableStatus } from "../../utils/report/getThemeByPassableStatus";
+import { PassableStatus } from "../../constant/enum/reportEnum";
 
 export const PrimaryFormButton = ({
 	onClick,

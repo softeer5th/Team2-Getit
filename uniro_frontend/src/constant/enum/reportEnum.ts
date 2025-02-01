@@ -18,21 +18,3 @@ export enum CautionIssueType {
 	STEEP_SLOPE = "경사가 매우 높아요",
 	OTHERS = "그 외 요소",
 }
-
-export type ReportModeType = "create" | "update";
-
-export interface PrimaryQuestionButton {
-	content: string;
-	passableStatus: PassableStatus;
-	mode?: ReportModeType;
-}
-
-export interface IssueQuestionButtons {
-	danger: DangerIssueType[];
-	caution: CautionIssueType[];
-}
-export interface ReportFormData {
-	passableStatus: PassableStatus;
-	dangerIssues: DangerIssueType[];
-	cautionIssues: CautionIssueType[];
-}
