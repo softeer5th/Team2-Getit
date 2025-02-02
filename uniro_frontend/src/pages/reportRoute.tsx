@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enums";
 import { RouteEdge } from "../data/types/edge";
@@ -9,9 +9,19 @@ import { ClickEvent } from "../data/types/event";
 import createSubNodes from "../utils/polylines/createSubnodes";
 import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
+import { AdvancedMarker } from "../data/types/marker";
 
 export default function ReportRoutePage() {
 	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
+	const originPoint = useRef<{ point: google.maps.LatLngLiteral; element: AdvancedMarker } | undefined>();
+	const [newPoints, setNewPoints] = useState<{ element: AdvancedMarker | null; coords: google.maps.LatLngLiteral[] }>(
+		{
+			element: null,
+			coords: [],
+		},
+	);
+	const newPolyLine = useRef<google.maps.Polyline>();
+	const [isActive, setIsActive] = useState<boolean>(false);
 
 	const drawRoute = (routes: RouteEdge[]) => {
 		if (!Polyline || !AdvancedMarker || !map) return;
@@ -46,14 +56,55 @@ export default function ReportRoutePage() {
 
 				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
 
-				const tempWaypointMarker = new AdvancedMarker({
-					map: map,
-					position: nearestPoint,
-					content: createMarkerElement({
+				const tempWaypointMarker = createAdvancedMarker(
+					AdvancedMarker,
+					map,
+					nearestPoint,
+					createMarkerElement({
 						type: Markers.WAYPOINT,
 						className: "translate-waypoint",
 					}),
-				});
+				);
+
+				if (originPoint.current) {
+					setNewPoints((prevPoints) => {
+						if (prevPoints.element) {
+							prevPoints.element.position = nearestPoint;
+							return {
+								...prevPoints,
+								coords: [...prevPoints.coords, nearestPoint],
+							};
+						} else {
+							setIsActive(true);
+							return {
+								element: new AdvancedMarker({
+									map: map,
+									position: nearestPoint,
+									content: createMarkerElement({
+										type: Markers.DESTINATION,
+									}),
+								}),
+								coords: [...prevPoints.coords, nearestPoint],
+							};
+						}
+					});
+				} else {
+					const originMarker = new AdvancedMarker({
+						map: map,
+						position: nearestPoint,
+						content: createMarkerElement({ type: Markers.ORIGIN }),
+					});
+
+					originPoint.current = {
+						point: nearestPoint,
+						element: originMarker,
+					};
+
+					setNewPoints({
+						element: null,
+						coords: [nearestPoint],
+					});
+				}
 			});
 		}
 
@@ -66,7 +117,45 @@ export default function ReportRoutePage() {
 	};
 
 	useEffect(() => {
+		if (newPolyLine.current) {
+			newPolyLine.current.setPath(newPoints.coords);
+		}
+	}, [newPoints]);
+
+	useEffect(() => {
 		drawRoute(mockNavigationRoute.route);
+		if (Polyline) {
+			newPolyLine.current = new Polyline({ map: map, path: [], strokeColor: "#0367FB" });
+		}
+
+		if (map && AdvancedMarker) {
+			map.addListener("click", (e: ClickEvent) => {
+				if (originPoint.current) {
+					const point = LatLngToLiteral(e.latLng);
+					setNewPoints((prevPoints) => {
+						if (prevPoints.element) {
+							prevPoints.element.position = point;
+							return {
+								...prevPoints,
+								coords: [...prevPoints.coords, point],
+							};
+						} else {
+							setIsActive(true);
+							return {
+								element: new AdvancedMarker({
+									map: map,
+									position: point,
+									content: createMarkerElement({
+										type: Markers.DESTINATION,
+									}),
+								}),
+								coords: [...prevPoints.coords, point],
+							};
+						}
+					});
+				}
+			});
+		}
 	}, [map]);
 
 	return (
