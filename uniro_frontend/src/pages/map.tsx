@@ -18,6 +18,7 @@ import { RoutePointType } from "../data/types/route";
 import { RoutePoint } from "../constant/enums";
 import { Markers } from "../constant/enums";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
+import toggleMarkers from "../utils/markers/toggleMarkers";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -52,7 +53,7 @@ export default function MapPage() {
 
 					if (type === Markers.BUILDING) return undefined;
 
-					element.content = createMarkerElement({ type, });
+					element.content = createMarkerElement({ type });
 				}
 				return undefined;
 			});
@@ -120,28 +121,17 @@ export default function MapPage() {
 		}
 	};
 
-	/** Marker 보이기 안보이기 토글 */
-	const toggleMarkers = (isActive: boolean, markers: AdvancedMarker[]) => {
-		if (isActive) {
-			for (const marker of markers) {
-				marker.map = map;
-			}
-		} else {
-			for (const marker of markers) {
-				marker.map = null;
-			}
-		}
-	};
-
 	const toggleCautionButton = () => {
+		if (!map) return;
 		setIsCautionActive((isActive) => {
-			toggleMarkers(!isActive, cautionMarkers);
+			toggleMarkers(!isActive, cautionMarkers, map);
 			return !isActive;
 		});
 	};
 	const toggleDangerButton = () => {
+		if (!map) return;
 		setIsDangerActive((isActive) => {
-			toggleMarkers(!isActive, dangerMarkers);
+			toggleMarkers(!isActive, dangerMarkers, map);
 			return !isActive;
 		});
 	};

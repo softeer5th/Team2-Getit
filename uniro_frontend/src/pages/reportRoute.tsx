@@ -11,6 +11,9 @@ import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import { AdvancedMarker } from "../data/types/marker";
 import Button from "../components/customButton";
+import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
+import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
+import toggleMarkers from "../utils/markers/toggleMarkers";
 
 const colors = [
 	"#f1a2b3",
@@ -36,6 +39,48 @@ export default function ReportRoutePage() {
 	);
 	const newPolyLine = useRef<google.maps.Polyline>();
 	const [isActive, setIsActive] = useState<boolean>(false);
+
+	const [dangerMarkers, setDangerMarkers] = useState<AdvancedMarker[]>([]);
+	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(true);
+
+	const [cautionMarkers, setCautionMarkers] = useState<AdvancedMarker[]>([]);
+	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
+
+	const addHazardMarker = () => {
+		if (AdvancedMarker === null || map === null) return;
+		for (const edge of mockHazardEdges) {
+			const { id, startNode, endNode, dangerFactors, cautionFactors } = edge;
+			const hazardMarker = createAdvancedMarker(
+				AdvancedMarker,
+				map,
+				new google.maps.LatLng({
+					lat: (startNode.lat + endNode.lat) / 2,
+					lng: (startNode.lng + endNode.lng) / 2,
+				}),
+				createMarkerElement({ type: dangerFactors ? Markers.DANGER : Markers.CAUTION }),
+			);
+			if (dangerFactors) {
+				setDangerMarkers((prevMarkers) => [...prevMarkers, hazardMarker]);
+			} else {
+				setCautionMarkers((prevMarkers) => [...prevMarkers, hazardMarker]);
+			}
+		}
+	};
+
+	const toggleCautionButton = () => {
+		if (!map) return;
+		setIsCautionActive((isActive) => {
+			toggleMarkers(!isActive, cautionMarkers, map);
+			return !isActive;
+		});
+	};
+	const toggleDangerButton = () => {
+		if (!map) return;
+		setIsDangerActive((isActive) => {
+			toggleMarkers(!isActive, dangerMarkers, map);
+			return !isActive;
+		});
+	};
 
 	const reportNewRoute = () => {
 		if (!newPolyLine.current || !Polyline) return;
@@ -169,6 +214,7 @@ export default function ReportRoutePage() {
 
 	useEffect(() => {
 		drawRoute(mockNavigationRoute.route);
+		addHazardMarker();
 		if (Polyline) {
 			newPolyLine.current = new Polyline({ map: map, path: [], strokeColor: "#0367FB" });
 		}
@@ -211,6 +257,10 @@ export default function ReportRoutePage() {
 					<Button onClick={reportNewRoute}>제보하기</Button>
 				</div>
 			)}
+			<div className="absolute right-4 bottom-[90px] space-y-2">
+				<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
+				<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
+			</div>
 		</div>
 	);
 }
