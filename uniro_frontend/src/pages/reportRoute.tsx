@@ -10,6 +10,20 @@ import createSubNodes from "../utils/polylines/createSubnodes";
 import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import { AdvancedMarker } from "../data/types/marker";
+import Button from "../components/customButton";
+
+const colors = [
+	"#f1a2b3",
+	"#4c8dff",
+	"#e67e22",
+	"#2ecc71",
+	"#9b59b6",
+	"#34495e",
+	"#f39c12",
+	"#1abc9c",
+	"#d35400",
+	"#c0392b",
+];
 
 export default function ReportRoutePage() {
 	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
@@ -22,6 +36,37 @@ export default function ReportRoutePage() {
 	);
 	const newPolyLine = useRef<google.maps.Polyline>();
 	const [isActive, setIsActive] = useState<boolean>(false);
+
+	const reportNewRoute = () => {
+		if (!newPolyLine.current || !Polyline) return;
+
+		const subNodes = [];
+		const edges = newPoints.coords.map((node, idx) => [node, newPoints.coords[idx + 1]]).slice(0, -1);
+
+		for (const edge of edges) {
+			const subNode = createSubNodes(new Polyline({ path: edge }));
+			const subEdges = subNode.map((node, idx) => [node, subNode[idx + 1]]).slice(0, -1);
+
+			for (let i = 0; i < subEdges.length; i++) {
+				new Polyline({
+					map: map,
+					path: subEdges[i],
+					strokeColor: colors[i % 10],
+				});
+			}
+
+			subNodes.push(...subNode);
+		}
+
+		console.log(subNodes);
+
+		setNewPoints({
+			element: null,
+			coords: [],
+		});
+		originPoint.current = undefined;
+		newPolyLine.current.setPath([]);
+	};
 
 	const drawRoute = (routes: RouteEdge[]) => {
 		if (!Polyline || !AdvancedMarker || !map) return;
@@ -161,6 +206,11 @@ export default function ReportRoutePage() {
 	return (
 		<div className="relative w-full h-dvh">
 			<div ref={mapRef} className="w-full h-full" />
+			{isActive && (
+				<div className="absolute w-full bottom-6 px-4">
+					<Button onClick={reportNewRoute}>제보하기</Button>
+				</div>
+			)}
 		</div>
 	);
 }
