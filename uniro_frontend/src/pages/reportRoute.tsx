@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import createMarkerElement from "../components/map/mapMarkers";
-import { Markers } from "../constant/enums";
+import { Markers } from "../constant/enum/markerEnum";
 import { RouteEdge } from "../data/types/edge";
 import useMap from "../hooks/useMap";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
