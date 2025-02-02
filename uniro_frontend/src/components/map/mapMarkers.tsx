@@ -1,6 +1,5 @@
 import { MarkerTypes } from "../../data/types/marker";
 import { Markers } from "../../constant/enum/markerEnum";
-import { a } from "@react-spring/web";
 
 const markerImages = import.meta.glob("/src/assets/markers/*.svg", { eager: true });
 
