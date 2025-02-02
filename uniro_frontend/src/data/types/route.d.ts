@@ -1,4 +1,4 @@
-import { RoutePoint } from "../../constant/enums";
+import { RoutePoint } from "../../constant/enum/markerEnum";
 import { RouteEdge } from "./edge";
 import { Building } from "./node";
 

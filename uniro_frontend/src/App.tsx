@@ -6,6 +6,7 @@ import UniversitySearchPage from "./pages/search";
 import MapPage from "./pages/map";
 import BuildingSearchPage from "./pages/buildingSearch";
 import NavigationResultPage from "./pages/navigationResult";
+import ReportForm from "./pages/reportForm";
 
 function App() {
 	return (
@@ -15,6 +16,7 @@ function App() {
 			<Route path="/university" element={<UniversitySearchPage />} />
 			<Route path="/building" element={<BuildingSearchPage />} />
 			<Route path="/map" element={<MapPage />} />
+			<Route path="/form" element={<ReportForm />} />
 			<Route path="/result" element={<NavigationResultPage />} />
 		</Routes>
 	);
