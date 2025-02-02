@@ -4,9 +4,11 @@ import UniversityButton from "../components/universityButton";
 import { UniversityList } from "../constant/university";
 import Button from "../components/customButton";
 import { Link } from "react-router";
+import useUniversityInfo from "../hooks/useUniversityInfo";
 
 export default function UniversitySearchPage() {
 	const [selectedUniv, setSelectedUniv] = useState<string>("");
+	const { setUniversity } = useUniversityInfo();
 
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto py-5">
@@ -34,7 +36,7 @@ export default function UniversitySearchPage() {
 			</div>
 			<div className="px-[14px]">
 				{selectedUniv !== "" && (
-					<Link to="/">
+					<Link to="/" onClick={() => setUniversity(selectedUniv)}>
 						<Button variant="primary">다음</Button>
 					</Link>
 				)}
