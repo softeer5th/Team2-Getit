@@ -15,8 +15,8 @@ import useSearchBuilding from "../hooks/useSearchBuilding";
 import Button from "../components/customButton";
 import { AdvancedMarker, MarkerTypes } from "../data/types/marker";
 import { RoutePointType } from "../data/types/route";
-import { RoutePoint } from "../constant/enums";
-import { Markers } from "../constant/enums";
+import { RoutePoint } from "../constant/enum/routeEnum";
+import { Markers } from "../constant/enum/markerEnum";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import toggleMarkers from "../utils/markers/toggleMarkers";
 

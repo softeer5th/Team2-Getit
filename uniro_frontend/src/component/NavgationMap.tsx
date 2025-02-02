@@ -3,7 +3,7 @@ import useMap from "../hooks/useMap";
 import { NavigationRoute } from "../data/types/route";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import createMarkerElement from "../components/map/mapMarkers";
-import { Markers } from "../constant/enums";
+import { Markers } from "../constant/enum/markerEnum";
 
 type MapProps = {
 	style?: React.CSSProperties;

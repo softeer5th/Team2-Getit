@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { Building } from "../data/types/node";
 import { RoutePointType } from "../data/types/route";
-import { RoutePoint } from "../constant/enums";
+import { RoutePoint } from "../constant/enum/routeEnum";
 
 interface SearchModeStore {
 	mode: RoutePointType;

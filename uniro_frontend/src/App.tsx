@@ -7,6 +7,7 @@ import MapPage from "./pages/map";
 import BuildingSearchPage from "./pages/buildingSearch";
 import NavigationResultPage from "./pages/navigationResult";
 import ReportRoutePage from "./pages/reportRoute";
+import ReportForm from "./pages/reportForm";
 
 function App() {
 	return (
@@ -16,6 +17,7 @@ function App() {
 			<Route path="/university" element={<UniversitySearchPage />} />
 			<Route path="/building" element={<BuildingSearchPage />} />
 			<Route path="/map" element={<MapPage />} />
+			<Route path="/form" element={<ReportForm />} />
 			<Route path="/result" element={<NavigationResultPage />} />
 			<Route path="/report" element={<ReportRoutePage />} />
 		</Routes>
