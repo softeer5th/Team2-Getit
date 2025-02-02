@@ -48,7 +48,6 @@ const ReportForm = () => {
 
 	const handlePrimarySelect = (status: PassableStatus) => {
 		setFormData((prev) => ({
-			...prev,
 			passableStatus: status === prev.passableStatus ? PassableStatus.INITIAL : status,
 			dangerIssues: status === PassableStatus.DANGER ? [] : prev.dangerIssues,
 			cautionIssues: status === PassableStatus.CAUTION ? [] : prev.cautionIssues,
