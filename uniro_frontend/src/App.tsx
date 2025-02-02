@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router";
 import "./App.css";
 import Demo from "./pages/demo";
 import LandingPage from "./pages/landing";
-import UniversitySearchPage from "./pages/search";
+import UniversitySearchPage from "./pages/universitySearch";
 import MapPage from "./pages/map";
 import BuildingSearchPage from "./pages/buildingSearch";
 import NavigationResultPage from "./pages/navigationResult";
