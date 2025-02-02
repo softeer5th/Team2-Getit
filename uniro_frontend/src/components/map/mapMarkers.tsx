@@ -54,16 +54,29 @@ function createContainerElement(className?: string) {
 	return container;
 }
 
+function attachAnimation(container: HTMLElement, hasAnimation: boolean) {
+	if (hasAnimation) {
+		const outerContainer = document.createElement("div");
+		outerContainer.className = "marker-appear";
+		outerContainer.appendChild(container);
+		return outerContainer;
+	}
+
+	return container;
+}
+
 export default function createMarkerElement({
 	type,
 	title,
 	className,
 	hasTopContent = false,
+	hasAnimation = false,
 }: {
 	type: MarkerTypes;
 	className?: string;
 	title?: string;
 	hasTopContent?: boolean;
+	hasAnimation?: boolean;
 }): HTMLElement {
 	const container = createContainerElement(className);
 
@@ -74,14 +87,15 @@ export default function createMarkerElement({
 		if (hasTopContent) {
 			container.appendChild(markerTitle);
 			container.appendChild(markerImage);
-			return container;
+			return attachAnimation(container, hasAnimation);
 		}
 
 		container.appendChild(markerImage);
 		container.appendChild(markerTitle);
-		return container;
+		return attachAnimation(container, hasAnimation);
 	}
 
 	container.appendChild(markerImage);
-	return container;
+
+	return attachAnimation(container, hasAnimation);
 }

@@ -13,6 +13,9 @@ type MapProps = {
 	bottomPadding?: number;
 };
 
+// TODO: useEffect로 경로가 모두 로딩된 이후에 마커가 생성되도록 수정하기
+// TODO: 경로 로딩 완료시 살짝 zoomIn 하는 부분 구현하기
+
 const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: MapProps) => {
 	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
 
@@ -64,6 +67,7 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 					type: Markers.ORIGIN,
 					title: routes.originBuilding.buildingName,
 					className: "translate-routemarker",
+					hasAnimation: true,
 				});
 				createAdvancedMarker(AdvancedMarker, map, startCoordinate, markerElement);
 				bounds.extend(startCoordinate);
@@ -73,6 +77,7 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 					type: Markers.DESTINATION,
 					title: routes.destinationBuilding.buildingName,
 					className: "translate-routemarker",
+					hasAnimation: true,
 				});
 				createAdvancedMarker(AdvancedMarker, map, endCoordinate, markerElement);
 				bounds.extend(endCoordinate);

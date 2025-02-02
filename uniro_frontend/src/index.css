@@ -136,3 +136,17 @@
 @utility translate-waypoint {
 	transform: translateY(+4px);
 }
+
+@keyframes markerAppear {
+	0% {
+		transform: scale(0);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+.marker-appear {
+	animation: markerAppear 0.2s ease-in-out forwards;
+	transform-origin: bottom center;
+}

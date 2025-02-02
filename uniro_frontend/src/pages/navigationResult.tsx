@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { PanInfo, useDragControls } from "framer-motion";
+import React, { useCallback, useEffect, useState } from "react";
+import { AnimatePresence, PanInfo, useDragControls } from "framer-motion";
 import Button from "../components/customButton";
 import GoBack from "../assets/icon/goBack.svg?react";
 import RouteList from "../components/navigation/route/routeList";
@@ -11,6 +11,9 @@ import AnimatedContainer from "../container/animatedContainer";
 import NavigationMap from "../component/NavgationMap";
 import NavigationDescription from "../components/navigation/navigationDescription";
 import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetHandle";
+
+import useLoading from "../hooks/useLoading";
+import Loading from "../components/loading/loading";
 
 // 1. 돌아가면 위치 reset ✅
 // 2. 상세경로 scroll 끝까지 가능하게 하기 ❎
@@ -31,9 +34,16 @@ const NavigationResultPage = () => {
 	const [sheetHeight, setSheetHeight] = useState(CLOSED_SHEET_HEIGHT);
 	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
 
+	const [isLoading, show, hide] = useLoading();
 	const [route, setRoute] = useState<NavigationRoute>(mockNavigationRoute);
 
 	useScrollControl();
+
+	useEffect(() => {
+		show();
+		const timer = setTimeout(hide, 5000);
+		return () => clearTimeout(timer);
+	}, []);
 
 	const dragControls = useDragControls();
 
@@ -60,14 +70,15 @@ const NavigationResultPage = () => {
 
 	return (
 		<div className="relative h-svh w-full max-w-[450px] mx-auto">
+			<Loading isLoading={isLoading} loadingContent="경로 탐색 중입니다" />
 			<AnimatedContainer
-				isVisible={!isDetailView}
+				isVisible={!isDetailView && !isLoading}
 				positionDelta={286}
 				className="absolute top-0 z-10 max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg"
 				isTop={true}
 				transition={{ type: "spring", damping: 20, duration: 0.3 }}
 			>
-				<NavigationDescription isDetailView={!isDetailView} />
+				<NavigationDescription isDetailView={!isDetailView && !isLoading} />
 			</AnimatedContainer>
 			<NavigationMap
 				style={{ width: "100%", height: "100%" }}
@@ -76,7 +87,7 @@ const NavigationResultPage = () => {
 				bottomPadding={sheetHeight}
 			/>
 			<AnimatedContainer
-				isVisible={!isDetailView}
+				isVisible={!isDetailView && !isLoading}
 				className="absolute bottom-0 left-0 w-full mb-[30px] px-4"
 				positionDelta={88}
 			>
@@ -86,7 +97,7 @@ const NavigationResultPage = () => {
 			</AnimatedContainer>
 
 			<AnimatedContainer
-				isVisible={isDetailView}
+				isVisible={isDetailView && !isLoading}
 				className="absolute top-4 left-4 z-10"
 				positionDelta={60}
 				isTop={true}
@@ -97,7 +108,7 @@ const NavigationResultPage = () => {
 			</AnimatedContainer>
 
 			<AnimatedContainer
-				isVisible={isDetailView}
+				isVisible={isDetailView && !isLoading}
 				className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto"
 				positionDelta={MAX_SHEET_HEIGHT}
 				transition={{ type: "spring", damping: 20, duration: 0.3 }}
@@ -120,7 +131,7 @@ const NavigationResultPage = () => {
 						height: MAX_SHEET_HEIGHT - BOTTOM_SHEET_HANDLE_HEIGHT,
 					}}
 				>
-					<NavigationDescription isDetailView={isDetailView} />
+					<NavigationDescription isDetailView={isDetailView && !isLoading} />
 					<RouteList
 						routes={route.route}
 						originBuilding={route.originBuilding}
