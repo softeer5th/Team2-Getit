@@ -8,3 +8,8 @@ export const enum Markers {
 	WAYPOINT = "waypoint",
 	NUMBERED_WAYPOINT = "numberedWayPoint",
 }
+
+export const enum RoutePoint {
+	ORIGIN = "origin",
+	DESTINATION = "destination",
+}
