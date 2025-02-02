@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { initializeMap } from "../map/initializer/googleMapInitializer";
 
-const useMap = () => {
+const useMap = (mapOptions?: google.maps.MapOptions) => {
 	const mapRef = useRef<HTMLDivElement>(null);
 	const [map, setMap] = useState<google.maps.Map | null>(null);
 	const [overlay, setOverlay] = useState<google.maps.OverlayView | null>(null);
@@ -14,7 +14,10 @@ const useMap = () => {
 
 		const initMap = async () => {
 			try {
-				const { map, overlay, AdvancedMarkerElement, Polyline } = await initializeMap(mapRef.current);
+				const { map, overlay, AdvancedMarkerElement, Polyline } = await initializeMap(
+					mapRef.current,
+					mapOptions,
+				);
 				setMap(map);
 				setOverlay(overlay);
 				setAdvancedMarker(() => AdvancedMarkerElement);

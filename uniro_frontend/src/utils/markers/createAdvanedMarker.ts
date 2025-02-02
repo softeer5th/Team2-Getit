@@ -1,7 +1,7 @@
 export default function createAdvancedMarker(
 	AdvancedMarker: typeof google.maps.marker.AdvancedMarkerElement,
 	map: google.maps.Map,
-	position: google.maps.LatLng,
+	position: google.maps.LatLng | google.maps.LatLngLiteral,
 	content: HTMLElement,
 	onClick?: () => void,
 ) {
