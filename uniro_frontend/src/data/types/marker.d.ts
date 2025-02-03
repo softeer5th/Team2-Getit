@@ -12,3 +12,8 @@ export type MarkerTypes =
 	| Markers.WAYPOINT
 	| Markers.SELECTED_BUILDING
 	| Markers.REPORT;
+
+export type MarkerTypesWithElement = {
+	type: MarkerTypes;
+	element: AdvancedMarker;
+};

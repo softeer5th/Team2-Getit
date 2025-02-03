@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useMap from "../hooks/useMap";
 import { mockNavigationRoute } from "../data/mock/hanyangRoute";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
@@ -11,9 +11,11 @@ import createSubNodes from "../utils/polylines/createSubnodes";
 import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import centerCoordinate from "../utils/coordinates/centerCoordinate";
+import { MarkerTypesWithElement } from "../data/types/marker";
 
 export default function ReportHazardPage() {
 	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
+	const [reportMarker, setReportMarker] = useState<MarkerTypesWithElement>();
 
 	const addHazardMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
@@ -73,6 +75,18 @@ export default function ReportHazardPage() {
 						className: 'translate-routemarker'
 					})
 				)
+
+				setReportMarker((prevMarker) => {
+					if (prevMarker) {
+						if (prevMarker.type === Markers.REPORT) {
+							prevMarker.element.map = null;
+						}
+					}
+					return {
+						type: Markers.REPORT,
+						element: newReportMarker
+					}
+				})
 			})
 		}
 
