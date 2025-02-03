@@ -15,8 +15,9 @@ import { MarkerTypesWithElement } from "../data/types/marker";
 import Button from "../components/customButton";
 import { Link } from "react-router";
 import { ReportHazardMessage } from "../constant/enum/messageEnum";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import useReportHazard from "../hooks/useReportHazard";
+import AnimatedContainer from "../container/animatedContainer";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	edge: [google.maps.LatLng | google.maps.LatLngLiteral, google.maps.LatLng | google.maps.LatLngLiteral]
@@ -117,7 +118,8 @@ export default function ReportHazardPage() {
 					centerCoordinate(nearestEdge[0], nearestEdge[1]),
 					createMarkerElement({
 						type: Markers.REPORT,
-						className: 'translate-routemarker'
+						className: 'translate-routemarker',
+						hasAnimation: true,
 					})
 				)
 
@@ -193,13 +195,16 @@ export default function ReportHazardPage() {
 					className="text-gray-100 text-kor-body2 font-medium text-center">{message}</motion.p>
 			</div>
 			<div ref={mapRef} className="w-full h-full" />
-			{reportMarker && (
-				<div className="absolute w-full bottom-6 px-4">
-					<Link onClick={reportHazard} to={'/form'}>
-						<Button>제보하기</Button>
-					</Link>
-				</div>
-			)}
+			<AnimatedContainer
+				isVisible={reportMarker ? true : false}
+				className="absolute w-full bottom-6 px-4"
+				positionDelta={88}
+				transition={{ duration: 0.6 }}
+			>
+				<Link onClick={reportHazard} to={'/form'}>
+					<Button>제보하기</Button>
+				</Link>
+			</AnimatedContainer>
 		</div>
 	);
 }
