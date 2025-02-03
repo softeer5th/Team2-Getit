@@ -17,6 +17,16 @@ export default function ReportHazardPage() {
 	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
 	const [reportMarker, setReportMarker] = useState<MarkerTypesWithElement>();
 
+	const resetMarker = (prevMarker: MarkerTypesWithElement) => {
+		if (prevMarker.type === Markers.REPORT) {
+			prevMarker.element.map = null;
+			return;
+		}
+		else {
+			prevMarker.element.content = createMarkerElement({ type: prevMarker.type })
+		}
+	}
+
 	const addHazardMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
 		for (const edge of mockHazardEdges) {
@@ -40,12 +50,7 @@ export default function ReportHazardPage() {
 					})
 					setReportMarker((prevMarker) => {
 						if (prevMarker) {
-							if (prevMarker.type === Markers.REPORT) {
-								prevMarker.element.map = null;
-							}
-							else {
-								prevMarker.element.content = createMarkerElement({ type: prevMarker.type })
-							}
+							resetMarker(prevMarker);
 						}
 
 						return {
@@ -103,13 +108,9 @@ export default function ReportHazardPage() {
 
 				setReportMarker((prevMarker) => {
 					if (prevMarker) {
-						if (prevMarker.type === Markers.REPORT) {
-							prevMarker.element.map = null;
-						}
-						else {
-							prevMarker.element.content = createMarkerElement({ type: prevMarker.type })
-						}
+						resetMarker(prevMarker);
 					}
+
 					return {
 						type: Markers.REPORT,
 						element: newReportMarker
@@ -129,13 +130,9 @@ export default function ReportHazardPage() {
 			map.addListener('click', () => {
 				setReportMarker((prevMarker) => {
 					if (prevMarker) {
-						if (prevMarker.type === Markers.REPORT) {
-							prevMarker.element.map = null;
-						}
-						else {
-							prevMarker.element.content = createMarkerElement({ type: prevMarker.type })
-						}
+						resetMarker(prevMarker);
 					}
+
 					return undefined
 				})
 			})
