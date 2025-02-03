@@ -29,10 +29,9 @@ const ReportForm = () => {
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
 
-	const { reportType, startNode, endNode } = useReportHazard()
+	const { reportType, startNode, endNode } = useReportHazard();
 
 	useEffect(() => {
-
 		console.log(reportType, startNode, endNode);
 
 		setTimeout(() => {

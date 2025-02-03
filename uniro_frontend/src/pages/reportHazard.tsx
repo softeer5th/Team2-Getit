@@ -20,7 +20,7 @@ import useReportHazard from "../hooks/useReportHazard";
 import AnimatedContainer from "../container/animatedContainer";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
-	edge: [google.maps.LatLng | google.maps.LatLngLiteral, google.maps.LatLng | google.maps.LatLngLiteral]
+	edge: [google.maps.LatLng | google.maps.LatLngLiteral, google.maps.LatLng | google.maps.LatLngLiteral];
 }
 
 export default function ReportHazardPage() {
@@ -28,18 +28,16 @@ export default function ReportHazardPage() {
 	const [reportMarker, setReportMarker] = useState<reportMarkerTypes>();
 	const { setReportType, setNode } = useReportHazard();
 
-
 	const [message, setMessage] = useState<ReportHazardMessage>(ReportHazardMessage.DEFAULT);
 
 	const resetMarker = (prevMarker: MarkerTypesWithElement) => {
 		if (prevMarker.type === Markers.REPORT) {
 			prevMarker.element.map = null;
 			return;
+		} else {
+			prevMarker.element.content = createMarkerElement({ type: prevMarker.type });
 		}
-		else {
-			prevMarker.element.content = createMarkerElement({ type: prevMarker.type })
-		}
-	}
+	};
 
 	const addHazardMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
@@ -60,9 +58,9 @@ export default function ReportHazardPage() {
 					hazardMarker.content = createMarkerElement({
 						type,
 						title: dangerFactors ? dangerFactors[0] : cautionFactors && cautionFactors[0],
-						hasTopContent: true
-					})
-					setMessage(ReportHazardMessage.UPDATE)
+						hasTopContent: true,
+					});
+					setMessage(ReportHazardMessage.UPDATE);
 					setReportMarker((prevMarker) => {
 						if (prevMarker) {
 							resetMarker(prevMarker);
@@ -71,10 +69,10 @@ export default function ReportHazardPage() {
 						return {
 							type,
 							element: hazardMarker,
-							edge: [startNode, endNode]
-						}
-					})
-				}
+							edge: [startNode, endNode],
+						};
+					});
+				},
 			);
 		}
 	};
@@ -118,12 +116,12 @@ export default function ReportHazardPage() {
 					centerCoordinate(nearestEdge[0], nearestEdge[1]),
 					createMarkerElement({
 						type: Markers.REPORT,
-						className: 'translate-routemarker',
+						className: "translate-routemarker",
 						hasAnimation: true,
-					})
-				)
+					}),
+				);
 
-				setMessage(ReportHazardMessage.NEW)
+				setMessage(ReportHazardMessage.CREATE);
 
 				setReportMarker((prevMarker) => {
 					if (prevMarker) {
@@ -133,10 +131,10 @@ export default function ReportHazardPage() {
 					return {
 						type: Markers.REPORT,
 						element: newReportMarker,
-						edge: nearestEdge
-					}
-				})
-			})
+						edge: nearestEdge,
+					};
+				});
+			});
 		}
 
 		createAdvancedMarker(
@@ -152,38 +150,34 @@ export default function ReportHazardPage() {
 
 		setReportType(reportMarker.type === Markers.REPORT ? "CREATE" : "UPDATE");
 
-		setNode(...reportMarker.edge)
-	}
+		setNode(...reportMarker.edge);
+	};
 
 	useEffect(() => {
 		drawRoute(mockNavigationRoute.route);
 		addHazardMarker();
 
 		if (map) {
-			map.addListener('click', () => {
+			map.addListener("click", () => {
 				setReportMarker((prevMarker) => {
 					if (prevMarker) {
-						setMessage(ReportHazardMessage.DEFAULT)
+						setMessage(ReportHazardMessage.DEFAULT);
 						resetMarker(prevMarker);
-					}
-					else setMessage(ReportHazardMessage.ERROR)
+					} else setMessage(ReportHazardMessage.ERROR);
 
-
-					return undefined
-				})
-			})
+					return undefined;
+				});
+			});
 		}
-	}, [map, AdvancedMarker, Polyline])
+	}, [map, AdvancedMarker, Polyline]);
 
 	useEffect(() => {
 		if (message === ReportHazardMessage.ERROR) {
 			setTimeout(() => {
 				setMessage(ReportHazardMessage.DEFAULT);
-			}, 1000)
+			}, 1000);
 		}
-	}, [message])
-
-
+	}, [message]);
 
 	return (
 		<div className="relative w-full h-dvh">
@@ -192,7 +186,10 @@ export default function ReportHazardPage() {
 					initial={{ x: 0 }}
 					animate={message === ReportHazardMessage.ERROR ? { x: [0, 5, -5, 2.5, -2.5, 0] } : { x: 0 }}
 					transition={{ duration: 0.5, ease: "easeOut" }}
-					className="text-gray-100 text-kor-body2 font-medium text-center">{message}</motion.p>
+					className="text-gray-100 text-kor-body2 font-medium text-center"
+				>
+					{message}
+				</motion.p>
 			</div>
 			<div ref={mapRef} className="w-full h-full" />
 			<AnimatedContainer
@@ -201,7 +198,7 @@ export default function ReportHazardPage() {
 				positionDelta={88}
 				transition={{ duration: 0.6 }}
 			>
-				<Link onClick={reportHazard} to={'/form'}>
+				<Link onClick={reportHazard} to={"/form"}>
 					<Button>제보하기</Button>
 				</Link>
 			</AnimatedContainer>
