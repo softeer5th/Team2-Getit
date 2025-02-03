@@ -7,4 +7,5 @@ export const enum Markers {
 	SELECTED_BUILDING = "selectedBuilding",
 	WAYPOINT = "waypoint",
 	NUMBERED_WAYPOINT = "numberedWayPoint",
+	REPORT = "report",
 }

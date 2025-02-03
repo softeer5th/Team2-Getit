@@ -10,4 +10,10 @@ export type MarkerTypes =
 	| Markers.ORIGIN
 	| Markers.NUMBERED_WAYPOINT
 	| Markers.WAYPOINT
-	| Markers.SELECTED_BUILDING;
+	| Markers.SELECTED_BUILDING
+	| Markers.REPORT;
+
+export type MarkerTypesWithElement = {
+	type: MarkerTypes;
+	element: AdvancedMarker;
+};
