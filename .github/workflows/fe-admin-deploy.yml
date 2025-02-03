@@ -58,7 +58,7 @@ jobs:
             cd ${DEPLOY_PATH}
             sudo docker ps -a --format '{{.ID}} {{.Names}}' \
                 | egrep -v 'nginx-container|uniro-backoffice' \
-                | awk '{print $1}'
+                | awk '{print $1}' \
                 | xargs -r sudo docker stop || true
             sudo docker rm $(sudo docker ps -a -q) || true
             sudo docker login -u _json_key --password-stdin https://gcr.io <<< '${{ secrets.GCP_SA_KEY }}'
