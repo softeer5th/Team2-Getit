@@ -356,5 +356,65 @@ public class RouteCalculationService {
         return checkedSelfRouteCrossNodes;
     }
 
+    // 3. 자가 크로스 or 중복점 (첫점과 끝점 동일)
+    // 해당 케이스 생길 경우 -> 해당 노드 코어 노드로 변경
+    private List<Node> checkSelfRouteCross(List<Node> nodes, GeometryFactory geometryFactory) {
+
+        if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
+            throw new IllegalArgumentException("출발점과 도착점은 같을 수 없습니다.");
+        }
+
+        STRtree strTree = new STRtree();
+        Map<String, Node> nodeMap = new HashMap<>();
+
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            Node curNode = nodes.get(i);
+            Node nextNode = nodes.get(i + 1);
+            LineString line = geometryFactory.createLineString(
+                new Coordinate[] {curNode.getCoordinates().getCoordinate(), nextNode.getCoordinates().getCoordinate()});
+            Envelope envelope = line.getEnvelopeInternal();  // MBR 생성
+            strTree.insert(envelope, line);
+
+            nodeMap.putIfAbsent(curNode.getCoordinates().getX() + " " + curNode.getCoordinates().getY(), curNode);
+            nodeMap.putIfAbsent(nextNode.getCoordinates().getX() + " " + nextNode.getCoordinates().getY(), nextNode);
+        }
+
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            Node curNode = nodes.get(i);
+            Node nextNode = nodes.get(i + 1);
+
+            LineString intersectLine = findIntersectLineString(curNode.getCoordinates().getCoordinate(),
+                nextNode.getCoordinates().getCoordinate(), strTree);
+
+            if (intersectLine != null) {
+                Coordinate[] coordinates = intersectLine.getCoordinates();
+
+                double distance1 =
+                    curNode.getCoordinates().getCoordinate().distance(coordinates[0]) + nextNode.getCoordinates()
+                        .getCoordinate()
+                        .distance(coordinates[0]);
+                double distance2 =
+                    curNode.getCoordinates().getCoordinate().distance(coordinates[1]) + nextNode.getCoordinates()
+                        .getCoordinate()
+                        .distance(coordinates[1]);
+
+                Node midNode;
+
+                if (distance1 <= distance2) {
+                    midNode = nodeMap.get(coordinates[0].getX() + " " + coordinates[0].getY());
+                } else {
+                    midNode = nodeMap.get(coordinates[1].getX() + " " + coordinates[1].getY());
+                }
+
+                midNode.setCore(true);
+
+                // TODO: Node insert할 때는 좌표값으로 Node 중복 여부 판단 필요
+                nodes.add(midNode);
+            }
+        }
+
+        return nodes;
+    }
+
 
 }
