@@ -6,6 +6,11 @@ import createMarkerElement from "../components/map/mapMarkers";
 import { RouteEdge } from "../data/types/edge";
 import { Markers } from "../constant/enum/markerEnum";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
+import { ClickEvent } from "../data/types/event";
+import createSubNodes from "../utils/polylines/createSubnodes";
+import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
+import findNearestSubEdge from "../utils/polylines/findNearestEdge";
+import centerCoordinate from "../utils/coordinates/centerCoordinate";
 
 export default function ReportHazardPage() {
 	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
@@ -44,6 +49,31 @@ export default function ReportHazardPage() {
 				path: [route.startNode, route.endNode],
 				strokeColor: "#808080",
 			});
+
+			routePolyLine.addListener("click", (e: ClickEvent) => {
+				const subNodes = createSubNodes(routePolyLine);
+
+				const edges = subNodes
+					.map(
+						(node, idx) =>
+							[node, subNodes[idx + 1]] as [google.maps.LatLngLiteral, google.maps.LatLngLiteral],
+					)
+					.slice(0, -1);
+
+				const point = LatLngToLiteral(e.latLng);
+
+				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
+
+				const newReportMarker = createAdvancedMarker(
+					AdvancedMarker,
+					map,
+					centerCoordinate(nearestEdge[0], nearestEdge[1]),
+					createMarkerElement({
+						type: Markers.REPORT,
+						className: 'translate-routemarker'
+					})
+				)
+			})
 		}
 
 	};
