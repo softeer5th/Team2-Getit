@@ -8,6 +8,7 @@ import BuildingSearchPage from "./pages/buildingSearch";
 import NavigationResultPage from "./pages/navigationResult";
 import ReportRoutePage from "./pages/reportRoute";
 import ReportForm from "./pages/reportForm";
+import ReportHazardPage from "./pages/reportHazard";
 
 function App() {
 	return (
@@ -19,7 +20,8 @@ function App() {
 			<Route path="/map" element={<MapPage />} />
 			<Route path="/form" element={<ReportForm />} />
 			<Route path="/result" element={<NavigationResultPage />} />
-			<Route path="/report" element={<ReportRoutePage />} />
+			<Route path="/report/route" element={<ReportRoutePage />} />
+			<Route path="/report/hazard" element={<ReportHazardPage />} />
 		</Routes>
 	);
 }
