@@ -1,8 +1,10 @@
 package com.softeer5.uniro_backend.route.service;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
+import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
+import com.softeer5.uniro_backend.common.exception.custom.NodeNotFoundException;
 import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
 import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
@@ -286,9 +288,7 @@ public class RouteCalculationService {
         Node startNode = nodeMap.get(getNodeKey(new Coordinate(init.getX(), init.getY())));
 
         if (startNode == null) {
-            // TODO: 예외처리 변경
-            // 해당 노드는 DB에서 조회 필요, 없으면 예외 발생
-            throw new IllegalArgumentException();
+            throw new NodeNotFoundException("Start Node Not Found", NODE_NOT_FOUND);
         }
 
         if(!startNode.isCore()){
@@ -353,7 +353,7 @@ public class RouteCalculationService {
         GeometryFactory geometryFactory = GeoUtils.getInstance();
 
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
-            throw new IllegalArgumentException("출발점과 도착점은 같을 수 없습니다.");
+            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", ErrorCode.SAME_START_AND_END_POINT);
         }
 
         STRtree strTree = new STRtree();

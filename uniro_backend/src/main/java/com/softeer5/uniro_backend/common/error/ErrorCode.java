@@ -21,6 +21,9 @@ public enum ErrorCode {
 
     // 건물 노드
     BUILDING_NOT_FOUND(404, "유효한 건물을 찾을 수 없습니다."),
+
+    // 노드
+    NODE_NOT_FOUND(404, "유효한 노드를 찾을 수 없습니다.")
     ;
 
     private final int httpStatus;
