@@ -14,10 +14,15 @@ import centerCoordinate from "../utils/coordinates/centerCoordinate";
 import { MarkerTypesWithElement } from "../data/types/marker";
 import Button from "../components/customButton";
 import { Link } from "react-router";
+import { ReportHazardMessage } from "../constant/enum/messageEnum";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ReportHazardPage() {
 	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
 	const [reportMarker, setReportMarker] = useState<MarkerTypesWithElement>();
+
+
+	const [message, setMessage] = useState<ReportHazardMessage>(ReportHazardMessage.DEFAULT);
 
 	const resetMarker = (prevMarker: MarkerTypesWithElement) => {
 		if (prevMarker.type === Markers.REPORT) {
@@ -50,6 +55,7 @@ export default function ReportHazardPage() {
 						title: dangerFactors ? dangerFactors[0] : cautionFactors && cautionFactors[0],
 						hasTopContent: true
 					})
+					setMessage(ReportHazardMessage.UPDATE)
 					setReportMarker((prevMarker) => {
 						if (prevMarker) {
 							resetMarker(prevMarker);
@@ -108,6 +114,8 @@ export default function ReportHazardPage() {
 					})
 				)
 
+				setMessage(ReportHazardMessage.NEW)
+
 				setReportMarker((prevMarker) => {
 					if (prevMarker) {
 						resetMarker(prevMarker);
@@ -138,8 +146,11 @@ export default function ReportHazardPage() {
 			map.addListener('click', () => {
 				setReportMarker((prevMarker) => {
 					if (prevMarker) {
+						setMessage(ReportHazardMessage.DEFAULT)
 						resetMarker(prevMarker);
 					}
+					else setMessage(ReportHazardMessage.ERROR)
+
 
 					return undefined
 				})
@@ -147,8 +158,23 @@ export default function ReportHazardPage() {
 		}
 	}, [map, AdvancedMarker, Polyline])
 
+	useEffect(() => {
+		if (message === ReportHazardMessage.ERROR) {
+			setTimeout(() => {
+				setMessage(ReportHazardMessage.DEFAULT);
+			}, 1000)
+		}
+	}, [message])
+
 	return (
 		<div className="relative w-full h-dvh">
+			<div className="w-full h-[57px] flex items-center justify-center absolute top-0 bg-black opacity-50 z-10 py-3 px-4">
+				<motion.p
+					initial={{ x: 0 }}
+					animate={message === ReportHazardMessage.ERROR ? { x: [0, 5, -5, 2.5, -2.5, 0] } : { x: 0 }}
+					transition={{ duration: 0.5, ease: "easeOut" }}
+					className="text-gray-100 text-kor-body2 font-medium text-center">{message}</motion.p>
+			</div>
 			<div ref={mapRef} className="w-full h-full" />
 			{reportMarker && (
 				<div className="absolute w-full bottom-6 px-4">
