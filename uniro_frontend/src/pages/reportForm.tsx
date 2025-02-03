@@ -11,6 +11,7 @@ import Button from "../components/customButton";
 
 import useScrollControl from "../hooks/useScrollControl";
 import useModal from "../hooks/useModal";
+import useReportHazard from "../hooks/useReportHazard";
 
 const ReportForm = () => {
 	useScrollControl();
@@ -28,7 +29,12 @@ const ReportForm = () => {
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
 
+	const { reportType, startNode, endNode } = useReportHazard()
+
 	useEffect(() => {
+
+		console.log(reportType, startNode, endNode);
+
 		setTimeout(() => {
 			setReportMode("update");
 		}, 2000);

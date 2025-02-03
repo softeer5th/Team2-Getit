@@ -16,10 +16,16 @@ import Button from "../components/customButton";
 import { Link } from "react-router";
 import { ReportHazardMessage } from "../constant/enum/messageEnum";
 import { motion, AnimatePresence } from "framer-motion";
+import useReportHazard from "../hooks/useReportHazard";
+
+interface reportMarkerTypes extends MarkerTypesWithElement {
+	edge: [google.maps.LatLng | google.maps.LatLngLiteral, google.maps.LatLng | google.maps.LatLngLiteral]
+}
 
 export default function ReportHazardPage() {
 	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
-	const [reportMarker, setReportMarker] = useState<MarkerTypesWithElement>();
+	const [reportMarker, setReportMarker] = useState<reportMarkerTypes>();
+	const { setReportType, setNode } = useReportHazard();
 
 
 	const [message, setMessage] = useState<ReportHazardMessage>(ReportHazardMessage.DEFAULT);
@@ -63,7 +69,8 @@ export default function ReportHazardPage() {
 
 						return {
 							type,
-							element: hazardMarker
+							element: hazardMarker,
+							edge: [startNode, endNode]
 						}
 					})
 				}
@@ -123,7 +130,8 @@ export default function ReportHazardPage() {
 
 					return {
 						type: Markers.REPORT,
-						element: newReportMarker
+						element: newReportMarker,
+						edge: nearestEdge
 					}
 				})
 			})
@@ -137,6 +145,13 @@ export default function ReportHazardPage() {
 		);
 	};
 
+	const reportHazard = () => {
+		if (!reportMarker) return;
+
+		setReportType(reportMarker.type === Markers.REPORT ? "CREATE" : "UPDATE");
+
+		setNode(...reportMarker.edge)
+	}
 
 	useEffect(() => {
 		drawRoute(mockNavigationRoute.route);
@@ -166,6 +181,8 @@ export default function ReportHazardPage() {
 		}
 	}, [message])
 
+
+
 	return (
 		<div className="relative w-full h-dvh">
 			<div className="w-full h-[57px] flex items-center justify-center absolute top-0 bg-black opacity-50 z-10 py-3 px-4">
@@ -178,7 +195,7 @@ export default function ReportHazardPage() {
 			<div ref={mapRef} className="w-full h-full" />
 			{reportMarker && (
 				<div className="absolute w-full bottom-6 px-4">
-					<Link to={'/form'}>
+					<Link onClick={reportHazard} to={'/form'}>
 						<Button>제보하기</Button>
 					</Link>
 				</div>
