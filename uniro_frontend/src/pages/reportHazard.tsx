@@ -106,6 +106,9 @@ export default function ReportHazardPage() {
 						if (prevMarker.type === Markers.REPORT) {
 							prevMarker.element.map = null;
 						}
+						else {
+							prevMarker.element.content = createMarkerElement({ type: prevMarker.type })
+						}
 					}
 					return {
 						type: Markers.REPORT,
@@ -117,9 +120,26 @@ export default function ReportHazardPage() {
 
 	};
 
+
 	useEffect(() => {
 		drawRoute(mockNavigationRoute.route);
 		addHazardMarker();
+
+		if (map) {
+			map.addListener('click', () => {
+				setReportMarker((prevMarker) => {
+					if (prevMarker) {
+						if (prevMarker.type === Markers.REPORT) {
+							prevMarker.element.map = null;
+						}
+						else {
+							prevMarker.element.content = createMarkerElement({ type: prevMarker.type })
+						}
+					}
+					return undefined
+				})
+			})
+		}
 	}, [map, AdvancedMarker, Polyline])
 
 	return (
