@@ -416,5 +416,24 @@ public class RouteCalculationService {
         return nodes;
     }
 
+    private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        LineString newLine = geometryFactory.createLineString(new Coordinate[] {start, end});
+        Envelope searchEnvelope = newLine.getEnvelopeInternal();
+
+        // 1️⃣ 후보 선분들 검색 (MBR이 겹치는 선분만 가져옴)
+        List<?> candidates = strTree.query(searchEnvelope);
+
+        // 2️⃣ 실제로 선분이 겹치는지 확인
+        for (Object obj : candidates) {
+            LineString existingLine = (LineString)obj;
+            if (existingLine.intersects(newLine)) {
+                return existingLine;  // 겹치는 선분이 하나라도 있으면 해당 LineString 반환
+            }
+        }
+
+        return null;  // 겹치는 선분이 없으면 null 반환
+    }
+
 
 }
