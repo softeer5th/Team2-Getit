@@ -6,14 +6,33 @@ import Map from "../component/Map";
 import RouteInput from "../components/map/routeSearchInput";
 import OriginIcon from "../assets/map/origin.svg?react";
 import DestinationIcon from "../assets/map/destination.svg?react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReportButton from "../components/map/reportButton";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
+import customFetch from "../utils/fetch/fetch";
+import { useQuery } from "@tanstack/react-query";
+
+
+const getTest = () => {
+	/** https://jsonplaceholder.typicode.com/comments?postId=1 */
+	return customFetch().get('/comments', { postId: 1 })
+}
 
 export default function Demo() {
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
 	const [destination, setDestination] = useState<string>("역사관");
+
+	const { data, status } = useQuery({
+		queryKey: ['test'],
+		queryFn: getTest
+	})
+
+	useEffect(() => {
+		console.log(data)
+	}, [status])
+
+
 
 	return (
 		<>
@@ -31,30 +50,30 @@ export default function Demo() {
 				<div className="w-1/3 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
 					<ReportButton />
 					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
-						<DangerToggleButton onClick={() => {}} isActive={false} />
-						<DangerToggleButton onClick={() => {}} isActive={true} />
+						<DangerToggleButton onClick={() => { }} isActive={false} />
+						<DangerToggleButton onClick={() => { }} isActive={true} />
 					</div>
 
 					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
-						<CautionToggleButton onClick={() => {}} isActive={false} />
-						<CautionToggleButton onClick={() => {}} isActive={true} />
+						<CautionToggleButton onClick={() => { }} isActive={false} />
+						<CautionToggleButton onClick={() => { }} isActive={true} />
 					</div>
 				</div>
 
 				<div className="w-1/3 rounded-sm border border-dashed border-[#9747FF] flex flex-col justify-start space-y-5 p-5">
 					<Input
 						placeholder="우리 학교를 검색해보세요"
-						handleVoiceInput={() => {}}
+						handleVoiceInput={() => { }}
 						onLengthChange={(e: string) => {
 							console.log(e);
 						}}
 					/>
-					<RouteInput onClick={() => {}} placeholder="출발지를 입력하세요">
+					<RouteInput onClick={() => { }} placeholder="출발지를 입력하세요">
 						<OriginIcon />
 					</RouteInput>
 
 					<RouteInput
-						onClick={() => {}}
+						onClick={() => { }}
 						placeholder="도착지를 입력하세요"
 						value={destination}
 						onCancel={() => setDestination("")}
