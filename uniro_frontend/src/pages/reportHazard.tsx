@@ -21,6 +21,9 @@ export default function ReportHazardPage() {
 		if (AdvancedMarker === null || map === null) return;
 		for (const edge of mockHazardEdges) {
 			const { id, startNode, endNode, dangerFactors, cautionFactors } = edge;
+
+			const type = dangerFactors ? Markers.DANGER : Markers.CAUTION;
+
 			const hazardMarker = createAdvancedMarker(
 				AdvancedMarker,
 				map,
@@ -28,7 +31,29 @@ export default function ReportHazardPage() {
 					lat: (startNode.lat + endNode.lat) / 2,
 					lng: (startNode.lng + endNode.lng) / 2,
 				}),
-				createMarkerElement({ type: dangerFactors ? Markers.DANGER : Markers.CAUTION }),
+				createMarkerElement({ type }),
+				() => {
+					hazardMarker.content = createMarkerElement({
+						type,
+						title: dangerFactors ? dangerFactors[0] : cautionFactors && cautionFactors[0],
+						hasTopContent: true
+					})
+					setReportMarker((prevMarker) => {
+						if (prevMarker) {
+							if (prevMarker.type === Markers.REPORT) {
+								prevMarker.element.map = null;
+							}
+							else {
+								prevMarker.element.content = createMarkerElement({ type: prevMarker.type })
+							}
+						}
+
+						return {
+							type,
+							element: hazardMarker
+						}
+					})
+				}
 			);
 		}
 	};
