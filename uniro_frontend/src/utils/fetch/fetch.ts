@@ -1,8 +1,11 @@
 export default function Fetch() {
 	const baseURL = import.meta.env.VITE_REACT_SERVER_BASE_URL;
 
-	const get = async (url: string, params?: Record<string, any>): Promise<any> => {
-		const paramsURL = new URLSearchParams(params).toString();
+	const get = async <T>(url: string, params?: Record<string, string | number | boolean>): Promise<T> => {
+		const paramsURL = new URLSearchParams(
+			Object.entries(params || {}).map(([key, value]) => [key, String(value)]),
+		).toString();
+
 		const response = await fetch(`${baseURL}${url}?${paramsURL}`, {
 			method: "GET",
 		});
@@ -14,7 +17,7 @@ export default function Fetch() {
 		return response.json();
 	};
 
-	const post = async (url: string, body?: Record<string, any>): Promise<any> => {
+	const post = async <T, K>(url: string, body?: Record<string, K>): Promise<T> => {
 		const response = await fetch(`${baseURL}${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),
@@ -27,7 +30,18 @@ export default function Fetch() {
 		return response.json();
 	};
 
-	const put = async () => {};
+	const put = async <T, K>(url: string, body?: Record<string, K>): Promise<T> => {
+		const response = await fetch(`${baseURL}${url}`, {
+			method: "PUT",
+			body: JSON.stringify(body),
+		});
+
+		if (!response.ok) {
+			throw new Error(`${response.status}-${response.statusText}`);
+		}
+
+		return response.json();
+	};
 
 	return {
 		get,

@@ -10,10 +10,9 @@ import ReportRoutePage from "./pages/reportRoute";
 import ReportForm from "./pages/reportForm";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 function App() {
-
 	return (
 		<QueryClientProvider client={queryClient}>
 			<Routes>

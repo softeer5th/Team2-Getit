@@ -12,16 +12,20 @@ import { CautionToggleButton, DangerToggleButton } from "../components/map/float
 import Fetch from "../utils/fetch/fetch";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-
 const getTest = () => {
 	/** https://jsonplaceholder.typicode.com/comments?postId=1 */
-	return Fetch().get('/comments', { postId: 1 });
-}
+	return Fetch().get<{ postId: string }>("/comments", {
+		postId: 1
+	});
+};
 
-const postTest = () => {
+const postTest = (): Promise<{ id: string }> => {
+	return Fetch().post<{ id: string }, string>("/posts", { id: "test" });
+};
 
-	return Fetch().post('/posts', { id: 'test' });
-}
+const putTest = (): Promise<{ id: string }> => {
+	return Fetch().put<{ id: string }, string>("/posts/1", { id: "test" });
+};
 
 export default function Demo() {
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
@@ -29,19 +33,21 @@ export default function Demo() {
 	const [destination, setDestination] = useState<string>("역사관");
 
 	const { data, status } = useQuery({
-		queryKey: ['test'],
-		queryFn: getTest
-	})
+		queryKey: ["test"],
+		queryFn: getTest,
+	});
 
-	const { data: testData, mutate } = useMutation({
+	const { data: postData, mutate: mutatePost } = useMutation<{ id: string }>({
 		mutationFn: postTest,
-	})
+	});
+
+	const { data: putData, mutate: mutatePut } = useMutation<{ id: string }>({
+		mutationFn: putTest,
+	});
 
 	useEffect(() => {
-		console.log(data)
-	}, [status])
-
-
+		console.log(data);
+	}, [status]);
 
 	return (
 		<>
@@ -91,7 +97,12 @@ export default function Demo() {
 					</RouteInput>
 				</div>
 				<div className="w-1/4 rounded-sm border border-dashed border-[#9747FF] flex flex-col justify-start space-y-5 p-5">
-					<Button onClick={() => mutate()}>{testData?.id ? `${testData.id} : 테스트 결과` : "POST 테스트"}</Button>
+					<Button onClick={() => mutatePost()}>
+						{postData?.id ? `${postData.id} : 테스트 결과` : "POST 테스트"}
+					</Button>
+					<Button onClick={() => mutatePut()}>
+						{putData?.id ? `${putData.id} : 테스트 결과` : "PUT 테스트"}
+					</Button>
 				</div>
 				<SuccessModal>
 					<p className="text-kor-body1 font-bold text-primary-500">불편한 길 제보가 완료되었습니다!</p>
