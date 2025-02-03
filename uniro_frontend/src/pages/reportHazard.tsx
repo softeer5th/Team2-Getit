@@ -12,6 +12,8 @@ import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import centerCoordinate from "../utils/coordinates/centerCoordinate";
 import { MarkerTypesWithElement } from "../data/types/marker";
+import Button from "../components/customButton";
+import { Link } from "react-router";
 
 export default function ReportHazardPage() {
 	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
@@ -142,6 +144,13 @@ export default function ReportHazardPage() {
 	return (
 		<div className="relative w-full h-dvh">
 			<div ref={mapRef} className="w-full h-full" />
+			{reportMarker && (
+				<div className="absolute w-full bottom-6 px-4">
+					<Link to={'/form'}>
+						<Button>제보하기</Button>
+					</Link>
+				</div>
+			)}
 		</div>
 	);
 }
