@@ -4,6 +4,7 @@ import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
 import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
 import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.route.dto.CreateRouteServiceReqDTO;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.dto.RouteDetailDTO;
@@ -12,7 +13,13 @@ import com.softeer5.uniro_backend.route.dto.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -241,6 +248,112 @@ public class RouteCalculationService {
     private Map<String,Double> getCenter(Node n1, Node n2){
         return Map.of("lat", (n1.getCoordinates().getY() + n2.getCoordinates().getY())/2
                 , "lng", (n1.getCoordinates().getX() + n2.getCoordinates().getX())/2);
+    }
+
+    // TODO: 모든 점이 아니라 request 값의 MBR 영역만 불러오면 좋을 것 같다.  <- 추가 검증 필요
+    // TODO: 캐시 사용 검토
+    public List<Node> checkRouteCross(Long univId, List<CreateRouteServiceReqDTO> requests) {
+        LinkedList<Node> createdNodes = new LinkedList<>();
+
+        Map<String, Node> nodeMap = new HashMap<>();
+        STRtree strTree = new STRtree();
+        GeometryFactory geometryFactory = new GeometryFactory();
+
+        List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+
+        for (Route route : routes) {
+            Node node1 = route.getNode1();
+            Node node2 = route.getNode2();
+
+            LineString line = geometryFactory.createLineString(
+                new Coordinate[] {node1.getCoordinates().getCoordinate(), node2.getCoordinates().getCoordinate()});
+            Envelope envelope = line.getEnvelopeInternal();  // MBR 생성
+            strTree.insert(envelope, line);
+
+            nodeMap.putIfAbsent(node1.getCoordinates().getX() + " " + node1.getCoordinates().getY(), node1);
+            nodeMap.putIfAbsent(node2.getCoordinates().getX() + " " + node2.getCoordinates().getY(), node2);
+        }
+
+        // 1. 첫번째 노드:
+        // 서브 -> 코어 : 처리 필요
+        // 코어 -> 코어 : 처리 필요 X
+        // 코어 -> 서브 : 불가한 케이스
+
+        CreateRouteServiceReqDTO init = requests.get(0);
+        Node startNode = nodeMap.get(init.getX() + " " + init.getY());
+
+        if (startNode == null) {
+            // TODO: 예외처리 변경
+            // 해당 노드는 DB에서 조회 필요, 없으면 예외 발생
+            throw new IllegalArgumentException();
+        }
+
+        if(!startNode.isCore()){
+            startNode.setCore(true);
+        }
+        createdNodes.add(startNode);
+
+        for (int i = 1; i < requests.size(); i++) {
+            CreateRouteServiceReqDTO cur = requests.get(i);
+
+            // 정확히 그 점과 일치하는 노드가 있는지 확인
+            Node curNode = nodeMap.get(cur.getX() + " " + cur.getY());
+            if(curNode != null){
+                curNode.setCore(true);
+                createdNodes.add(curNode);
+                continue;
+            }
+
+            Coordinate coordinate = new Coordinate(cur.getX(), cur.getY());
+
+            curNode = Node.builder()
+                .coordinates(geometryFactory.createPoint(coordinate))
+                .isCore(false)
+                .univId(univId)
+                .build();
+
+            createdNodes.add(curNode);
+        }
+
+        // 2. 두번째 노드 ~ N-1번째 노드
+        // 현재 노드와 다음 노드가 기존 route와 겹치는지 확인
+        ListIterator<Node> iterator = createdNodes.listIterator();
+        // 첫 번째 요소는 무시하고 시작
+        if (iterator.hasNext()) {
+            iterator.next();
+        }
+
+        while(iterator.hasNext()){
+            Node cur = iterator.next();
+            Node prev = iterator.previous();
+
+            Coordinate start = new Coordinate(prev.getCoordinates().getX(), prev.getCoordinates().getY());
+            Coordinate end = new Coordinate(cur.getCoordinates().getX(), cur.getCoordinates().getY());
+
+            LineString intersectLine = findIntersectLineString(start, end, strTree);
+
+            if (intersectLine != null) {
+                Coordinate[] coordinates = intersectLine.getCoordinates();
+                // 가까운 점 탐색
+                double distance1 = start.distance(coordinates[0]) + end.distance(coordinates[0]);
+                double distance2 = start.distance(coordinates[1]) + end.distance(coordinates[1]);
+
+                Node midNode;
+
+                if (distance1 <= distance2) {
+                    midNode = nodeMap.get(coordinates[0].getX() + " " + coordinates[0].getY());
+                } else {
+                    midNode = nodeMap.get(coordinates[1].getX() + " " + coordinates[1].getY());
+                }
+
+                midNode.setCore(true);
+                iterator.add(midNode);
+            }
+        }
+
+        List<Node> checkedSelfRouteCrossNodes = checkSelfRouteCross(createdNodes, geometryFactory);
+
+        return checkedSelfRouteCrossNodes;
     }
 
 

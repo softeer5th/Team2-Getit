@@ -49,4 +49,15 @@ public class Node {
 		this.coordinates = coordinates;
 	}
 
+	public void setCore(boolean isCore){
+		this.isCore = isCore;
+	}
+
+	@Builder
+	private Node(Point coordinates, double height, boolean isCore, Long univId) {
+		this.coordinates = coordinates;
+		this.height = height;
+		this.isCore = isCore;
+		this.univId = univId;
+	}
 }
