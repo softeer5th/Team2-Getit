@@ -9,13 +9,18 @@ import DestinationIcon from "../assets/map/destination.svg?react";
 import { useEffect, useState } from "react";
 import ReportButton from "../components/map/reportButton";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
-import customFetch from "../utils/fetch/fetch";
-import { useQuery } from "@tanstack/react-query";
+import Fetch from "../utils/fetch/fetch";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 
 const getTest = () => {
 	/** https://jsonplaceholder.typicode.com/comments?postId=1 */
-	return customFetch().get('/comments', { postId: 1 })
+	return Fetch().get('/comments', { postId: 1 });
+}
+
+const postTest = () => {
+
+	return Fetch().post('/posts', { id: 'test' });
 }
 
 export default function Demo() {
@@ -28,6 +33,10 @@ export default function Demo() {
 		queryFn: getTest
 	})
 
+	const { data: testData, mutate } = useMutation({
+		mutationFn: postTest,
+	})
+
 	useEffect(() => {
 		console.log(data)
 	}, [status])
@@ -37,7 +46,7 @@ export default function Demo() {
 	return (
 		<>
 			<div className="flex flex-row">
-				<div className="w-1/3 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
+				<div className="w-1/4 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
 					<Button onClick={openFail}>버튼</Button>
 					<Button onClick={openSuccess} variant="secondary">
 						버튼
@@ -47,7 +56,7 @@ export default function Demo() {
 					<LandingButton />
 				</div>
 
-				<div className="w-1/3 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
+				<div className="w-1/4 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
 					<ReportButton />
 					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
 						<DangerToggleButton onClick={() => { }} isActive={false} />
@@ -60,7 +69,7 @@ export default function Demo() {
 					</div>
 				</div>
 
-				<div className="w-1/3 rounded-sm border border-dashed border-[#9747FF] flex flex-col justify-start space-y-5 p-5">
+				<div className="w-1/4 rounded-sm border border-dashed border-[#9747FF] flex flex-col justify-start space-y-5 p-5">
 					<Input
 						placeholder="우리 학교를 검색해보세요"
 						handleVoiceInput={() => { }}
@@ -80,6 +89,9 @@ export default function Demo() {
 					>
 						<DestinationIcon />
 					</RouteInput>
+				</div>
+				<div className="w-1/4 rounded-sm border border-dashed border-[#9747FF] flex flex-col justify-start space-y-5 p-5">
+					<Button onClick={() => mutate()}>{testData?.id ? `${testData.id} : 테스트 결과` : "POST 테스트"}</Button>
 				</div>
 				<SuccessModal>
 					<p className="text-kor-body1 font-bold text-primary-500">불편한 길 제보가 완료되었습니다!</p>
