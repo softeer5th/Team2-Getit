@@ -3,6 +3,7 @@ package com.softeer5.uniro_backend.route.service;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
 import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
+import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.route.dto.CreateRouteServiceReqDTO;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
@@ -257,7 +258,7 @@ public class RouteCalculationService {
 
         Map<String, Node> nodeMap = new HashMap<>();
         STRtree strTree = new STRtree();
-        GeometryFactory geometryFactory = new GeometryFactory();
+        GeometryFactory geometryFactory = GeoUtils.getInstance();
 
         List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
@@ -351,14 +352,16 @@ public class RouteCalculationService {
             }
         }
 
-        List<Node> checkedSelfRouteCrossNodes = checkSelfRouteCross(createdNodes, geometryFactory);
+        List<Node> checkedSelfRouteCrossNodes = checkSelfRouteCross(createdNodes);
 
         return checkedSelfRouteCrossNodes;
     }
 
     // 3. 자가 크로스 or 중복점 (첫점과 끝점 동일)
     // 해당 케이스 생길 경우 -> 해당 노드 코어 노드로 변경
-    private List<Node> checkSelfRouteCross(List<Node> nodes, GeometryFactory geometryFactory) {
+    private List<Node> checkSelfRouteCross(List<Node> nodes) {
+
+        GeometryFactory geometryFactory = GeoUtils.getInstance();
 
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
             throw new IllegalArgumentException("출발점과 도착점은 같을 수 없습니다.");
@@ -417,7 +420,7 @@ public class RouteCalculationService {
     }
 
     private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree) {
-        GeometryFactory geometryFactory = new GeometryFactory();
+        GeometryFactory geometryFactory = GeoUtils.getInstance();
         LineString newLine = geometryFactory.createLineString(new Coordinate[] {start, end});
         Envelope searchEnvelope = newLine.getEnvelopeInternal();
 
