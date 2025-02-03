@@ -1,6 +1,8 @@
 package com.softeer5.uniro_backend.node.entity;
 
 
+import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
+
 import java.util.Map;
 
 import lombok.*;
@@ -51,6 +53,10 @@ public class Node {
 
 	public void setCore(boolean isCore){
 		this.isCore = isCore;
+	}
+
+	public String getNodeKey() {
+		return coordinates.getX() + NODE_KEY_DELIMITER + coordinates.getY();
 	}
 
 	@Builder
