@@ -49,3 +49,6 @@ export default function Fetch() {
 		put,
 	};
 }
+
+const { get, post, put } = Fetch();
+export { get as getFetch, post as postFetch, put as putFetch };
