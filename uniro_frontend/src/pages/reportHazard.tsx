@@ -121,6 +121,12 @@ export default function ReportHazardPage() {
 			})
 		}
 
+		createAdvancedMarker(
+			AdvancedMarker,
+			map,
+			routes[0].startNode,
+			createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
+		);
 	};
 
 
