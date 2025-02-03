@@ -15,7 +15,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 const getTest = () => {
 	/** https://jsonplaceholder.typicode.com/comments?postId=1 */
 	return Fetch().get<{ postId: string }>("/comments", {
-		postId: 1
+		postId: 1,
 	});
 };
 
@@ -65,30 +65,30 @@ export default function Demo() {
 				<div className="w-1/4 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
 					<ReportButton />
 					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
-						<DangerToggleButton onClick={() => { }} isActive={false} />
-						<DangerToggleButton onClick={() => { }} isActive={true} />
+						<DangerToggleButton onClick={() => {}} isActive={false} />
+						<DangerToggleButton onClick={() => {}} isActive={true} />
 					</div>
 
 					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
-						<CautionToggleButton onClick={() => { }} isActive={false} />
-						<CautionToggleButton onClick={() => { }} isActive={true} />
+						<CautionToggleButton onClick={() => {}} isActive={false} />
+						<CautionToggleButton onClick={() => {}} isActive={true} />
 					</div>
 				</div>
 
 				<div className="w-1/4 rounded-sm border border-dashed border-[#9747FF] flex flex-col justify-start space-y-5 p-5">
 					<Input
 						placeholder="우리 학교를 검색해보세요"
-						handleVoiceInput={() => { }}
+						handleVoiceInput={() => {}}
 						onLengthChange={(e: string) => {
 							console.log(e);
 						}}
 					/>
-					<RouteInput onClick={() => { }} placeholder="출발지를 입력하세요">
+					<RouteInput onClick={() => {}} placeholder="출발지를 입력하세요">
 						<OriginIcon />
 					</RouteInput>
 
 					<RouteInput
-						onClick={() => { }}
+						onClick={() => {}}
 						placeholder="도착지를 입력하세요"
 						value={destination}
 						onCancel={() => setDestination("")}
