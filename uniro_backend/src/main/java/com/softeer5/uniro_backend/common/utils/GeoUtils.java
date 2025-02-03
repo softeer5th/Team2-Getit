@@ -8,11 +8,15 @@ import org.locationtech.jts.io.WKTWriter;
 
 import java.util.List;
 
-public final class Utils {
+public final class GeoUtils {
     private static final GeometryFactory geometryFactory = new GeometryFactory();
 
-    private Utils(){
+    private GeoUtils(){
         // 인스턴스화 방지
+    }
+
+    public static GeometryFactory getInstance(){
+        return geometryFactory;
     }
 
     public static Point convertDoubleToPoint(double lat, double lng) {
