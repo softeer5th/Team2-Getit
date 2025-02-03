@@ -1,8 +1,6 @@
 package com.softeer5.uniro_backend.route.dto;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.Map;
 
@@ -10,12 +8,19 @@ import java.util.Map;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class RouteCoordinatesInfo {
     private final Long routeId;
-    private final Long startNodeId;
-    private final Map<String, Double> startNode;
-    private final Long endNodeId;
-    private final Map<String, Double> endNode;
+    private final NodeInfo startNode;
+    private final NodeInfo endNode;
+
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    private static class NodeInfo{
+        private final Long nodeId;
+        private final Map<String, Double> coordinates;
+    }
 
     public static RouteCoordinatesInfo of(Long routeId, Long startNodeId, Map<String, Double> startNode, Long endNodeId, Map<String, Double> endNode) {
-        return new RouteCoordinatesInfo(routeId, startNodeId, startNode, endNodeId, endNode);
+        return new RouteCoordinatesInfo(routeId, new NodeInfo(startNodeId,startNode),
+                new NodeInfo(endNodeId, endNode));
     }
 }
