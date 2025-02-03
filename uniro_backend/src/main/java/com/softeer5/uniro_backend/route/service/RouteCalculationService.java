@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
@@ -299,7 +300,7 @@ public class RouteCalculationService {
             CreateRouteServiceReqDTO cur = requests.get(i);
 
             // 정확히 그 점과 일치하는 노드가 있는지 확인
-            Node curNode = nodeMap.get(getNodeKey(new Coordinate(init.getX(), init.getY())));
+            Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getX(), cur.getY())));
             if(curNode != null){
                 curNode.setCore(true);
                 createdNodes.add(curNode);
@@ -418,7 +419,25 @@ public class RouteCalculationService {
         // 2️⃣ 실제로 선분이 겹치는지 확인
         for (Object obj : candidates) {
             LineString existingLine = (LineString)obj;
+
+            // 동일한 선이면 continue
+            if(existingLine.equalsTopo(newLine)){
+                continue;
+            }
+
             if (existingLine.intersects(newLine)) {
+                Geometry intersection = existingLine.intersection(newLine);
+
+                if (intersection instanceof Point) {
+                    Point intersectionPoint = (Point) intersection;
+                    Coordinate intersectionCoord = intersectionPoint.getCoordinate();
+
+                    // 교차점이 start 또는 end 좌표와 동일하면 continue
+                    if (intersectionCoord.equals2D(start) || intersectionCoord.equals2D(end)) {
+                        continue;
+                    }
+                }
+
                 return existingLine;  // 겹치는 선분이 하나라도 있으면 해당 LineString 반환
             }
         }
