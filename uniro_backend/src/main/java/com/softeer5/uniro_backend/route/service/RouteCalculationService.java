@@ -437,6 +437,9 @@ public class RouteCalculationService {
                         continue;
                     }
                 }
+                else if (intersection instanceof LineString) {
+                    continue;
+                }
 
                 return existingLine;  // 겹치는 선분이 하나라도 있으면 해당 LineString 반환
             }
