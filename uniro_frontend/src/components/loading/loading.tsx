@@ -28,7 +28,7 @@ const Loading = ({ isLoading, loadingContent }: Props) => {
 						<p className="text-kor-body2 mr-2 my-1">{university}</p>
 					</div>
 					<p className="text-kor-body2 mt-3">{loadingContent}</p>
-					<img src="/public/loading/spinner.gif" className="w-12 h-12 mt-8" />
+					<img src="/loading/spinner.gif" className="w-12 h-12 mt-8" />
 				</motion.div>
 			)}
 		</AnimatePresence>
