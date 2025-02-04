@@ -19,6 +19,6 @@ public interface AdminAPI {
             @ApiResponse(responseCode = "200", description = "모든 버전정보 조회 성공"),
             @ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
     })
-    ResponseEntity<List<RevInfoDTO>> getAllRev();
+    ResponseEntity<List<RevInfoDTO>> getAllRev(@PathVariable("univId") Long univId);
 
 }

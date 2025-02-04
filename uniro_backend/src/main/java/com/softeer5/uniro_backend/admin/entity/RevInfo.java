@@ -22,7 +22,7 @@ public class RevInfo {
     @RevisionTimestamp
     @Column(name = "revtstmp")
     private long revTimeStamp;
-    @Column(name = "univ_id")
+    @Column(name = "univ_id", nullable = false)
     private Long univId;
     private String action;
 }
