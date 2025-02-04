@@ -9,8 +9,10 @@ import DestinationIcon from "../assets/map/destination.svg?react";
 import { useEffect, useState } from "react";
 import ReportButton from "../components/map/reportButton";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { getFetch, postFetch, putFetch } from "../utils/fetch/fetch";
+import SuspenseMapComponent from "../component/SuspenseMap";
+import { getMockTest } from "../utils/fetch/mockFetch";
 import SearchNull from "../components/error/SearchNull";
 import Offline from "../components/error/Offline";
 import Error from "../components/error/Error";
@@ -35,9 +37,9 @@ export default function Demo() {
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
 	const [destination, setDestination] = useState<string>("역사관");
 
-	const { data, status } = useQuery({
+	const { data, status } = useSuspenseQuery({
 		queryKey: ["test"],
-		queryFn: getTest,
+		queryFn: getMockTest,
 	});
 
 	const { data: postData, mutate: mutatePost } = useMutation<{ id: string }>({

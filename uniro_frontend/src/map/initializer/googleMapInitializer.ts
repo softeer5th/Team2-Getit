@@ -15,9 +15,8 @@ export const initializeMap = async (
 ): Promise<MapWithOverlay> => {
 	const { Map, OverlayView, AdvancedMarkerElement, Polyline } = await loadGoogleMapsLibraries();
 
-	// useMap hook에서 error을 catch 하도록 함.
 	if (!mapElement) {
-		throw new Error("mapElement is null");
+		throw new Error("Map Element is not provided");
 	}
 
 	const map = new Map(mapElement, {
