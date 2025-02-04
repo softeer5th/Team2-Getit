@@ -13,6 +13,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getFetch, postFetch, putFetch } from "../utils/fetch/fetch";
 import SearchNull from "../components/error/SearchNull";
 import Offline from "../components/error/Offline";
+import Error from "../components/error/Error";
 
 const getTest = () => {
 	/** https://jsonplaceholder.typicode.com/comments?postId=1 */
@@ -130,8 +131,9 @@ export default function Demo() {
 						<SearchNull message="캠퍼스 내 건물명을 입력해 보세요." />
 						<SearchNull message="캠퍼스 리스트를 확인해 보세요." />
 					</div>
-					<div className="w-fit h-fit rounded-sm border border-dashed border-[#9747FF] p-5">
+					<div className="w-fit h-fit rounded-sm border border-dashed border-[#9747FF] p-5 space-y-5">
 						<Offline />
+						<Error />
 					</div>
 				</div>
 			</div>
