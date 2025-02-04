@@ -22,7 +22,7 @@ public interface RouteApi {
 			@ApiResponse(responseCode = "200", description = "모든 지도 조회 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
-	ResponseEntity<List<GetAllRoutesResDTO>> getAllRoutesAndNodes(@PathVariable("univId") Long univId);
+	ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId);
 
 	@Operation(summary = "위험&주의 요소 조회")
 	@ApiResponses(value = {

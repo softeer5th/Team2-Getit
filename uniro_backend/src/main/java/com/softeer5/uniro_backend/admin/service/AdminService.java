@@ -17,12 +17,10 @@ import java.util.List;
 public class AdminService {
     private final RevInfoRepository revInfoRepository;
 
-    public List<RevInfoDTO> getAllRevInfo(){
-        return revInfoRepository.findAll().stream().map(r -> RevInfoDTO.builder()
-                .rev(r.getRev())
-                .revTime(LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(r.getRevTimeStamp()),
-                        ZoneId.systemDefault()))
-                .build()).toList();
+    public List<RevInfoDTO> getAllRevInfo(Long univId){
+        return revInfoRepository.findAllByUnivId(univId).stream().map(r -> RevInfoDTO.of(r.getRev(),
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(r.getRevTimeStamp()), ZoneId.systemDefault()),
+                r.getUnivId(),
+                r.getAction())).toList();
     }
 }
