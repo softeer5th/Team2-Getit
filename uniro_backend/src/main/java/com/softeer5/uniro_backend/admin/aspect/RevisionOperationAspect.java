@@ -11,9 +11,11 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
+
 @Aspect
 @Component
-@Order(-1)
+@Order(BEFORE_DEFAULT_ORDER)
 public class RevisionOperationAspect {
 
     @Around("@annotation(revisionOperation)")
