@@ -14,6 +14,8 @@ import Button from "../components/customButton";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import toggleMarkers from "../utils/markers/toggleMarkers";
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import useRedirectUndefined from "../hooks/useRedirectUndefined";
 
 const colors = [
 	"#f1a2b3",
@@ -45,6 +47,9 @@ export default function ReportRoutePage() {
 
 	const [cautionMarkers, setCautionMarkers] = useState<AdvancedMarker[]>([]);
 	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
+
+	const { university } = useUniversityInfo();
+	useRedirectUndefined<string | undefined>([university]);
 
 	const addHazardMarker = () => {
 		if (AdvancedMarker === null || map === null) return;

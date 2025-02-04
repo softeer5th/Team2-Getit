@@ -2,9 +2,15 @@ import Input from "../components/customInput";
 import { hanyangBuildings } from "../data/mock/hanyangBuildings";
 import BuildingCard from "../components/building/buildingCard";
 import useSearchBuilding from "../hooks/useSearchBuilding";
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import useRedirectUndefined from "../hooks/useRedirectUndefined";
 
 export default function BuildingSearchPage() {
 	const { setBuilding } = useSearchBuilding();
+
+	const { university } = useUniversityInfo();
+	useRedirectUndefined<string | undefined>([university]);
+
 	return (
 		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
 			<div className="px-[14px] py-4 border-b-[1px] border-gray-400">

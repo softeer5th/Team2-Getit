@@ -14,6 +14,8 @@ import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetH
 
 import useLoading from "../hooks/useLoading";
 import Loading from "../components/loading/loading";
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import useRedirectUndefined from "../hooks/useRedirectUndefined";
 
 // 1. 돌아가면 위치 reset ✅
 // 2. 상세경로 scroll 끝까지 가능하게 하기 ❎
@@ -38,6 +40,9 @@ const NavigationResultPage = () => {
 	const [route, setRoute] = useState<NavigationRoute>(mockNavigationRoute);
 
 	useScrollControl();
+
+	const { university } = useUniversityInfo();
+	useRedirectUndefined<string | undefined>([university]);
 
 	useEffect(() => {
 		show();
