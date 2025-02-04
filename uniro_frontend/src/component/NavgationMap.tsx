@@ -4,6 +4,7 @@ import { NavigationRoute } from "../data/types/route";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enum/markerEnum";
+import useSuspenseMap from "../hooks/useSuspenseMap";
 
 type MapProps = {
 	style?: React.CSSProperties;
@@ -17,7 +18,7 @@ type MapProps = {
 // TODO: 경로 로딩 완료시 살짝 zoomIn 하는 부분 구현하기
 
 const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: MapProps) => {
-	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
+	const { mapRef, map, AdvancedMarker, Polyline } = useSuspenseMap();
 
 	const boundsRef = useRef<google.maps.LatLngBounds | null>(null);
 
@@ -26,7 +27,7 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 	}
 
 	useEffect(() => {
-		if (!map || !AdvancedMarker || !routes || !Polyline) return;
+		if (!mapRef || !map || !AdvancedMarker || !routes || !Polyline) return;
 
 		const { route: routeList } = routes;
 		if (!routeList || routeList.length === 0) return;
@@ -91,7 +92,7 @@ const NavigationMap = ({ style, routes, topPadding = 0, bottomPadding = 0 }: Map
 			bottom: bottomPadding,
 			left: 50,
 		});
-	}, [map, AdvancedMarker, Polyline, routes]);
+	}, [mapRef, map, AdvancedMarker, Polyline, routes]);
 
 	useEffect(() => {
 		if (!map || !boundsRef.current) return;
