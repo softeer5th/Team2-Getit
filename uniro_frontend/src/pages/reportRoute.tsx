@@ -251,6 +251,11 @@ export default function ReportRoutePage() {
 
 	return (
 		<div className="relative w-full h-dvh">
+			<div className="w-full h-[57px] flex items-center justify-center absolute top-0 bg-black opacity-50 z-10 py-3 px-4">
+				<p className="text-gray-100 text-kor-body2 font-medium text-center">
+					선 위 또는 기존 지점을 선택하세요
+				</p>
+			</div>
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
 				<div className="absolute w-full bottom-6 px-4">
