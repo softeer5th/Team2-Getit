@@ -19,9 +19,14 @@ import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import toggleMarkers from "../utils/markers/toggleMarkers";
+
 import { Link } from "react-router";
 import useModal from "../hooks/useModal";
 import ReportModal from "../components/map/reportModal";
+
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import useRedirectUndefined from "../hooks/useRedirectUndefined";
+
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -47,6 +52,9 @@ export default function MapPage() {
 	const { mode, building: selectedBuilding } = useSearchBuilding();
 
 	const [_, isOpen, open, close] = useModal();
+
+	const { university } = useUniversityInfo();
+	useRedirectUndefined<string | undefined>([university]);
 
 	const initMap = () => {
 		if (map === null) return;
