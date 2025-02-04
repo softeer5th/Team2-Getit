@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import { AnimatePresence, PanInfo, useDragControls } from "framer-motion";
 import Button from "../components/customButton";
 import GoBack from "../assets/icon/goBack.svg?react";
@@ -13,7 +13,8 @@ import NavigationDescription from "../components/navigation/navigationDescriptio
 import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetHandle";
 
 import useLoading from "../hooks/useLoading";
-import Loading from "../components/loading/loading";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { getMockTest } from "../utils/fetch/mockFetch";
 
 // 1. 돌아가면 위치 reset ✅
 // 2. 상세경로 scroll 끝까지 가능하게 하기 ❎
@@ -39,11 +40,14 @@ const NavigationResultPage = () => {
 
 	useScrollControl();
 
+	const { data, status } = useSuspenseQuery({
+		queryKey: ["test"],
+		queryFn: getMockTest,
+	});
+
 	useEffect(() => {
-		show();
-		const timer = setTimeout(hide, 5000);
-		return () => clearTimeout(timer);
-	}, []);
+		console.log(data);
+	}, [status]);
 
 	const dragControls = useDragControls();
 
@@ -70,7 +74,12 @@ const NavigationResultPage = () => {
 
 	return (
 		<div className="relative h-svh w-full max-w-[450px] mx-auto">
-			<Loading isLoading={isLoading} loadingContent="경로 탐색 중입니다" />
+			<NavigationMap
+				style={{ width: "100%", height: "100%" }}
+				routes={route}
+				topPadding={topBarHeight}
+				bottomPadding={sheetHeight}
+			/>
 			<AnimatedContainer
 				isVisible={!isDetailView && !isLoading}
 				positionDelta={286}
@@ -80,12 +89,7 @@ const NavigationResultPage = () => {
 			>
 				<NavigationDescription isDetailView={!isDetailView && !isLoading} />
 			</AnimatedContainer>
-			<NavigationMap
-				style={{ width: "100%", height: "100%" }}
-				routes={route}
-				topPadding={topBarHeight}
-				bottomPadding={sheetHeight}
-			/>
+
 			<AnimatedContainer
 				isVisible={!isDetailView && !isLoading}
 				className="absolute bottom-0 left-0 w-full mb-[30px] px-4"
