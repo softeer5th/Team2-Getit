@@ -5,10 +5,13 @@ import { fallbackConfig } from "../constant/fallback";
 
 export const useDynamicSuspense = () => {
 	const location = useLocation();
-	const { setFallback } = useFallbackStore();
+	const { fallback, setFallback } = useFallbackStore();
 
 	useEffect(() => {
 		const newFallback = fallbackConfig[location.pathname] || fallbackConfig["/"];
 		setFallback(newFallback);
+		console.log("fallback", newFallback);
 	}, [location.pathname, setFallback]);
+
+	return { location, fallback }
 };
