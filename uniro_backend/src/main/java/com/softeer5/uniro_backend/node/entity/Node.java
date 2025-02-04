@@ -4,6 +4,7 @@ package com.softeer5.uniro_backend.node.entity;
 import java.util.Map;
 
 import lombok.*;
+import org.hibernate.envers.Audited;
 import org.locationtech.jts.geom.Point;
 
 import jakarta.persistence.Column;
@@ -19,6 +20,7 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
+@Audited
 public class Node {
 
 	@Id
@@ -26,6 +28,7 @@ public class Node {
 	private Long id;
 
 	@NotNull
+	@Column(columnDefinition = "POINT SRID 4326")
 	private Point coordinates;
 
 	private double height;
