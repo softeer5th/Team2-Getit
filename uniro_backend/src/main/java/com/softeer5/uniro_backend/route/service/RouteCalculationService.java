@@ -5,6 +5,7 @@ import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeNotFoundException;
+import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
 import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
@@ -51,7 +52,7 @@ public class RouteCalculationService {
     public FastestRouteResDTO calculateFastestRoute(Long univId, Long startNodeId, Long endNodeId){
 
         if(startNodeId.equals(endNodeId)){
-            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", ErrorCode.SAME_START_AND_END_POINT);
+            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
 
         //인접 리스트
@@ -258,15 +259,17 @@ public class RouteCalculationService {
 
     // TODO: 모든 점이 아니라 request 값의 MBR 영역만 불러오면 좋을 것 같다.  <- 추가 검증 필요
     // TODO: 캐시 사용 검토
-    public List<Node> checkRouteCross(Long univId, List<CreateRouteServiceReqDTO> requests) {
+    public List<Node> checkRouteCross(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteServiceReqDTO> requests) {
         LinkedList<Node> createdNodes = new LinkedList<>();
 
         Map<String, Node> nodeMap = new HashMap<>();
         STRtree strTree = new STRtree();
         GeometryFactory geometryFactory = GeoUtils.getInstance();
 
-        List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+        int startNodeCount = 0;
+        int endNodeCount = 0;
 
+        List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
         for (Route route : routes) {
             Node node1 = route.getNode1();
             Node node2 = route.getNode2();
@@ -278,20 +281,27 @@ public class RouteCalculationService {
 
             nodeMap.putIfAbsent(node1.getNodeKey(), node1);
             nodeMap.putIfAbsent(node2.getNodeKey(), node2);
+
+            if(startNodeId.equals(node1.getId()) || startNodeId.equals(node2.getId())) startNodeCount++;
+            if(endNodeId != null){
+                if(endNodeId.equals(node1.getId()) || endNodeId.equals(node2.getId())){
+                    endNodeCount++;
+                }
+            }
         }
 
         // 1. 첫번째 노드:
         // 서브 -> 코어 : 처리 필요
         // 코어 -> 코어 : 처리 필요 X
         // 코어 -> 서브 : 불가한 케이스
-        CreateRouteServiceReqDTO init = requests.get(0);
-        Node startNode = nodeMap.get(getNodeKey(new Coordinate(init.getX(), init.getY())));
+        CreateRouteServiceReqDTO startCoordinate = requests.get(0);
+        Node startNode = nodeMap.get(getNodeKey(new Coordinate(startCoordinate.getX(), startCoordinate.getY())));
 
         if (startNode == null) {
             throw new NodeNotFoundException("Start Node Not Found", NODE_NOT_FOUND);
         }
 
-        if(!startNode.isCore()){
+        if(!startNode.isCore() && startNodeCount == CORE_NODE_CONDITION - 1){
             startNode.setCore(true);
         }
         createdNodes.add(startNode);
@@ -302,6 +312,11 @@ public class RouteCalculationService {
             // 정확히 그 점과 일치하는 노드가 있는지 확인
             Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getX(), cur.getY())));
             if(curNode != null){
+
+                if(i == requests.size() - 1 && endNodeCount < CORE_NODE_CONDITION - 1 && !curNode.getId().equals(startNodeId)){  // 마지막 노드일 경우, 해당 노드가 끝점일 경우
+                    continue;
+                }
+
                 curNode.setCore(true);
                 createdNodes.add(curNode);
                 continue;
@@ -341,7 +356,7 @@ public class RouteCalculationService {
                 midNode.setCore(true);
                 iterator.previous(); // 이전으로 이동
                 iterator.add(midNode); // 이전 위치에 삽입
-                iterator.next(); // 다시 원래 위치로 이동
+                cur = midNode;
             }
             prev = cur;
         }
@@ -353,7 +368,7 @@ public class RouteCalculationService {
         GeometryFactory geometryFactory = GeoUtils.getInstance();
 
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
-            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", ErrorCode.SAME_START_AND_END_POINT);
+            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
 
         STRtree strTree = new STRtree();
@@ -416,6 +431,9 @@ public class RouteCalculationService {
         // 1️⃣ 후보 선분들 검색 (MBR이 겹치는 선분만 가져옴)
         List<?> candidates = strTree.query(searchEnvelope);
 
+        LineString closestLine = null;
+        double minDistance = Double.MAX_VALUE;
+
         // 2️⃣ 실제로 선분이 겹치는지 확인
         for (Object obj : candidates) {
             LineString existingLine = (LineString)obj;
@@ -428,24 +446,30 @@ public class RouteCalculationService {
             if (existingLine.intersects(newLine)) {
                 Geometry intersection = existingLine.intersection(newLine);
 
+                Coordinate intersectionCoord = null;
+
                 if (intersection instanceof Point) {
-                    Point intersectionPoint = (Point) intersection;
-                    Coordinate intersectionCoord = intersectionPoint.getCoordinate();
+                    intersectionCoord = ((Point) intersection).getCoordinate();
 
                     // 교차점이 start 또는 end 좌표와 동일하면 continue
                     if (intersectionCoord.equals2D(start) || intersectionCoord.equals2D(end)) {
                         continue;
                     }
+
+                    double distance = start.distance(intersectionCoord);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestLine = existingLine;
+                    }
                 }
                 else if (intersection instanceof LineString) {
-                    continue;
+                    throw new RouteCalculationException("intersection is only allowed by point", INTERSECTION_ONLY_ALLOWED_POINT);
                 }
 
-                return existingLine;  // 겹치는 선분이 하나라도 있으면 해당 LineString 반환
             }
         }
 
-        return null;  // 겹치는 선분이 없으면 null 반환
+        return closestLine;  // 겹치는 선분이 없으면 null 반환
     }
 
     private Node getClosestNode(LineString intersectLine, Node start, Node end, Map<String, Node> nodeMap) {
