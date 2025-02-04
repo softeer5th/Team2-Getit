@@ -1,14 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
-export default function useRedirectUndefined<T>(deps: T[], url?: string) {
+export default function useRedirectUndefined<T>(deps: T[], url: string = "/landing") {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		for (const dep of deps) {
-			if (dep === undefined) {
-				navigate(url ? url : "/landing");
-			}
+		if (deps.some((dep) => dep === undefined)) {
+			navigate(url);
 		}
-	}, [deps]);
+	}, [navigate, ...deps]);
 }
