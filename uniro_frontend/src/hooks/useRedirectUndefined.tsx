@@ -8,5 +8,5 @@ export default function useRedirectUndefined<T>(deps: T[], url: string = "/landi
 		if (deps.some((dep) => dep === undefined)) {
 			navigate(url);
 		}
-	}, [navigate, ...deps]);
+	}, [...deps]);
 }
