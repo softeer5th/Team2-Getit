@@ -14,6 +14,7 @@ import Button from "../components/customButton";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import toggleMarkers from "../utils/markers/toggleMarkers";
+import BackButton from "../components/map/backButton";
 
 const colors = [
 	"#f1a2b3",
@@ -256,6 +257,7 @@ export default function ReportRoutePage() {
 					선 위 또는 기존 지점을 선택하세요
 				</p>
 			</div>
+			<BackButton className="absolute top-[73px] left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
 				<div className="absolute w-full bottom-6 px-4">
