@@ -14,6 +14,7 @@ import Button from "../components/customButton";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import toggleMarkers from "../utils/markers/toggleMarkers";
+import BackButton from "../components/map/backButton";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 
@@ -256,6 +257,12 @@ export default function ReportRoutePage() {
 
 	return (
 		<div className="relative w-full h-dvh">
+			<div className="w-full h-[57px] flex items-center justify-center absolute top-0 bg-black opacity-50 z-10 py-3 px-4">
+				<p className="text-gray-100 text-kor-body2 font-medium text-center">
+					선 위 또는 기존 지점을 선택하세요
+				</p>
+			</div>
+			<BackButton className="absolute top-[73px] left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
 				<div className="absolute w-full bottom-6 px-4">

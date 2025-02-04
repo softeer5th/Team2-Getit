@@ -19,8 +19,14 @@ import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import toggleMarkers from "../utils/markers/toggleMarkers";
+
+import { Link } from "react-router";
+import useModal from "../hooks/useModal";
+import ReportModal from "../components/map/reportModal";
+
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
+
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -44,6 +50,8 @@ export default function MapPage() {
 
 	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
 	const { mode, building: selectedBuilding } = useSearchBuilding();
+
+	const [_, isOpen, open, close] = useModal();
 
 	const { university } = useUniversityInfo();
 	useRedirectUndefined<string | undefined>([university]);
@@ -298,14 +306,14 @@ export default function MapPage() {
 			</BottomSheet>
 			{origin && destination && origin.id !== destination.id ? (
 				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */
-				<div className="absolute bottom-6 space-y-2 w-full px-4">
+				<Link to="/result" className="absolute bottom-6 space-y-2 w-full px-4">
 					<Button variant="primary">길찾기</Button>
-				</div>
+				</Link>
 			) : (
 				/** 출발지랑 도착지가 존재하지 않거나, 같은 경우 기존 Button UI 보이기 */
 				<>
 					<div className="absolute right-4 bottom-6 space-y-2">
-						<ReportButton />
+						<ReportButton onClick={open} />
 					</div>
 					<div className="absolute right-4 bottom-[90px] space-y-2">
 						<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
@@ -313,6 +321,7 @@ export default function MapPage() {
 					</div>
 				</>
 			)}
+			{isOpen && <ReportModal close={close} />}
 		</div>
 	);
 }

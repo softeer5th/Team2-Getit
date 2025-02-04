@@ -12,8 +12,10 @@ import NavigationMap from "../component/NavgationMap";
 import NavigationDescription from "../components/navigation/navigationDescription";
 import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetHandle";
 
-import useLoading from "../hooks/useLoading";
 import Loading from "../components/loading/loading";
+import BackButton from "../components/map/backButton";
+
+import useLoading from "../hooks/useLoading";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 
@@ -107,9 +109,7 @@ const NavigationResultPage = () => {
 				positionDelta={60}
 				isTop={true}
 			>
-				<button onClick={hideDetailView}>
-					<GoBack />
-				</button>
+				<BackButton onClick={hideDetailView} />
 			</AnimatedContainer>
 
 			<AnimatedContainer
