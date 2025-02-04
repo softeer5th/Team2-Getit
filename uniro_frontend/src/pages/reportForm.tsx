@@ -12,6 +12,8 @@ import Button from "../components/customButton";
 import useScrollControl from "../hooks/useScrollControl";
 import useModal from "../hooks/useModal";
 import useReportHazard from "../hooks/useReportHazard";
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import useRedirectUndefined from "../hooks/useRedirectUndefined";
 
 const ReportForm = () => {
 	useScrollControl();
@@ -30,6 +32,9 @@ const ReportForm = () => {
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
 
 	const { reportType, startNode, endNode } = useReportHazard();
+
+	const { university } = useUniversityInfo();
+	useRedirectUndefined<string | undefined>([university, reportType]);
 
 	useEffect(() => {
 		console.log(reportType, startNode, endNode);

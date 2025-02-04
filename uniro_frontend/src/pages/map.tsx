@@ -19,6 +19,8 @@ import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import toggleMarkers from "../utils/markers/toggleMarkers";
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import useRedirectUndefined from "../hooks/useRedirectUndefined";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -42,6 +44,9 @@ export default function MapPage() {
 
 	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
 	const { mode, building: selectedBuilding } = useSearchBuilding();
+
+	const { university } = useUniversityInfo();
+	useRedirectUndefined<string | undefined>([university]);
 
 	const initMap = () => {
 		if (map === null) return;
