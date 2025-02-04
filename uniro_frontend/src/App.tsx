@@ -24,8 +24,8 @@ function App() {
 				<Route path="/map" element={<MapPage />} />
 				<Route path="/form" element={<ReportForm />} />
 				<Route path="/result" element={<NavigationResultPage />} />
-        <Route path="/report/route" element={<ReportRoutePage />} />
-        <Route path="/report/hazard" element={<ReportHazardPage />} />
+				<Route path="/report/route" element={<ReportRoutePage />} />
+				<Route path="/report/hazard" element={<ReportHazardPage />} />
 			</Routes>
 		</QueryClientProvider>
 	);
