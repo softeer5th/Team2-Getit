@@ -22,6 +22,12 @@ public enum ErrorCode {
 
     // 건물 노드
     BUILDING_NOT_FOUND(404, "유효한 건물을 찾을 수 없습니다."),
+
+    // 노드
+    NODE_NOT_FOUND(404, "유효한 노드를 찾을 수 없습니다."),
+
+    // 경로 계산
+    INTERSECTION_ONLY_ALLOWED_POINT(400, "기존 경로와 겹칠 수 없습니다.")
     ;
 
     private final int httpStatus;

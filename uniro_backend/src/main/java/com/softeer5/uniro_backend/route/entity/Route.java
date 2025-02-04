@@ -22,6 +22,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -84,4 +85,16 @@ public class Route {
 		this.dangerFactors.addAll(dangerFactors);
 	}
 
+	@Builder
+	private Route(double cost, LineString path, Node node1, Node node2, Long univId, Long coreRouteId,
+		Set<CautionType> cautionFactors, Set<DangerType> dangerFactors) {
+		this.cost = cost;
+		this.path = path;
+		this.node1 = node1;
+		this.node2 = node2;
+		this.univId = univId;
+		this.coreRouteId = coreRouteId;
+		this.cautionFactors = cautionFactors;
+		this.dangerFactors = dangerFactors;
+	}
 }

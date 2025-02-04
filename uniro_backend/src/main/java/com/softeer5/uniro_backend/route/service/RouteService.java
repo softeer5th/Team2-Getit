@@ -9,8 +9,8 @@ import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.DangerCautionConflictException;
 import com.softeer5.uniro_backend.common.exception.custom.InvalidMapException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteNotFoundException;
-import com.softeer5.uniro_backend.common.utils.Utils;
 import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.route.dto.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -192,8 +192,8 @@ public class RouteService {
 
 
 	public GetRiskResDTO getRisk(Long univId, double startLat, double startLng, double endLat, double endLng) {
-		String startWTK = Utils.convertDoubleToPointWTK(startLat, startLng);
-		String endWTK = Utils.convertDoubleToPointWTK(endLat, endLng);
+		String startWTK = GeoUtils.convertDoubleToPointWTK(startLat, startLng);
+		String endWTK = GeoUtils.convertDoubleToPointWTK(endLat, endLng);
 
 		Route routeWithJoin = routeRepository.findRouteByPointsAndUnivId(univId, startWTK ,endWTK)
 				.orElseThrow(() -> new RouteNotFoundException("Route Not Found", ErrorCode.ROUTE_NOT_FOUND));
