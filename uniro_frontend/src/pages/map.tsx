@@ -19,6 +19,7 @@ import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import toggleMarkers from "../utils/markers/toggleMarkers";
+import { Link } from "react-router";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -293,9 +294,9 @@ export default function MapPage() {
 			</BottomSheet>
 			{origin && destination && origin.id !== destination.id ? (
 				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */
-				<div className="absolute bottom-6 space-y-2 w-full px-4">
+				<Link to='/result' className="absolute bottom-6 space-y-2 w-full px-4">
 					<Button variant="primary">길찾기</Button>
-				</div>
+				</Link>
 			) : (
 				/** 출발지랑 도착지가 존재하지 않거나, 같은 경우 기존 Button UI 보이기 */
 				<>
