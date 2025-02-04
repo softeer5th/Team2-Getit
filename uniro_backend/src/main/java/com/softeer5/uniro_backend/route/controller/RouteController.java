@@ -20,8 +20,8 @@ public class RouteController implements RouteApi {
 
 	@Override
 	@GetMapping("/{univId}/routes")
-	public ResponseEntity<List<GetAllRoutesResDTO>> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
-		List<GetAllRoutesResDTO> allRoutes = routeService.getAllRoutes(univId);
+	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
+		GetAllRoutesResDTO allRoutes = routeService.getAllRoutes(univId);
 		return ResponseEntity.ok().body(allRoutes);
 	}
 
