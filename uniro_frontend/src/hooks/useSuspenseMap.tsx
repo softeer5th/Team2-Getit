@@ -18,6 +18,11 @@ export function useSuspenseMap(mapOptions?: google.maps.MapOptions) {
 
 	useEffect(() => {
 		setResource(createMapResource(mapElement, mapOptions));
+		return () => {
+			if (mapElement) {
+				mapElement.innerHTML = "";
+			}
+		};
 	}, [mapElement, mapOptions]);
 
 	const { map, AdvancedMarkerElement, Polyline } = resource.read();
