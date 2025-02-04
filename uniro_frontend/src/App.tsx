@@ -31,7 +31,6 @@ function App() {
 				<Route path="/result" element={<NavigationResultPage />} />
 				<Route path="/report/route" element={<ReportRoutePage />} />
 				<Route path="/report/hazard" element={<ReportHazardPage />} />
-
 				/** 에러 페이지 */
 				<Route path="/error" element={<ErrorPage />} />
 				<Route path="/error/offline" element={<OfflinePage />} />
