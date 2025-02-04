@@ -25,7 +25,7 @@ public class RouteService {
 	private final RouteRepository routeRepository;
 
 
-	public List<GetAllRoutesResDTO> getAllRoutes(Long univId) {
+	public GetAllRoutesResDTO getAllRoutes(Long univId) {
 		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
 		// 맵이 존재하지 않을 경우 예외
@@ -49,6 +49,13 @@ public class RouteService {
 			else if(route.getNode2().isCore()) startNode = route.getNode2();
 		}
 
+		List<NodeInfo> nodeInfos = nodeMap.entrySet().stream()
+				.map(entry -> {
+					Node node = entry.getValue();
+					return NodeInfo.of(entry.getKey(), node.getXY());
+				})
+				.collect(Collectors.toList());
+
 		// 맵에 코어노드가 없는 경우 서브노드끼리 순서 매겨서 리턴
 		if(startNode==null){
 			List<Long> endNodes = adjMap.entrySet()
@@ -60,7 +67,7 @@ public class RouteService {
 			//끝 노드가 2개인 경우 둘 중 하나에서 출발
 			if(endNodes.size()==2){
 				startNode = nodeMap.get(endNodes.get(0));
-				return List.of(getSingleRoutes(adjMap, startNode));
+				return GetAllRoutesResDTO.of(nodeInfos, List.of(getSingleRoutes(adjMap, startNode)));
 			}
 
 			// 그 외의 경우의 수는 모두 사이클만 존재하거나, 규칙에 어긋난 맵
@@ -69,12 +76,12 @@ public class RouteService {
 		}
 
 
-		return getCoreRoutes(adjMap, startNode);
+		return GetAllRoutesResDTO.of(nodeInfos, getCoreRoutes(adjMap, startNode));
 	}
 
 	// coreRoute를 만들어주는 메서드
-	private List<GetAllRoutesResDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
-		List<GetAllRoutesResDTO> result = new ArrayList<>();
+	private List<CoreRouteDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
+		List<CoreRouteDTO> result = new ArrayList<>();
 		// core node간의 BFS 할 때 방문여부를 체크하는 set
 		Set<Long> visitedCoreNodes = new HashSet<>();
 		// 길 중복을 처리하기 위한 set
@@ -98,7 +105,7 @@ public class RouteService {
 
 				// 코어루트를 이루는 node들을 List로 저장
 				List<RouteCoordinatesInfo> coreRoute = new ArrayList<>();
-				coreRoute.add(RouteCoordinatesInfo.of(r.getId(),now.getId(), now.getXY(),currentNode.getId(),currentNode.getXY()));
+				coreRoute.add(RouteCoordinatesInfo.of(r.getId(),now.getId(), currentNode.getId()));
 				routeSet.add(r.getId());
 
 				while (true) {
@@ -117,19 +124,19 @@ public class RouteService {
 					for (Route R : adjMap.get(currentNode.getId())) {
 						if (routeSet.contains(R.getId())) continue;
 						Node nextNode = R.getNode1().getId().equals(currentNode.getId()) ? R.getNode2() : R.getNode1();
-						coreRoute.add(RouteCoordinatesInfo.of(R.getId(), currentNode.getId(), currentNode.getXY(), nextNode.getId(), nextNode.getXY()));
+						coreRoute.add(RouteCoordinatesInfo.of(R.getId(), currentNode.getId(), nextNode.getId()));
 						routeSet.add(R.getId());
 						currentNode = nextNode;
 					}
 				}
-				result.add(GetAllRoutesResDTO.of(now.getId(), currentNode.getId(), coreRoute));
+				result.add(CoreRouteDTO.of(now.getId(), currentNode.getId(), coreRoute));
 			}
 
 		}
 		return result;
 	}
 
-	private GetAllRoutesResDTO getSingleRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
+	private CoreRouteDTO getSingleRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
 		List<RouteCoordinatesInfo> coreRoute = new ArrayList<>();
 		Set<Long> visitedNodes = new HashSet<>();
 		visitedNodes.add(startNode.getId());
@@ -142,12 +149,12 @@ public class RouteService {
 			for (Route r : adjMap.get(currentNode.getId())) {
 				Node nextNode = r.getNode1().getId().equals(currentNode.getId()) ? r.getNode2() : r.getNode1();
 				if(visitedNodes.contains(nextNode.getId())) continue;
-				coreRoute.add(RouteCoordinatesInfo.of(r.getId(), currentNode.getId(), currentNode.getXY(), nextNode.getId(), nextNode.getXY()));
+				coreRoute.add(RouteCoordinatesInfo.of(r.getId(), currentNode.getId(), nextNode.getId()));
 				flag = true;
 				currentNode = nextNode;
 			}
 		}
-		return GetAllRoutesResDTO.of(startNode.getId(), currentNode.getId(), coreRoute);
+		return CoreRouteDTO.of(startNode.getId(), currentNode.getId(), coreRoute);
 	}
 
 	public GetRiskRoutesResDTO getRiskRoutes(Long univId) {
