@@ -15,6 +15,13 @@ import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetH
 import useLoading from "../hooks/useLoading";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getMockTest } from "../utils/fetch/mockFetch";
+import Loading from "../components/loading/loading";
+import BackButton from "../components/map/backButton";
+
+import useLoading from "../hooks/useLoading";
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import useRedirectUndefined from "../hooks/useRedirectUndefined";
+
 
 // 1. 돌아가면 위치 reset ✅
 // 2. 상세경로 scroll 끝까지 가능하게 하기 ❎
@@ -44,6 +51,8 @@ const NavigationResultPage = () => {
 		queryKey: ["test"],
 		queryFn: getMockTest,
 	});
+	const { university } = useUniversityInfo();
+	useRedirectUndefined<string | undefined>([university]);
 
 	useEffect(() => {
 		console.log(data);
@@ -106,9 +115,7 @@ const NavigationResultPage = () => {
 				positionDelta={60}
 				isTop={true}
 			>
-				<button onClick={hideDetailView}>
-					<GoBack />
-				</button>
+				<BackButton onClick={hideDetailView} />
 			</AnimatedContainer>
 
 			<AnimatedContainer

@@ -19,6 +19,11 @@ import { motion } from "framer-motion";
 import useReportHazard from "../hooks/useReportHazard";
 import AnimatedContainer from "../container/animatedContainer";
 
+import BackButton from "../components/map/backButton";
+
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import useRedirectUndefined from "../hooks/useRedirectUndefined";
+
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	edge: [google.maps.LatLng | google.maps.LatLngLiteral, google.maps.LatLng | google.maps.LatLngLiteral];
 }
@@ -29,6 +34,9 @@ export default function ReportHazardPage() {
 	const { setReportType, setNode } = useReportHazard();
 
 	const [message, setMessage] = useState<ReportHazardMessage>(ReportHazardMessage.DEFAULT);
+
+	const { university } = useUniversityInfo();
+	useRedirectUndefined<string | undefined>([university]);
 
 	const resetMarker = (prevMarker: MarkerTypesWithElement) => {
 		if (prevMarker.type === Markers.REPORT) {
@@ -191,6 +199,7 @@ export default function ReportHazardPage() {
 					{message}
 				</motion.p>
 			</div>
+			<BackButton className="absolute top-[73px] left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
 			<AnimatedContainer
 				isVisible={reportMarker ? true : false}
