@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 export default function useNetworkStatus() {
-	const [isOffline, setIsOffline] = useState<boolean>(false);
+	const [isOffline, setIsOffline] = useState(false);
 	const navigate = useNavigate();
 
 	const handleOffline = () => {
