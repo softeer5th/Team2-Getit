@@ -12,6 +12,7 @@ import { CautionToggleButton, DangerToggleButton } from "../components/map/float
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getFetch, postFetch, putFetch } from "../utils/fetch/fetch";
 import SearchNull from "../components/error/SearchNull";
+import Offline from "../components/error/Offline";
 
 const getTest = () => {
 	/** https://jsonplaceholder.typicode.com/comments?postId=1 */
@@ -118,7 +119,7 @@ export default function Demo() {
 				<div className="w-1/2 h-[500px] rounded-sm border border-dashed border-[#9747FF]">
 					<Map />
 				</div>
-				<div className="w-1/2 rounded-sm border border-dashed border-[#9747FF] flex flex-col justify-start space-y-5 p-5">
+				<div className="w-1/2 rounded-sm border border-dashed border-[#9747FF] flex flex-row flex-wrap justify-start space-y-5 p-5">
 					<Button onClick={() => mutatePost()}>
 						{postData?.id ? `${postData.id} : 테스트 결과` : "POST 테스트"}
 					</Button>
@@ -128,6 +129,9 @@ export default function Demo() {
 					<div className="w-fit h-fit rounded-sm border border-dashed border-[#9747FF] p-5">
 						<SearchNull message="캠퍼스 내 건물명을 입력해 보세요." />
 						<SearchNull message="캠퍼스 리스트를 확인해 보세요." />
+					</div>
+					<div className="w-fit h-fit rounded-sm border border-dashed border-[#9747FF] p-5">
+						<Offline />
 					</div>
 				</div>
 			</div>
