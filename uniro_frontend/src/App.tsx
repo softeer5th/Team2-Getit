@@ -20,29 +20,29 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 const queryClient = new QueryClient();
 
 function App() {
-  const { location, fallback } = useDynamicSuspense();
-  useNetworkStatus();
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Suspense key={location.key} fallback={fallback}>
-        <Routes>
-          <Route path="/demo" element={<Demo />} />
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/university" element={<UniversitySearchPage />} />
-          <Route path="/building" element={<BuildingSearchPage />} />
-          <Route path="/map" element={<MapPage />} />
-          <Route path="/form" element={<ReportForm />} />
-          <Route path="/result" element={<NavigationResultPage />} />
-          <Route path="/report/route" element={<ReportRoutePage />} />
-          <Route path="/report/hazard" element={<ReportHazardPage />} />
-          /** 에러 페이지 */
-          <Route path="/error" element={<ErrorPage />} />
-          <Route path="/error/offline" element={<OfflinePage />} />
-        </Routes>
-      </Suspense>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  );
+	const { location, fallback } = useDynamicSuspense();
+	useNetworkStatus();
+	return (
+		<QueryClientProvider client={queryClient}>
+			<Suspense key={location.key} fallback={fallback}>
+				<Routes>
+					<Route path="/demo" element={<Demo />} />
+					<Route path="/" element={<LandingPage />} />
+					<Route path="/university" element={<UniversitySearchPage />} />
+					<Route path="/building" element={<BuildingSearchPage />} />
+					<Route path="/map" element={<MapPage />} />
+					<Route path="/form" element={<ReportForm />} />
+					<Route path="/result" element={<NavigationResultPage />} />
+					<Route path="/report/route" element={<ReportRoutePage />} />
+					<Route path="/report/hazard" element={<ReportHazardPage />} />
+					/** 에러 페이지 */
+					<Route path="/error" element={<ErrorPage />} />
+					<Route path="/error/offline" element={<OfflinePage />} />
+				</Routes>
+			</Suspense>
+			<ReactQueryDevtools initialIsOpen={false} />
+		</QueryClientProvider>
+	);
 }
 
 export default App;

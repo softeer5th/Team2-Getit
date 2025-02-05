@@ -4,7 +4,7 @@ import StraightIcon from "../../../assets/route/straight.svg?react";
 import RightIcon from "../../../assets/route/right.svg?react";
 import LeftIcon from "../../../assets/route/left.svg?react";
 import CautionText from "../../../assets/icon/cautionText.svg?react";
-import { RouteEdge } from "../../../data/types/edge";
+import { RouteEdge } from "../../../data/types/route";
 import { Building } from "../../../data/types/node";
 
 const NumberIcon = ({ index }: { index: number }) => {
