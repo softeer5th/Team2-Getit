@@ -1,28 +1,23 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { PanInfo, useDragControls } from "framer-motion";
+import { useSuspenseQuery } from "@tanstack/react-query";
+
 import Button from "../components/customButton";
 import RouteList from "../components/navigation/route/routeList";
-
-import { mockNavigationRoute } from "../data/mock/hanyangRoute";
-import { NavigationRoute } from "../data/types/route";
-import useScrollControl from "../hooks/useScrollControl";
-import AnimatedContainer from "../container/animatedContainer";
-import NavigationMap from "../component/NavgationMap";
 import NavigationDescription from "../components/navigation/navigationDescription";
 import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetHandle";
-
-import useLoading from "../hooks/useLoading";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { getMockTest } from "../utils/fetch/mockFetch";
+import NavigationMap from "../component/NavgationMap";
 import BackButton from "../components/map/backButton";
+import AnimatedContainer from "../container/animatedContainer";
+import { mockNavigationRoute } from "../data/mock/hanyangRoute";
+import { NavigationRoute } from "../data/types/route";
+import { getMockTest } from "../utils/fetch/mockFetch";
 
+import useScrollControl from "../hooks/useScrollControl";
+import useLoading from "../hooks/useLoading";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-
-
-// 1. 돌아가면 위치 reset ✅
-// 2. 상세경로 scroll 끝까지 가능하게 하기 ❎
-// 3. 코드 리팩토링 하기
+import AnimatedSheetContainer from "../container/animatedSheetContainer";
 
 const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
 const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
@@ -30,16 +25,14 @@ const CLOSED_SHEET_HEIGHT = 0;
 
 const INITIAL_TOP_BAR_HEIGHT = 143;
 const BOTTOM_SHEET_HANDLE_HEIGHT = 40;
-
 const PADDING_FOR_MAP_BOUNDARY = 50;
 
 const NavigationResultPage = () => {
 	const [isDetailView, setIsDetailView] = useState(false);
-
 	const [sheetHeight, setSheetHeight] = useState(CLOSED_SHEET_HEIGHT);
 	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
 
-	const [isLoading, show, hide] = useLoading();
+	const [isLoading, showLoading, hideLoading] = useLoading();
 	const [route, setRoute] = useState<NavigationRoute>(mockNavigationRoute);
 
 	useScrollControl();
@@ -62,30 +55,30 @@ const NavigationResultPage = () => {
 		setTopBarHeight(PADDING_FOR_MAP_BOUNDARY);
 		setIsDetailView(true);
 	};
+
 	const hideDetailView = () => {
 		setSheetHeight(CLOSED_SHEET_HEIGHT);
 		setTopBarHeight(INITIAL_TOP_BAR_HEIGHT);
 		setIsDetailView(false);
 	};
 
-	const handleDrag = useCallback(
-		(event: Event, info: PanInfo) => {
-			setSheetHeight((prev) => {
-				const newHeight = prev - info.delta.y;
-				return Math.min(Math.max(newHeight, MIN_SHEET_HEIGHT), MAX_SHEET_HEIGHT);
-			});
-		},
-		[setSheetHeight, MAX_SHEET_HEIGHT, MIN_SHEET_HEIGHT],
-	);
+	const handleDrag = useCallback((event: Event, info: PanInfo) => {
+		setSheetHeight((prev) => {
+			const newHeight = prev - info.delta.y;
+			return Math.min(Math.max(newHeight, MIN_SHEET_HEIGHT), MAX_SHEET_HEIGHT);
+		});
+	}, []);
 
 	return (
 		<div className="relative h-svh w-full max-w-[450px] mx-auto">
+			{/* 지도 영역 */}
 			<NavigationMap
 				style={{ width: "100%", height: "100%" }}
 				routes={route}
 				topPadding={topBarHeight}
 				bottomPadding={sheetHeight}
 			/>
+
 			<AnimatedContainer
 				isVisible={!isDetailView && !isLoading}
 				positionDelta={286}
@@ -93,7 +86,7 @@ const NavigationResultPage = () => {
 				isTop={true}
 				transition={{ type: "spring", damping: 20, duration: 0.3 }}
 			>
-				<NavigationDescription isDetailView={!isDetailView && !isLoading} />
+				<NavigationDescription isDetailView={false} />
 			</AnimatedContainer>
 
 			<AnimatedContainer
@@ -101,9 +94,7 @@ const NavigationResultPage = () => {
 				className="absolute bottom-0 left-0 w-full mb-[30px] px-4"
 				positionDelta={88}
 			>
-				<Button className="" onClick={showDetailView}>
-					상세경로 보기
-				</Button>
+				<Button onClick={showDetailView}>상세경로 보기</Button>
 			</AnimatedContainer>
 
 			<AnimatedContainer
@@ -115,38 +106,39 @@ const NavigationResultPage = () => {
 				<BackButton onClick={hideDetailView} />
 			</AnimatedContainer>
 
-			<AnimatedContainer
+			<AnimatedSheetContainer
 				isVisible={isDetailView && !isLoading}
-				className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto"
-				positionDelta={MAX_SHEET_HEIGHT}
-				transition={{ type: "spring", damping: 20, duration: 0.3 }}
+				height={sheetHeight}
+				className="bg-white rounded-t-2xl shadow-xl"
+				transition={{ type: "tween", duration: 0.3 }}
 				motionProps={{
 					drag: "y",
 					dragControls,
 					dragListener: false,
 					dragConstraints: {
 						top: 0,
-						bottom: MIN_SHEET_HEIGHT,
+						bottom: 0,
 					},
 					onDrag: handleDrag,
 					onDragEnd: handleDrag,
 				}}
 			>
 				<BottomSheetHandle dragControls={dragControls} />
+
 				<div
 					className="w-full overflow-y-auto"
 					style={{
-						height: MAX_SHEET_HEIGHT - BOTTOM_SHEET_HANDLE_HEIGHT,
+						height: sheetHeight - BOTTOM_SHEET_HANDLE_HEIGHT,
 					}}
 				>
-					<NavigationDescription isDetailView={isDetailView && !isLoading} />
+					<NavigationDescription isDetailView={true} />
 					<RouteList
 						routes={route.route}
 						originBuilding={route.originBuilding}
 						destinationBuilding={route.destinationBuilding}
 					/>
 				</div>
-			</AnimatedContainer>
+			</AnimatedSheetContainer>
 		</div>
 	);
 };
