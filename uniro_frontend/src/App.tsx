@@ -26,8 +26,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Suspense key={location.key} fallback={fallback}>
         <Routes>
-          <Route path="/" element={<Demo />} />
-          <Route path="/landing" element={<LandingPage />} />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/university" element={<UniversitySearchPage />} />
           <Route path="/building" element={<BuildingSearchPage />} />
           <Route path="/map" element={<MapPage />} />
