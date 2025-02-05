@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class CreateRouteServiceReqDTO {
+public class CreateRouteCoordinates {
 	private final double x;
 	private final double y;
 }

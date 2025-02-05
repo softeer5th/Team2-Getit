@@ -53,6 +53,14 @@ public class RouteController implements RouteApi {
 	}
 
 	@Override
+	@PostMapping("/{univId}/route")
+	public ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
+											 @RequestBody CreateRouteReqDTO routes){
+		routeCalculationService.createRoute(univId,routes);
+		return ResponseEntity.ok().build();
+	}
+
+	@Override
 	@GetMapping("/{univId}/routes/fastest")
 	public ResponseEntity<FastestRouteResDTO> calculateFastestRoute(@PathVariable("univId") Long univId,
 																	@RequestParam(value = "start-node-id") Long startNodeId,

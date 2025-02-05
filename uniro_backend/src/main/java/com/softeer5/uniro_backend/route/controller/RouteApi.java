@@ -51,6 +51,14 @@ public interface RouteApi {
 								  @PathVariable("routeId") Long routeId,
 								  @RequestBody PostRiskReqDTO postRiskReqDTO);
 
+	@Operation(summary = "길 추가 로직")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "길 추가 성공"),
+			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
+									  @RequestBody CreateRouteReqDTO routes);
+
 	@Operation(summary = "빠른 길 계산")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "빠른 길 계산 성공"),
