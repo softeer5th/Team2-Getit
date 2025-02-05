@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { RouteEdge } from "../../../data/types/edge";
+import { RouteEdge } from "../../../data/types/route";
 import { Building } from "../../../data/types/node";
 import { RouteCard } from "./routeCard";
 

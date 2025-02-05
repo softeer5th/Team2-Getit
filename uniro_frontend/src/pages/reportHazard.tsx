@@ -3,7 +3,7 @@ import useMap from "../hooks/useMap";
 import { mockNavigationRoute } from "../data/mock/hanyangRoute";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import createMarkerElement from "../components/map/mapMarkers";
-import { RouteEdge } from "../data/types/edge";
+import { RouteEdge } from "../data/types/route";
 import { Markers } from "../constant/enum/markerEnum";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import { ClickEvent } from "../data/types/event";

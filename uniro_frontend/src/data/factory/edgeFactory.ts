@@ -1,4 +1,4 @@
-import { Direction, HazardEdge, RouteEdge } from "../types/edge";
+import { Direction, HazardEdge, RouteEdge } from "../types/route";
 import { CautionFactor, DangerFactor } from "../types/factor";
 import { CustomNode } from "../types/node";
 

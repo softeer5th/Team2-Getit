@@ -1,5 +1,5 @@
 import { hanyangBuildings } from "../mock/hanyangBuildings";
-import { RouteEdge } from "../types/edge";
+import { RouteEdge } from "../types/route";
 import { NavigationRoute } from "../types/route";
 
 // TODO: Distance를 m-> km로 자동 변환해주는 util
