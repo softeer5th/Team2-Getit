@@ -25,10 +25,14 @@ public class GetDangerResDTO {
 	@Schema(description = "간선 id", example = "3")
 	private final Long routeId;
 
-	@Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
+	@Schema(description = "위험 요소 타입 리스트", example = "[\"CURB\", \"STAIRS\"]")
 	private final List<DangerType> dangerTypes;
 
 	public static GetDangerResDTO of(Node node1, Node node2, Long routeId, List<DangerType> dangerTypes){
 		return new GetDangerResDTO(node1.getXY(), node2.getXY(), routeId, dangerTypes);
+	}
+
+	public List<DangerType> getDangerTypes() {
+		return dangerTypes;
 	}
 }

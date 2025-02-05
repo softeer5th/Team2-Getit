@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @Getter
-@Schema(name = "GetDangerResDTO", description = "위험 요소 조회 DTO")
+@Schema(name = "FastestRouteResDTO", description = "빠른 경로 조회 DTO")
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class FastestRouteResDTO {
     @Schema(description = "길 찾기 결과에 위험요소가 포함되어있는지 여부", example = "true")

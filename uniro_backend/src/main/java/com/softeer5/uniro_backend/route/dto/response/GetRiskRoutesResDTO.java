@@ -12,10 +12,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class GetRiskRoutesResDTO {
 
-	@Schema(description = "위험요소 객체", example = "")
+	@Schema(description = "위험요소 객체")
 	private final List<GetDangerResDTO> dangerRoutes;
 
-	@Schema(description = "주의요소 객체", example = "")
+	@Schema(description = "주의요소 객체")
 	private final List<GetCautionResDTO> cautionRoutes;
 
 	public static GetRiskRoutesResDTO of(List<GetDangerResDTO> dangerRoutes, List<GetCautionResDTO> cautionRoutes) {

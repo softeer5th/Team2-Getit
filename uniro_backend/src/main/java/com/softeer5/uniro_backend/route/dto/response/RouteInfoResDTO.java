@@ -13,6 +13,7 @@ import java.util.Set;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Schema(name = "RouteInfoResDTO", description = "경로 정보 DTO")
 public class RouteInfoResDTO {
     @Schema(description = "위험요소가 있는 길의 ID", example = "2")
     private final Long routeId;

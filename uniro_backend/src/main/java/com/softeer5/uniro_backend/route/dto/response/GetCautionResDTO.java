@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-@Schema(name = "GetDangerResDTO", description = "위험 요소 조회 DTO")
+@Schema(name = "GetCautionResDTO", description = "위험 요소 조회 DTO")
 public class GetCautionResDTO {
 
 	@Schema(description = "노드 1의 좌표", example = "{\"lng\": 127.123456, \"lat\": 37.123456}")

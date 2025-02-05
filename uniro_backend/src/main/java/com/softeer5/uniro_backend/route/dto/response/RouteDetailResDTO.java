@@ -10,6 +10,7 @@ import java.util.Map;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Schema(name = "RouteDetailResDTO", description = "상세 경로 DTO")
 public class RouteDetailResDTO {
     @Schema(description = "다음 이정표까지의 거리", example = "17.38721484")
     private final double dist;

@@ -63,7 +63,7 @@ public class RouteService {
 		List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
 				.map(entry -> {
 					Node node = entry.getValue();
-					return NodeInfoResDTO.of(entry.getKey(), node.getXY());
+					return NodeInfoResDTO.of(entry.getKey(), node.getX(), node.getY());
 				})
 				.collect(Collectors.toList());
 

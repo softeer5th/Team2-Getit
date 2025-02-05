@@ -14,10 +14,13 @@ public class NodeInfoResDTO {
     @Schema(description = "노드 ID", example = "10")
     private final Long nodeId;
 
-    @Schema(description = "좌표", example = "{\"lng\": 127.123456, \"lat\": 37.123456}")
-    private final Map<String, Double> coordinates;
+    @Schema(description = "x 좌표 (위도 및 경도)", example = "127.123456")
+    private final double lng;
 
-    public static NodeInfoResDTO of(Long nodeId, Map<String, Double> coordinates) {
-        return new NodeInfoResDTO(nodeId, coordinates);
+    @Schema(description = "y 좌표 (위도 및 경도)", example = "37.123456")
+    private final double lat;
+
+    public static NodeInfoResDTO of(Long nodeId, double lng, double lat) {
+        return new NodeInfoResDTO(nodeId, lng, lat);
     }
 }
