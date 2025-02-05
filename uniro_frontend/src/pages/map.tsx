@@ -170,6 +170,16 @@ export default function MapPage() {
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
+		if (marker.property && (marker.id === origin?.id || marker.id === destination?.id)) {
+			map.setOptions({
+				center: { lat: marker.property.lat, lng: marker.property.lng },
+				zoom: 19,
+			})
+			setSheetOpen(true);
+
+			return;
+		}
+
 		if (marker.type == Markers.BUILDING && marker.property) {
 			if (isSelect) {
 				marker.element.content = createMarkerElement({
@@ -184,6 +194,23 @@ export default function MapPage() {
 				setSheetOpen(true);
 
 				return;
+			}
+
+			if (marker.id === origin?.id) {
+				marker.element.content = createMarkerElement({
+					type: Markers.ORIGIN,
+					title: marker.property.buildingName,
+					className: "translate-routemarker",
+				});
+			}
+
+			else if (marker.id === destination?.id) {
+				marker.element.content = createMarkerElement({
+					type: Markers.DESTINATION,
+					title: destination.buildingName,
+					className: "translate-routemarker",
+				});
+
 			}
 
 			marker.element.content = createMarkerElement({
