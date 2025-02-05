@@ -37,3 +37,6 @@ management:
     metrics:
       export:
         enabled: true
+
+cors:
+  allowed-origins: ${allowed-origins}
