@@ -39,6 +39,8 @@ export type SelectedMarkerTypes = {
 export default function MapPage() {
 	const { mapRef, map, AdvancedMarker } = useMap();
 	const [zoom, setZoom] = useState<number>(16);
+	const prevZoom = useRef<number>(16);
+
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
@@ -65,7 +67,12 @@ export default function MapPage() {
 			setSelectedMarker(undefined);
 		});
 		map.addListener("zoom_changed", () => {
-			setZoom(map.getZoom() as number);
+			setZoom((prev) => {
+				const curZoom = map.getZoom() as number;
+				prevZoom.current = prev;
+
+				return curZoom
+			});
 		})
 	};
 
@@ -326,13 +333,15 @@ export default function MapPage() {
 
 	useEffect(() => {
 		if (!map) return;
+
 		const _buildingMarkers = buildingMarkers.map(buildingMarker => buildingMarker.element);
-		if (zoom === 15 || zoom === 16) {
+
+		if (prevZoom.current >= 17 && zoom <= 16) {
 			toggleMarkers(false, cautionMarkers, map);
 			toggleMarkers(false, dangerMarkers, map);
 			toggleMarkers(false, _buildingMarkers, map);
 		}
-		else {
+		else if ((prevZoom.current <= 16 && zoom >= 17)) {
 			toggleMarkers(true, cautionMarkers, map);
 			toggleMarkers(true, dangerMarkers, map);
 			toggleMarkers(true, _buildingMarkers, map);
