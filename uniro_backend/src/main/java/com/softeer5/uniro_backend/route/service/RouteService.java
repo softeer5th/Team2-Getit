@@ -3,6 +3,8 @@ package com.softeer5.uniro_backend.route.service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
+import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.DangerCautionConflictException;
 import com.softeer5.uniro_backend.common.exception.custom.InvalidMapException;
@@ -215,6 +217,7 @@ public class RouteService {
 		return GetRiskResDTO.of(routeWithJoin);
 	}
 
+	@RevisionOperation(RevisionOperationType.UPDATE_RISK)
 	@Transactional
 	public void updateRisk(Long univId, Long routeId, PostRiskReqDTO postRiskReqDTO) {
 		Route route = routeRepository.findByIdAndUnivId(routeId, univId)

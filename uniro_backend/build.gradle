@@ -66,6 +66,9 @@ dependencies {
 	//webClient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	//hibernate envers
+	implementation 'org.hibernate.orm:hibernate-envers:6.3.1.Final'
+
 	// actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }

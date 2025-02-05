@@ -8,6 +8,8 @@ import java.util.Set;
 import com.softeer5.uniro_backend.resolver.CautionListConverter;
 import com.softeer5.uniro_backend.resolver.DangerListConverter;
 import com.softeer5.uniro_backend.node.entity.Node;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.locationtech.jts.geom.LineString;
 
 import jakarta.persistence.Column;
@@ -27,6 +29,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Audited
 public class Route {
 
 	@Id
@@ -35,16 +38,18 @@ public class Route {
 
 	private double cost;
 
-	@Column(columnDefinition = "geometry(LineString, 4326)") // WGS84 좌표계
+	@Column(columnDefinition = "LINESTRING SRID 4326") // WGS84 좌표계
 	private LineString path;
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(referencedColumnName = "id", name = "node1_id")
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	@NotNull
 	private Node node1;
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(referencedColumnName = "id", name = "node2_id")
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	@NotNull
 	private Node node2;
 
