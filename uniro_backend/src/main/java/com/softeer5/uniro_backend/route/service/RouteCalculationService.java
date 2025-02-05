@@ -2,20 +2,19 @@ package com.softeer5.uniro_backend.route.service;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
+import static com.softeer5.uniro_backend.common.utils.GeoUtils.getInstance;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeNotFoundException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
 import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
-import com.softeer5.uniro_backend.common.utils.GeoUtils;
+import com.softeer5.uniro_backend.node.client.MapClient;
 import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.route.dto.CreateRouteServiceReqDTO;
+import com.softeer5.uniro_backend.node.repository.NodeRepository;
+import com.softeer5.uniro_backend.route.dto.*;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
 import com.softeer5.uniro_backend.route.entity.Route;
-import com.softeer5.uniro_backend.route.dto.RouteDetailDTO;
-import com.softeer5.uniro_backend.route.dto.RouteInfoDTO;
-import com.softeer5.uniro_backend.route.dto.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +36,8 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class RouteCalculationService {
     private final RouteRepository routeRepository;
+    private final MapClient mapClient;
+    private final NodeRepository nodeRepository;
 
     @AllArgsConstructor
     private class CostToNextNode implements Comparable<CostToNextNode> {
@@ -257,14 +258,61 @@ public class RouteCalculationService {
                 , "lng", (n1.getCoordinates().getX() + n2.getCoordinates().getX())/2);
     }
 
+    @Transactional
+    public void createRoute(Long univId, CreateRouteReqDTO requests){
+        List<Node> nodes = checkRouteCross(univId, requests.getStartNodeId(), requests.getEndNodeId(), requests.getCoordinates());
+        mapClient.fetchHeights(nodes);
+        createLinkedRouteAndSave(univId,nodes);
+    }
+
+    private void createLinkedRouteAndSave(Long univId, List<Node> nodes) {
+        GeometryFactory geometryFactory = getInstance();
+        Set<String> nodeSet = new HashSet<>();
+        List<Node> nodeForSave = new ArrayList<>();
+        List<Route> routeForSave = new ArrayList<>();
+        for(int i=1;i<nodes.size();i++){
+            Node now = nodes.get(i);
+            Node prev = nodes.get(i-1);
+            routeForSave.add(Route.builder()
+                    .cost(calculateCost(prev,now))
+                    .path(geometryFactory.createLineString(
+                            new Coordinate[] {prev.getCoordinates().getCoordinate(), now.getCoordinates().getCoordinate()}))
+                    .node1(prev)
+                    .node2(now)
+                    .univId(univId).build());
+            if(!nodeSet.contains(getNodeKey(new Coordinate(now.getCoordinates().getX(), now.getCoordinates().getY())))){
+                nodeForSave.add(now);
+                nodeSet.add(getNodeKey(new Coordinate(now.getCoordinates().getX(), now.getCoordinates().getY())));
+            }
+        }
+        nodeRepository.saveAll(nodeForSave);
+        routeRepository.saveAll(routeForSave);
+    }
+
+    private double calculateCost(Node prev, Node now) {
+        double lng1 = prev.getCoordinates().getX();
+        double lat1 = prev.getCoordinates().getY();
+        double lng2 = now.getCoordinates().getX();
+        double lat2 = now.getCoordinates().getY();
+
+        double dLat = (lat2 - lat1) * METERS_PER_DEGREE;
+
+        double avgLat = (lat1 + lat2) / 2.0;
+        double dLng = (lng2 - lng1) * METERS_PER_DEGREE * Math.cos(Math.toRadians(avgLat));
+
+        double distance = Math.sqrt(dLat * dLat + dLng * dLng);
+
+        return distance * SECONDS_PER_MITER;
+    }
+
     // TODO: 모든 점이 아니라 request 값의 MBR 영역만 불러오면 좋을 것 같다.  <- 추가 검증 필요
     // TODO: 캐시 사용 검토
-    public List<Node> checkRouteCross(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteServiceReqDTO> requests) {
+    public List<Node> checkRouteCross(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteCoordinates> requests) {
         LinkedList<Node> createdNodes = new LinkedList<>();
 
         Map<String, Node> nodeMap = new HashMap<>();
         STRtree strTree = new STRtree();
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
+        GeometryFactory geometryFactory = getInstance();
 
         int startNodeCount = 0;
         int endNodeCount = 0;
@@ -294,7 +342,7 @@ public class RouteCalculationService {
         // 서브 -> 코어 : 처리 필요
         // 코어 -> 코어 : 처리 필요 X
         // 코어 -> 서브 : 불가한 케이스
-        CreateRouteServiceReqDTO startCoordinate = requests.get(0);
+        CreateRouteCoordinates startCoordinate = requests.get(0);
         Node startNode = nodeMap.get(getNodeKey(new Coordinate(startCoordinate.getX(), startCoordinate.getY())));
 
         if (startNode == null) {
@@ -307,7 +355,7 @@ public class RouteCalculationService {
         createdNodes.add(startNode);
 
         for (int i = 1; i < requests.size(); i++) {
-            CreateRouteServiceReqDTO cur = requests.get(i);
+            CreateRouteCoordinates cur = requests.get(i);
 
             // 정확히 그 점과 일치하는 노드가 있는지 확인
             Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getX(), cur.getY())));
@@ -365,7 +413,7 @@ public class RouteCalculationService {
 
     private List<Node> checkSelfRouteCross(List<Node> nodes) {
 
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
+        GeometryFactory geometryFactory = getInstance();
 
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
             throw new SameStartAndEndPointException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
@@ -424,7 +472,7 @@ public class RouteCalculationService {
     }
 
     private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree) {
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
+        GeometryFactory geometryFactory = getInstance();
         LineString newLine = geometryFactory.createLineString(new Coordinate[] {start, end});
         Envelope searchEnvelope = newLine.getEnvelopeInternal();
 
@@ -473,7 +521,7 @@ public class RouteCalculationService {
     }
 
     private Node getClosestNode(LineString intersectLine, Node start, Node end, Map<String, Node> nodeMap) {
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
+        GeometryFactory geometryFactory = getInstance();
         Coordinate[] coordinates = intersectLine.getCoordinates();
 
         double distance1 = start.getCoordinates().getCoordinate().distance(coordinates[0]) +
