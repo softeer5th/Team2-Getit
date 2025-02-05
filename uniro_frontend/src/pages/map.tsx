@@ -27,11 +27,12 @@ import ReportModal from "../components/map/reportModal";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 
-
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
+	id: string | number;
 	element: AdvancedMarker;
 	property?: Building;
+	factors?: string[];
 	from: "Marker" | "List";
 };
 
@@ -60,16 +61,7 @@ export default function MapPage() {
 		if (map === null) return;
 		map.addListener("click", (e: unknown) => {
 			setSheetOpen(false);
-			setSelectedMarker((marker) => {
-				if (marker) {
-					const { type, element } = marker;
-
-					if (type === Markers.BUILDING) return undefined;
-
-					element.content = createMarkerElement({ type });
-				}
-				return undefined;
-			});
+			setSelectedMarker(undefined);
 		});
 	};
 
@@ -87,6 +79,7 @@ export default function MapPage() {
 				createMarkerElement({ type: Markers.BUILDING, title: buildingName, className: "translate-marker" }),
 				() => {
 					setSelectedMarker({
+						id: id,
 						type: Markers.BUILDING,
 						element: buildingMarker,
 						property: building,
@@ -114,16 +107,18 @@ export default function MapPage() {
 				}),
 				createMarkerElement({ type: dangerFactors ? Markers.DANGER : Markers.CAUTION }),
 				() => {
-					hazardMarker.content = createMarkerElement({
-						type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
-						title: dangerFactors ? dangerFactors[0] : cautionFactors && cautionFactors[0],
-						hasTopContent: true,
-					});
-					setSelectedMarker({
-						type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
-						element: hazardMarker,
-						from: "Marker",
-					});
+					setSelectedMarker((prevMarker) => {
+						if (prevMarker && prevMarker.id === id) {
+							return undefined;
+						}
+						return {
+							id: id,
+							type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
+							element: hazardMarker,
+							factors: dangerFactors ? dangerFactors : cautionFactors,
+							from: "Marker",
+						}
+					})
 				},
 			);
 			if (dangerFactors) {
@@ -172,28 +167,45 @@ export default function MapPage() {
 	};
 
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
-	const changeMarkerStyle = (marker: AdvancedMarker, isSelect: boolean) => {
-		if (!map || !selectedMarker || selectedMarker.type !== Markers.BUILDING || !selectedMarker.property) return;
+	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
+		if (!map || !marker) return;
 
-		if (isSelect) {
-			marker.content = createMarkerElement({
-				type: Markers.SELECTED_BUILDING,
-				title: selectedMarker.property.buildingName,
+		if (marker.type == Markers.BUILDING && marker.property) {
+			if (isSelect) {
+				marker.element.content = createMarkerElement({
+					type: Markers.SELECTED_BUILDING,
+					title: marker.property.buildingName,
+					className: "translate-marker",
+				});
+				map.setOptions({
+					center: { lat: marker.property.lat, lng: marker.property.lng },
+					zoom: 19,
+				});
+				setSheetOpen(true);
+
+				return;
+			}
+
+			marker.element.content = createMarkerElement({
+				type: Markers.BUILDING,
+				title: marker.property.buildingName,
 				className: "translate-marker",
 			});
-			map.setOptions({
-				center: { lat: selectedMarker.property.lat, lng: selectedMarker.property.lng },
-				zoom: 19,
-			});
-			setSheetOpen(true);
+		} else {
+			if (isSelect) {
+				marker.element.content = createMarkerElement({
+					type: marker.type,
+					title: marker.factors && marker.factors[0],
+					hasTopContent: true,
+				});
 
-			return;
+				return;
+			}
+
+			marker.element.content = createMarkerElement({
+				type: marker.type,
+			});
 		}
-		marker.content = createMarkerElement({
-			type: Markers.BUILDING,
-			title: selectedMarker.property.buildingName,
-			className: "translate-marker",
-		});
 	};
 
 	const findBuildingMarker = (id: string): AdvancedMarker | undefined => {
@@ -211,10 +223,9 @@ export default function MapPage() {
 
 	/** 선택된 마커가 있는 경우 */
 	useEffect(() => {
-		if (selectedMarker === undefined) return;
-		changeMarkerStyle(selectedMarker.element, true);
+		changeMarkerStyle(selectedMarker, true);
 		return () => {
-			changeMarkerStyle(selectedMarker.element, false);
+			changeMarkerStyle(selectedMarker, false);
 		};
 	}, [selectedMarker]);
 
@@ -226,6 +237,7 @@ export default function MapPage() {
 
 		if (matchedMarker)
 			setSelectedMarker({
+				id: selectedBuilding.id,
 				type: Markers.BUILDING,
 				element: matchedMarker,
 				from: "List",

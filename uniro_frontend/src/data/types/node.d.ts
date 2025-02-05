@@ -1,5 +1,5 @@
 export interface CustomNode {
-	id?: string;
+	id: string;
 	lng: number;
 	lat: number;
 	isCore?: boolean;
