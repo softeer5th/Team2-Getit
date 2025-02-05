@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.2'
+	id 'org.springframework.boot' version '3.3.8'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'org.hibernate.orm' version '6.3.1.Final'
 }
@@ -68,6 +68,9 @@ dependencies {
 
 	//hibernate envers
 	implementation 'org.hibernate.orm:hibernate-envers:6.3.1.Final'
+
+	// actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
