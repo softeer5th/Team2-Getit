@@ -6,6 +6,7 @@ import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import java.util.Map;
 
 import lombok.*;
+import org.hibernate.envers.Audited;
 import org.locationtech.jts.geom.Point;
 
 import jakarta.persistence.Column;
@@ -21,6 +22,7 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
+@Audited
 public class Node {
 
 	@Id
