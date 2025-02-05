@@ -38,6 +38,7 @@ export type SelectedMarkerTypes = {
 
 export default function MapPage() {
 	const { mapRef, map, AdvancedMarker } = useMap();
+	const [zoom, setZoom] = useState<number>(16);
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
@@ -63,6 +64,9 @@ export default function MapPage() {
 			setSheetOpen(false);
 			setSelectedMarker(undefined);
 		});
+		map.addListener("zoom_changed", () => {
+			setZoom(map.getZoom() as number);
+		})
 	};
 
 	const addBuildings = () => {
@@ -74,7 +78,7 @@ export default function MapPage() {
 
 			const buildingMarker = createAdvancedMarker(
 				AdvancedMarker,
-				map,
+				null,
 				new google.maps.LatLng(lat, lng),
 				createMarkerElement({ type: Markers.BUILDING, title: buildingName, className: "translate-marker" }),
 				() => {
@@ -100,7 +104,7 @@ export default function MapPage() {
 			const { id, startNode, endNode, dangerFactors, cautionFactors } = edge;
 			const hazardMarker = createAdvancedMarker(
 				AdvancedMarker,
-				map,
+				null,
 				new google.maps.LatLng({
 					lat: (startNode.lat + endNode.lat) / 2,
 					lng: (startNode.lng + endNode.lng) / 2,
@@ -319,6 +323,21 @@ export default function MapPage() {
 			});
 		};
 	}, [destination]);
+
+	useEffect(() => {
+		if (!map) return;
+		const _buildingMarkers = buildingMarkers.map(buildingMarker => buildingMarker.element);
+		if (zoom === 15 || zoom === 16) {
+			toggleMarkers(false, cautionMarkers, map);
+			toggleMarkers(false, dangerMarkers, map);
+			toggleMarkers(false, _buildingMarkers, map);
+		}
+		else {
+			toggleMarkers(true, cautionMarkers, map);
+			toggleMarkers(true, dangerMarkers, map);
+			toggleMarkers(true, _buildingMarkers, map);
+		}
+	}, [map, zoom])
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
