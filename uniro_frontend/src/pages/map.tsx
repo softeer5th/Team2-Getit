@@ -17,7 +17,7 @@ import { AdvancedMarker, MarkerTypes } from "../data/types/marker";
 import { RoutePointType } from "../data/types/route";
 import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
-import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
+import createAdvancedMarker, { createUniversityMarker } from "../utils/markers/createAdvanedMarker";
 import toggleMarkers from "../utils/markers/toggleMarkers";
 
 import { Link } from "react-router";
@@ -26,27 +26,34 @@ import ReportModal from "../components/map/reportModal";
 
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-
+import { HanyangUniversity } from "../constant/university";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
+	id: string | number;
 	element: AdvancedMarker;
 	property?: Building;
+	factors?: string[];
 	from: "Marker" | "List";
 };
 
 export default function MapPage() {
 	const { mapRef, map, AdvancedMarker } = useMap();
+	const [zoom, setZoom] = useState<number>(16);
+	const prevZoom = useRef<number>(16);
+
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
 	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; id: string }[]>([]);
 	const [dangerMarkers, setDangerMarkers] = useState<AdvancedMarker[]>([]);
-	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(true);
+	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(false);
 
 	const [cautionMarkers, setCautionMarkers] = useState<AdvancedMarker[]>([]);
-	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
+	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(false);
+
+	const [universityMarker, setUniversityMarker] = useState<AdvancedMarker>();
 
 	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
 	const { mode, building: selectedBuilding } = useSearchBuilding();
@@ -57,20 +64,27 @@ export default function MapPage() {
 	useRedirectUndefined<string | undefined>([university]);
 
 	const initMap = () => {
-		if (map === null) return;
+		if (map === null || !AdvancedMarker) return;
 		map.addListener("click", (e: unknown) => {
 			setSheetOpen(false);
-			setSelectedMarker((marker) => {
-				if (marker) {
-					const { type, element } = marker;
-
-					if (type === Markers.BUILDING) return undefined;
-
-					element.content = createMarkerElement({ type });
-				}
-				return undefined;
-			});
+			setSelectedMarker(undefined);
 		});
+		map.addListener("zoom_changed", () => {
+			setZoom((prev) => {
+				const curZoom = map.getZoom() as number;
+				prevZoom.current = prev;
+
+				return curZoom
+			});
+		})
+
+		const centerMarker = createUniversityMarker(
+			AdvancedMarker,
+			map,
+			HanyangUniversity,
+			university ? university : "",
+		)
+		setUniversityMarker(centerMarker);
 	};
 
 	const addBuildings = () => {
@@ -82,11 +96,12 @@ export default function MapPage() {
 
 			const buildingMarker = createAdvancedMarker(
 				AdvancedMarker,
-				map,
+				null,
 				new google.maps.LatLng(lat, lng),
 				createMarkerElement({ type: Markers.BUILDING, title: buildingName, className: "translate-marker" }),
 				() => {
 					setSelectedMarker({
+						id: id,
 						type: Markers.BUILDING,
 						element: buildingMarker,
 						property: building,
@@ -107,23 +122,25 @@ export default function MapPage() {
 			const { id, startNode, endNode, dangerFactors, cautionFactors } = edge;
 			const hazardMarker = createAdvancedMarker(
 				AdvancedMarker,
-				map,
+				null,
 				new google.maps.LatLng({
 					lat: (startNode.lat + endNode.lat) / 2,
 					lng: (startNode.lng + endNode.lng) / 2,
 				}),
 				createMarkerElement({ type: dangerFactors ? Markers.DANGER : Markers.CAUTION }),
 				() => {
-					hazardMarker.content = createMarkerElement({
-						type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
-						title: dangerFactors ? dangerFactors[0] : cautionFactors && cautionFactors[0],
-						hasTopContent: true,
-					});
-					setSelectedMarker({
-						type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
-						element: hazardMarker,
-						from: "Marker",
-					});
+					setSelectedMarker((prevMarker) => {
+						if (prevMarker && prevMarker.id === id) {
+							return undefined;
+						}
+						return {
+							id: id,
+							type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
+							element: hazardMarker,
+							factors: dangerFactors ? dangerFactors : cautionFactors,
+							from: "Marker",
+						}
+					})
 				},
 			);
 			if (dangerFactors) {
@@ -136,6 +153,12 @@ export default function MapPage() {
 
 	const toggleCautionButton = () => {
 		if (!map) return;
+		if (zoom <= 16) {
+			map.setOptions({
+				zoom: 17,
+				center: HanyangUniversity,
+			});
+		}
 		setIsCautionActive((isActive) => {
 			toggleMarkers(!isActive, cautionMarkers, map);
 			return !isActive;
@@ -143,6 +166,12 @@ export default function MapPage() {
 	};
 	const toggleDangerButton = () => {
 		if (!map) return;
+		if (zoom <= 16) {
+			map.setOptions({
+				zoom: 17,
+				center: HanyangUniversity,
+			});
+		}
 		setIsDangerActive((isActive) => {
 			toggleMarkers(!isActive, dangerMarkers, map);
 			return !isActive;
@@ -156,9 +185,11 @@ export default function MapPage() {
 		if (selectedMarker.from === "Marker" && type) {
 			switch (type) {
 				case RoutePoint.ORIGIN:
+					if (selectedMarker.id === destination?.id) setDestination(undefined);
 					setOrigin(selectedMarker.property);
 					break;
 				case RoutePoint.DESTINATION:
+					if (selectedMarker.id === origin?.id) setOrigin(undefined);
 					setDestination(selectedMarker.property);
 					break;
 			}
@@ -172,28 +203,74 @@ export default function MapPage() {
 	};
 
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
-	const changeMarkerStyle = (marker: AdvancedMarker, isSelect: boolean) => {
-		if (!map || !selectedMarker || selectedMarker.type !== Markers.BUILDING || !selectedMarker.property) return;
+	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
+		if (!map || !marker) return;
 
-		if (isSelect) {
-			marker.content = createMarkerElement({
-				type: Markers.SELECTED_BUILDING,
-				title: selectedMarker.property.buildingName,
-				className: "translate-marker",
-			});
-			map.setOptions({
-				center: { lat: selectedMarker.property.lat, lng: selectedMarker.property.lng },
-				zoom: 19,
-			});
-			setSheetOpen(true);
+		if (marker.property && (marker.id === origin?.id || marker.id === destination?.id)) {
+			if (isSelect) {
+				map.setOptions({
+					center: { lat: marker.property.lat, lng: marker.property.lng },
+					zoom: 19,
+				})
+				setSheetOpen(true);
+			}
 
 			return;
 		}
-		marker.content = createMarkerElement({
-			type: Markers.BUILDING,
-			title: selectedMarker.property.buildingName,
-			className: "translate-marker",
-		});
+
+		if (marker.type == Markers.BUILDING && marker.property) {
+			if (isSelect) {
+				marker.element.content = createMarkerElement({
+					type: Markers.SELECTED_BUILDING,
+					title: marker.property.buildingName,
+					className: "translate-marker",
+				});
+				map.setOptions({
+					center: { lat: marker.property.lat, lng: marker.property.lng },
+					zoom: 19,
+				});
+				setSheetOpen(true);
+
+				return;
+			}
+
+			if (marker.id === origin?.id) {
+				marker.element.content = createMarkerElement({
+					type: Markers.ORIGIN,
+					title: marker.property.buildingName,
+					className: "translate-routemarker",
+				});
+			}
+
+			else if (marker.id === destination?.id) {
+				marker.element.content = createMarkerElement({
+					type: Markers.DESTINATION,
+					title: destination.buildingName,
+					className: "translate-routemarker",
+				});
+
+			}
+
+			marker.element.content = createMarkerElement({
+				type: Markers.BUILDING,
+				title: marker.property.buildingName,
+				className: "translate-marker",
+			});
+		} else {
+			if (isSelect) {
+				marker.element.content = createMarkerElement({
+					type: marker.type,
+					title: marker.factors && marker.factors[0],
+					hasTopContent: true,
+				});
+
+				return;
+			}
+
+			marker.element.content = createMarkerElement({
+				type: marker.type,
+			});
+		}
 	};
 
 	const findBuildingMarker = (id: string): AdvancedMarker | undefined => {
@@ -211,10 +288,9 @@ export default function MapPage() {
 
 	/** 선택된 마커가 있는 경우 */
 	useEffect(() => {
-		if (selectedMarker === undefined) return;
-		changeMarkerStyle(selectedMarker.element, true);
+		changeMarkerStyle(selectedMarker, true);
 		return () => {
-			changeMarkerStyle(selectedMarker.element, false);
+			changeMarkerStyle(selectedMarker, false);
 		};
 	}, [selectedMarker]);
 
@@ -226,6 +302,7 @@ export default function MapPage() {
 
 		if (matchedMarker)
 			setSelectedMarker({
+				id: selectedBuilding.id,
 				type: Markers.BUILDING,
 				element: matchedMarker,
 				from: "List",
@@ -250,7 +327,7 @@ export default function MapPage() {
 			originMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
 				title: origin.buildingName,
-				className: "translate-routemarker",
+				className: "translate-marker",
 			});
 		};
 	}, [origin]);
@@ -272,13 +349,37 @@ export default function MapPage() {
 			destinationMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
 				title: destination.buildingName,
-				className: "translate-routemarker",
+				className: "translate-marker",
 			});
 		};
 	}, [destination]);
 
+	useEffect(() => {
+		if (!map) return;
+
+		const _buildingMarkers = buildingMarkers.map(buildingMarker => buildingMarker.element);
+
+		if (prevZoom.current >= 17 && zoom <= 16) {
+			if (isCautionAcitve) {
+				setIsCautionActive(false);
+				toggleMarkers(false, cautionMarkers, map);
+			}
+			if (isDangerAcitve) {
+				setIsDangerActive(false);
+				toggleMarkers(false, dangerMarkers, map);
+			}
+
+			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
+			toggleMarkers(false, _buildingMarkers, map);
+		}
+		else if ((prevZoom.current <= 16 && zoom >= 17)) {
+			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
+			toggleMarkers(true, _buildingMarkers, map);
+		}
+	}, [map, zoom])
+
 	return (
-		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
+		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
 			<TopSheet open={!sheetOpen} />
 			<div ref={mapRef} className="w-full h-full" />
 			<BottomSheet
