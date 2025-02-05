@@ -1,7 +1,6 @@
-import React, { Suspense, useCallback, useEffect, useState } from "react";
-import { AnimatePresence, PanInfo, useDragControls } from "framer-motion";
+import React, { useCallback, useEffect, useState } from "react";
+import { PanInfo, useDragControls } from "framer-motion";
 import Button from "../components/customButton";
-import GoBack from "../assets/icon/goBack.svg?react";
 import RouteList from "../components/navigation/route/routeList";
 
 import { mockNavigationRoute } from "../data/mock/hanyangRoute";
@@ -15,10 +14,8 @@ import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetH
 import useLoading from "../hooks/useLoading";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getMockTest } from "../utils/fetch/mockFetch";
-import Loading from "../components/loading/loading";
 import BackButton from "../components/map/backButton";
 
-import useLoading from "../hooks/useLoading";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 
@@ -55,7 +52,7 @@ const NavigationResultPage = () => {
 	useRedirectUndefined<string | undefined>([university]);
 
 	useEffect(() => {
-		console.log(data);
+		console.log("status", status);
 	}, [status]);
 
 	const dragControls = useDragControls();
