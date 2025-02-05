@@ -151,9 +151,11 @@ export default function MapPage() {
 		if (selectedMarker.from === "Marker" && type) {
 			switch (type) {
 				case RoutePoint.ORIGIN:
+					if (selectedMarker.id === destination?.id) setDestination(undefined);
 					setOrigin(selectedMarker.property);
 					break;
 				case RoutePoint.DESTINATION:
+					if (selectedMarker.id === origin?.id) setOrigin(undefined);
 					setDestination(selectedMarker.property);
 					break;
 			}
@@ -171,11 +173,13 @@ export default function MapPage() {
 		if (!map || !marker) return;
 
 		if (marker.property && (marker.id === origin?.id || marker.id === destination?.id)) {
-			map.setOptions({
-				center: { lat: marker.property.lat, lng: marker.property.lng },
-				zoom: 19,
-			})
-			setSheetOpen(true);
+			if (isSelect) {
+				map.setOptions({
+					center: { lat: marker.property.lat, lng: marker.property.lng },
+					zoom: 19,
+				})
+				setSheetOpen(true);
+			}
 
 			return;
 		}
