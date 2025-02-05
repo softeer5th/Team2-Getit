@@ -153,6 +153,12 @@ export default function MapPage() {
 
 	const toggleCautionButton = () => {
 		if (!map) return;
+		if (zoom <= 16) {
+			map.setOptions({
+				zoom: 17,
+				center: HanyangUniversity,
+			});
+		}
 		setIsCautionActive((isActive) => {
 			toggleMarkers(!isActive, cautionMarkers, map);
 			return !isActive;
@@ -160,6 +166,12 @@ export default function MapPage() {
 	};
 	const toggleDangerButton = () => {
 		if (!map) return;
+		if (zoom <= 16) {
+			map.setOptions({
+				zoom: 17,
+				center: HanyangUniversity,
+			});
+		}
 		setIsDangerActive((isActive) => {
 			toggleMarkers(!isActive, dangerMarkers, map);
 			return !isActive;
