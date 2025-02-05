@@ -17,7 +17,7 @@ import { AdvancedMarker, MarkerTypes } from "../data/types/marker";
 import { RoutePointType } from "../data/types/route";
 import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
-import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
+import createAdvancedMarker, { createUniversityMarker } from "../utils/markers/createAdvanedMarker";
 import toggleMarkers from "../utils/markers/toggleMarkers";
 
 import { Link } from "react-router";
@@ -26,6 +26,7 @@ import ReportModal from "../components/map/reportModal";
 
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
+import { HanyangUniversity } from "../constant/university";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -47,10 +48,12 @@ export default function MapPage() {
 
 	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; id: string }[]>([]);
 	const [dangerMarkers, setDangerMarkers] = useState<AdvancedMarker[]>([]);
-	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(true);
+	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(false);
 
 	const [cautionMarkers, setCautionMarkers] = useState<AdvancedMarker[]>([]);
-	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
+	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(false);
+
+	const [universityMarker, setUniversityMarker] = useState<AdvancedMarker>();
 
 	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
 	const { mode, building: selectedBuilding } = useSearchBuilding();
@@ -61,7 +64,7 @@ export default function MapPage() {
 	useRedirectUndefined<string | undefined>([university]);
 
 	const initMap = () => {
-		if (map === null) return;
+		if (map === null || !AdvancedMarker) return;
 		map.addListener("click", (e: unknown) => {
 			setSheetOpen(false);
 			setSelectedMarker(undefined);
@@ -74,6 +77,14 @@ export default function MapPage() {
 				return curZoom
 			});
 		})
+
+		const centerMarker = createUniversityMarker(
+			AdvancedMarker,
+			map,
+			HanyangUniversity,
+			university ? university : "",
+		)
+		setUniversityMarker(centerMarker);
 	};
 
 	const addBuildings = () => {
@@ -337,13 +348,20 @@ export default function MapPage() {
 		const _buildingMarkers = buildingMarkers.map(buildingMarker => buildingMarker.element);
 
 		if (prevZoom.current >= 17 && zoom <= 16) {
-			toggleMarkers(false, cautionMarkers, map);
-			toggleMarkers(false, dangerMarkers, map);
+			if (isCautionAcitve) {
+				setIsCautionActive(false);
+				toggleMarkers(false, cautionMarkers, map);
+			}
+			if (isDangerAcitve) {
+				setIsDangerActive(false);
+				toggleMarkers(false, dangerMarkers, map);
+			}
+
+			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
 			toggleMarkers(false, _buildingMarkers, map);
 		}
 		else if ((prevZoom.current <= 16 && zoom >= 17)) {
-			toggleMarkers(true, cautionMarkers, map);
-			toggleMarkers(true, dangerMarkers, map);
+			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
 			toggleMarkers(true, _buildingMarkers, map);
 		}
 	}, [map, zoom])
