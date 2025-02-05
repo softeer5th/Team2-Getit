@@ -15,6 +15,7 @@ import OfflinePage from "./pages/offline";
 import useNetworkStatus from "./hooks/useNetworkStatus";
 import ErrorPage from "./pages/error";
 import { Suspense } from "react";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ function App() {
           <Route path="/error/offline" element={<OfflinePage />} />
         </Routes>
       </Suspense>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
