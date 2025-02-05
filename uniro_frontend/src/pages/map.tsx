@@ -289,7 +289,7 @@ export default function MapPage() {
 			originMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
 				title: origin.buildingName,
-				className: "translate-routemarker",
+				className: "translate-marker",
 			});
 		};
 	}, [origin]);
@@ -311,7 +311,7 @@ export default function MapPage() {
 			destinationMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
 				title: destination.buildingName,
-				className: "translate-routemarker",
+				className: "translate-marker",
 			});
 		};
 	}, [destination]);
