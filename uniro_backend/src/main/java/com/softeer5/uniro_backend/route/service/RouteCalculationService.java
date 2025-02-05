@@ -360,13 +360,12 @@ public class RouteCalculationService {
             // 정확히 그 점과 일치하는 노드가 있는지 확인
             Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getX(), cur.getY())));
             if(curNode != null){
-
-                if(i == requests.size() - 1 && endNodeCount < CORE_NODE_CONDITION - 1 && !curNode.getId().equals(startNodeId)){  // 마지막 노드일 경우, 해당 노드가 끝점일 경우
+                createdNodes.add(curNode);
+                if(i == requests.size() - 1 && endNodeCount < CORE_NODE_CONDITION - 1){  // 마지막 노드일 경우, 해당 노드가 끝점일 경우
                     continue;
                 }
 
                 curNode.setCore(true);
-                createdNodes.add(curNode);
                 continue;
             }
 
@@ -463,7 +462,6 @@ public class RouteCalculationService {
 
                 midNode.setCore(true);
 
-                // TODO: Node insert할 때는 좌표값으로 Node 중복 여부 판단 필요
                 nodes.add(midNode);
             }
         }
