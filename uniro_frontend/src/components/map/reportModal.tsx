@@ -13,7 +13,7 @@ export default function ReportModal({ close }: ReportModalProps) {
 		>
 			<Link
 				to={"/report/route"}
-				className="w-full h-[58px] flex items-center justify-between px-5 bg-gray-100 rounded-400 text-kor-body2 font-semibold text-primary-500"
+				className="w-full max-w-[418px] h-[58px] flex items-center justify-between px-5 bg-gray-100 rounded-400 text-kor-body2 font-semibold text-primary-500"
 			>
 				<p>새로운 길 제보</p>
 				<ChevronRight fill="none" />
@@ -21,7 +21,7 @@ export default function ReportModal({ close }: ReportModalProps) {
 
 			<Link
 				to={"/report/hazard"}
-				className="w-full h-[58px] flex items-center justify-between px-5 bg-gray-100 rounded-400 text-kor-body2 font-semibold text-primary-500"
+				className="w-full max-w-[418px] h-[58px] flex items-center justify-between px-5 bg-gray-100 rounded-400 text-kor-body2 font-semibold text-primary-500"
 			>
 				<p>불편한 길 제보</p>
 				<ChevronRight fill="none" />
