@@ -12,11 +12,11 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-public class AdminController implements AdminAPI{
+public class AdminController implements AdminApi {
     private final AdminService adminService;
 
     @Override
-    @GetMapping("/admin/rev/{univId}")
+    @GetMapping("/admin/revision/{univId}")
     public ResponseEntity<List<RevInfoDTO>> getAllRev(@PathVariable("univId") Long univId) {
         return ResponseEntity.ok().body(adminService.getAllRevInfo(univId));
     }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 @Tag(name = "admin 페이지 API")
-public interface AdminAPI {
+public interface AdminApi {
 
     @Operation(summary = "모든 버전정보 조회")
     @ApiResponses(value = {
