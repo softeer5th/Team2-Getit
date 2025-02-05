@@ -39,11 +39,9 @@ public interface RouteApi {
 			@ApiResponse(responseCode = "200", description = "단일 route의 위험&주의 요소 조회 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
-	ResponseEntity<GetRiskResDTO> getRisk(@PathVariable("univId") Long univId,
-												 @RequestParam(value = "start-lat") double startLat,
-												 @RequestParam(value = "start-lng") double startLng,
-												 @RequestParam(value = "end-lat") double endLat,
-												 @RequestParam(value = "end-lng") double endLng);
+	ResponseEntity<GetRiskResDTO> getRisk(
+		@PathVariable("univId") Long univId,
+		@PathVariable("routeId") Long routeId);
 
 	@Operation(summary = "위험&주의 요소 제보")
 	@ApiResponses(value = {

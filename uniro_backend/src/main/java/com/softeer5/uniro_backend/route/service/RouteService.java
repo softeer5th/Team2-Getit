@@ -1,5 +1,7 @@
 package com.softeer5.uniro_backend.route.service;
 
+import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,7 +43,7 @@ public class RouteService {
 
 		// 맵이 존재하지 않을 경우 예외
 		if(routes.isEmpty()) {
-			throw new RouteNotFoundException("Route Not Found", ErrorCode.ROUTE_NOT_FOUND);
+			throw new RouteNotFoundException("Route Not Found", ROUTE_NOT_FOUND);
 		}
 
 		//인접 리스트
@@ -200,37 +202,17 @@ public class RouteService {
 	}
 
 
-	public GetRiskResDTO getRisk(Long univId, double startLat, double startLng, double endLat, double endLng) {
-		String startWTK = GeoUtils.convertDoubleToPointWTK(startLat, startLng);
-		String endWTK = GeoUtils.convertDoubleToPointWTK(endLat, endLng);
-
-		Route routeWithJoin = routeRepository.findRouteByPointsAndUnivId(univId, startWTK ,endWTK)
-				.orElseThrow(() -> new RouteNotFoundException("Route Not Found", ErrorCode.ROUTE_NOT_FOUND));
-
-		/*
-		// LineString 사용버전
-		List<double[]> coordinates = Arrays.asList(
-				new double[]{startLat, startLng},
-				new double[]{endLat, endLng}
-		);
-		String lineStringWTK = Utils.convertDoubleToLineStringWTK(coordinates);
-		Collections.reverse(coordinates);
-		String reverseLineStringWTK = Utils.convertDoubleToLineStringWTK(coordinates);
-
-		Route routeWithoutJoin = routeRepository.findRouteByLineStringAndUnivId(univId,lineStringWTK,reverseLineStringWTK)
-				.orElseThrow(() -> new RouteNotFoundException("Route Not Found", ErrorCode.ROUTE_NOT_FOUND));
-
-		 */
-
-
-		return GetRiskResDTO.of(routeWithJoin);
+	public GetRiskResDTO getRisk(Long univId, Long routeId) {
+		Route route = routeRepository.findById(routeId)
+			.orElseThrow(() -> new RouteNotFoundException("Route not found", ROUTE_NOT_FOUND));
+		return GetRiskResDTO.of(route);
 	}
 
 	@RevisionOperation(RevisionOperationType.UPDATE_RISK)
 	@Transactional
 	public void updateRisk(Long univId, Long routeId, PostRiskReqDTO postRiskReqDTO) {
 		Route route = routeRepository.findByIdAndUnivId(routeId, univId)
-				.orElseThrow(() -> new RouteNotFoundException("Route not Found", ErrorCode.ROUTE_NOT_FOUND));
+				.orElseThrow(() -> new RouteNotFoundException("Route not Found", ROUTE_NOT_FOUND));
 
 		if(!postRiskReqDTO.getCautionTypes().isEmpty() && !postRiskReqDTO.getDangerTypes().isEmpty()){
 			throw new DangerCautionConflictException("DangerFactors and CautionFactors can't exist simultaneously.",

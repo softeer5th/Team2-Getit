@@ -35,13 +35,10 @@ public class RouteController implements RouteApi {
 	}
 
 	@Override
-	@GetMapping("/{univId}/route/risk")
+	@GetMapping("/{univId}/routes/{routeId}/risk")
 	public ResponseEntity<GetRiskResDTO> getRisk(@PathVariable("univId") Long univId,
-												 @RequestParam(value = "start-lat") double startLat,
-												 @RequestParam(value = "start-lng") double startLng,
-												 @RequestParam(value = "end-lat") double endLat,
-												 @RequestParam(value = "end-lng") double endLng){
-		GetRiskResDTO riskResDTO = routeService.getRisk(univId,startLat,startLng,endLat,endLng);
+												 @PathVariable(value = "routeId") Long routeId){
+		GetRiskResDTO riskResDTO = routeService.getRisk(univId, routeId);
 		return ResponseEntity.ok().body(riskResDTO);
 	}
 
