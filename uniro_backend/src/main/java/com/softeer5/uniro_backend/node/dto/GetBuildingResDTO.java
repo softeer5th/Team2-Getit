@@ -10,8 +10,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Schema(name = "GetBuildingResDTO", description = "건물 노드 조회 DTO")
 @Getter
+@Schema(name = "GetBuildingResDTO", description = "건물 노드 조회 DTO")
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class GetBuildingResDTO {
 
@@ -19,7 +19,7 @@ public class GetBuildingResDTO {
 	private final Long nodeId;
 
 	@Schema(description = "건물 노드 좌표 (위도 및 경도)",
-		example = "{\"lag\": 127.123456, \"lat\": 37.123456}")
+		example = "{\"lng\": 127.123456, \"lat\": 37.123456}")
 	private final Map<String, Double> node;
 
 	@Schema(description = "건물 이름", example = "공학관")

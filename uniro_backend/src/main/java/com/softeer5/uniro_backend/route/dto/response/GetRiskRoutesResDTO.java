@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.route.dto;
+package com.softeer5.uniro_backend.route.dto.response;
 
 import java.util.List;
 

@@ -10,12 +10,12 @@ import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointEx
 import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.route.dto.CreateRouteServiceReqDTO;
+import com.softeer5.uniro_backend.route.dto.request.CreateRouteServiceReqDTO;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
 import com.softeer5.uniro_backend.route.entity.Route;
-import com.softeer5.uniro_backend.route.dto.RouteDetailDTO;
-import com.softeer5.uniro_backend.route.dto.RouteInfoDTO;
-import com.softeer5.uniro_backend.route.dto.FastestRouteResDTO;
+import com.softeer5.uniro_backend.route.dto.response.RouteDetailResDTO;
+import com.softeer5.uniro_backend.route.dto.response.RouteInfoResDTO;
+import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -81,7 +81,7 @@ public class RouteCalculationService {
         double totalCost = 0.0;
         double totalDistance = 0.0;
 
-        List<RouteInfoDTO> routeInfoDTOS = new ArrayList<>();
+        List<RouteInfoResDTO> routeInfoDTOS = new ArrayList<>();
         Node currentNode = startNode;
         // 외부 변수를 수정해야하기 때문에 for-loop문 사용
         for (Route route : shortestRoutes) {
@@ -100,10 +100,10 @@ public class RouteCalculationService {
                 secondNode = temp;
             }
 
-            routeInfoDTOS.add(RouteInfoDTO.of(route, firstNode, secondNode));
+            routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
         }
 
-        List<RouteDetailDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
+        List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
         return FastestRouteResDTO.of(hasCaution, totalDistance, totalCost, routeInfoDTOS, details);
     }
@@ -209,8 +209,8 @@ public class RouteCalculationService {
     }
 
     // 길 상세정보를 추출하는 메서드
-    private List<RouteDetailDTO> getRouteDetail(Node startNode, Node endNode, List<Route> shortestRoutes){
-        List<RouteDetailDTO> details = new ArrayList<>();
+    private List<RouteDetailResDTO> getRouteDetail(Node startNode, Node endNode, List<Route> shortestRoutes){
+        List<RouteDetailResDTO> details = new ArrayList<>();
         double accumulatedDistance = 0.0;
         Node now = startNode;
         Map<String,Double> checkPointNodeCoordinates = startNode.getXY();
@@ -223,15 +223,15 @@ public class RouteCalculationService {
             accumulatedDistance += calculateDistance(nowRoute);
 
             if(!nowRoute.getCautionFactors().isEmpty()){
-                details.add(RouteDetailDTO.of(accumulatedDistance - calculateDistance(nowRoute)/2, checkPointType, checkPointNodeCoordinates));
+                details.add(RouteDetailResDTO.of(accumulatedDistance - calculateDistance(nowRoute)/2, checkPointType, checkPointNodeCoordinates));
                 accumulatedDistance = calculateDistance(nowRoute)/2;
                 checkPointNodeCoordinates = getCenter(now, nxt);
                 checkPointType = DirectionType.CAUTION;
             }
 
             if(nxt.equals(endNode)){
-                details.add(RouteDetailDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
-                details.add(RouteDetailDTO.of(0, DirectionType.FINISH, nxt.getXY()));
+                details.add(RouteDetailResDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
+                details.add(RouteDetailResDTO.of(0, DirectionType.FINISH, nxt.getXY()));
                 break;
             }
             if(nxt.isCore()){
@@ -240,7 +240,7 @@ public class RouteCalculationService {
                     now = nxt;
                     continue;
                 }
-                details.add(RouteDetailDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
+                details.add(RouteDetailResDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
                 checkPointNodeCoordinates = nxt.getXY();
                 checkPointType = directionType;
                 accumulatedDistance = 0.0;
@@ -295,7 +295,7 @@ public class RouteCalculationService {
         // 코어 -> 코어 : 처리 필요 X
         // 코어 -> 서브 : 불가한 케이스
         CreateRouteServiceReqDTO startCoordinate = requests.get(0);
-        Node startNode = nodeMap.get(getNodeKey(new Coordinate(startCoordinate.getX(), startCoordinate.getY())));
+        Node startNode = nodeMap.get(getNodeKey(new Coordinate(startCoordinate.getLng(), startCoordinate.getLat())));
 
         if (startNode == null) {
             throw new NodeNotFoundException("Start Node Not Found", NODE_NOT_FOUND);
@@ -310,7 +310,7 @@ public class RouteCalculationService {
             CreateRouteServiceReqDTO cur = requests.get(i);
 
             // 정확히 그 점과 일치하는 노드가 있는지 확인
-            Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getX(), cur.getY())));
+            Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getLng(), cur.getLat())));
             if(curNode != null){
 
                 if(i == requests.size() - 1 && endNodeCount < CORE_NODE_CONDITION - 1 && !curNode.getId().equals(startNodeId)){  // 마지막 노드일 경우, 해당 노드가 끝점일 경우
@@ -322,7 +322,7 @@ public class RouteCalculationService {
                 continue;
             }
 
-            Coordinate coordinate = new Coordinate(cur.getX(), cur.getY());
+            Coordinate coordinate = new Coordinate(cur.getLng(), cur.getLat());
             curNode = Node.builder()
                 .coordinates(geometryFactory.createPoint(coordinate))
                 .isCore(false)

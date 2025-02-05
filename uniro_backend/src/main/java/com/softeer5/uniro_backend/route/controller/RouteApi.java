@@ -1,6 +1,11 @@
 package com.softeer5.uniro_backend.route.controller;
 
-import com.softeer5.uniro_backend.route.dto.*;
+import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetRiskResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetRiskRoutesResDTO;
+import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -11,8 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 @Tag(name = "간선 및 위험&주의 요소 관련 Api")
 public interface RouteApi {

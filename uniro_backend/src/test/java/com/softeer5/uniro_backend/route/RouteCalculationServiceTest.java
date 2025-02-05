@@ -18,7 +18,7 @@ import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
-import com.softeer5.uniro_backend.route.dto.CreateRouteServiceReqDTO;
+import com.softeer5.uniro_backend.route.dto.request.CreateRouteServiceReqDTO;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;

@@ -11,10 +11,19 @@ import com.softeer5.uniro_backend.common.exception.custom.InvalidMapException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteNotFoundException;
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
-import com.softeer5.uniro_backend.route.dto.*;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.softeer5.uniro_backend.route.dto.response.CoreRouteResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetCautionResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetDangerResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetRiskResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetRiskRoutesResDTO;
+import com.softeer5.uniro_backend.route.dto.response.NodeInfoResDTO;
+import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
+import com.softeer5.uniro_backend.route.dto.response.RouteCoordinatesInfoResDTO;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 
@@ -51,10 +60,10 @@ public class RouteService {
 			else if(route.getNode2().isCore()) startNode = route.getNode2();
 		}
 
-		List<NodeInfo> nodeInfos = nodeMap.entrySet().stream()
+		List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
 				.map(entry -> {
 					Node node = entry.getValue();
-					return NodeInfo.of(entry.getKey(), node.getXY());
+					return NodeInfoResDTO.of(entry.getKey(), node.getXY());
 				})
 				.collect(Collectors.toList());
 
@@ -82,8 +91,8 @@ public class RouteService {
 	}
 
 	// coreRoute를 만들어주는 메서드
-	private List<CoreRouteDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
-		List<CoreRouteDTO> result = new ArrayList<>();
+	private List<CoreRouteResDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
+		List<CoreRouteResDTO> result = new ArrayList<>();
 		// core node간의 BFS 할 때 방문여부를 체크하는 set
 		Set<Long> visitedCoreNodes = new HashSet<>();
 		// 길 중복을 처리하기 위한 set
@@ -106,8 +115,8 @@ public class RouteService {
 				Node currentNode = now.getId().equals(r.getNode1().getId()) ? r.getNode2() : r.getNode1();
 
 				// 코어루트를 이루는 node들을 List로 저장
-				List<RouteCoordinatesInfo> coreRoute = new ArrayList<>();
-				coreRoute.add(RouteCoordinatesInfo.of(r.getId(),now.getId(), currentNode.getId()));
+				List<RouteCoordinatesInfoResDTO> coreRoute = new ArrayList<>();
+				coreRoute.add(RouteCoordinatesInfoResDTO.of(r.getId(),now.getId(), currentNode.getId()));
 				routeSet.add(r.getId());
 
 				while (true) {
@@ -126,20 +135,20 @@ public class RouteService {
 					for (Route R : adjMap.get(currentNode.getId())) {
 						if (routeSet.contains(R.getId())) continue;
 						Node nextNode = R.getNode1().getId().equals(currentNode.getId()) ? R.getNode2() : R.getNode1();
-						coreRoute.add(RouteCoordinatesInfo.of(R.getId(), currentNode.getId(), nextNode.getId()));
+						coreRoute.add(RouteCoordinatesInfoResDTO.of(R.getId(), currentNode.getId(), nextNode.getId()));
 						routeSet.add(R.getId());
 						currentNode = nextNode;
 					}
 				}
-				result.add(CoreRouteDTO.of(now.getId(), currentNode.getId(), coreRoute));
+				result.add(CoreRouteResDTO.of(now.getId(), currentNode.getId(), coreRoute));
 			}
 
 		}
 		return result;
 	}
 
-	private CoreRouteDTO getSingleRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
-		List<RouteCoordinatesInfo> coreRoute = new ArrayList<>();
+	private CoreRouteResDTO getSingleRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
+		List<RouteCoordinatesInfoResDTO> coreRoute = new ArrayList<>();
 		Set<Long> visitedNodes = new HashSet<>();
 		visitedNodes.add(startNode.getId());
 
@@ -151,12 +160,12 @@ public class RouteService {
 			for (Route r : adjMap.get(currentNode.getId())) {
 				Node nextNode = r.getNode1().getId().equals(currentNode.getId()) ? r.getNode2() : r.getNode1();
 				if(visitedNodes.contains(nextNode.getId())) continue;
-				coreRoute.add(RouteCoordinatesInfo.of(r.getId(), currentNode.getId(), nextNode.getId()));
+				coreRoute.add(RouteCoordinatesInfoResDTO.of(r.getId(), currentNode.getId(), nextNode.getId()));
 				flag = true;
 				currentNode = nextNode;
 			}
 		}
-		return CoreRouteDTO.of(startNode.getId(), currentNode.getId(), coreRoute);
+		return CoreRouteResDTO.of(startNode.getId(), currentNode.getId(), coreRoute);
 	}
 
 	public GetRiskRoutesResDTO getRiskRoutes(Long univId) {
