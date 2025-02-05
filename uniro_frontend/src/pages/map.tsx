@@ -4,7 +4,7 @@ import { hanyangBuildings } from "../data/mock/hanyangBuildings";
 import createMarkerElement from "../components/map/mapMarkers";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import { BottomSheet, BottomSheetRef } from "react-spring-bottom-sheet";
-import { Building } from "../data/types/node";
+import { Building, NodeId } from "../data/types/node";
 import "react-spring-bottom-sheet/dist/style.css";
 import { MapBottomSheetFromList, MapBottomSheetFromMarker } from "../components/map/mapBottomSheet";
 import TopSheet from "../components/map/TopSheet";
@@ -27,10 +27,11 @@ import ReportModal from "../components/map/reportModal";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 import { HanyangUniversity } from "../constant/university";
+import { University } from "../data/types/university";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
-	id: string | number;
+	nodeId: NodeId;
 	element: AdvancedMarker;
 	property?: Building;
 	factors?: string[];
@@ -46,7 +47,7 @@ export default function MapPage() {
 	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
-	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; id: string }[]>([]);
+	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; nodeId: NodeId }[]>([]);
 	const [dangerMarkers, setDangerMarkers] = useState<AdvancedMarker[]>([]);
 	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(false);
 
@@ -61,7 +62,7 @@ export default function MapPage() {
 	const [_, isOpen, open, close] = useModal();
 
 	const { university } = useUniversityInfo();
-	useRedirectUndefined<string | undefined>([university]);
+	useRedirectUndefined<University | undefined>([university]);
 
 	const initMap = () => {
 		if (map === null || !AdvancedMarker) return;
@@ -82,7 +83,7 @@ export default function MapPage() {
 			AdvancedMarker,
 			map,
 			HanyangUniversity,
-			university ? university : "",
+			university ? university.name : "",
 		)
 		setUniversityMarker(centerMarker);
 	};
@@ -90,9 +91,9 @@ export default function MapPage() {
 	const addBuildings = () => {
 		if (AdvancedMarker === null || map === null) return;
 
-		const markersWithId: { id: string; element: AdvancedMarker }[] = [];
+		const markersWithId: { nodeId: NodeId; element: AdvancedMarker }[] = [];
 		for (const building of hanyangBuildings) {
-			const { id, lat, lng, buildingName } = building;
+			const { nodeId, lat, lng, buildingName } = building;
 
 			const buildingMarker = createAdvancedMarker(
 				AdvancedMarker,
@@ -101,7 +102,7 @@ export default function MapPage() {
 				createMarkerElement({ type: Markers.BUILDING, title: buildingName, className: "translate-marker" }),
 				() => {
 					setSelectedMarker({
-						id: id,
+						nodeId: nodeId,
 						type: Markers.BUILDING,
 						element: buildingMarker,
 						property: building,
@@ -110,7 +111,7 @@ export default function MapPage() {
 				},
 			);
 
-			markersWithId.push({ id: id ? id : "", element: buildingMarker });
+			markersWithId.push({ nodeId: nodeId ? nodeId : -1, element: buildingMarker });
 		}
 
 		setBuildingMarkers(markersWithId);
@@ -130,11 +131,11 @@ export default function MapPage() {
 				createMarkerElement({ type: dangerFactors ? Markers.DANGER : Markers.CAUTION }),
 				() => {
 					setSelectedMarker((prevMarker) => {
-						if (prevMarker && prevMarker.id === id) {
+						if (prevMarker && prevMarker.nodeId === id) {
 							return undefined;
 						}
 						return {
-							id: id,
+							nodeId: id,
 							type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
 							element: hazardMarker,
 							factors: dangerFactors ? dangerFactors : cautionFactors,
@@ -185,11 +186,11 @@ export default function MapPage() {
 		if (selectedMarker.from === "Marker" && type) {
 			switch (type) {
 				case RoutePoint.ORIGIN:
-					if (selectedMarker.id === destination?.id) setDestination(undefined);
+					if (selectedMarker.nodeId === destination?.nodeId) setDestination(undefined);
 					setOrigin(selectedMarker.property);
 					break;
 				case RoutePoint.DESTINATION:
-					if (selectedMarker.id === origin?.id) setOrigin(undefined);
+					if (selectedMarker.nodeId === origin?.nodeId) setOrigin(undefined);
 					setDestination(selectedMarker.property);
 					break;
 			}
@@ -206,7 +207,7 @@ export default function MapPage() {
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
-		if (marker.property && (marker.id === origin?.id || marker.id === destination?.id)) {
+		if (marker.property && (marker.nodeId === origin?.nodeId || marker.nodeId === destination?.nodeId)) {
 			if (isSelect) {
 				map.setOptions({
 					center: { lat: marker.property.lat, lng: marker.property.lng },
@@ -234,7 +235,7 @@ export default function MapPage() {
 				return;
 			}
 
-			if (marker.id === origin?.id) {
+			if (marker.nodeId === origin?.nodeId) {
 				marker.element.content = createMarkerElement({
 					type: Markers.ORIGIN,
 					title: marker.property.buildingName,
@@ -242,7 +243,7 @@ export default function MapPage() {
 				});
 			}
 
-			else if (marker.id === destination?.id) {
+			else if (marker.nodeId === destination?.nodeId) {
 				marker.element.content = createMarkerElement({
 					type: Markers.DESTINATION,
 					title: destination.buildingName,
@@ -273,8 +274,8 @@ export default function MapPage() {
 		}
 	};
 
-	const findBuildingMarker = (id: string): AdvancedMarker | undefined => {
-		const matchedMarker = buildingMarkers.find((el) => el.id === id)?.element;
+	const findBuildingMarker = (id: NodeId): AdvancedMarker | undefined => {
+		const matchedMarker = buildingMarkers.find((el) => el.nodeId === id)?.element;
 
 		return matchedMarker;
 	};
@@ -296,13 +297,13 @@ export default function MapPage() {
 
 	/** 빌딩 리스트에서 넘어온 경우, 일치하는 BuildingMarkerElement를 탐색 */
 	useEffect(() => {
-		if (buildingMarkers.length === 0 || !selectedBuilding || !selectedBuilding.id) return;
+		if (buildingMarkers.length === 0 || !selectedBuilding || !selectedBuilding.nodeId) return;
 
-		const matchedMarker = findBuildingMarker(selectedBuilding.id);
+		const matchedMarker = findBuildingMarker(selectedBuilding.nodeId);
 
 		if (matchedMarker)
 			setSelectedMarker({
-				id: selectedBuilding.id,
+				nodeId: selectedBuilding.nodeId,
 				type: Markers.BUILDING,
 				element: matchedMarker,
 				from: "List",
@@ -312,9 +313,9 @@ export default function MapPage() {
 
 	/** 출발지 결정 시, Marker Content 변경 */
 	useEffect(() => {
-		if (!origin || !origin.id) return;
+		if (!origin || !origin.nodeId) return;
 
-		const originMarker = findBuildingMarker(origin.id);
+		const originMarker = findBuildingMarker(origin.nodeId);
 		if (!originMarker) return;
 
 		originMarker.content = createMarkerElement({
@@ -334,9 +335,9 @@ export default function MapPage() {
 
 	/** 도착지 결정 시, Marker Content 변경 */
 	useEffect(() => {
-		if (!destination || !destination.id) return;
+		if (!destination || !destination.nodeId) return;
 
-		const destinationMarker = findBuildingMarker(destination.id);
+		const destinationMarker = findBuildingMarker(destination.nodeId);
 		if (!destinationMarker) return;
 
 		destinationMarker.content = createMarkerElement({
@@ -405,7 +406,7 @@ export default function MapPage() {
 						/>
 					))}
 			</BottomSheet>
-			{origin && destination && origin.id !== destination.id ? (
+			{origin && destination && origin.nodeId !== destination.nodeId ? (
 				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */
 				<Link to="/result" className="absolute bottom-6 space-y-2 w-full px-4">
 					<Button variant="primary">길찾기</Button>
