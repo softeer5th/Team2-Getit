@@ -28,3 +28,6 @@ spring:
 map:
   api:
     key: ${google.api.key}
+
+cors:
+  allowed-origins: ${allowed-origins}
