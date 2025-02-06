@@ -1,6 +1,6 @@
 import React from "react";
-import { CautionIssueType, DangerIssueType, PassableStatus } from "../../data/types/report";
 import { getThemeByPassableStatus } from "../../utils/report/getThemeByPassableStatus";
+import { CautionIssue, DangerIssue, PassableStatus } from "../../constant/enum/reportEnum";
 
 export const SecondaryFormButton = ({
 	onClick,
@@ -8,9 +8,9 @@ export const SecondaryFormButton = ({
 	content,
 	isSelected,
 }: {
-	onClick: (answer: DangerIssueType | CautionIssueType) => void;
+	onClick: (answer: DangerIssue | CautionIssue) => void;
 	formPassableStatus: PassableStatus;
-	content: DangerIssueType | CautionIssueType;
+	content: DangerIssue | CautionIssue;
 	isSelected: boolean;
 }) => {
 	return (
