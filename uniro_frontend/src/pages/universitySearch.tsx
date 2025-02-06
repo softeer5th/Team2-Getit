@@ -29,7 +29,7 @@ export default function UniversitySearchPage() {
 						setSelectedUniv(undefined);
 					}}
 				>
-					{universityList && universityList.data.map((univ) => (
+					{universityList && universityList.map((univ) => (
 						<UniversityButton
 							key={`university-${univ.id}`}
 							selected={selectedUniv?.id === univ.id}
