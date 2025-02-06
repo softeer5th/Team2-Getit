@@ -1,4 +1,4 @@
-import { CautionIssueType, DangerIssueType, PassableStatus } from "../../constant/enum/reportEnum";
+import { CautionIssue, DangerIssue, PassableStatus } from "../../constant/enum/reportEnum";
 
 export type ReportModeType = "create" | "update";
 
@@ -9,11 +9,12 @@ export interface PrimaryQuestionButton {
 }
 
 export interface IssueQuestionButtons {
-	danger: DangerIssueType[];
-	caution: CautionIssueType[];
+	danger: DangerIssue[];
+	caution: CautionIssue[];
 }
 export interface ReportFormData {
 	passableStatus: PassableStatus;
 	dangerIssues: IssueTypeKey[];
 	cautionIssues: IssueTypeKey[];
+
 }

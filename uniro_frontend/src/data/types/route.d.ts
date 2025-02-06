@@ -1,6 +1,8 @@
+import { Markers } from "../../constant/enum/markerEnum";
 import { CautionIssueType, DangerIssueType } from "../../constant/enum/reportEnum";
+import { RoutePoint } from "../../constant/enum/routeEnum";
 import { Coord } from "./coord";
-import { Node } from "./node";
+import { MarkerTypes } from "./marker";
 
 export type RouteId = number;
 
@@ -37,6 +39,8 @@ export interface CoreRoutes {
 }
 
 export type CoreRoutesList = CoreRoutes[];
+
+export type RoutePointType = RoutePoint.ORIGIN | RoutePoint.DESTINATION;
 
 export type RouteDetail = {
 	dist: number;
