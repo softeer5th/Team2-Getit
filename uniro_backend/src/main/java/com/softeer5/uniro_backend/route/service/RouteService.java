@@ -164,6 +164,7 @@ public class RouteService {
 				if(visitedNodes.contains(nextNode.getId())) continue;
 				coreRoute.add(RouteCoordinatesInfoResDTO.of(r.getId(), currentNode.getId(), nextNode.getId()));
 				flag = true;
+				visitedNodes.add(nextNode.getId());
 				currentNode = nextNode;
 			}
 		}
