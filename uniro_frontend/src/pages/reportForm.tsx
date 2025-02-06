@@ -13,7 +13,7 @@ import useScrollControl from "../hooks/useScrollControl";
 import useModal from "../hooks/useModal";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getSingleRouteRisk, postReport } from "../api/route";
 import { University } from "../data/types/university";
 import { useNavigate } from "react-router";
@@ -23,6 +23,7 @@ const ReportForm = () => {
 
 	const navigate = useNavigate();
 	const redirectToMap = () => navigate("/map");
+	const queryClient = useQueryClient();
 
 	const [disabled, setDisabled] = useState<boolean>(true);
 
@@ -38,7 +39,7 @@ const ReportForm = () => {
 	const routeId = 1;
 
 	const { data } = useSuspenseQuery({
-		queryKey: ["user", university?.id ?? 1001, routeId],
+		queryKey: ["report", university?.id ?? 1001, routeId],
 		queryFn: async () => {
 			try {
 				const data = await getSingleRouteRisk(university?.id ?? 1001, routeId);
@@ -57,6 +58,7 @@ const ReportForm = () => {
 	// 임시 Error 처리
 	useEffect(() => {
 		if (data.routeId === -1) {
+			queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
 			setErrorTitle("존재하지 않은 경로예요");
 			openFail();
 		}
@@ -122,6 +124,7 @@ const ReportForm = () => {
 				cautionTypes: formData.cautionIssues,
 			}),
 		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
 			openSuccess();
 		},
 		onError: () => {
