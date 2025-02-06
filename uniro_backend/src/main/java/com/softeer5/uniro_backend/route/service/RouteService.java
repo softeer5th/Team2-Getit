@@ -181,7 +181,7 @@ public class RouteService {
 
 	private List<GetDangerResDTO> mapRoutesToDangerDTO(List<Route> routes) {
 		return routes.stream()
-			.filter(route -> route.getDangerFactors() != null) // 위험 요소가 있는 경로만 필터링
+			.filter(route -> !route.getDangerFactors().isEmpty() && route.getCautionFactors().isEmpty()) // 위험 요소가 있는 경로만 필터링
 			.map(route -> GetDangerResDTO.of(
 				route.getNode1(),
 				route.getNode2(),
@@ -192,7 +192,7 @@ public class RouteService {
 
 	private List<GetCautionResDTO> mapRoutesToCautionDTO(List<Route> routes) {
 		return routes.stream()
-			.filter(route -> route.getDangerFactors() == null && route.getCautionFactors() != null)
+			.filter(route -> route.getDangerFactors().isEmpty() && !route.getCautionFactors().isEmpty())
 			.map(route -> GetCautionResDTO.of(
 				route.getNode1(),
 				route.getNode2(),
