@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.node.client;
+package com.softeer5.uniro_backend.external;
 
 import com.softeer5.uniro_backend.node.entity.Node;
 

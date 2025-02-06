@@ -1,15 +1,12 @@
 package com.softeer5.uniro_backend.common.utils;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTWriter;
 
 import java.util.List;
 
 public final class GeoUtils {
-    private static final GeometryFactory geometryFactory = new GeometryFactory();
+    private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
     private GeoUtils(){
         // 인스턴스화 방지

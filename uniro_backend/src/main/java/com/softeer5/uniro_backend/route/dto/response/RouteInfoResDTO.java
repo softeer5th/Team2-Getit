@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.route.dto;
+package com.softeer5.uniro_backend.route.dto.response;
 
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.route.entity.CautionType;
@@ -13,18 +13,19 @@ import java.util.Set;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class RouteInfoDTO {
+@Schema(name = "RouteInfoResDTO", description = "경로 정보 DTO")
+public class RouteInfoResDTO {
     @Schema(description = "위험요소가 있는 길의 ID", example = "2")
     private final Long routeId;
-    @Schema(description = "노드 1의 좌표", example = "{\"lag\": 127.123456, \"lat\": 37.123456}")
+    @Schema(description = "노드 1의 좌표", example = "{\"lng\": 127.123456, \"lat\": 37.123456}")
     private final Map<String,Double> node1;
-    @Schema(description = "노드 2의 좌표", example = "{\"lag\": 127.123456, \"lat\": 37.123456}")
+    @Schema(description = "노드 2의 좌표", example = "{\"lng\": 127.123456, \"lat\": 37.123456}")
     private final Map<String,Double> node2;
     @Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
     private final Set<CautionType> cautionFactors;
 
-    public static RouteInfoDTO of(Route route, Node node1, Node node2) {
-        return new RouteInfoDTO(route.getId(),
+    public static RouteInfoResDTO of(Route route, Node node1, Node node2) {
+        return new RouteInfoResDTO(route.getId(),
                 node1.getXY(),
                 node2.getXY(),
                 route.getCautionFactors());
