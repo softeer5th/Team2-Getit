@@ -12,7 +12,7 @@ interface MapBottomSheetFromListProps {
 export function MapBottomSheetFromList({ building, buttonText, onClick }: MapBottomSheetFromListProps) {
 	if (building.property === undefined) return;
 
-	const { id, lng, lat, isCore, buildingName, buildingImageUrl, phoneNumber, address } = building.property;
+	const { nodeId, lng, lat, buildingName, buildingImageUrl, phoneNumber, address } = building.property;
 
 	return (
 		<div className="h-full px-5 pt-3 pb-6 flex flex-col items-between">
@@ -46,7 +46,7 @@ interface MapBottomSheetProps {
 export function MapBottomSheetFromMarker({ building, onClickLeft, onClickRight }: MapBottomSheetProps) {
 	if (building.property === undefined) return;
 
-	const { id, lng, lat, isCore, buildingName, buildingImageUrl, phoneNumber, address } = building.property;
+	const { nodeId, lng, lat, buildingName, buildingImageUrl, phoneNumber, address } = building.property;
 
 	return (
 		<div className="h-full px-5 pt-3 pb-6 flex flex-col items-between">
