@@ -29,7 +29,7 @@ public class GetCautionResDTO {
 	@Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
 	private final List<CautionType> cautionTypes;
 
-	public static GetCautionResDTO of(Node node1, Node node2, Long routeId, List<CautionType> cautionTypes){
-		return new GetCautionResDTO(node1.getXY(), node2.getXY(), routeId, cautionTypes);
+	public static GetCautionResDTO of(Map<String, Double> node1, Map<String, Double> node2, Long routeId, List<CautionType> cautionTypes){
+		return new GetCautionResDTO(node1, node2, routeId, cautionTypes);
 	}
 }

@@ -62,11 +62,13 @@ public class Route {
 
 	@Convert(converter = CautionListConverter.class)
 	@Column(name = "caution_factors")
-	private Set<CautionType> cautionFactors;
+	@NotNull
+	private Set<CautionType> cautionFactors = new HashSet<>();
 
 	@Convert(converter = DangerListConverter.class)
 	@Column(name = "danger_factors")
-	private Set<DangerType> dangerFactors;
+	@NotNull
+	private Set<DangerType> dangerFactors = new HashSet<>();
 
 	public List<CautionType> getCautionFactorsByList(){
 		return cautionFactors.stream().toList();
@@ -77,25 +79,13 @@ public class Route {
 	}
 
 	public void setCautionFactors(List<CautionType> cautionFactors) {
-		if (this.cautionFactors == null) {
-			this.cautionFactors = new HashSet<>();
-		} else {
-			this.cautionFactors.clear();
-		}
-		if (cautionFactors != null) {
-			this.cautionFactors.addAll(cautionFactors);
-		}
+		this.cautionFactors.clear();
+		this.cautionFactors.addAll(cautionFactors);
 	}
 
 	public void setDangerFactors(List<DangerType> dangerFactors) {
-		if (this.dangerFactors == null) {
-			this.dangerFactors = new HashSet<>();
-		} else {
-			this.dangerFactors.clear();
-		}
-		if (dangerFactors != null) {
-			this.dangerFactors.addAll(dangerFactors);
-		}
+		this.dangerFactors.clear();
+		this.dangerFactors.addAll(dangerFactors);
 	}
 
 	@Builder
