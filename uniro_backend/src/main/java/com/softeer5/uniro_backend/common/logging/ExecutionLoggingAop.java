@@ -58,8 +58,8 @@ public class ExecutionLoggingAop {
 		String task = className + "." + methodName;
 
 		log.info("");
-		log.info("🚨 userId = {} {} Start", userId, className);
-		log.info("userId = {} [Call Method] {}: {}", userId, httpMethod, task);
+		log.info("🚨 [ userId = {} ] {} Start", userId, className);
+		log.info("[ userId = {} ] [Call Method] {}: {}", userId, httpMethod, task);
 
 		Object[] paramArgs = pjp.getArgs();
 		for (Object object : paramArgs) {
@@ -91,7 +91,7 @@ public class ExecutionLoggingAop {
 		try {
 			result = pjp.proceed();
 		} catch (Exception e) {
-			log.warn("[ERROR] userId = {} {} 메서드 예외 발생 : {}", userId, task, e.getMessage());
+			log.warn("[ERROR] [ userId = {} ] {} 메서드 예외 발생 : {}", userId, task, e.getMessage());
 			throw e;
 		} finally {
 			// Controller 클래스일 때만 ThreadLocal 값 삭제
@@ -106,7 +106,7 @@ public class ExecutionLoggingAop {
 		long executionTime = sw.getTotalTimeMillis();
 
 		log.info("[ExecutionTime] {} --> {} (ms)", task, executionTime);
-		log.info("🚨 userId = {} {} End", userId, className);
+		log.info("🚨 [ userId = {} ] {} End", userId, className);
 		log.info("");
 
 		return result;
@@ -154,6 +154,6 @@ public class ExecutionLoggingAop {
 
 		// 요청 메시지 출력
 		log.info("✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅ New request");
-		log.info("HTTP Request: [ userId = "+ userId + " ]\n" + httpMessage);
+		log.info("[ userId = "+ userId + " ] HTTP Request: \n" + httpMessage);
 	}
 }
