@@ -25,10 +25,10 @@ public interface NodeApi {
 	ResponseEntity<List<GetBuildingResDTO>> getBuildings(
 		@PathVariable("univId") Long univId,
 		@RequestParam(value = "level", required = false, defaultValue = "1") int level,
-		@RequestParam(value = "left-up-lng") double leftUpLng,
 		@RequestParam(value = "left-up-lat") double leftUpLat,
-		@RequestParam(value = "right-down-lng") double rightDownLng,
-		@RequestParam(value = "right-down-lat") double rightDownLat
+		@RequestParam(value = "left-up-lng") double leftUpLng,
+		@RequestParam(value = "right-down-lat") double rightDownLat,
+		@RequestParam(value = "right-down-lng") double rightDownLng
 	);
 
 	@Operation(summary = "건물 노드 검색")

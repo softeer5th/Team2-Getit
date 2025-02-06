@@ -24,13 +24,13 @@ public class NodeController implements NodeApi {
 	public ResponseEntity<List<GetBuildingResDTO>> getBuildings(
 		@PathVariable("univId") Long univId,
 		@RequestParam(value = "level", required = false, defaultValue = "1") int level,
-		@RequestParam(value = "left-up-lng") double leftUpLng,
 		@RequestParam(value = "left-up-lat") double leftUpLat,
-		@RequestParam(value = "right-down-lng") double rightDownLng,
-		@RequestParam(value = "right-down-lat") double rightDownLat
+		@RequestParam(value = "left-up-lng") double leftUpLng,
+		@RequestParam(value = "right-down-lat") double rightDownLat,
+		@RequestParam(value = "right-down-lng") double rightDownLng
 	) {
-		List<GetBuildingResDTO> buildingResDTOS = nodeService.getBuildings(univId, level, leftUpLng, leftUpLat,
-			rightDownLng, rightDownLat);
+		List<GetBuildingResDTO> buildingResDTOS = nodeService.getBuildings(univId, level, leftUpLat, leftUpLng,
+			rightDownLat, rightDownLng);
 		return ResponseEntity.ok().body(buildingResDTOS);
 	}
 

@@ -18,9 +18,9 @@ public interface BuildingRepository extends JpaRepository<Building, Long>, Build
         JOIN FETCH Node n ON b.nodeId = n.id
         WHERE b.univId = :univId 
         AND b.level >= :level
-        AND ST_Within(n.coordinates, ST_MakeEnvelope(:lux, :luy, :rdx, :rdy, 4326))
+        AND ST_Within(n.coordinates, ST_PolygonFromText((:polygon),4326))
     """)
-	List<BuildingNode> findByUnivIdAndLevelWithNode(Long univId, int level, double lux , double luy, double rdx , double rdy);
+	List<BuildingNode> findByUnivIdAndLevelWithNode(Long univId, int level, String polygon);
 
 	@Query("""
         SELECT new com.softeer5.uniro_backend.node.dto.BuildingNode(b, n)
