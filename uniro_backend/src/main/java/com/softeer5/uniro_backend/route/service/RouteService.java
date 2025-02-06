@@ -12,8 +12,8 @@ import com.softeer5.uniro_backend.common.exception.custom.DangerCautionConflictE
 import com.softeer5.uniro_backend.common.exception.custom.InvalidMapException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteNotFoundException;
 import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.common.utils.GeoUtils;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -171,7 +171,7 @@ public class RouteService {
 	}
 
 	public GetRiskRoutesResDTO getRiskRoutes(Long univId) {
-		List<Route> riskRoutes = routeRepository.findRiskRouteByUnivIdWithNode(univId);
+		List<Route> riskRoutes = routeRepository.findRiskRouteByUnivId(univId);
 
 		List<GetDangerResDTO> dangerRoutes = mapRoutesToDangerDTO(riskRoutes);
 		List<GetCautionResDTO> cautionRoutes = mapRoutesToCautionDTO(riskRoutes);
@@ -183,8 +183,8 @@ public class RouteService {
 		return routes.stream()
 			.filter(route -> !route.getDangerFactors().isEmpty() && route.getCautionFactors().isEmpty()) // 위험 요소가 있는 경로만 필터링
 			.map(route -> GetDangerResDTO.of(
-				route.getNode1(),
-				route.getNode2(),
+				getPoint(route.getPath().getCoordinates()[0]),
+				getPoint(route.getPath().getCoordinates()[1]),
 				route.getId(),
 				route.getDangerFactorsByList()
 			)).toList();
@@ -194,11 +194,18 @@ public class RouteService {
 		return routes.stream()
 			.filter(route -> route.getDangerFactors().isEmpty() && !route.getCautionFactors().isEmpty())
 			.map(route -> GetCautionResDTO.of(
-				route.getNode1(),
-				route.getNode2(),
+				getPoint(route.getPath().getCoordinates()[0]),
+				getPoint(route.getPath().getCoordinates()[1]),
 				route.getId(),
 				route.getCautionFactorsByList()
 			)).toList();
+	}
+
+	private Map<String, Double> getPoint(Coordinate c) {
+		Map<String, Double> point = new HashMap<>();
+		point.put("lat", c.getY());
+		point.put("lng", c.getX());
+		return point;
 	}
 
 
