@@ -4,5 +4,5 @@ public enum CautionType {
 	CURB,   // 턱
 	CRACK,   // 균열
 	SLOPE,  // 경사
-	ETC  // 계단
+	ETC  // 기타
 }
