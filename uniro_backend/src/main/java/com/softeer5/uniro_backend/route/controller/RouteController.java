@@ -2,14 +2,14 @@ package com.softeer5.uniro_backend.route.controller;
 
 import com.softeer5.uniro_backend.route.dto.*;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.softeer5.uniro_backend.route.service.RouteService;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -50,6 +50,14 @@ public class RouteController implements RouteApi {
 									   @RequestBody PostRiskReqDTO postRiskReqDTO){
 		routeService.updateRisk(univId,routeId,postRiskReqDTO);
 		return ResponseEntity.ok().build();
+	}
+
+	@Override
+	@PostMapping("/{univId}/route")
+	public ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
+											 @RequestBody CreateRouteReqDTO routes){
+		routeCalculationService.createRoute(univId,routes);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@Override
