@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.route.controller;
 
+import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.dto.response.GetAllRoutesResDTO;
 import com.softeer5.uniro_backend.route.dto.response.GetRiskResDTO;
@@ -51,6 +52,14 @@ public interface RouteApi {
 	ResponseEntity<Void> updateRisk(@PathVariable("univId") Long univId,
 								  @PathVariable("routeId") Long routeId,
 								  @RequestBody PostRiskReqDTO postRiskReqDTO);
+
+	@Operation(summary = "길 추가 로직")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "201", description = "길 추가 성공"),
+			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
+									  @RequestBody CreateRoutesReqDTO routes);
 
 	@Operation(summary = "빠른 길 계산")
 	@ApiResponses(value = {

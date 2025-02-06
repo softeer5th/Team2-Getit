@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-@Schema(name = "CoreRouteResDTO", description = "코어 루트 정보 DTO")
-public class CreateRouteServiceReqDTO {
+@Schema(name = "CreateRouteReqDTO", description = "길 생성 단일 노드 정보 DTO")
+public class CreateRouteReqDTO {
 
 	@Schema(description = "x 좌표", example = "127.123456")
 	private final double lng;

@@ -2,6 +2,7 @@ package com.softeer5.uniro_backend.route.entity;
 
 import static jakarta.persistence.FetchType.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -76,13 +77,25 @@ public class Route {
 	}
 
 	public void setCautionFactors(List<CautionType> cautionFactors) {
-		this.cautionFactors.clear();
-        this.cautionFactors.addAll(cautionFactors);
+		if (this.cautionFactors == null) {
+			this.cautionFactors = new HashSet<>();
+		} else {
+			this.cautionFactors.clear();
+		}
+		if (cautionFactors != null) {
+			this.cautionFactors.addAll(cautionFactors);
+		}
 	}
 
 	public void setDangerFactors(List<DangerType> dangerFactors) {
-		this.dangerFactors.clear();
-		this.dangerFactors.addAll(dangerFactors);
+		if (this.dangerFactors == null) {
+			this.dangerFactors = new HashSet<>();
+		} else {
+			this.dangerFactors.clear();
+		}
+		if (dangerFactors != null) {
+			this.dangerFactors.addAll(dangerFactors);
+		}
 	}
 
 	@Builder

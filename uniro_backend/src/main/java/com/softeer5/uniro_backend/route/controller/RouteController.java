@@ -1,11 +1,14 @@
 package com.softeer5.uniro_backend.route.controller;
 
+import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.dto.response.GetAllRoutesResDTO;
 import com.softeer5.uniro_backend.route.dto.response.GetRiskResDTO;
 import com.softeer5.uniro_backend.route.dto.response.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +52,14 @@ public class RouteController implements RouteApi {
 									   @RequestBody PostRiskReqDTO postRiskReqDTO){
 		routeService.updateRisk(univId,routeId,postRiskReqDTO);
 		return ResponseEntity.ok().build();
+	}
+
+	@Override
+	@PostMapping("/{univId}/route")
+	public ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
+											 @RequestBody CreateRoutesReqDTO routes){
+		routeCalculationService.createRoute(univId, routes);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@Override

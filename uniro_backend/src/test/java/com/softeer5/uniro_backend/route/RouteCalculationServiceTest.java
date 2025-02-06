@@ -18,7 +18,7 @@ import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
-import com.softeer5.uniro_backend.route.dto.request.CreateRouteServiceReqDTO;
+import com.softeer5.uniro_backend.route.dto.request.CreateRouteReqDTO;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;
@@ -41,10 +41,10 @@ class RouteCalculationServiceTest {
 		void 기본_경로_생성() {
 			// Given
 			Long univId = 1001L;
-			List<CreateRouteServiceReqDTO> requests = List.of(
-				new CreateRouteServiceReqDTO(0, 0),
-				new CreateRouteServiceReqDTO(1, 1),
-				new CreateRouteServiceReqDTO(2, 2)
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(1, 1),
+				new CreateRouteReqDTO(2, 2)
 			);
 
 			Node node0 = NodeFixture.createNode(-1, 0);
@@ -70,10 +70,10 @@ class RouteCalculationServiceTest {
 		void 기존_경로와_겹치는_경우_예외발생() {
 			// Given
 			Long univId = 1001L;
-			List<CreateRouteServiceReqDTO> requests = List.of(
-				new CreateRouteServiceReqDTO(0, 0),
-				new CreateRouteServiceReqDTO(1, 1),
-				new CreateRouteServiceReqDTO(2, 2)
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(1, 1),
+				new CreateRouteReqDTO(2, 2)
 			);
 
 			Node node1 = NodeFixture.createNode(0, 0);
@@ -93,10 +93,10 @@ class RouteCalculationServiceTest {
 		void 연결된_간선이_3개가_된_경우_시작노드가_서브에서_코어노드로_변경된다() {
 			// Given
 			Long univId = 1001L;
-			List<CreateRouteServiceReqDTO> requests = List.of(
-				new CreateRouteServiceReqDTO(0, 0),
-				new CreateRouteServiceReqDTO(3, 3),
-				new CreateRouteServiceReqDTO(5, 3)
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(3, 3),
+				new CreateRouteReqDTO(5, 3)
 			);
 
 			Node node0 = NodeFixture.createNode(0, -1);
@@ -125,10 +125,10 @@ class RouteCalculationServiceTest {
 		void 출발점과_도착점이_같은_경우_예외처리() {
 			// Given
 			Long univId = 1001L;
-			List<CreateRouteServiceReqDTO> requests = List.of(
-				new CreateRouteServiceReqDTO(0, 0),
-				new CreateRouteServiceReqDTO(1, 1),
-				new CreateRouteServiceReqDTO(0, 0)
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(1, 1),
+				new CreateRouteReqDTO(0, 0)
 			);
 
 			Node node1 = NodeFixture.createNode(0, 0);
@@ -149,12 +149,12 @@ class RouteCalculationServiceTest {
 		void 기존에_존재하는_노드와_연결할_경우_코어노드가_될_수_있다() {
 			// Given
 			Long univId = 1001L;
-			List<CreateRouteServiceReqDTO> requests = List.of(
-				new CreateRouteServiceReqDTO(0, 0),
-				new CreateRouteServiceReqDTO(2, 1),
-				new CreateRouteServiceReqDTO(2, 2),
-				new CreateRouteServiceReqDTO(0, 2),
-				new CreateRouteServiceReqDTO(-1, 2)
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(2, 1),
+				new CreateRouteReqDTO(2, 2),
+				new CreateRouteReqDTO(0, 2),
+				new CreateRouteReqDTO(-1, 2)
 			);
 
 			Node node1 = NodeFixture.createNode(0, 0);
