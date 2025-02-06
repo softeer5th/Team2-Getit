@@ -26,7 +26,7 @@ public class RevisionOperationAspect {
         Object result;
         switch (opType) {
             case UPDATE_RISK -> result = updateRiskHandler(joinPoint);
-            case UPDATE_ROUTE -> result = updateRouteHandler(joinPoint);
+            case CREATE_ROUTE -> result = updateRouteHandler(joinPoint);
             default -> result = joinPoint.proceed();
         }
 

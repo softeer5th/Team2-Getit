@@ -265,7 +265,7 @@ public class RouteCalculationService {
     }
 
     @Transactional
-    @RevisionOperation(RevisionOperationType.UPDATE_ROUTE)
+    @RevisionOperation(RevisionOperationType.CREATE_ROUTE)
     public void createRoute(Long univId, CreateRoutesReqDTO requests){
         List<Node> nodes = checkRouteCross(univId, requests.getStartNodeId(), requests.getEndNodeId(), requests.getCoordinates());
         mapClient.fetchHeights(nodes);
