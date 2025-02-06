@@ -26,6 +26,20 @@ export interface NavigationRoute extends Route {
 	cautionTypes: CautionIssueType[];
 }
 
+export interface CoreRoute {
+	routeId: RouteId;
+	node1: Node;
+	node2: Node;
+}
+
+export interface CoreRoutes {
+	coreNode1Id: NodeId;
+	coreNode2Id: NodeId;
+	routes: CoreRoute[];
+}
+
+export type CoreRoutesList = CoreRoutes[];
+
 export type RoutePointType = RoutePoint.ORIGIN | RoutePoint.DESTINATION;
 
 export type RouteDetail = {

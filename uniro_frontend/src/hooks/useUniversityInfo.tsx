@@ -7,7 +7,6 @@ interface UniversityInfoStore {
 	setUniversity: (university: University) => void;
 	resetUniversity: () => void;
 }
-
 const useUniversityInfo = create(
 	persist<UniversityInfoStore>(
 		(set) => ({
@@ -24,5 +23,4 @@ const useUniversityInfo = create(
 		},
 	),
 );
-
 export default useUniversityInfo;

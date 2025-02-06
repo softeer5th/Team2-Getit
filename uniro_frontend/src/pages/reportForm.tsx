@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { PassableStatus, DangerIssueType, CautionIssueType } from "../constant/enum/reportEnum";
+import { PassableStatus, IssueTypeKey } from "../constant/enum/reportEnum";
 import { ReportModeType, ReportFormData } from "../data/types/report";
 
 import { ReportTitle } from "../components/report/reportTitle";
@@ -11,38 +11,73 @@ import Button from "../components/customButton";
 
 import useScrollControl from "../hooks/useScrollControl";
 import useModal from "../hooks/useModal";
-import useReportHazard from "../hooks/useReportHazard";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { getSingleRouteRisk, postReport } from "../api/route";
+import { University } from "../data/types/university";
+import { useNavigate } from "react-router";
 
 const ReportForm = () => {
 	useScrollControl();
 
-	const [reportMode, setReportMode] = useState<ReportModeType | null>(null);
-
-	const [formData, setFormData] = useState<ReportFormData>({
-		passableStatus: PassableStatus.INITIAL,
-		dangerIssues: [],
-		cautionIssues: [],
-	});
+	const navigate = useNavigate();
+	const redirectToMap = () => navigate("/map");
+	const queryClient = useQueryClient();
 
 	const [disabled, setDisabled] = useState<boolean>(true);
 
-	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
-	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
+	const [FailModal, isFailOpen, openFail, closeFail] = useModal(redirectToMap);
+	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(redirectToMap);
 
-	const { reportType, startNode, endNode } = useReportHazard();
+	const [errorTitle, setErrorTitle] = useState<string>("");
 
 	const { university } = useUniversityInfo();
-	useRedirectUndefined<string | undefined>([university, reportType]);
 
+	useRedirectUndefined<University | undefined>([university]);
+
+	const routeId = 1;
+
+	const { data } = useSuspenseQuery({
+		queryKey: ["report", university?.id ?? 1001, routeId],
+		queryFn: async () => {
+			try {
+				const data = await getSingleRouteRisk(university?.id ?? 1001, routeId);
+				return data;
+			} catch (e) {
+				return {
+					routeId: -1,
+					dangerTypes: [],
+					cautionTypes: [],
+				};
+			}
+		},
+		retry: 1,
+	});
+
+	// 임시 Error 처리
 	useEffect(() => {
-		console.log(reportType, startNode, endNode);
+		if (data.routeId === -1) {
+			queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
+			setErrorTitle("존재하지 않은 경로예요");
+			openFail();
+		}
+	}, [data]);
 
-		setTimeout(() => {
-			setReportMode("update");
-		}, 2000);
-	}, []);
+	const [reportMode, setReportMode] = useState<ReportModeType | null>(
+		data.cautionTypes.length > 0 || data.dangerTypes.length > 0 ? "update" : "create",
+	);
+
+	const [formData, setFormData] = useState<ReportFormData>({
+		passableStatus:
+			reportMode === "create"
+				? PassableStatus.INITIAL
+				: data.cautionTypes.length > 0
+					? PassableStatus.CAUTION
+					: PassableStatus.DANGER,
+		dangerIssues: data.dangerTypes,
+		cautionIssues: data.cautionTypes,
+	});
 
 	useEffect(() => {
 		if (
@@ -59,55 +94,63 @@ const ReportForm = () => {
 	const handlePrimarySelect = (status: PassableStatus) => {
 		setFormData((prev) => ({
 			passableStatus: status === prev.passableStatus ? PassableStatus.INITIAL : status,
-			dangerIssues: status === PassableStatus.DANGER ? [] : prev.dangerIssues,
-			cautionIssues: status === PassableStatus.CAUTION ? [] : prev.cautionIssues,
+			dangerIssues: status === prev.passableStatus ? prev.dangerIssues : [],
+			cautionIssues: status === prev.passableStatus ? prev.cautionIssues : [],
 		}));
 	};
 
-	const handleSecondarySelect = (answerType: DangerIssueType | CautionIssueType) => {
+	const handleSecondarySelect = (answerType: IssueTypeKey) => {
 		if (formData.passableStatus === PassableStatus.DANGER) {
 			setFormData((prev) => ({
 				...prev,
-				dangerIssues: prev.dangerIssues.includes(answerType as DangerIssueType)
+				dangerIssues: prev.dangerIssues.includes(answerType)
 					? prev.dangerIssues.filter((issue) => issue !== answerType)
-					: [...prev.dangerIssues, answerType as DangerIssueType],
+					: [...prev.dangerIssues, answerType],
 			}));
 		} else if (formData.passableStatus === PassableStatus.CAUTION) {
 			setFormData((prev) => ({
 				...prev,
-				cautionIssues: prev.cautionIssues.includes(answerType as CautionIssueType)
+				cautionIssues: prev.cautionIssues.includes(answerType)
 					? prev.cautionIssues.filter((issue) => issue !== answerType)
-					: [...prev.cautionIssues, answerType as CautionIssueType],
+					: [...prev.cautionIssues, answerType],
 			}));
 		}
 	};
 
-	const onReportSubmitSuccess = () => {
-		openSuccess();
-	};
+	const { mutate } = useMutation({
+		mutationFn: () =>
+			postReport(university?.id ?? 1001, routeId, {
+				dangerTypes: formData.dangerIssues,
+				cautionTypes: formData.cautionIssues,
+			}),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
+			openSuccess();
+		},
+		onError: () => {
+			setErrorTitle("제보에 실패하였습니다");
+			openFail();
+		},
+	});
 
-	const onReportSubmitFail = () => {
-		openFail();
-	};
-
-	return reportMode ? (
+	return (
 		<div className="flex flex-col h-svh w-full max-w-[450px] mx-auto relative">
-			<ReportTitle reportMode={reportMode} />
+			<ReportTitle reportMode={reportMode!} />
 			<ReportDivider />
 			<div className="flex-1 overflow-y-auto">
 				<PrimaryForm
-					reportMode={reportMode}
+					reportMode={reportMode!}
 					passableStatus={formData.passableStatus}
 					handlePrimarySelect={handlePrimarySelect}
 				/>
 				<SecondaryForm
-					reportMode={reportMode}
+					reportMode={reportMode!}
 					formData={formData}
 					handleSecondarySelect={handleSecondarySelect}
 				/>
 			</div>
 			<div className="mb-4 w-full px-4">
-				<Button onClick={onReportSubmitSuccess} variant={disabled ? "disabled" : "primary"}>
+				<Button onClick={() => mutate()} variant={disabled ? "disabled" : "primary"}>
 					제보하기
 				</Button>
 			</div>
@@ -121,7 +164,7 @@ const ReportForm = () => {
 				</div>
 			</SuccessModal>
 			<FailModal>
-				<p className="text-kor-body1 font-bold text-system-red">이미 삭제된 경로예요</p>
+				<p className="text-kor-body1 font-bold text-system-red">{errorTitle}</p>
 				<div className="space-y-0">
 					<p className="text-kor-body3 font-regular text-gray-700">
 						해당 경로는 다른 사용자에 의해 삭제되어,
@@ -130,8 +173,6 @@ const ReportForm = () => {
 				</div>
 			</FailModal>
 		</div>
-	) : (
-		<div>로딩중...</div>
 	);
 };
 

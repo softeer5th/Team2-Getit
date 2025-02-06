@@ -10,8 +10,7 @@ export const useDynamicSuspense = () => {
 	useEffect(() => {
 		const newFallback = fallbackConfig[location.pathname] || fallbackConfig["/"];
 		setFallback(newFallback);
-		console.log("fallback", newFallback);
 	}, [location.pathname, setFallback]);
 
-	return { location, fallback }
+	return { location, fallback };
 };

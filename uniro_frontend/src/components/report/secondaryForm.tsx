@@ -1,23 +1,18 @@
-import { CautionIssue, DangerIssue, PassableStatus } from "../../constant/enum/reportEnum";
+import { IssueTypeKey, PassableStatus } from "../../constant/enum/reportEnum";
 import { IssueQuestionButtons, ReportFormData, ReportModeType } from "../../data/types/report";
 
 import { FormTitle } from "./formTitle";
 import { SecondaryFormButton } from "./secondaryButton";
 
 const buttonConfig = {
-	danger: [DangerIssue.CURB, DangerIssue.CRACK, DangerIssue.SLOPE, DangerIssue.ETC],
-	caution: [
-		CautionIssue.CURB,
-		CautionIssue.STAIRS,
-		CautionIssue.SLOPE,
-		CautionIssue.ETC,
-	],
+	danger: [IssueTypeKey.CURB, IssueTypeKey.STAIRS, IssueTypeKey.SLOPE, IssueTypeKey.ETC],
+	caution: [IssueTypeKey.CURB, IssueTypeKey.CRACK, IssueTypeKey.SLOPE, IssueTypeKey.ETC],
 } as IssueQuestionButtons;
 
 type SecondaryFormProps = {
 	reportMode: ReportModeType;
 	formData: ReportFormData;
-	handleSecondarySelect: (answer: DangerIssue | CautionIssue) => void;
+	handleSecondarySelect: (answer: IssueTypeKey) => void;
 };
 
 export const SecondaryForm = ({ formData, handleSecondarySelect, reportMode }: SecondaryFormProps) => {
@@ -35,8 +30,7 @@ export const SecondaryForm = ({ formData, handleSecondarySelect, reportMode }: S
 								onClick={handleSecondarySelect}
 								formPassableStatus={formData.passableStatus}
 								isSelected={formData.cautionIssues.includes(button)}
-								content={button}
-								key={index}
+								contentKey={button}
 							/>
 						);
 					})}
@@ -47,8 +41,7 @@ export const SecondaryForm = ({ formData, handleSecondarySelect, reportMode }: S
 								onClick={handleSecondarySelect}
 								formPassableStatus={formData.passableStatus}
 								isSelected={formData.dangerIssues.includes(button)}
-								content={button}
-								key={index}
+								contentKey={button}
 							/>
 						);
 					})}
