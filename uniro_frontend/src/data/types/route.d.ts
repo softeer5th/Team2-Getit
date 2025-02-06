@@ -6,8 +6,8 @@ export type RouteId = number;
 
 export type Route = {
 	routeId: RouteId;
-	startNode: Node;
-	endNode: Node;
+	node1: Coord;
+	node2: Coord;
 };
 
 export type Direction = "origin" | "right" | "straight" | "left" | "uturn" | "destination" | "caution";
@@ -23,6 +23,20 @@ export interface DangerRoute extends Route {
 export interface NavigationRoute extends Route {
 	cautionTypes: CautionIssueType[];
 }
+
+export interface CoreRoute {
+	routeId: RouteId;
+	node1: Node;
+	node2: Node;
+}
+
+export interface CoreRoutes {
+	coreNode1Id: NodeId;
+	coreNode2Id: NodeId;
+	routes: CoreRoute[];
+}
+
+export type CoreRoutesList = CoreRoutes[];
 
 export type RouteDetail = {
 	dist: number;

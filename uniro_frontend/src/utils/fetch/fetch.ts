@@ -17,17 +17,20 @@ export default function Fetch() {
 		return response.json();
 	};
 
-	const post = async <T, K>(url: string, body?: Record<string, K>): Promise<T> => {
+	const post = async <T, K>(url: string, body?: Record<string, K | K[]>): Promise<boolean> => {
 		const response = await fetch(`${baseURL}${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),
+			headers: {
+				"Content-Type": "application/json",
+			},
 		});
 
 		if (!response.ok) {
 			throw new Error(`${response.status}-${response.statusText}`);
 		}
 
-		return response.json();
+		return response.ok;
 	};
 
 	const put = async <T, K>(url: string, body?: Record<string, K>): Promise<T> => {

@@ -14,6 +14,6 @@ export interface IssueQuestionButtons {
 }
 export interface ReportFormData {
 	passableStatus: PassableStatus;
-	dangerIssues: DangerIssueType[];
-	cautionIssues: CautionIssueType[];
+	dangerIssues: IssueTypeKey[];
+	cautionIssues: IssueTypeKey[];
 }
