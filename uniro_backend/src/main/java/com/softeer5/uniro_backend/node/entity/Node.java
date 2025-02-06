@@ -46,6 +46,14 @@ public class Node {
 		return Map.of("lat", coordinates.getY(), "lng", coordinates.getX());
 	}
 
+	public double getX(){
+		return coordinates.getX();
+	}
+
+	public double getY(){
+		return coordinates.getY();
+	}
+
 	public void setHeight(double height) {
 		this.height = height;
 	}

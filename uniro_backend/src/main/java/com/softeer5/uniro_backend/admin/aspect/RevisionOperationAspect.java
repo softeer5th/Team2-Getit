@@ -3,7 +3,7 @@ package com.softeer5.uniro_backend.admin.aspect;
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.admin.setting.RevisionContext;
-import com.softeer5.uniro_backend.route.dto.PostRiskReqDTO;
+import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

@@ -16,7 +16,8 @@ spring:
     defer-datasource-initialization: true
   sql:
     init:
-      schema-locations: classpath:h2gis-setting.sql
+      #schema-locations: classpath:h2gis-setting.sql
+      mode: always
   h2:
     console:
       enabled: true

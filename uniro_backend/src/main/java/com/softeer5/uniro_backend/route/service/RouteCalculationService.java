@@ -2,17 +2,21 @@ package com.softeer5.uniro_backend.route.service;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
-import static com.softeer5.uniro_backend.common.utils.GeoUtils.getInstance;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeNotFoundException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
 import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
+import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
-import com.softeer5.uniro_backend.route.dto.*;
+import com.softeer5.uniro_backend.route.dto.request.CreateRouteReqDTO;
+import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
+import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
+import com.softeer5.uniro_backend.route.dto.response.RouteDetailResDTO;
+import com.softeer5.uniro_backend.route.dto.response.RouteInfoResDTO;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
@@ -82,7 +86,7 @@ public class RouteCalculationService {
         double totalCost = 0.0;
         double totalDistance = 0.0;
 
-        List<RouteInfoDTO> routeInfoDTOS = new ArrayList<>();
+        List<RouteInfoResDTO> routeInfoDTOS = new ArrayList<>();
         Node currentNode = startNode;
         // 외부 변수를 수정해야하기 때문에 for-loop문 사용
         for (Route route : shortestRoutes) {
@@ -101,10 +105,10 @@ public class RouteCalculationService {
                 secondNode = temp;
             }
 
-            routeInfoDTOS.add(RouteInfoDTO.of(route, firstNode, secondNode));
+            routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
         }
 
-        List<RouteDetailDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
+        List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
         return FastestRouteResDTO.of(hasCaution, totalDistance, totalCost, routeInfoDTOS, details);
     }
@@ -210,8 +214,8 @@ public class RouteCalculationService {
     }
 
     // 길 상세정보를 추출하는 메서드
-    private List<RouteDetailDTO> getRouteDetail(Node startNode, Node endNode, List<Route> shortestRoutes){
-        List<RouteDetailDTO> details = new ArrayList<>();
+    private List<RouteDetailResDTO> getRouteDetail(Node startNode, Node endNode, List<Route> shortestRoutes){
+        List<RouteDetailResDTO> details = new ArrayList<>();
         double accumulatedDistance = 0.0;
         Node now = startNode;
         Map<String,Double> checkPointNodeCoordinates = startNode.getXY();
@@ -224,15 +228,15 @@ public class RouteCalculationService {
             accumulatedDistance += calculateDistance(nowRoute);
 
             if(!nowRoute.getCautionFactors().isEmpty()){
-                details.add(RouteDetailDTO.of(accumulatedDistance - calculateDistance(nowRoute)/2, checkPointType, checkPointNodeCoordinates));
+                details.add(RouteDetailResDTO.of(accumulatedDistance - calculateDistance(nowRoute)/2, checkPointType, checkPointNodeCoordinates));
                 accumulatedDistance = calculateDistance(nowRoute)/2;
                 checkPointNodeCoordinates = getCenter(now, nxt);
                 checkPointType = DirectionType.CAUTION;
             }
 
             if(nxt.equals(endNode)){
-                details.add(RouteDetailDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
-                details.add(RouteDetailDTO.of(0, DirectionType.FINISH, nxt.getXY()));
+                details.add(RouteDetailResDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
+                details.add(RouteDetailResDTO.of(0, DirectionType.FINISH, nxt.getXY()));
                 break;
             }
             if(nxt.isCore()){
@@ -241,7 +245,7 @@ public class RouteCalculationService {
                     now = nxt;
                     continue;
                 }
-                details.add(RouteDetailDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
+                details.add(RouteDetailResDTO.of(accumulatedDistance, checkPointType, checkPointNodeCoordinates));
                 checkPointNodeCoordinates = nxt.getXY();
                 checkPointType = directionType;
                 accumulatedDistance = 0.0;
@@ -259,14 +263,14 @@ public class RouteCalculationService {
     }
 
     @Transactional
-    public void createRoute(Long univId, CreateRouteReqDTO requests){
+    public void createRoute(Long univId, CreateRoutesReqDTO requests){
         List<Node> nodes = checkRouteCross(univId, requests.getStartNodeId(), requests.getEndNodeId(), requests.getCoordinates());
         mapClient.fetchHeights(nodes);
         createLinkedRouteAndSave(univId,nodes);
     }
 
     private void createLinkedRouteAndSave(Long univId, List<Node> nodes) {
-        GeometryFactory geometryFactory = getInstance();
+        GeometryFactory geometryFactory = GeoUtils.getInstance();
         Set<String> nodeSet = new HashSet<>();
         List<Node> nodeForSave = new ArrayList<>();
         List<Route> routeForSave = new ArrayList<>();
@@ -307,12 +311,12 @@ public class RouteCalculationService {
 
     // TODO: 모든 점이 아니라 request 값의 MBR 영역만 불러오면 좋을 것 같다.  <- 추가 검증 필요
     // TODO: 캐시 사용 검토
-    public List<Node> checkRouteCross(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteCoordinates> requests) {
+    public List<Node> checkRouteCross(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteReqDTO> requests) {
         LinkedList<Node> createdNodes = new LinkedList<>();
 
         Map<String, Node> nodeMap = new HashMap<>();
         STRtree strTree = new STRtree();
-        GeometryFactory geometryFactory = getInstance();
+        GeometryFactory geometryFactory = GeoUtils.getInstance();
 
         int startNodeCount = 0;
         int endNodeCount = 0;
@@ -342,8 +346,8 @@ public class RouteCalculationService {
         // 서브 -> 코어 : 처리 필요
         // 코어 -> 코어 : 처리 필요 X
         // 코어 -> 서브 : 불가한 케이스
-        CreateRouteCoordinates startCoordinate = requests.get(0);
-        Node startNode = nodeMap.get(getNodeKey(new Coordinate(startCoordinate.getX(), startCoordinate.getY())));
+        CreateRouteReqDTO startCoordinate = requests.get(0);
+        Node startNode = nodeMap.get(getNodeKey(new Coordinate(startCoordinate.getLng(), startCoordinate.getLat())));
 
         if (startNode == null) {
             throw new NodeNotFoundException("Start Node Not Found", NODE_NOT_FOUND);
@@ -355,10 +359,10 @@ public class RouteCalculationService {
         createdNodes.add(startNode);
 
         for (int i = 1; i < requests.size(); i++) {
-            CreateRouteCoordinates cur = requests.get(i);
+            CreateRouteReqDTO cur = requests.get(i);
 
             // 정확히 그 점과 일치하는 노드가 있는지 확인
-            Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getX(), cur.getY())));
+            Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getLng(), cur.getLat())));
             if(curNode != null){
                 createdNodes.add(curNode);
                 if(i == requests.size() - 1 && endNodeCount < CORE_NODE_CONDITION - 1){  // 마지막 노드일 경우, 해당 노드가 끝점일 경우
@@ -369,7 +373,7 @@ public class RouteCalculationService {
                 continue;
             }
 
-            Coordinate coordinate = new Coordinate(cur.getX(), cur.getY());
+            Coordinate coordinate = new Coordinate(cur.getLng(), cur.getLat());
             curNode = Node.builder()
                 .coordinates(geometryFactory.createPoint(coordinate))
                 .isCore(false)
@@ -412,7 +416,7 @@ public class RouteCalculationService {
 
     private List<Node> checkSelfRouteCross(List<Node> nodes) {
 
-        GeometryFactory geometryFactory = getInstance();
+        GeometryFactory geometryFactory = GeoUtils.getInstance();
 
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
             throw new SameStartAndEndPointException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
@@ -470,7 +474,7 @@ public class RouteCalculationService {
     }
 
     private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree) {
-        GeometryFactory geometryFactory = getInstance();
+        GeometryFactory geometryFactory = GeoUtils.getInstance();
         LineString newLine = geometryFactory.createLineString(new Coordinate[] {start, end});
         Envelope searchEnvelope = newLine.getEnvelopeInternal();
 
@@ -519,7 +523,7 @@ public class RouteCalculationService {
     }
 
     private Node getClosestNode(LineString intersectLine, Node start, Node end, Map<String, Node> nodeMap) {
-        GeometryFactory geometryFactory = getInstance();
+        GeometryFactory geometryFactory = GeoUtils.getInstance();
         Coordinate[] coordinates = intersectLine.getCoordinates();
 
         double distance1 = start.getCoordinates().getCoordinate().distance(coordinates[0]) +

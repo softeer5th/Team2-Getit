@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@Schema(name = "SearchUnivResDTO", description = "대학 검색 DTO")
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Schema(name = "SearchUnivResDTO", description = "대학 검색 DTO")
 public class SearchUnivResDTO {
 
     @Schema(description = "실제 data", example = "")
