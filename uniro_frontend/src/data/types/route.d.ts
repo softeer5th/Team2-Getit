@@ -3,6 +3,7 @@ import { CautionIssueType, DangerIssueType } from "../../constant/enum/reportEnu
 import { RoutePoint } from "../../constant/enum/routeEnum";
 import { Coord } from "./coord";
 import { MarkerTypes } from "./marker";
+import { Node } from "./node";
 
 export type RouteId = number;
 
