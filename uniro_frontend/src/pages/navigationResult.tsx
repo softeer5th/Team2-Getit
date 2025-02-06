@@ -70,7 +70,7 @@ const NavigationResultPage = () => {
 	}, []);
 
 	return (
-		<div className="relative h-svh w-full max-w-[450px] mx-auto">
+		<div className="relative h-dvh w-full max-w-[450px] mx-auto">
 			{/* 지도 영역 */}
 			<NavigationMap
 				style={{ width: "100%", height: "100%" }}

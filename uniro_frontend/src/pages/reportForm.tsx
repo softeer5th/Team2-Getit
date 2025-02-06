@@ -134,7 +134,7 @@ const ReportForm = () => {
 	});
 
 	return (
-		<div className="flex flex-col h-svh w-full max-w-[450px] mx-auto relative">
+		<div className="flex flex-col h-dvh w-full max-w-[450px] mx-auto relative">
 			<ReportTitle reportMode={reportMode!} />
 			<ReportDivider />
 			<div className="flex-1 overflow-y-auto">
