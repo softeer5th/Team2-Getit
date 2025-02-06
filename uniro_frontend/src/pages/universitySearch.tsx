@@ -10,17 +10,17 @@ import { University } from "../data/types/university";
 
 export default function UniversitySearchPage() {
 	const { data: universityList, status } = useQuery({
-		queryKey: ['university'],
-		queryFn: getUniversityList
-	})
+		queryKey: ["university"],
+		queryFn: getUniversityList,
+	});
 
 	const [selectedUniv, setSelectedUniv] = useState<University>();
 	const { setUniversity } = useUniversityInfo();
 
 	return (
-		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto py-5">
+		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto py-5">
 			<div className="w-full px-[14px] pb-[17px] border-b-[1px] border-gray-400">
-				<Input onLengthChange={() => { }} placeholder="우리 학교를 검색해보세요" handleVoiceInput={() => { }} />
+				<Input onLengthChange={() => {}} placeholder="우리 학교를 검색해보세요" handleVoiceInput={() => {}} />
 			</div>
 			<div className="overflow-y-scroll flex-1">
 				<ul
@@ -29,17 +29,18 @@ export default function UniversitySearchPage() {
 						setSelectedUniv(undefined);
 					}}
 				>
-					{universityList && universityList.map((univ) => (
-						<UniversityButton
-							key={`university-${univ.id}`}
-							selected={selectedUniv?.id === univ.id}
-							onClick={() => {
-								setSelectedUniv(univ);
-							}}
-							name={univ.name}
-							img={univ.imageUrl}
-						/>
-					))}
+					{universityList &&
+						universityList.map((univ) => (
+							<UniversityButton
+								key={`university-${univ.id}`}
+								selected={selectedUniv?.id === univ.id}
+								onClick={() => {
+									setSelectedUniv(univ);
+								}}
+								name={univ.name}
+								img={univ.imageUrl}
+							/>
+						))}
 				</ul>
 			</div>
 			<div className="px-[14px]">

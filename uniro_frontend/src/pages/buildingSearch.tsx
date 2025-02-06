@@ -12,7 +12,7 @@ export default function BuildingSearchPage() {
 	useRedirectUndefined<string | undefined>([university]);
 
 	return (
-		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
+		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
 			<div className="px-[14px] py-4 border-b-[1px] border-gray-400">
 				<Input onLengthChange={() => {}} handleVoiceInput={() => {}} placeholder="" />
 			</div>

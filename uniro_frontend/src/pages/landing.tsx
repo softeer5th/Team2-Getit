@@ -5,7 +5,7 @@ import { Link } from "react-router";
 
 export default function LandingPage() {
 	return (
-		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center bg-[url(/public/background.png)] bg-cover">
+		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center bg-[url(/public/background.png)] bg-cover">
 			<div>
 				<p className="text-kor-heading1 font-bold">어디든 갈 수 있는 캠퍼스.</p>
 				<p className="text-kor-heading1 font-bold">쉽고 빠르게 이동하세요.</p>
