@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enum/markerEnum";
-import { RouteEdge } from "../data/types/route";
 import useMap from "../hooks/useMap";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
-import { mockNavigationRoute } from "../data/mock/hanyangRoute";
 import { ClickEvent } from "../data/types/event";
 import createSubNodes from "../utils/polylines/createSubnodes";
 import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
@@ -17,6 +15,10 @@ import toggleMarkers from "../utils/markers/toggleMarkers";
 import BackButton from "../components/map/backButton";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
+import { University } from "../data/types/university";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { getAllRoutes } from "../api/route";
+import { CoreRoutesList } from "../data/types/route";
 
 const colors = [
 	"#f1a2b3",
@@ -50,7 +52,12 @@ export default function ReportRoutePage() {
 	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
 
 	const { university } = useUniversityInfo();
-	useRedirectUndefined<string | undefined>([university]);
+	useRedirectUndefined<University | undefined>([university]);
+
+	const { data } = useSuspenseQuery({
+		queryKey: ["routes", university?.id],
+		queryFn: () => getAllRoutes(university?.id ?? 1001),
+	});
 
 	const addHazardMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
@@ -119,97 +126,98 @@ export default function ReportRoutePage() {
 		newPolyLine.current.setPath([]);
 	};
 
-	const drawRoute = (routes: RouteEdge[]) => {
+	const drawRoute = (coreRouteList: CoreRoutesList) => {
 		if (!Polyline || !AdvancedMarker || !map) return;
 
-		for (const route of routes) {
-			const coreNode = route.endNode;
+		for (const coreRoutes of coreRouteList) {
+			// 가장 끝쪽 Core Node 그리기
+			const endNode = coreRoutes.routes[coreRoutes.routes.length - 1].node2;
 
 			createAdvancedMarker(
 				AdvancedMarker,
 				map,
-				coreNode,
+				endNode,
 				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
 			);
+			for (const coreRoute of coreRoutes.routes) {
+				const routePolyLine = new Polyline({
+					map: map,
+					path: [coreRoute.node1, coreRoute.node2],
+					strokeColor: "#808080",
+				});
+				routePolyLine.addListener("click", (e: ClickEvent) => {
+					const subNodes = createSubNodes(routePolyLine);
 
-			const routePolyLine = new Polyline({
-				map: map,
-				path: [route.startNode, route.endNode],
-				strokeColor: "#808080",
-			});
+					const edges = subNodes
+						.map(
+							(node, idx) =>
+								[node, subNodes[idx + 1]] as [google.maps.LatLngLiteral, google.maps.LatLngLiteral],
+						)
+						.slice(0, -1);
 
-			routePolyLine.addListener("click", (e: ClickEvent) => {
-				const subNodes = createSubNodes(routePolyLine);
+					const point = LatLngToLiteral(e.latLng);
 
-				const edges = subNodes
-					.map(
-						(node, idx) =>
-							[node, subNodes[idx + 1]] as [google.maps.LatLngLiteral, google.maps.LatLngLiteral],
-					)
-					.slice(0, -1);
+					const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
 
-				const point = LatLngToLiteral(e.latLng);
-
-				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
-
-				const tempWaypointMarker = createAdvancedMarker(
-					AdvancedMarker,
-					map,
-					nearestPoint,
-					createMarkerElement({
-						type: Markers.WAYPOINT,
-						className: "translate-waypoint",
-					}),
-				);
-
-				if (originPoint.current) {
-					setNewPoints((prevPoints) => {
-						if (prevPoints.element) {
-							prevPoints.element.position = nearestPoint;
-							return {
-								...prevPoints,
-								coords: [...prevPoints.coords, nearestPoint],
-							};
-						} else {
-							setIsActive(true);
-							return {
-								element: new AdvancedMarker({
-									map: map,
-									position: nearestPoint,
-									content: createMarkerElement({
-										type: Markers.DESTINATION,
+					const tempWaypointMarker = createAdvancedMarker(
+						AdvancedMarker,
+						map,
+						nearestPoint,
+						createMarkerElement({
+							type: Markers.WAYPOINT,
+							className: "translate-waypoint",
+						}),
+					);
+					if (originPoint.current) {
+						setNewPoints((prevPoints) => {
+							if (prevPoints.element) {
+								prevPoints.element.position = nearestPoint;
+								return {
+									...prevPoints,
+									coords: [...prevPoints.coords, nearestPoint],
+								};
+							} else {
+								setIsActive(true);
+								return {
+									element: new AdvancedMarker({
+										map: map,
+										position: nearestPoint,
+										content: createMarkerElement({
+											type: Markers.DESTINATION,
+										}),
 									}),
-								}),
-								coords: [...prevPoints.coords, nearestPoint],
-							};
-						}
-					});
-				} else {
-					const originMarker = new AdvancedMarker({
-						map: map,
-						position: nearestPoint,
-						content: createMarkerElement({ type: Markers.ORIGIN }),
-					});
+									coords: [...prevPoints.coords, nearestPoint],
+								};
+							}
+						});
+					} else {
+						const originMarker = new AdvancedMarker({
+							map: map,
+							position: nearestPoint,
+							content: createMarkerElement({ type: Markers.ORIGIN }),
+						});
 
-					originPoint.current = {
-						point: nearestPoint,
-						element: originMarker,
-					};
+						originPoint.current = {
+							point: nearestPoint,
+							element: originMarker,
+						};
 
-					setNewPoints({
-						element: null,
-						coords: [nearestPoint],
-					});
-				}
-			});
+						setNewPoints({
+							element: null,
+							coords: [nearestPoint],
+						});
+					}
+				});
+			}
+			const startNode = coreRoutes.routes[0].node1;
+
+			createAdvancedMarker(
+				AdvancedMarker,
+				map,
+				startNode,
+				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
+			);
 		}
-
-		createAdvancedMarker(
-			AdvancedMarker,
-			map,
-			routes[0].startNode,
-			createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
-		);
 	};
 
 	useEffect(() => {
@@ -219,7 +227,7 @@ export default function ReportRoutePage() {
 	}, [newPoints]);
 
 	useEffect(() => {
-		drawRoute(mockNavigationRoute.route);
+		drawRoute(data);
 		addHazardMarker();
 		if (Polyline) {
 			newPolyLine.current = new Polyline({ map: map, path: [], strokeColor: "#0367FB" });

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import useMap from "../hooks/useMap";
-import { mockNavigationRoute } from "../data/mock/hanyangRoute";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import createMarkerElement from "../components/map/mapMarkers";
-import { RouteEdge } from "../data/types/route";
+import { CoreRoutesList } from "../data/types/route";
 import { Markers } from "../constant/enum/markerEnum";
 import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import { ClickEvent } from "../data/types/event";
@@ -23,6 +22,9 @@ import BackButton from "../components/map/backButton";
 
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
+import { University } from "../data/types/university";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { getAllRoutes } from "../api/route";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	edge: [google.maps.LatLng | google.maps.LatLngLiteral, google.maps.LatLng | google.maps.LatLngLiteral];
@@ -36,7 +38,12 @@ export default function ReportHazardPage() {
 	const [message, setMessage] = useState<ReportHazardMessage>(ReportHazardMessage.DEFAULT);
 
 	const { university } = useUniversityInfo();
-	useRedirectUndefined<string | undefined>([university]);
+	useRedirectUndefined<University | undefined>([university]);
+
+	const { data } = useSuspenseQuery({
+		queryKey: ["routes", university?.id],
+		queryFn: () => getAllRoutes(university?.id ?? 1001),
+	});
 
 	const resetMarker = (prevMarker: MarkerTypesWithElement) => {
 		if (prevMarker.type === Markers.REPORT) {
@@ -85,72 +92,78 @@ export default function ReportHazardPage() {
 		}
 	};
 
-	const drawRoute = (routes: RouteEdge[]) => {
+	const drawRoute = (coreRouteList: CoreRoutesList) => {
 		if (!Polyline || !AdvancedMarker || !map) return;
 
-		for (const route of routes) {
-			const coreNode = route.endNode;
+		for (const coreRoutes of coreRouteList) {
+			// 가장 끝쪽 Core Node 그리기
+			const endNode = coreRoutes.routes[coreRoutes.routes.length - 1].node2;
 
 			createAdvancedMarker(
 				AdvancedMarker,
 				map,
-				coreNode,
+				endNode,
 				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
 			);
 
-			const routePolyLine = new Polyline({
-				map: map,
-				path: [route.startNode, route.endNode],
-				strokeColor: "#808080",
-			});
-
-			routePolyLine.addListener("click", (e: ClickEvent) => {
-				const subNodes = createSubNodes(routePolyLine);
-
-				const edges = subNodes
-					.map(
-						(node, idx) =>
-							[node, subNodes[idx + 1]] as [google.maps.LatLngLiteral, google.maps.LatLngLiteral],
-					)
-					.slice(0, -1);
-
-				const point = LatLngToLiteral(e.latLng);
-
-				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
-
-				const newReportMarker = createAdvancedMarker(
-					AdvancedMarker,
-					map,
-					centerCoordinate(nearestEdge[0], nearestEdge[1]),
-					createMarkerElement({
-						type: Markers.REPORT,
-						className: "translate-routemarker",
-						hasAnimation: true,
-					}),
-				);
-
-				setMessage(ReportHazardMessage.CREATE);
-
-				setReportMarker((prevMarker) => {
-					if (prevMarker) {
-						resetMarker(prevMarker);
-					}
-
-					return {
-						type: Markers.REPORT,
-						element: newReportMarker,
-						edge: nearestEdge,
-					};
+			for (const coreRoute of coreRoutes.routes) {
+				const routePolyLine = new Polyline({
+					map: map,
+					path: [coreRoute.node1, coreRoute.node2],
+					strokeColor: "#808080",
 				});
-			});
-		}
 
-		createAdvancedMarker(
-			AdvancedMarker,
-			map,
-			routes[0].startNode,
-			createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
-		);
+				routePolyLine.addListener("click", (e: ClickEvent) => {
+					const subNodes = createSubNodes(routePolyLine);
+
+					alert(coreRoute.routeId);
+
+					const edges = subNodes
+						.map(
+							(node, idx) =>
+								[node, subNodes[idx + 1]] as [google.maps.LatLngLiteral, google.maps.LatLngLiteral],
+						)
+						.slice(0, -1);
+
+					const point = LatLngToLiteral(e.latLng);
+
+					const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
+
+					const newReportMarker = createAdvancedMarker(
+						AdvancedMarker,
+						map,
+						centerCoordinate(nearestEdge[0], nearestEdge[1]),
+						createMarkerElement({
+							type: Markers.REPORT,
+							className: "translate-routemarker",
+							hasAnimation: true,
+						}),
+					);
+
+					setMessage(ReportHazardMessage.CREATE);
+
+					setReportMarker((prevMarker) => {
+						if (prevMarker) {
+							resetMarker(prevMarker);
+						}
+
+						return {
+							type: Markers.REPORT,
+							element: newReportMarker,
+							edge: nearestEdge,
+						};
+					});
+				});
+			}
+			// 시작하는 쪽의 Core Node 그리기
+			const startNode = coreRoutes.routes[0].node1;
+			createAdvancedMarker(
+				AdvancedMarker,
+				map,
+				startNode,
+				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
+			);
+		}
 	};
 
 	const reportHazard = () => {
@@ -162,7 +175,7 @@ export default function ReportHazardPage() {
 	};
 
 	useEffect(() => {
-		drawRoute(mockNavigationRoute.route);
+		drawRoute(data);
 		addHazardMarker();
 
 		if (map) {
