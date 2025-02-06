@@ -53,7 +53,7 @@ public interface RouteApi {
 								  @PathVariable("routeId") Long routeId,
 								  @RequestBody PostRiskReqDTO postRiskReqDTO);
 
-	@Operation(summary = "길 추가 로직")
+	@Operation(summary = "새로운 길 추가")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "길 추가 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
