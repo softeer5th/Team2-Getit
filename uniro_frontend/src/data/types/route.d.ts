@@ -3,14 +3,13 @@ import { CautionIssueType, DangerIssueType } from "../../constant/enum/reportEnu
 import { RoutePoint } from "../../constant/enum/routeEnum";
 import { Coord } from "./coord";
 import { MarkerTypes } from "./marker";
-import { Node } from "./node";
 
 export type RouteId = number;
 
 export type Route = {
 	routeId: RouteId;
-	startNode: Node;
-	endNode: Node;
+	node1: Coord;
+	node2: Coord;
 };
 
 export type Direction = "origin" | "right" | "straight" | "left" | "uturn" | "destination" | "caution";
