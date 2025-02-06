@@ -79,25 +79,13 @@ public class Route {
 	}
 
 	public void setCautionFactors(List<CautionType> cautionFactors) {
-		if (this.cautionFactors == null) {
-			this.cautionFactors = new HashSet<>();
-		} else {
-			this.cautionFactors.clear();
-		}
-		if (cautionFactors != null) {
-			this.cautionFactors.addAll(cautionFactors);
-		}
+		this.cautionFactors.clear();
+		this.cautionFactors.addAll(cautionFactors);
 	}
 
 	public void setDangerFactors(List<DangerType> dangerFactors) {
-		if (this.dangerFactors == null) {
-			this.dangerFactors = new HashSet<>();
-		} else {
-			this.dangerFactors.clear();
-		}
-		if (dangerFactors != null) {
-			this.dangerFactors.addAll(dangerFactors);
-		}
+		this.dangerFactors.clear();
+		this.dangerFactors.addAll(dangerFactors);
 	}
 
 	@Builder
