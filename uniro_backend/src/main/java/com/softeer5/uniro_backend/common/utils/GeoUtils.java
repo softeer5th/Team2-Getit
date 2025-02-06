@@ -43,14 +43,15 @@ public final class GeoUtils {
 		return writer.write(lineString);
 	}
 
-	public static String makeSquarePolygonString(double leftUpLng, double leftUpLat, double rightDownLng,
-		double rightDownLat) {
+	public static String makeSquarePolygonString(
+		double leftUpLat, double leftUpLng, double rightDownLat, double rightDownLng
+	) {
 		return String.format("Polygon((%f %f, %f %f, %f %f, %f %f, %f %f))"
-			,leftUpLat, leftUpLng
-			,rightDownLat, leftUpLng
-			,rightDownLat, rightDownLng
-			,leftUpLat, rightDownLng
-			,leftUpLat, leftUpLng
+			, leftUpLat, leftUpLng
+			, rightDownLat, leftUpLng
+			, rightDownLat, rightDownLng
+			, leftUpLat, rightDownLng
+			, leftUpLat, leftUpLng
 		);
 	}
 
