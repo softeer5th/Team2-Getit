@@ -1,13 +1,15 @@
+import { Markers } from "../../constant/enum/markerEnum";
 import { CautionIssueType, DangerIssueType } from "../../constant/enum/reportEnum";
+import { RoutePoint } from "../../constant/enum/routeEnum";
 import { Coord } from "./coord";
-import { Node } from "./node";
+import { MarkerTypes } from "./marker";
 
 export type RouteId = number;
 
 export type Route = {
 	routeId: RouteId;
-	startNode: Node;
-	endNode: Node;
+	node1: Coord;
+	node2: Coord;
 };
 
 export type Direction = "origin" | "right" | "straight" | "left" | "uturn" | "destination" | "caution";
@@ -23,6 +25,8 @@ export interface DangerRoute extends Route {
 export interface NavigationRoute extends Route {
 	cautionTypes: CautionIssueType[];
 }
+
+export type RoutePointType = RoutePoint.ORIGIN | RoutePoint.DESTINATION;
 
 export type RouteDetail = {
 	dist: number;
