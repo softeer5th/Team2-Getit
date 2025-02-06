@@ -20,7 +20,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @Query(value = "SELECT r.* FROM Route r " +
             "WHERE r.univ_id = :univId " +
-            "AND (r.caution_factors LIKE '[%' OR r.danger_factors LIKE '[%')",
+            "AND (r.caution_factors LIKE '[\"%' OR r.danger_factors LIKE '[\"%')",
             nativeQuery = true)
     List<Route> findRiskRouteByUnivId(@Param("univId") Long univId);
 
