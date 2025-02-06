@@ -3,6 +3,8 @@ package com.softeer5.uniro_backend.route.service;
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 
+import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
+import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeNotFoundException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
@@ -263,6 +265,7 @@ public class RouteCalculationService {
     }
 
     @Transactional
+    @RevisionOperation(RevisionOperationType.UPDATE_ROUTE)
     public void createRoute(Long univId, CreateRoutesReqDTO requests){
         List<Node> nodes = checkRouteCross(univId, requests.getStartNodeId(), requests.getEndNodeId(), requests.getCoordinates());
         mapClient.fetchHeights(nodes);
@@ -277,12 +280,15 @@ public class RouteCalculationService {
         for(int i=1;i<nodes.size();i++){
             Node now = nodes.get(i);
             Node prev = nodes.get(i-1);
-            routeForSave.add(Route.builder()
+            routeForSave.add(
+                Route.builder()
                     .cost(calculateCost(prev,now))
                     .path(geometryFactory.createLineString(
                             new Coordinate[] {prev.getCoordinates().getCoordinate(), now.getCoordinates().getCoordinate()}))
                     .node1(prev)
                     .node2(now)
+                    .cautionFactors(Collections.EMPTY_SET)
+                    .dangerFactors(Collections.EMPTY_SET)
                     .univId(univId).build());
             if(!nodeSet.contains(getNodeKey(new Coordinate(now.getCoordinates().getX(), now.getCoordinates().getY())))){
                 nodeForSave.add(now);
