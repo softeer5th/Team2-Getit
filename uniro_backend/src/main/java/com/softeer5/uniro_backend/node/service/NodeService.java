@@ -16,6 +16,8 @@ import com.softeer5.uniro_backend.node.repository.BuildingRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.softeer5.uniro_backend.common.utils.GeoUtils.makeSquarePolygonString;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,8 +28,8 @@ public class NodeService {
 		Long univId, int level,
 		double leftUpLng, double leftUpLat, double rightDownLng , double rightDownLat) {
 
-		List<BuildingNode> buildingNodes = buildingRepository.findByUnivIdAndLevelWithNode(
-			univId, level, leftUpLng, leftUpLat, rightDownLng, rightDownLat);
+		String polygon = makeSquarePolygonString(leftUpLng, leftUpLat, rightDownLng, rightDownLat);
+		List<BuildingNode> buildingNodes = buildingRepository.findByUnivIdAndLevelWithNode(univId, level, polygon);
 
 		return buildingNodes.stream()
 			.map(buildingNode -> GetBuildingResDTO.of(buildingNode.getBuilding(), buildingNode.getNode()))
