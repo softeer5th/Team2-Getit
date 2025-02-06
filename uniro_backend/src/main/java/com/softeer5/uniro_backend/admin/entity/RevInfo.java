@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.softeer5.uniro_backend.admin.setting.CustomReversionListener;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.RevisionEntity;
@@ -24,7 +25,8 @@ public class RevInfo {
     @Column(name = "revtstmp")
     private LocalDateTime revTimeStamp;
 
-    @Column(name = "univ_id", nullable = false)
+    @Column(name = "univ_id")
+    @NotNull
     private Long univId;
 
     private String action;

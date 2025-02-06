@@ -78,7 +78,7 @@ public class RevisionOperationAspect {
             if (args[i] instanceof Long && "univId".equals(parameterNames[i])) {
                 univId = (Long) args[i];
             }
-            else if(args[i] instanceof CreateRoutesReqDTO createRoutesReqDTO){
+            else if(args[i] instanceof CreateRoutesReqDTO){
                 action = "새로운 길 추가";
             }
         }
