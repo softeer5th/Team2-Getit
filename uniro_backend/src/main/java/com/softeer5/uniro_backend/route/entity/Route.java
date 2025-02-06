@@ -62,11 +62,13 @@ public class Route {
 
 	@Convert(converter = CautionListConverter.class)
 	@Column(name = "caution_factors")
-	private Set<CautionType> cautionFactors;
+	@NotNull
+	private Set<CautionType> cautionFactors = new HashSet<>();
 
 	@Convert(converter = DangerListConverter.class)
 	@Column(name = "danger_factors")
-	private Set<DangerType> dangerFactors;
+	@NotNull
+	private Set<DangerType> dangerFactors = new HashSet<>();
 
 	public List<CautionType> getCautionFactorsByList(){
 		return cautionFactors.stream().toList();
