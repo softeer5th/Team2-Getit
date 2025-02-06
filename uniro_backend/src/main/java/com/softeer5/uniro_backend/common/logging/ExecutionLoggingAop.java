@@ -43,22 +43,22 @@ public class ExecutionLoggingAop {
 		Object target = pjp.getTarget();
 		Annotation[] declaredAnnotations = target.getClass().getDeclaredAnnotations();
 
-		for(Annotation annotation : declaredAnnotations){
-			if(annotation instanceof RestController){
-				logHttpRequest(userId);
-			}
-		}
-
-		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
-		RequestMethod httpMethod = RequestMethod.valueOf(request.getMethod());
-
 		String className = pjp.getSignature().getDeclaringType().getSimpleName();
 		String methodName = pjp.getSignature().getName();
 		String task = className + "." + methodName;
 
-		log.info("");
-		log.info("🚨 [ userId = {} ] {} Start", userId, className);
-		log.info("[ userId = {} ] [Call Method] {}: {}", userId, httpMethod, task);
+		for(Annotation annotation : declaredAnnotations){
+			if(annotation instanceof RestController){
+				logHttpRequest(userId);
+
+				HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+				RequestMethod httpMethod = RequestMethod.valueOf(request.getMethod());
+
+				log.info("");
+				log.info("🚨 [ userId = {} ] {} Start", userId, className);
+				log.info("[ userId = {} ] [Call Method] {}: {}", userId, httpMethod, task);
+			}
+		}
 
 		Object[] paramArgs = pjp.getArgs();
 		for (Object object : paramArgs) {
