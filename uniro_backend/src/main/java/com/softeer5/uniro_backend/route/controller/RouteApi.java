@@ -53,7 +53,7 @@ public interface RouteApi {
 
 	@Operation(summary = "길 추가 로직")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "길 추가 성공"),
+			@ApiResponse(responseCode = "201", description = "길 추가 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
 	ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,

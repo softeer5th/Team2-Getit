@@ -9,7 +9,7 @@ import com.softeer5.uniro_backend.common.exception.custom.NodeNotFoundException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
 import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
-import com.softeer5.uniro_backend.node.client.MapClient;
+import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
 import com.softeer5.uniro_backend.route.dto.*;
