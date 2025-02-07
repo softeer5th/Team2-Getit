@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { PanInfo, useDragControls } from "framer-motion";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 
 import Button from "../components/customButton";
 import RouteList from "../components/navigation/route/routeList";
@@ -11,13 +11,17 @@ import BackButton from "../components/map/backButton";
 import AnimatedContainer from "../container/animatedContainer";
 import { mockNavigationRoute } from "../data/mock/hanyangRoute";
 import { NavigationRoute } from "../data/types/route";
-import { getMockTest } from "../utils/fetch/mockFetch";
 
 import useScrollControl from "../hooks/useScrollControl";
-import useLoading from "../hooks/useLoading";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 import AnimatedSheetContainer from "../container/animatedSheetContainer";
+import { University } from "../data/types/university";
+import { getNavigationResult } from "../api/route";
+import { getAllRisks } from "../api/routes";
+import useRoutePoint from "../hooks/useRoutePoint";
+import { Building } from "../data/types/node";
+import { useLocation } from "react-router";
 
 const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
 const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
@@ -31,22 +35,48 @@ const NavigationResultPage = () => {
 	const [isDetailView, setIsDetailView] = useState(false);
 	const [sheetHeight, setSheetHeight] = useState(CLOSED_SHEET_HEIGHT);
 	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
-
-	const [isLoading, showLoading, hideLoading] = useLoading();
 	const [route, setRoute] = useState<NavigationRoute>(mockNavigationRoute);
+	const location = useLocation();
+
+	const { university } = useUniversityInfo();
+	const { origin, destination, setOriginCoord, setDestinationCoord } = useRoutePoint();
+
+	const { search } = location;
+	const params = new URLSearchParams(search);
+
+	const originId = params.get("node1Id");
+	const destinationId = params.get("node2Id");
+
+	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
 
 	useScrollControl();
 
-	const { data, status } = useSuspenseQuery({
-		queryKey: ["test"],
-		queryFn: getMockTest,
+	const result = useSuspenseQueries({
+		queries: [
+			{
+				queryKey: ["fastRoute", university?.id, origin?.nodeId, destination?.nodeId],
+				queryFn: async () => {
+					try {
+						const response = await getNavigationResult(
+							university?.id ?? 1001,
+							originId ? Number(originId) : origin?.nodeId,
+							destinationId ? Number(destinationId) : destination?.nodeId,
+						);
+						setOriginCoord(response.routes[0].node1.lng, response.routes[0].node1.lat);
+						setDestinationCoord(
+							response.routes[response.routes.length - 1].node1.lng,
+							response.routes[response.routes.length - 1].node1.lat,
+						);
+						return response;
+					} catch (e) {
+						return null;
+					}
+				},
+				retry: 1,
+			},
+			{ queryKey: [university?.id, "risks"], queryFn: () => getAllRisks(university?.id ?? 1001) },
+		],
 	});
-	const { university } = useUniversityInfo();
-	useRedirectUndefined<string | undefined>([university]);
-
-	useEffect(() => {
-		console.log("status", status);
-	}, [status]);
 
 	const dragControls = useDragControls();
 
@@ -74,23 +104,25 @@ const NavigationResultPage = () => {
 			{/* 지도 영역 */}
 			<NavigationMap
 				style={{ width: "100%", height: "100%" }}
-				routes={route}
+				routeResult={result[0].data!}
+				isDetailView={isDetailView}
+				risks={result[1].data}
 				topPadding={topBarHeight}
 				bottomPadding={sheetHeight}
 			/>
 
 			<AnimatedContainer
-				isVisible={!isDetailView && !isLoading}
+				isVisible={!isDetailView}
 				positionDelta={286}
 				className="absolute top-0 z-10 max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg"
 				isTop={true}
 				transition={{ type: "spring", damping: 20, duration: 0.3 }}
 			>
-				<NavigationDescription isDetailView={false} />
+				<NavigationDescription isDetailView={false} navigationRoute={result[0].data!} />
 			</AnimatedContainer>
 
 			<AnimatedContainer
-				isVisible={!isDetailView && !isLoading}
+				isVisible={!isDetailView}
 				className="absolute bottom-0 left-0 w-full mb-[30px] px-4"
 				positionDelta={88}
 			>
@@ -98,7 +130,7 @@ const NavigationResultPage = () => {
 			</AnimatedContainer>
 
 			<AnimatedContainer
-				isVisible={isDetailView && !isLoading}
+				isVisible={isDetailView}
 				className="absolute top-4 left-4 z-10"
 				positionDelta={60}
 				isTop={true}
@@ -107,7 +139,7 @@ const NavigationResultPage = () => {
 			</AnimatedContainer>
 
 			<AnimatedSheetContainer
-				isVisible={isDetailView && !isLoading}
+				isVisible={isDetailView}
 				height={sheetHeight}
 				className="bg-white rounded-t-2xl shadow-xl"
 				transition={{ type: "tween", duration: 0.3 }}
@@ -131,12 +163,8 @@ const NavigationResultPage = () => {
 						height: sheetHeight - BOTTOM_SHEET_HANDLE_HEIGHT,
 					}}
 				>
-					<NavigationDescription isDetailView={true} />
-					<RouteList
-						routes={route.route}
-						originBuilding={route.originBuilding}
-						destinationBuilding={route.destinationBuilding}
-					/>
+					<NavigationDescription isDetailView={true} navigationRoute={result[0].data!} />
+					<RouteList routes={result[0].data!.routeDetails} />
 				</div>
 			</AnimatedSheetContainer>
 		</div>
