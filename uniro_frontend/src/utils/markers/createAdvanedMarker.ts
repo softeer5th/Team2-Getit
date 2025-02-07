@@ -30,8 +30,11 @@ export function createUniversityMarker(
 		"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
 	container.appendChild(markerTitle);
 	const markerImage = document.createElement("img");
+
+	const markerImages = import.meta.glob("/src/assets/markers/*.svg", { eager: true });
+
 	markerImage.className = "border-0 translate-y-[-1px]";
-	markerImage.src = "/src/assets/markers/university.svg";
+	markerImage.src = (markerImages[`/src/assets/markers/university.svg`] as { default: string })?.default;
 	container.appendChild(markerImage);
 
 	const newMarker = new AdvancedMarker({
