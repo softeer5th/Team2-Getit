@@ -52,6 +52,7 @@ const NavigationResultPage = () => {
 
 	useScrollControl();
 
+	// Cache를 위한 Key를 지정하기 위해서 추가한 코드
 	const requestOriginId = originId ? Number(originId) : origin?.nodeId;
 	const requestDestinationId = destinationId ? Number(destinationId) : destination?.nodeId;
 

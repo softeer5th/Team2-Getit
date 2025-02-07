@@ -39,22 +39,17 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 
 		if (routeResult.routes.length === 0) return;
 
-		const paths: Coord[] = [];
 		const cautionFactor: Coord[] = [];
 
 		const { routes, routeDetails } = routeResult;
 
 		// 하나의 길 완성
-		paths.push(routes[0].node1);
-		routes.forEach((route) => {
-			const { node2 } = route;
-			paths.push(node2);
-		});
+		const paths = [routes[0].node1, ...routes.map((el) => el.node2)];
 
 		const bounds = new google.maps.LatLngBounds();
 
 		new Polyline({
-			path: [...paths],
+			path: paths,
 			map,
 			strokeColor: "#000000",
 			strokeWeight: 2.0,

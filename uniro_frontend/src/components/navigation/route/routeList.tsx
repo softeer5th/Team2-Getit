@@ -30,8 +30,8 @@ const RouteList = ({ routes }: RouteListProps) => {
 				...routes,
 			].map((route, index) => (
 				<Fragment key={`${route.coordinates.lat}-fragment`}>
-					<Divider key={`${route.coordinates.lat}-divider`} />
-					<div key={`${route.coordinates.lat}`} className="flex flex-col">
+					<Divider />
+					<div className="flex flex-col">
 						<RouteCard
 							index={index}
 							route={route}
