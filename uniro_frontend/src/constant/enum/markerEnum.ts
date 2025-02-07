@@ -7,9 +7,5 @@ export const enum Markers {
 	SELECTED_BUILDING = "selectedBuilding",
 	WAYPOINT = "waypoint",
 	NUMBERED_WAYPOINT = "numberedWayPoint",
-}
-
-export const enum RoutePoint {
-	ORIGIN = "origin",
-	DESTINATION = "destination",
+	REPORT = "report",
 }

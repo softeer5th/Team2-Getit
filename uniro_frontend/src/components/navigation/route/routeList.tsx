@@ -1,28 +1,42 @@
-import { Fragment } from "react";
-import { RouteEdge } from "../../../data/types/edge";
-import { Building } from "../../../data/types/node";
+import { Fragment, useEffect } from "react";
 import { RouteCard } from "./routeCard";
+import useRoutePoint from "../../../hooks/useRoutePoint";
+import { RouteDetail } from "../../../data/types/route";
+import { Direction } from "../../../data/types/route";
 
 type RouteListProps = {
-	routes: RouteEdge[];
-	originBuilding: Building;
-	destinationBuilding: Building;
+	routes: RouteDetail[];
 };
+
+// export type RouteDetail = {
+// 	dist: number;
+// 	directionType: Direction;
+// 	coordinates: Coord;
+// };
 
 const Divider = () => <div className="border-[0.5px] border-gray-200 w-full"></div>;
 
-const RouteList = ({ routes, originBuilding, destinationBuilding }: RouteListProps) => {
+const RouteList = ({ routes }: RouteListProps) => {
+	const { origin, destination } = useRoutePoint();
+
 	return (
 		<div className="w-full">
-			{routes.map((route, index) => (
-				<Fragment key={`${route.id}-fragment`}>
-					<Divider key={`${route.id}-divider`} />
-					<div key={route.id} className="flex flex-col">
+			{[
+				{
+					dist: 0,
+					directionType: "origin" as Direction,
+					coordinates: { lat: origin!.lat, lng: origin!.lng },
+				},
+				...routes,
+			].map((route, index) => (
+				<Fragment key={`${route.coordinates.lat}-fragment`}>
+					<Divider />
+					<div className="flex flex-col">
 						<RouteCard
 							index={index}
 							route={route}
-							originBuilding={originBuilding}
-							destinationBuilding={destinationBuilding}
+							originBuilding={origin!}
+							destinationBuilding={destination!}
 						/>
 					</div>
 				</Fragment>

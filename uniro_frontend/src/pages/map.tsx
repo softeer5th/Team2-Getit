@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
-import { hanyangBuildings } from "../data/mock/hanyangBuildings";
 import createMarkerElement from "../components/map/mapMarkers";
-import { mockHazardEdges } from "../data/mock/hanyangHazardEdge";
 import { BottomSheet, BottomSheetRef } from "react-spring-bottom-sheet";
-import { Building } from "../data/types/node";
+import { Building, NodeId } from "../data/types/node";
 import "react-spring-bottom-sheet/dist/style.css";
 import { MapBottomSheetFromList, MapBottomSheetFromMarker } from "../components/map/mapBottomSheet";
 import TopSheet from "../components/map/TopSheet";
@@ -13,66 +11,122 @@ import ReportButton from "../components/map/reportButton";
 import useRoutePoint from "../hooks/useRoutePoint";
 import useSearchBuilding from "../hooks/useSearchBuilding";
 import Button from "../components/customButton";
-import { AdvancedMarker, MarkerTypes } from "../data/types/marker";
-import { RoutePointType } from "../data/types/route";
-import { RoutePoint } from "../constant/enums";
-import { Markers } from "../constant/enums";
-import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
+import { AdvancedMarker } from "../data/types/marker";
+import { RouteId, RoutePointType } from "../data/types/route";
+import { RoutePoint } from "../constant/enum/routeEnum";
+import { Markers } from "../constant/enum/markerEnum";
+import createAdvancedMarker, { createUniversityMarker } from "../utils/markers/createAdvanedMarker";
+import toggleMarkers from "../utils/markers/toggleMarkers";
+import { Link } from "react-router";
+import useModal from "../hooks/useModal";
+import ReportModal from "../components/map/reportModal";
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import useRedirectUndefined from "../hooks/useRedirectUndefined";
+import { HanyangUniversity } from "../constant/university";
+import { University } from "../data/types/university";
+import { CautionIssueType, DangerIssueType, MarkerTypes } from "../data/types/enum";
+import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
+
+/** API 호출 */
+import { useSuspenseQueries } from "@tanstack/react-query";
+import { getAllRisks } from "../api/routes";
+import { getAllBuildings } from "../api/nodes";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
+	id: NodeId | RouteId;
 	element: AdvancedMarker;
 	property?: Building;
+	factors?: DangerIssueType[] | CautionIssueType[];
 	from: "Marker" | "List";
 };
 
 export default function MapPage() {
 	const { mapRef, map, AdvancedMarker } = useMap();
+	const [zoom, setZoom] = useState<number>(16);
+	const prevZoom = useRef<number>(16);
+
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
-	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; id: string }[]>([]);
-	const [dangerMarkers, setDangerMarkers] = useState<AdvancedMarker[]>([]);
-	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(true);
+	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; nodeId: NodeId }[]>([]);
 
-	const [cautionMarkers, setCautionMarkers] = useState<AdvancedMarker[]>([]);
-	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(true);
+	const [dangerMarkers, setDangerMarkers] = useState<{ element: AdvancedMarker, routeId: RouteId }[]>([]);
+	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(false);
+
+	const [cautionMarkers, setCautionMarkers] = useState<{ element: AdvancedMarker, routeId: RouteId }[]>([]);
+	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(false);
+
+	const [universityMarker, setUniversityMarker] = useState<AdvancedMarker>();
 
 	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
 	const { mode, building: selectedBuilding } = useSearchBuilding();
 
+	const [_, isOpen, open, close] = useModal();
+
+	const { university } = useUniversityInfo();
+	useRedirectUndefined<University | undefined>([university]);
+
+	if (!university) return;
+
+	const results = useSuspenseQueries({
+		queries: [
+			{ queryKey: [university.id, 'risks'], queryFn: () => getAllRisks(university.id) },
+			{
+				queryKey: [university.id, 'buildings'], queryFn: () => getAllBuildings(university.id, {
+					leftUpLat: 38,
+					leftUpLng: 127,
+					rightDownLat: 37,
+					rightDownLng: 128
+				})
+			}
+		]
+	});
+
+	const [risks, buildings] = results;
+
 	const initMap = () => {
-		if (map === null) return;
+		if (map === null || !AdvancedMarker) return;
 		map.addListener("click", (e: unknown) => {
 			setSheetOpen(false);
-			setSelectedMarker((marker) => {
-				if (marker) {
-					const { type, element } = marker;
-
-					if (type === Markers.BUILDING) return undefined;
-
-					element.content = createMarkerElement({ type, });
-				}
-				return undefined;
-			});
+			setSelectedMarker(undefined);
 		});
+		map.addListener("zoom_changed", () => {
+			setZoom((prev) => {
+				const curZoom = map.getZoom() as number;
+				prevZoom.current = prev;
+
+				return curZoom
+			});
+		})
+
+		const centerMarker = createUniversityMarker(
+			AdvancedMarker,
+			map,
+			HanyangUniversity,
+			university ? university.name : "",
+		)
+		setUniversityMarker(centerMarker);
 	};
 
 	const addBuildings = () => {
 		if (AdvancedMarker === null || map === null) return;
 
-		const markersWithId: { id: string; element: AdvancedMarker }[] = [];
-		for (const building of hanyangBuildings) {
-			const { id, lat, lng, buildingName } = building;
+		const buildingList = buildings.data;
+		const buildingMarkersWithID: { nodeId: NodeId; element: AdvancedMarker }[] = [];
+
+		for (const building of buildingList) {
+			const { nodeId, lat, lng, buildingName } = building;
 
 			const buildingMarker = createAdvancedMarker(
 				AdvancedMarker,
-				map,
+				null,
 				new google.maps.LatLng(lat, lng),
 				createMarkerElement({ type: Markers.BUILDING, title: buildingName, className: "translate-marker" }),
 				() => {
 					setSelectedMarker({
+						id: nodeId,
 						type: Markers.BUILDING,
 						element: buildingMarker,
 						property: building,
@@ -81,67 +135,110 @@ export default function MapPage() {
 				},
 			);
 
-			markersWithId.push({ id: id ? id : "", element: buildingMarker });
+			buildingMarkersWithID.push({ nodeId: nodeId ? nodeId : -1, element: buildingMarker });
 		}
 
-		setBuildingMarkers(markersWithId);
+		setBuildingMarkers(buildingMarkersWithID);
 	};
 
-	const addHazardMarker = () => {
+	const addRiskMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
-		for (const edge of mockHazardEdges) {
-			const { id, startNode, endNode, dangerFactors, cautionFactors } = edge;
-			const hazardMarker = createAdvancedMarker(
+		const { dangerRoutes, cautionRoutes } = risks.data;
+
+		/** 위험 마커 생성 */
+		const dangerMarkersWithId: { routeId: RouteId; element: AdvancedMarker }[] = [];
+
+		for (const route of dangerRoutes) {
+			const { routeId, node1, node2, dangerTypes } = route;
+			const type = Markers.DANGER;
+
+			const dangerMarker = createAdvancedMarker(
 				AdvancedMarker,
-				map,
+				null,
 				new google.maps.LatLng({
-					lat: (startNode.lat + endNode.lat) / 2,
-					lng: (startNode.lng + endNode.lng) / 2,
+					lat: (node1.lat + node2.lat) / 2,
+					lng: (node1.lng + node2.lng) / 2,
 				}),
-				createMarkerElement({ type: dangerFactors ? Markers.DANGER : Markers.CAUTION }),
+				createMarkerElement({ type }),
 				() => {
-					hazardMarker.content = createMarkerElement({
-						type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
-						title: dangerFactors ? dangerFactors[0] : cautionFactors && cautionFactors[0],
-						hasTopContent: true,
-					});
-					setSelectedMarker({
-						type: dangerFactors ? Markers.DANGER : Markers.CAUTION,
-						element: hazardMarker,
-						from: "Marker",
-					});
+					setSelectedMarker((prevMarker) => {
+						if (prevMarker && prevMarker.id === routeId) {
+							return undefined;
+						}
+						return {
+							id: routeId,
+							type: type,
+							element: dangerMarker,
+							factors: dangerTypes,
+							from: "Marker",
+						}
+					})
 				},
 			);
-			if (dangerFactors) {
-				setDangerMarkers((prevMarkers) => [...prevMarkers, hazardMarker]);
-			} else {
-				setCautionMarkers((prevMarkers) => [...prevMarkers, hazardMarker]);
-			}
-		}
-	};
 
-	/** Marker 보이기 안보이기 토글 */
-	const toggleMarkers = (isActive: boolean, markers: AdvancedMarker[]) => {
-		if (isActive) {
-			for (const marker of markers) {
-				marker.map = map;
-			}
-		} else {
-			for (const marker of markers) {
-				marker.map = null;
-			}
+			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
+		setDangerMarkers(dangerMarkersWithId);
+
+		/** 주의 마커 생성 */
+		const cautionMarkersWithId: { routeId: RouteId; element: AdvancedMarker }[] = [];
+
+		for (const route of cautionRoutes) {
+			const { routeId, node1, node2, cautionTypes } = route;
+			const type = Markers.CAUTION;
+
+			const cautionMarker = createAdvancedMarker(
+				AdvancedMarker,
+				null,
+				new google.maps.LatLng({
+					lat: (node1.lat + node2.lat) / 2,
+					lng: (node1.lng + node2.lng) / 2,
+				}),
+				createMarkerElement({ type }),
+				() => {
+					setSelectedMarker((prevMarker) => {
+						if (prevMarker && prevMarker.id === routeId) {
+							return undefined;
+						}
+						return {
+							id: routeId,
+							type: type,
+							element: cautionMarker,
+							factors: cautionTypes,
+							from: "Marker",
+						}
+					})
+				},
+			);
+			cautionMarkersWithId.push({ routeId, element: cautionMarker });
+		}
+
+		setCautionMarkers(cautionMarkersWithId);
 	};
 
 	const toggleCautionButton = () => {
+		if (!map) return;
+		if (zoom <= 16) {
+			map.setOptions({
+				zoom: 17,
+				center: HanyangUniversity,
+			});
+		}
 		setIsCautionActive((isActive) => {
-			toggleMarkers(!isActive, cautionMarkers);
+			toggleMarkers(!isActive, cautionMarkers.map(marker => marker.element), map);
 			return !isActive;
 		});
 	};
 	const toggleDangerButton = () => {
+		if (!map) return;
+		if (zoom <= 16) {
+			map.setOptions({
+				zoom: 17,
+				center: HanyangUniversity,
+			});
+		}
 		setIsDangerActive((isActive) => {
-			toggleMarkers(!isActive, dangerMarkers);
+			toggleMarkers(!isActive, dangerMarkers.map(marker => marker.element), map);
 			return !isActive;
 		});
 	};
@@ -153,9 +250,11 @@ export default function MapPage() {
 		if (selectedMarker.from === "Marker" && type) {
 			switch (type) {
 				case RoutePoint.ORIGIN:
+					if (selectedMarker.id === destination?.nodeId) setDestination(undefined);
 					setOrigin(selectedMarker.property);
 					break;
 				case RoutePoint.DESTINATION:
+					if (selectedMarker.id === origin?.nodeId) setOrigin(undefined);
 					setDestination(selectedMarker.property);
 					break;
 			}
@@ -169,32 +268,88 @@ export default function MapPage() {
 	};
 
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
-	const changeMarkerStyle = (marker: AdvancedMarker, isSelect: boolean) => {
-		if (!map || !selectedMarker || selectedMarker.type !== Markers.BUILDING || !selectedMarker.property) return;
+	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
+		if (!map || !marker) return;
 
-		if (isSelect) {
-			marker.content = createMarkerElement({
-				type: Markers.SELECTED_BUILDING,
-				title: selectedMarker.property.buildingName,
-				className: "translate-marker",
-			});
-			map.setOptions({
-				center: { lat: selectedMarker.property.lat, lng: selectedMarker.property.lng },
-				zoom: 19,
-			});
-			setSheetOpen(true);
+		if (marker.property && (marker.id === origin?.nodeId || marker.id === destination?.nodeId)) {
+			if (isSelect) {
+				map.setOptions({
+					center: { lat: marker.property.lat, lng: marker.property.lng },
+					zoom: 19,
+				})
+				setSheetOpen(true);
+			}
 
 			return;
 		}
-		marker.content = createMarkerElement({
-			type: Markers.BUILDING,
-			title: selectedMarker.property.buildingName,
-			className: "translate-marker",
-		});
+
+		if (marker.type === Markers.BUILDING && marker.property) {
+			if (isSelect) {
+				marker.element.content = createMarkerElement({
+					type: Markers.SELECTED_BUILDING,
+					title: marker.property.buildingName,
+					className: "translate-marker",
+				});
+				map.setOptions({
+					center: { lat: marker.property.lat, lng: marker.property.lng },
+					zoom: 19,
+				});
+				setSheetOpen(true);
+
+				return;
+			}
+
+			if (marker.id === origin?.nodeId) {
+				marker.element.content = createMarkerElement({
+					type: Markers.ORIGIN,
+					title: marker.property.buildingName,
+					className: "translate-routemarker",
+				});
+			}
+
+			else if (marker.id === destination?.nodeId) {
+				marker.element.content = createMarkerElement({
+					type: Markers.DESTINATION,
+					title: destination.buildingName,
+					className: "translate-routemarker",
+				});
+
+			}
+
+			marker.element.content = createMarkerElement({
+				type: Markers.BUILDING,
+				title: marker.property.buildingName,
+				className: "translate-marker",
+			});
+		} else {
+			if (isSelect) {
+				if (marker.type === Markers.DANGER) {
+					const key = marker.factors && marker.factors[0] as DangerIssueType;
+					marker.element.content = createMarkerElement({
+						type: marker.type,
+						title: key && DangerIssue[key],
+						hasTopContent: true,
+					});
+				}
+				else if (marker.type === Markers.CAUTION) {
+					const key = marker.factors && marker.factors[0] as CautionIssueType;
+					marker.element.content = createMarkerElement({
+						type: marker.type,
+						title: key && CautionIssue[key],
+						hasTopContent: true,
+					});
+				}
+				return;
+			}
+
+			marker.element.content = createMarkerElement({
+				type: marker.type,
+			});
+		}
 	};
 
-	const findBuildingMarker = (id: string): AdvancedMarker | undefined => {
-		const matchedMarker = buildingMarkers.find((el) => el.id === id)?.element;
+	const findBuildingMarker = (id: NodeId): AdvancedMarker | undefined => {
+		const matchedMarker = buildingMarkers.find((el) => el.nodeId === id)?.element;
 
 		return matchedMarker;
 	};
@@ -203,26 +358,26 @@ export default function MapPage() {
 	useEffect(() => {
 		initMap();
 		addBuildings();
-		addHazardMarker();
+		addRiskMarker();
 	}, [map]);
 
 	/** 선택된 마커가 있는 경우 */
 	useEffect(() => {
-		if (selectedMarker === undefined) return;
-		changeMarkerStyle(selectedMarker.element, true);
+		changeMarkerStyle(selectedMarker, true);
 		return () => {
-			changeMarkerStyle(selectedMarker.element, false);
+			changeMarkerStyle(selectedMarker, false);
 		};
 	}, [selectedMarker]);
 
 	/** 빌딩 리스트에서 넘어온 경우, 일치하는 BuildingMarkerElement를 탐색 */
 	useEffect(() => {
-		if (buildingMarkers.length === 0 || !selectedBuilding || !selectedBuilding.id) return;
+		if (buildingMarkers.length === 0 || !selectedBuilding || !selectedBuilding.nodeId) return;
 
-		const matchedMarker = findBuildingMarker(selectedBuilding.id);
+		const matchedMarker = findBuildingMarker(selectedBuilding.nodeId);
 
 		if (matchedMarker)
 			setSelectedMarker({
+				id: selectedBuilding.nodeId,
 				type: Markers.BUILDING,
 				element: matchedMarker,
 				from: "List",
@@ -232,9 +387,9 @@ export default function MapPage() {
 
 	/** 출발지 결정 시, Marker Content 변경 */
 	useEffect(() => {
-		if (!origin || !origin.id) return;
+		if (!origin || !origin.nodeId) return;
 
-		const originMarker = findBuildingMarker(origin.id);
+		const originMarker = findBuildingMarker(origin.nodeId);
 		if (!originMarker) return;
 
 		originMarker.content = createMarkerElement({
@@ -247,16 +402,16 @@ export default function MapPage() {
 			originMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
 				title: origin.buildingName,
-				className: "translate-routemarker",
+				className: "translate-marker",
 			});
 		};
 	}, [origin]);
 
 	/** 도착지 결정 시, Marker Content 변경 */
 	useEffect(() => {
-		if (!destination || !destination.id) return;
+		if (!destination || !destination.nodeId) return;
 
-		const destinationMarker = findBuildingMarker(destination.id);
+		const destinationMarker = findBuildingMarker(destination.nodeId);
 		if (!destinationMarker) return;
 
 		destinationMarker.content = createMarkerElement({
@@ -269,13 +424,37 @@ export default function MapPage() {
 			destinationMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
 				title: destination.buildingName,
-				className: "translate-routemarker",
+				className: "translate-marker",
 			});
 		};
 	}, [destination]);
 
+	useEffect(() => {
+		if (!map) return;
+
+		const _buildingMarkers = buildingMarkers.map(buildingMarker => buildingMarker.element);
+
+		if (prevZoom.current >= 17 && zoom <= 16) {
+			if (isCautionAcitve) {
+				setIsCautionActive(false);
+				toggleMarkers(false, cautionMarkers.map(marker => marker.element), map);
+			}
+			if (isDangerAcitve) {
+				setIsDangerActive(false);
+				toggleMarkers(false, dangerMarkers.map(marker => marker.element), map);
+			}
+
+			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
+			toggleMarkers(false, _buildingMarkers, map);
+		}
+		else if ((prevZoom.current <= 16 && zoom >= 17)) {
+			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
+			toggleMarkers(true, _buildingMarkers, map);
+		}
+	}, [map, zoom])
+
 	return (
-		<div className="relative flex flex-col h-screen w-full max-w-[450px] mx-auto justify-center">
+		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
 			<TopSheet open={!sheetOpen} />
 			<div ref={mapRef} className="w-full h-full" />
 			<BottomSheet
@@ -301,16 +480,16 @@ export default function MapPage() {
 						/>
 					))}
 			</BottomSheet>
-			{origin && destination && origin.id !== destination.id ? (
+			{origin && destination && origin.nodeId !== destination.nodeId ? (
 				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */
-				<div className="absolute bottom-6 space-y-2 w-full px-4">
+				<Link to="/result" className="absolute bottom-6 space-y-2 w-full px-4">
 					<Button variant="primary">길찾기</Button>
-				</div>
+				</Link>
 			) : (
 				/** 출발지랑 도착지가 존재하지 않거나, 같은 경우 기존 Button UI 보이기 */
 				<>
 					<div className="absolute right-4 bottom-6 space-y-2">
-						<ReportButton />
+						<ReportButton onClick={open} />
 					</div>
 					<div className="absolute right-4 bottom-[90px] space-y-2">
 						<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
@@ -318,6 +497,7 @@ export default function MapPage() {
 					</div>
 				</>
 			)}
+			{isOpen && <ReportModal close={close} />}
 		</div>
 	);
 }

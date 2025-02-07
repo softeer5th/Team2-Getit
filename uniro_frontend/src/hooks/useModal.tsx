@@ -1,6 +1,8 @@
 import React, { ReactNode, useCallback, useState } from "react";
 
-export default function useModal(): [React.FC<{ children: ReactNode }>, boolean, () => void, () => void] {
+export default function useModal(
+	onClose?: () => void,
+): [React.FC<{ children: ReactNode }>, boolean, () => void, () => void] {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
 	const open = useCallback(() => {
@@ -8,6 +10,9 @@ export default function useModal(): [React.FC<{ children: ReactNode }>, boolean,
 	}, []);
 
 	const close = useCallback(() => {
+		if (onClose) {
+			onClose();
+		}
 		setIsOpen(false);
 	}, []);
 

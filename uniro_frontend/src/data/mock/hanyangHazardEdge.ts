@@ -1,6 +1,6 @@
 import { createHazardEdge } from "../factory/edgeFactory";
 import { createNode } from "../factory/nodeFactory";
-import { HazardEdge } from "../types/edge";
+import { HazardEdge } from "../types/route";
 import { CustomNode } from "../types/node";
 
 const nodes: CustomNode[] = [

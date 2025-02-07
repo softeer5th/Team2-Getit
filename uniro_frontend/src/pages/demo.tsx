@@ -6,18 +6,57 @@ import Map from "../component/Map";
 import RouteInput from "../components/map/routeSearchInput";
 import OriginIcon from "../assets/map/origin.svg?react";
 import DestinationIcon from "../assets/map/destination.svg?react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReportButton from "../components/map/reportButton";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { getFetch, postFetch, putFetch } from "../utils/fetch/fetch";
+import SuspenseMapComponent from "../component/SuspenseMap";
+import { getMockTest } from "../utils/fetch/mockFetch";
+import SearchNull from "../components/error/SearchNull";
+import Offline from "../components/error/Offline";
+import Error from "../components/error/Error";
+
+const getTest = () => {
+	/** https://jsonplaceholder.typicode.com/comments?postId=1 */
+	return getFetch<{ postId: string }>("/comments", {
+		postId: 1,
+	});
+};
+
+const postTest = (): Promise<{ id: string }> => {
+	return postFetch<{ id: string }, string>("/posts", { id: "test" });
+};
+
+const putTest = (): Promise<{ id: string }> => {
+	return putFetch<{ id: string }, string>("/posts/1", { id: "test" });
+};
 
 export default function Demo() {
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
 	const [destination, setDestination] = useState<string>("역사관");
 
+	const { data, status } = useSuspenseQuery({
+		queryKey: ["test"],
+		queryFn: getMockTest,
+	});
+
+	const { data: postData, mutate: mutatePost } = useMutation<{ id: string }>({
+		mutationFn: postTest,
+	});
+
+	const { data: putData, mutate: mutatePut } = useMutation<{ id: string }>({
+		mutationFn: putTest,
+	});
+
+	useEffect(() => {
+		console.log(data);
+	}, [status]);
+
 	return (
 		<>
-			<div className="flex flex-row">
+			<div className="flex flex-row flex-wrap">
 				<div className="w-1/3 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
 					<Button onClick={openFail}>버튼</Button>
 					<Button onClick={openSuccess} variant="secondary">
@@ -31,30 +70,30 @@ export default function Demo() {
 				<div className="w-1/3 flex flex-col justify-start space-y-5 p-5 mb-5 rounded-sm border border-dashed border-[#9747FF] ">
 					<ReportButton />
 					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
-						<DangerToggleButton onClick={() => { }} isActive={false} />
-						<DangerToggleButton onClick={() => { }} isActive={true} />
+						<DangerToggleButton onClick={() => {}} isActive={false} />
+						<DangerToggleButton onClick={() => {}} isActive={true} />
 					</div>
 
 					<div className="flex space-x-3 rounded-sm border border-dashed border-[#9747FF] p-3">
-						<CautionToggleButton onClick={() => { }} isActive={false} />
-						<CautionToggleButton onClick={() => { }} isActive={true} />
+						<CautionToggleButton onClick={() => {}} isActive={false} />
+						<CautionToggleButton onClick={() => {}} isActive={true} />
 					</div>
 				</div>
 
 				<div className="w-1/3 rounded-sm border border-dashed border-[#9747FF] flex flex-col justify-start space-y-5 p-5">
 					<Input
 						placeholder="우리 학교를 검색해보세요"
-						handleVoiceInput={() => { }}
+						handleVoiceInput={() => {}}
 						onLengthChange={(e: string) => {
 							console.log(e);
 						}}
 					/>
-					<RouteInput onClick={() => { }} placeholder="출발지를 입력하세요">
+					<RouteInput onClick={() => {}} placeholder="출발지를 입력하세요">
 						<OriginIcon />
 					</RouteInput>
 
 					<RouteInput
-						onClick={() => { }}
+						onClick={() => {}}
 						placeholder="도착지를 입력하세요"
 						value={destination}
 						onCancel={() => setDestination("")}
@@ -80,9 +119,25 @@ export default function Demo() {
 						<p className="text-kor-body3 font-regular text-gray-700">다른 건물을 시도해주세요.</p>
 					</div>
 				</FailModal>
-			</div>
-			<div className="h-[500px] w-[500px]">
-				<Map />
+				<div className="w-1/2 h-[500px] rounded-sm border border-dashed border-[#9747FF]">
+					<Map />
+				</div>
+				<div className="w-1/2 rounded-sm border border-dashed border-[#9747FF] flex flex-row flex-wrap justify-start space-y-5 p-5">
+					<Button onClick={() => mutatePost()}>
+						{postData?.id ? `${postData.id} : 테스트 결과` : "POST 테스트"}
+					</Button>
+					<Button onClick={() => mutatePut()}>
+						{putData?.id ? `${putData.id} : 테스트 결과` : "PUT 테스트"}
+					</Button>
+					<div className="w-fit h-fit rounded-sm border border-dashed border-[#9747FF] p-5">
+						<SearchNull message="캠퍼스 내 건물명을 입력해 보세요." />
+						<SearchNull message="캠퍼스 리스트를 확인해 보세요." />
+					</div>
+					<div className="w-fit h-fit rounded-sm border border-dashed border-[#9747FF] p-5 space-y-5">
+						<Offline />
+						<Error />
+					</div>
+				</div>
 			</div>
 			<p className="read-the-docs">Click on the Vite and React logos to learn more</p>
 		</>

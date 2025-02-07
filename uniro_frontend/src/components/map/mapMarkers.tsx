@@ -1,5 +1,5 @@
-import { MarkerTypes } from "../../data/types/marker";
-import { Markers } from "../../constant/enums";
+import { Markers } from "../../constant/enum/markerEnum";
+import { MarkerTypes } from "../../data/types/enum";
 
 const markerImages = import.meta.glob("/src/assets/markers/*.svg", { eager: true });
 
@@ -54,17 +54,60 @@ function createContainerElement(className?: string) {
 	return container;
 }
 
+function attachAnimation(container: HTMLElement, hasAnimation: boolean) {
+	if (hasAnimation) {
+		const outerContainer = document.createElement("div");
+		outerContainer.className = "marker-appear";
+		outerContainer.appendChild(container);
+		return outerContainer;
+	}
+
+	return container;
+}
+
+function createNumberMarkerElement({
+	number,
+	className,
+	hasAnimation = false,
+}: {
+	number: number | string;
+	className?: string;
+	hasAnimation?: boolean;
+}): HTMLElement {
+	const container = createContainerElement(className);
+	const numberText = document.createElement("p");
+	numberText.innerText = `${number}`;
+	numberText.className =
+		"h-[17px] w-[17px] flex items-center justify-center text-white text-kor-body3 text-[10.25px] font-bold bg-[#161616] rounded-full";
+	const markerWrapper = document.createElement("div");
+	markerWrapper.className = "relative flex items-center justify-center";
+	markerWrapper.style.transform = "translateY(8.5px)";
+	markerWrapper.appendChild(numberText);
+
+	container.appendChild(markerWrapper);
+
+	return attachAnimation(container, hasAnimation);
+}
+
 export default function createMarkerElement({
 	type,
 	title,
 	className,
 	hasTopContent = false,
+	hasAnimation = false,
+	number = 0,
 }: {
 	type: MarkerTypes;
 	className?: string;
 	title?: string;
 	hasTopContent?: boolean;
+	hasAnimation?: boolean;
+	number?: number;
 }): HTMLElement {
+	if (number && type === Markers.NUMBERED_WAYPOINT) {
+		return createNumberMarkerElement({ number, className, hasAnimation });
+	}
+
 	const container = createContainerElement(className);
 
 	const markerImage = createImageElement(type);
@@ -74,14 +117,15 @@ export default function createMarkerElement({
 		if (hasTopContent) {
 			container.appendChild(markerTitle);
 			container.appendChild(markerImage);
-			return container;
+			return attachAnimation(container, hasAnimation);
 		}
 
 		container.appendChild(markerImage);
 		container.appendChild(markerTitle);
-		return container;
+		return attachAnimation(container, hasAnimation);
 	}
 
 	container.appendChild(markerImage);
-	return container;
+
+	return attachAnimation(container, hasAnimation);
 }

@@ -1,14 +1,14 @@
-export interface CustomNode {
-	id?: string;
-	lng: number;
-	lat: number;
-	isCore?: boolean;
+import { Coord } from "./coord";
+
+export type NodeId = number;
+
+export interface Node extends Coord {
+	nodeId: NodeId;
 }
 
-// 건물 노드의 정보를 담고 있음
-export interface Building extends CustomNode {
+export interface Building extends Node {
 	buildingName: string;
-	buildingImageUrl?: string;
+	buildingImageUrl: string;
 	phoneNumber: string;
 	address: string;
 }
