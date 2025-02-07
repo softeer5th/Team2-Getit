@@ -1,7 +1,10 @@
 package com.softeer5.uniro_backend.admin.entity;
 
+import java.time.LocalDateTime;
+
 import com.softeer5.uniro_backend.admin.setting.CustomReversionListener;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.RevisionEntity;
@@ -12,7 +15,6 @@ import org.hibernate.envers.RevisionTimestamp;
 @RevisionEntity(CustomReversionListener.class)
 @Getter
 @Setter
-@Table(name = "Revinfo")
 public class RevInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +23,11 @@ public class RevInfo {
 
     @RevisionTimestamp
     @Column(name = "revtstmp")
-    private long revTimeStamp;
-    @Column(name = "univ_id", nullable = false)
+    private LocalDateTime revTimeStamp;
+
+    @Column(name = "univ_id")
+    @NotNull
     private Long univId;
+
     private String action;
 }

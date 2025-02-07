@@ -6,9 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -19,7 +16,7 @@ public class AdminService {
 
     public List<RevInfoDTO> getAllRevInfo(Long univId){
         return revInfoRepository.findAllByUnivId(univId).stream().map(r -> RevInfoDTO.of(r.getRev(),
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(r.getRevTimeStamp()), ZoneId.systemDefault()),
+                r.getRevTimeStamp(),
                 r.getUnivId(),
                 r.getAction())).toList();
     }
