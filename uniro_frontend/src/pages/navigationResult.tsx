@@ -52,16 +52,19 @@ const NavigationResultPage = () => {
 
 	useScrollControl();
 
+	const requestOriginId = originId ? Number(originId) : origin?.nodeId;
+	const requestDestinationId = destinationId ? Number(destinationId) : destination?.nodeId;
+
 	const result = useSuspenseQueries({
 		queries: [
 			{
-				queryKey: ["fastRoute", university?.id, origin?.nodeId, destination?.nodeId],
+				queryKey: ["fastRoute", university?.id, requestOriginId, requestDestinationId],
 				queryFn: async () => {
 					try {
 						const response = await getNavigationResult(
 							university?.id ?? 1001,
-							originId ? Number(originId) : origin?.nodeId,
-							destinationId ? Number(destinationId) : destination?.nodeId,
+							requestOriginId,
+							requestDestinationId,
 						);
 						setOriginCoord(response.routes[0].node1.lng, response.routes[0].node1.lat);
 						setDestinationCoord(
