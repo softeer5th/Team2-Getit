@@ -17,6 +17,8 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { getSingleRouteRisk, postReport } from "../api/route";
 import { University } from "../data/types/university";
 import { useNavigate } from "react-router";
+import useReportRisk from "../hooks/useReportRisk";
+import { RouteId } from "../data/types/route";
 
 const ReportForm = () => {
 	useScrollControl();
@@ -33,10 +35,13 @@ const ReportForm = () => {
 	const [errorTitle, setErrorTitle] = useState<string>("");
 
 	const { university } = useUniversityInfo();
+	const { reportRouteId: routeId } = useReportRisk();
 
-	useRedirectUndefined<University | undefined>([university]);
+	useRedirectUndefined<University | RouteId | undefined>([university, routeId]);
 
-	const routeId = 1;
+	console.log(routeId)
+
+	if (!routeId) return;
 
 	const { data } = useSuspenseQuery({
 		queryKey: ["report", university?.id ?? 1001, routeId],

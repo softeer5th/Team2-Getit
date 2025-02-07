@@ -1,9 +1,10 @@
 import { EDGE_LENGTH } from "../../constant/edge";
+import { Coord } from "../../data/types/coord";
 import { LatLngToLiteral } from "../coordinates/coordinateTransform";
 import distance from "../coordinates/distance";
 
 /** 구면 보간 없이 계산한 결과 */
-export default function createSubNodes(polyLine: google.maps.Polyline): google.maps.LatLngLiteral[] {
+export default function createSubNodes(polyLine: google.maps.Polyline): Coord[] {
 	const paths = polyLine.getPath();
 	const [startNode, endNode] = paths.getArray().map((el) => LatLngToLiteral(el));
 
@@ -19,7 +20,7 @@ export default function createSubNodes(polyLine: google.maps.Polyline): google.m
 	const subNodes = [];
 
 	for (let i = 0; i < subEdgesCount; i++) {
-		const subNode: google.maps.LatLngLiteral = {
+		const subNode: Coord = {
 			lat: startNode.lat + interval.lat * i,
 			lng: startNode.lng + interval.lng * i,
 		};

@@ -8,7 +8,7 @@ import BuildingSearchPage from "./pages/buildingSearch";
 import NavigationResultPage from "./pages/navigationResult";
 import ReportRoutePage from "./pages/reportRoute";
 import ReportForm from "./pages/reportForm";
-import ReportHazardPage from "./pages/reportHazard";
+import ReportRiskPage from "./pages/reportRisk";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDynamicSuspense } from "./hooks/useDynamicSuspense";
 import OfflinePage from "./pages/offline";
@@ -34,7 +34,7 @@ function App() {
 					<Route path="/form" element={<ReportForm />} />
 					<Route path="/result" element={<NavigationResultPage />} />
 					<Route path="/report/route" element={<ReportRoutePage />} />
-					<Route path="/report/hazard" element={<ReportHazardPage />} />
+					<Route path="/report/risk" element={<ReportRiskPage />} />
 					/** 에러 페이지 */
 					<Route path="/error" element={<ErrorPage />} />
 					<Route path="/error/offline" element={<OfflinePage />} />
