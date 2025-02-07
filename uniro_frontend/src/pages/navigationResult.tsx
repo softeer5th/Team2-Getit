@@ -78,8 +78,14 @@ const NavigationResultPage = () => {
 					}
 				},
 				retry: 1,
+				staleTime: 0,
 			},
-			{ queryKey: [university?.id, "risks"], queryFn: () => getAllRisks(university?.id ?? 1001), retry: 1 },
+			{
+				queryKey: [university?.id, "risks"],
+				queryFn: () => getAllRisks(university?.id ?? 1001),
+				retry: 1,
+				staleTime: 0,
+			},
 		],
 	});
 
