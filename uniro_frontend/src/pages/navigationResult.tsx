@@ -41,6 +41,7 @@ const NavigationResultPage = () => {
 	const { university } = useUniversityInfo();
 	const { origin, destination, setOriginCoord, setDestinationCoord } = useRoutePoint();
 
+	// TEST용 Link
 	const { search } = location;
 	const params = new URLSearchParams(search);
 
@@ -74,7 +75,7 @@ const NavigationResultPage = () => {
 				},
 				retry: 1,
 			},
-			{ queryKey: [university?.id, "risks"], queryFn: () => getAllRisks(university?.id ?? 1001) },
+			{ queryKey: [university?.id, "risks"], queryFn: () => getAllRisks(university?.id ?? 1001), retry: 1 },
 		],
 	});
 
