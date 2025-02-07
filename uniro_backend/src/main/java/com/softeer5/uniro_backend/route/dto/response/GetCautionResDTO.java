@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.route.dto;
+package com.softeer5.uniro_backend.route.dto.response;
 
 import java.util.List;
 import java.util.Map;
@@ -14,13 +14,13 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-@Schema(name = "GetDangerResDTO", description = "위험 요소 조회 DTO")
+@Schema(name = "GetCautionResDTO", description = "위험 요소 조회 DTO")
 public class GetCautionResDTO {
 
-	@Schema(description = "노드 1의 좌표", example = "{\"lag\": 127.123456, \"lat\": 37.123456}")
+	@Schema(description = "노드 1의 좌표", example = "{\"lng\": 127.123456, \"lat\": 37.123456}")
 	private final Map<String, Double> node1;
 
-	@Schema(description = "노드 2의 좌표", example = "{\"lag\": 127.123456, \"lat\": 37.123456}")
+	@Schema(description = "노드 2의 좌표", example = "{\"lng\": 127.123456, \"lat\": 37.123456}")
 	private final Map<String, Double> node2;
 
 	@Schema(description = "간선 id", example = "3")
@@ -29,7 +29,7 @@ public class GetCautionResDTO {
 	@Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
 	private final List<CautionType> cautionTypes;
 
-	public static GetCautionResDTO of(Node node1, Node node2, Long routeId, List<CautionType> cautionTypes){
-		return new GetCautionResDTO(node1.getXY(), node2.getXY(), routeId, cautionTypes);
+	public static GetCautionResDTO of(Map<String, Double> node1, Map<String, Double> node2, Long routeId, List<CautionType> cautionTypes){
+		return new GetCautionResDTO(node1, node2, routeId, cautionTypes);
 	}
 }

@@ -2,12 +2,15 @@ package com.softeer5.uniro_backend.route.entity;
 
 import static jakarta.persistence.FetchType.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.softeer5.uniro_backend.resolver.CautionListConverter;
 import com.softeer5.uniro_backend.resolver.DangerListConverter;
 import com.softeer5.uniro_backend.node.entity.Node;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.locationtech.jts.geom.LineString;
 
 import jakarta.persistence.Column;
@@ -20,12 +23,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Audited
 public class Route {
 
 	@Id
@@ -34,16 +39,18 @@ public class Route {
 
 	private double cost;
 
-	@Column(columnDefinition = "geometry(LineString, 4326)") // WGS84 좌표계
+	@Column(columnDefinition = "LINESTRING SRID 4326") // WGS84 좌표계
 	private LineString path;
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(referencedColumnName = "id", name = "node1_id")
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	@NotNull
 	private Node node1;
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(referencedColumnName = "id", name = "node2_id")
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 	@NotNull
 	private Node node2;
 
@@ -55,11 +62,13 @@ public class Route {
 
 	@Convert(converter = CautionListConverter.class)
 	@Column(name = "caution_factors")
-	private Set<CautionType> cautionFactors;
+	@NotNull
+	private Set<CautionType> cautionFactors = new HashSet<>();
 
 	@Convert(converter = DangerListConverter.class)
 	@Column(name = "danger_factors")
-	private Set<DangerType> dangerFactors;
+	@NotNull
+	private Set<DangerType> dangerFactors = new HashSet<>();
 
 	public List<CautionType> getCautionFactorsByList(){
 		return cautionFactors.stream().toList();
@@ -71,7 +80,7 @@ public class Route {
 
 	public void setCautionFactors(List<CautionType> cautionFactors) {
 		this.cautionFactors.clear();
-        this.cautionFactors.addAll(cautionFactors);
+		this.cautionFactors.addAll(cautionFactors);
 	}
 
 	public void setDangerFactors(List<DangerType> dangerFactors) {
@@ -79,4 +88,16 @@ public class Route {
 		this.dangerFactors.addAll(dangerFactors);
 	}
 
+	@Builder
+	private Route(double cost, LineString path, Node node1, Node node2, Long univId, Long coreRouteId,
+		Set<CautionType> cautionFactors, Set<DangerType> dangerFactors) {
+		this.cost = cost;
+		this.path = path;
+		this.node1 = node1;
+		this.node2 = node2;
+		this.univId = univId;
+		this.coreRouteId = coreRouteId;
+		this.cautionFactors = cautionFactors;
+		this.dangerFactors = dangerFactors;
+	}
 }

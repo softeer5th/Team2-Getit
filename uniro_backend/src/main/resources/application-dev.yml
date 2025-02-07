@@ -1,0 +1,44 @@
+spring:
+  config:
+    import: application.properties
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        show_sql: true
+    open-in-view: false
+    defer-datasource-initialization: true
+  sql:
+    init:
+      schema-locations: classpath:h2gis-setting.sql
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+map:
+  api:
+    key: ${google.api.key}
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        exclude: "*"
+    web:
+      exposure:
+        include: info, health, prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+cors:
+  allowed-origins: ${allowed-origins}

@@ -1,15 +1,20 @@
 package com.softeer5.uniro_backend.route.controller;
 
-import com.softeer5.uniro_backend.route.dto.*;
+import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
+import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetRiskResDTO;
+import com.softeer5.uniro_backend.route.dto.response.GetRiskRoutesResDTO;
+import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.softeer5.uniro_backend.route.service.RouteService;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -20,8 +25,8 @@ public class RouteController implements RouteApi {
 
 	@Override
 	@GetMapping("/{univId}/routes")
-	public ResponseEntity<List<GetAllRoutesResDTO>> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
-		List<GetAllRoutesResDTO> allRoutes = routeService.getAllRoutes(univId);
+	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
+		GetAllRoutesResDTO allRoutes = routeService.getAllRoutes(univId);
 		return ResponseEntity.ok().body(allRoutes);
 	}
 
@@ -33,13 +38,10 @@ public class RouteController implements RouteApi {
 	}
 
 	@Override
-	@GetMapping("/{univId}/route/risk")
+	@GetMapping("/{univId}/routes/{routeId}/risk")
 	public ResponseEntity<GetRiskResDTO> getRisk(@PathVariable("univId") Long univId,
-												 @RequestParam(value = "start-lat") double startLat,
-												 @RequestParam(value = "start-lng") double startLng,
-												 @RequestParam(value = "end-lat") double endLat,
-												 @RequestParam(value = "end-lng") double endLng){
-		GetRiskResDTO riskResDTO = routeService.getRisk(univId,startLat,startLng,endLat,endLng);
+												 @PathVariable(value = "routeId") Long routeId){
+		GetRiskResDTO riskResDTO = routeService.getRisk(univId, routeId);
 		return ResponseEntity.ok().body(riskResDTO);
 	}
 
@@ -50,6 +52,14 @@ public class RouteController implements RouteApi {
 									   @RequestBody PostRiskReqDTO postRiskReqDTO){
 		routeService.updateRisk(univId,routeId,postRiskReqDTO);
 		return ResponseEntity.ok().build();
+	}
+
+	@Override
+	@PostMapping("/{univId}/route")
+	public ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
+											 @RequestBody CreateRoutesReqDTO routes){
+		routeCalculationService.createRoute(univId, routes);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@Override

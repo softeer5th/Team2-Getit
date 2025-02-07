@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.route.dto;
+package com.softeer5.uniro_backend.route.dto.response;
 
 import com.softeer5.uniro_backend.route.entity.CautionType;
 import com.softeer5.uniro_backend.route.entity.DangerType;
@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @Getter
-@Schema(name = "GetAllRoutesResDTO", description = "특정 간선의 주의/위험요소 조회 DTO")
+@Schema(name = "GetRiskResDTO", description = "특정 간선의 주의/위험요소 조회 DTO")
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class GetRiskResDTO {
     @Schema(description = "route ID", example = "3")
