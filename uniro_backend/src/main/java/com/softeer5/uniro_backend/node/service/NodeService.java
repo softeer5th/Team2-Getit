@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.softeer5.uniro_backend.common.CursorPage;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.BuildingNotFoundException;
+import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.node.dto.BuildingNode;
 import com.softeer5.uniro_backend.node.dto.GetBuildingResDTO;
 import com.softeer5.uniro_backend.node.dto.SearchBuildingResDTO;
@@ -24,10 +25,10 @@ public class NodeService {
 
 	public List<GetBuildingResDTO> getBuildings(
 		Long univId, int level,
-		double leftUpLng, double leftUpLat, double rightDownLng , double rightDownLat) {
+		double leftUpLat, double leftUpLng,  double rightDownLat, double rightDownLng) {
 
-		List<BuildingNode> buildingNodes = buildingRepository.findByUnivIdAndLevelWithNode(
-			univId, level, leftUpLng, leftUpLat, rightDownLng, rightDownLat);
+		String polygon = GeoUtils.makeSquarePolygonString(leftUpLat, leftUpLng, rightDownLat, rightDownLng);
+		List<BuildingNode> buildingNodes = buildingRepository.findByUnivIdAndLevelWithNode(univId, level, polygon);
 
 		return buildingNodes.stream()
 			.map(buildingNode -> GetBuildingResDTO.of(buildingNode.getBuilding(), buildingNode.getNode()))

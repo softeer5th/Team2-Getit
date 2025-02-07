@@ -12,20 +12,17 @@ import org.springframework.stereotype.Repository;
 import com.softeer5.uniro_backend.route.entity.Route;
 
 @Repository
-public interface RouteRepository extends JpaRepository<Route, Integer> {
+public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = {"node1", "node2"})
     @Query("SELECT r FROM Route r WHERE r.univId = :univId")
     List<Route> findAllRouteByUnivIdWithNodes(Long univId);
 
-    @Query("SELECT r "
-            + "FROM Route r "
-            + "JOIN FETCH r.node1 n1 "
-            + "JOIN FETCH r.node2 n2 "
-            + "WHERE r.univId = :univId "
-            + "AND (r.cautionFactors IS NOT NULL OR r.dangerFactors IS NOT NULL)"
-    )
-    List<Route> findRiskRouteByUnivIdWithNode(@Param("univId") Long univId);
+    @Query(value = "SELECT r.* FROM route r " +
+            "WHERE r.univ_id = :univId " +
+            "AND (r.caution_factors LIKE '[\"%' OR r.danger_factors LIKE '[\"%')",
+            nativeQuery = true)
+    List<Route> findRiskRouteByUnivId(@Param("univId") Long univId);
 
     @Query(value = """
     SELECT r.* FROM route r

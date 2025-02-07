@@ -21,7 +21,7 @@ public class CautionListConverter implements AttributeConverter<Set<CautionType>
 	public String convertToDatabaseColumn(Set<CautionType> attribute) {
 		try {
 			if (attribute == null) {
-				return null; // List가 null일 경우, DB에 저장할 값도 null
+				return "[]"; // List가 null일 경우, DB에 저장할 값은 []
 			}
 			return mapper.writeValueAsString(attribute);
 		} catch (JsonProcessingException e) {

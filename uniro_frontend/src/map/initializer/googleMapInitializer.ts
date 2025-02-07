@@ -9,12 +9,14 @@ interface MapWithOverlay {
 	Polyline: typeof google.maps.Polyline;
 }
 
-export const initializeMap = async (mapElement: HTMLElement | null): Promise<MapWithOverlay> => {
+export const initializeMap = async (
+	mapElement: HTMLElement | null,
+	mapOptions?: google.maps.MapOptions,
+): Promise<MapWithOverlay> => {
 	const { Map, OverlayView, AdvancedMarkerElement, Polyline } = await loadGoogleMapsLibraries();
 
-	// useMap hook에서 error을 catch 하도록 함.
 	if (!mapElement) {
-		throw new Error("mapElement is null");
+		throw new Error("Map Element is not provided");
 	}
 
 	const map = new Map(mapElement, {
@@ -33,6 +35,7 @@ export const initializeMap = async (mapElement: HTMLElement | null): Promise<Map
 		// 	strictBounds: false,
 		// },
 		mapId: import.meta.env.VITE_REACT_APP_GOOGLE_MAP_ID,
+		...mapOptions,
 	});
 
 	const overlay = new OverlayView();
