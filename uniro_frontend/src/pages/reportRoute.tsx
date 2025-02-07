@@ -202,13 +202,16 @@ export default function ReportRoutePage() {
 		const subNodes = [];
 		const edges = newPoints.coords.map((node, idx) => [node, newPoints.coords[idx + 1]]).slice(0, -1);
 
+		const lastPoint = newPoints.coords[newPoints.coords.length - 1] as Node | Coord;
+
 		for (const edge of edges) {
-			const subNode = createSubNodes(new Polyline({ path: edge }));
+			const subNode = createSubNodes(new Polyline({ path: edge })).slice(0, -1);
 			subNodes.push(...subNode);
 		}
 
+		subNodes.push(lastPoint);
+
 		if (!originPoint.current) return;
-		const lastPoint = newPoints.coords[newPoints.coords.length - 1] as Node | Coord;
 
 		if ("nodeId" in lastPoint) {
 			mutate({
