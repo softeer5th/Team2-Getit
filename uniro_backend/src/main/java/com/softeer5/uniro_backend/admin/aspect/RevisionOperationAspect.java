@@ -5,6 +5,7 @@ import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.admin.setting.RevisionContext;
 import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -72,14 +73,12 @@ public class RevisionOperationAspect {
         String[] parameterNames = signature.getParameterNames();
         Object[] args = joinPoint.getArgs();
 
-        Long univId = null;
-        String action = null;
+		Long univId = null;
+		String action = "새로운 길 추가";
+
         for (int i = 0; i < args.length; i++) {
             if (args[i] instanceof Long && "univId".equals(parameterNames[i])) {
                 univId = (Long) args[i];
-            }
-            else if(args[i] instanceof CreateRoutesReqDTO){
-                action = "새로운 길 추가";
             }
         }
         RevisionContext.setUnivId(univId);
