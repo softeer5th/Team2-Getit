@@ -1,18 +1,21 @@
+import { Coord } from "../../data/types/coord";
+import { Node } from "../../data/types/node";
+import { CoreRoute } from "../../data/types/route";
 import centerCoordinate from "../coordinates/centerCoordinate";
 import distance from "../coordinates/distance";
 
 export default function findNearestSubEdge(
-	edges: [google.maps.LatLngLiteral, google.maps.LatLngLiteral][],
-	point: google.maps.LatLngLiteral,
+	edges: CoreRoute[],
+	point: Coord,
 ): {
-	edge: [google.maps.LatLngLiteral, google.maps.LatLngLiteral];
-	point: google.maps.LatLngLiteral;
+	edge: CoreRoute;
+	point: Node;
 } {
 	const edgesWithDistance = edges
-		.map(([startNode, endNode]) => {
+		.map((edge) => {
 			return {
-				edge: [startNode, endNode] as [google.maps.LatLngLiteral, google.maps.LatLngLiteral],
-				distance: distance(point, centerCoordinate(startNode, endNode)),
+				edge,
+				distance: distance(point, centerCoordinate(edge.node1, edge.node2)),
 			};
 		})
 		.sort((a, b) => {
@@ -21,9 +24,10 @@ export default function findNearestSubEdge(
 
 	const nearestEdge = edgesWithDistance[0].edge;
 
-	const distance0 = distance(nearestEdge[0], point);
-	const distance1 = distance(nearestEdge[1], point);
-	const nearestPoint = distance0 > distance1 ? nearestEdge[1] : nearestEdge[0];
+	const { node1, node2 } = nearestEdge;
+	const distance0 = distance(node1, point);
+	const distance1 = distance(node2, point);
+	const nearestPoint = distance0 > distance1 ? node2 : node1;
 
 	return {
 		edge: nearestEdge,

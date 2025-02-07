@@ -1,7 +1,6 @@
-export default function centerCoordinate(
-	point1: google.maps.LatLngLiteral,
-	point2: google.maps.LatLngLiteral,
-): google.maps.LatLngLiteral {
+import { Coord } from "../../data/types/coord";
+
+export default function centerCoordinate(point1: Coord, point2: Coord): Coord {
 	return {
 		lat: (point1.lat + point2.lat) / 2,
 		lng: (point1.lng + point2.lng) / 2,

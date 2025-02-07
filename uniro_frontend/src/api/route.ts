@@ -1,4 +1,5 @@
 import { IssueTypeKey } from "../constant/enum/reportEnum";
+import { Coord } from "../data/types/coord";
 import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { NodeId } from "../data/types/node";
 
@@ -43,4 +44,15 @@ export const postReport = (
 	body: { dangerTypes: DangerIssueType[]; cautionTypes: CautionIssueType[] },
 ): Promise<boolean> => {
 	return postFetch<void, string>(`/${univId}/route/risk/${routeId}`, body);
+};
+
+export const postReportRoute = (
+	univId: number,
+	body: {
+		startNodeId: NodeId;
+		endNodeId: NodeId | null;
+		coordinates: Coord[];
+	},
+): Promise<boolean> => {
+	return postFetch<void, Coord[] | NodeId | null>(`/${univId}/route`, body);
 };
