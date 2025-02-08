@@ -267,9 +267,10 @@ public class RouteCalculationService {
             accumulatedDistance += calculateDistance(nowRoute);
 
             if(!nowRoute.getCautionFactors().isEmpty()){
-                details.add(RouteDetailResDTO.of(accumulatedDistance - calculateDistance(nowRoute)/2,
+                double halfOfRouteDistance = calculateDistance(nowRoute)/2;
+                details.add(RouteDetailResDTO.of(accumulatedDistance - halfOfRouteDistance,
                         checkPointType, checkPointNodeCoordinates, checkPointCautionTypes));
-                accumulatedDistance = calculateDistance(nowRoute)/2;
+                accumulatedDistance = halfOfRouteDistance;
                 checkPointNodeCoordinates = getCenter(now, nxt);
                 checkPointType = DirectionType.CAUTION;
                 checkPointCautionTypes = nowRoute.getCautionFactorsByList();
