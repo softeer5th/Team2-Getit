@@ -68,7 +68,7 @@ public class NodeController implements NodeApi {
 												   @PathVariable("nodeId") Long nodeId,
 											@RequestBody UpdateBuildingNodeReqDTO updateBuildingNodeReqDTO){
 		nodeService.updateBuildingNode(univId, nodeId,updateBuildingNodeReqDTO);
-		return ResponseEntity.status(HttpStatus.OK).build();
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
 }
