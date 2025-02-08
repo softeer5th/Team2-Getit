@@ -19,8 +19,8 @@ import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.BuildingNotFoundException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.node.dto.BuildingNode;
-import com.softeer5.uniro_backend.node.dto.GetBuildingResDTO;
-import com.softeer5.uniro_backend.node.dto.SearchBuildingResDTO;
+import com.softeer5.uniro_backend.node.dto.response.GetBuildingResDTO;
+import com.softeer5.uniro_backend.node.dto.response.SearchBuildingResDTO;
 import com.softeer5.uniro_backend.node.repository.BuildingRepository;
 
 import lombok.RequiredArgsConstructor;

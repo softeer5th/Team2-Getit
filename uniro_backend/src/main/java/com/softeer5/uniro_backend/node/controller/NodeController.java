@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.softeer5.uniro_backend.node.dto.GetBuildingResDTO;
-import com.softeer5.uniro_backend.node.dto.SearchBuildingResDTO;
+import com.softeer5.uniro_backend.node.dto.response.GetBuildingResDTO;
+import com.softeer5.uniro_backend.node.dto.response.SearchBuildingResDTO;
 import com.softeer5.uniro_backend.node.service.NodeService;
 
 import lombok.RequiredArgsConstructor;
