@@ -39,7 +39,6 @@ public class Route {
 
 	private double cost;
 
-	@Column(columnDefinition = "LINESTRING SRID 4326") // WGS84 좌표계
 	private LineString path;
 
 	@ManyToOne(fetch = LAZY)
