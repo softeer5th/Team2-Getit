@@ -71,11 +71,7 @@ const NavigationResultPage = () => {
 						);
 						return response;
 					} catch (e) {
-						alert("경로를 찾을 수 없습니다.");
-						return {
-							routes: [],
-							routeDetails: [],
-						};
+						return alert("경로를 찾을 수 없습니다.");
 					}
 				},
 				retry: 1,
