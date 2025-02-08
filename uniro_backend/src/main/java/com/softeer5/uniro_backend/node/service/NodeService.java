@@ -3,6 +3,11 @@ package com.softeer5.uniro_backend.node.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
+import com.softeer5.uniro_backend.node.entity.Building;
+import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.node.repository.NodeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +22,15 @@ import com.softeer5.uniro_backend.node.repository.BuildingRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.softeer5.uniro_backend.common.utils.GeoUtils.convertDoubleToPoint;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class NodeService {
 	private final BuildingRepository buildingRepository;
+	private final NodeRepository nodeRepository;
+	private final MapClient mapClient;
 
 	public List<GetBuildingResDTO> getBuildings(
 		Long univId, int level,
@@ -55,4 +64,23 @@ public class NodeService {
 		return GetBuildingResDTO.of(buildingNode.get().getBuilding(), buildingNode.get().getNode());
 	}
 
+	@Transactional
+    public void createBuildingNode(CreateBuildingNodeReqDTO createBuildingNodeReqDTO) {
+		Node node = Node.builder()
+				.coordinates(convertDoubleToPoint(createBuildingNodeReqDTO.getLat(), createBuildingNodeReqDTO.getLng()))
+				.isCore(false)
+				.univId(createBuildingNodeReqDTO.getUnivId()).build();
+		mapClient.fetchHeights(List.of(node));
+		nodeRepository.save(node);
+
+		Building building = Building.builder()
+				.phoneNumber(createBuildingNodeReqDTO.getPhoneNumber())
+				.address(createBuildingNodeReqDTO.getAddress())
+				.name(createBuildingNodeReqDTO.getName())
+				.imageUrl(createBuildingNodeReqDTO.getImageUrl())
+				.level(createBuildingNodeReqDTO.getLevel())
+				.nodeId(node.getId())
+				.univId(createBuildingNodeReqDTO.getUnivId()).build();
+		buildingRepository.save(building);
+    }
 }
