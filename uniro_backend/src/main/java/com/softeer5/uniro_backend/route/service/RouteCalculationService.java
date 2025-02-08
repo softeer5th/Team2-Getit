@@ -134,6 +134,7 @@ public class RouteCalculationService {
                     && currentDistance > costMap.get(currentNode.getId())) continue;
 
             for(Route route : adjMap.getOrDefault(currentNode.getId(), Collections.emptyList())){
+                if(!route.getDangerFactors().isEmpty())continue;
                 double newDistance = currentDistance + route.getCost();
                 Node nextNode = route.getNode1().getId().equals(currentNode.getId())?route.getNode2():route.getNode1();
                 if(!costMap.containsKey(nextNode.getId()) || costMap.get(nextNode.getId()) > newDistance){
