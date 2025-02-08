@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface CoreRouteRepository extends JpaRepository<CoreRoute, Long> {
     List<CoreRoute> findByUnivId(Long univId);
 }
