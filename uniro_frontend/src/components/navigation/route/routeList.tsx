@@ -20,14 +20,14 @@ const RouteList = ({ routes }: RouteListProps) => {
 				dist: 0,
 				directionType: "origin" as Direction,
 				coordinates: { lat: origin!.lat, lng: origin!.lng },
-				cautionTypes: [],
+				cautionFactors: [],
 			},
 			...routes.slice(0, -1),
 			{
 				dist: 0,
 				directionType: "finish" as Direction,
 				coordinates: { lat: destination!.lat, lng: destination!.lng },
-				cautionTypes: [],
+				cautionFactors: [],
 			},
 		];
 	};

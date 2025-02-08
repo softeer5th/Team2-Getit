@@ -4,7 +4,6 @@ import { CautionRoute, DangerRoute, NavigationRouteList } from "../data/types/ro
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enum/markerEnum";
-import { Coord } from "../data/types/coord";
 import useRoutePoint from "../hooks/useRoutePoint";
 import { AdvancedMarker } from "../data/types/marker";
 
@@ -62,7 +61,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 				className: "translate-waypoint",
 			});
 			// routeDetail에 cautionTypes가 있다면 [주의] 마커를 넣기
-			if (routeDetail.cautionTypes && routeDetail.cautionTypes.length > 0) {
+			if (routeDetail.cautionFactors && routeDetail.cautionFactors.length > 0) {
 				const markerElement = createMarkerElement({
 					type: Markers.CAUTION,
 					className: "traslate-marker",

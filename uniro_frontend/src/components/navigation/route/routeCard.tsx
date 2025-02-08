@@ -7,6 +7,7 @@ import CautionText from "../../../assets/icon/cautionText.svg?react";
 import { RouteDetail } from "../../../data/types/route";
 import useRoutePoint from "../../../hooks/useRoutePoint";
 import { formatDistance } from "../../../utils/navigation/formatDistance";
+import { CautionIssue } from "../../../constant/enum/reportEnum";
 
 const NumberIcon = ({ index }: { index: number }) => {
 	return (
@@ -17,7 +18,7 @@ const NumberIcon = ({ index }: { index: number }) => {
 };
 
 export const RouteCard = ({ index, route }: { index: number; route: RouteDetail }) => {
-	const { dist: distance, directionType, cautionTypes } = route;
+	const { dist: distance, directionType, cautionFactors } = route;
 	const formattedDistance = formatDistance(distance);
 	const { origin, destination } = useRoutePoint();
 	switch (directionType.toLocaleLowerCase()) {
@@ -133,9 +134,14 @@ export const RouteCard = ({ index, route }: { index: number; route: RouteDetail 
 						<div className="text-system-orange text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
 					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
+						{/* TODO: Auto Resize Text 적용 */}
 						<NumberIcon index={index} />
-						<div className="text-kor-body1 text-gray-900">
-							{cautionTypes && cautionTypes.length > 0 ? cautionTypes.join() : "주의 요소가 없습니다."}
+						<div className="text-[clamp(0.8rem, 4ch, 2rem)] text-left text-kor-body1 text-gray-900">
+							{cautionFactors && cautionFactors.length > 0
+								? cautionFactors
+										.map((factor) => CautionIssue[factor as keyof typeof CautionIssue])
+										.join(", ")
+								: "주의 요소가 없습니다."}
 						</div>
 					</div>
 				</div>

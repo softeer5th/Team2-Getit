@@ -31,13 +31,14 @@ const PADDING_FOR_MAP_BOUNDARY = 50;
 const NavigationResultPage = () => {
 	const [isDetailView, setIsDetailView] = useState(false);
 	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
-	const location = useLocation();
+
 	const { sheetHeight, setSheetHeight, dragControls, handleDrag, preventScroll, scrollRef } =
 		useNavigationBottomSheet();
 	const { university } = useUniversityInfo();
 	const { origin, destination, setOriginCoord, setDestinationCoord } = useRoutePoint();
 
 	// TEST용 Link
+	const location = useLocation();
 	const { search } = location;
 	const params = new URLSearchParams(search);
 
