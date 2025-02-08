@@ -3,6 +3,7 @@ package com.softeer5.uniro_backend.node.controller;
 import java.util.List;
 
 import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
+import com.softeer5.uniro_backend.node.dto.request.UpdateBuildingNodeReqDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,9 +57,18 @@ public class NodeController implements NodeApi {
 	}
 
 	@PostMapping("{univId}/nodes/building")
-	public ResponseEntity<Void> createBuildingNode(@RequestBody CreateBuildingNodeReqDTO createBuildingNodeReqDTO){
-		nodeService.createBuildingNode(createBuildingNodeReqDTO);
+	public ResponseEntity<Void> createBuildingNode(@PathVariable("univId") Long univId,
+												   @RequestBody CreateBuildingNodeReqDTO createBuildingNodeReqDTO){
+		nodeService.createBuildingNode(univId, createBuildingNodeReqDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
+
+	@PutMapping("{univId}/nodes/building/{nodeId}")
+	public ResponseEntity<Void> updateBuildingNode(@PathVariable("univId") Long univId,
+												   @PathVariable("nodeId") Long nodeId,
+											@RequestBody UpdateBuildingNodeReqDTO updateBuildingNodeReqDTO){
+		nodeService.updateBuildingNode(univId, nodeId,updateBuildingNodeReqDTO);
+		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
 }

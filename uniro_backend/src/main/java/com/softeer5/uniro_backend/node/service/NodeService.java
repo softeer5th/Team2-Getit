@@ -7,6 +7,7 @@ import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
+import com.softeer5.uniro_backend.node.dto.request.UpdateBuildingNodeReqDTO;
 import com.softeer5.uniro_backend.node.entity.Building;
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
@@ -68,22 +69,30 @@ public class NodeService {
 
 	@RevisionOperation(RevisionOperationType.CREATE_BUILDING_NODE)
 	@Transactional
-    public void createBuildingNode(CreateBuildingNodeReqDTO createBuildingNodeReqDTO) {
+    public void createBuildingNode(Long univId, CreateBuildingNodeReqDTO createBuildingNodeReqDTO) {
 		Node node = Node.builder()
 				.coordinates(convertDoubleToPoint(createBuildingNodeReqDTO.getLng(), createBuildingNodeReqDTO.getLat()))
 				.isCore(false)
-				.univId(createBuildingNodeReqDTO.getUnivId()).build();
+				.univId(univId).build();
 		mapClient.fetchHeights(List.of(node));
 		nodeRepository.save(node);
 
 		Building building = Building.builder()
 				.phoneNumber(createBuildingNodeReqDTO.getPhoneNumber())
 				.address(createBuildingNodeReqDTO.getAddress())
-				.name(createBuildingNodeReqDTO.getName())
-				.imageUrl(createBuildingNodeReqDTO.getImageUrl())
+				.name(createBuildingNodeReqDTO.getBuildingName())
+				.imageUrl(createBuildingNodeReqDTO.getBuildingImageUrl())
 				.level(createBuildingNodeReqDTO.getLevel())
 				.nodeId(node.getId())
-				.univId(createBuildingNodeReqDTO.getUnivId()).build();
+				.univId(univId).build();
 		buildingRepository.save(building);
     }
+
+	@Transactional
+	public void updateBuildingNode(Long univId, Long nodeId, UpdateBuildingNodeReqDTO updateBuildingNodeReqDTO) {
+		Building building = buildingRepository.findByIdAndUnivId(nodeId,univId)
+				.orElseThrow(()-> new BuildingNotFoundException("Building Not Found", ErrorCode.BUILDING_NOT_FOUND));
+		building.update(updateBuildingNodeReqDTO);
+		buildingRepository.save(building);
+	}
 }

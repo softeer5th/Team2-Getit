@@ -3,6 +3,7 @@ package com.softeer5.uniro_backend.node.controller;
 import java.util.List;
 
 import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
+import com.softeer5.uniro_backend.node.dto.request.UpdateBuildingNodeReqDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,5 +61,15 @@ public interface NodeApi {
 			@ApiResponse(responseCode = "200", description = "건물 노드 생성 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
-	ResponseEntity<Void> createBuildingNode(@RequestBody CreateBuildingNodeReqDTO createBuildingNodeReqDTO);
+	ResponseEntity<Void> createBuildingNode(@PathVariable("univId") Long univId,
+											@RequestBody CreateBuildingNodeReqDTO createBuildingNodeReqDTO);
+
+	@Operation(summary = "건물 노드 업데이트")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "건물 노드 생성 업데이트"),
+			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	ResponseEntity<Void> updateBuildingNode(@PathVariable("univId") Long univId,
+											@PathVariable("nodeId") Long nodeId,
+											@RequestBody UpdateBuildingNodeReqDTO updateBuildingNodeReqDTO);
 }
