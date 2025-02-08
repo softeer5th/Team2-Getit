@@ -17,12 +17,11 @@ import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.dto.response.RouteDetailResDTO;
 import com.softeer5.uniro_backend.route.dto.response.RouteInfoResDTO;
-import com.softeer5.uniro_backend.route.entity.CautionType;
+import com.softeer5.uniro_backend.route.entity.CautionFactor;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -263,7 +262,7 @@ public class RouteCalculationService {
         Node now = startNode;
         Map<String,Double> checkPointNodeCoordinates = startNode.getXY();
         DirectionType checkPointType = DirectionType.STRAIGHT;
-        List<CautionType> checkPointCautionTypes = new ArrayList<>();
+        List<CautionFactor> checkPointCautionFactors = new ArrayList<>();
 
         // 길찾기 결과 상세정보 정리
         for(int i=0;i<shortestRoutes.size();i++){
@@ -274,16 +273,16 @@ public class RouteCalculationService {
             if(!nowRoute.getCautionFactors().isEmpty()){
                 double halfOfRouteDistance = calculateDistance(nowRoute)/2;
                 details.add(RouteDetailResDTO.of(accumulatedDistance - halfOfRouteDistance,
-                        checkPointType, checkPointNodeCoordinates, checkPointCautionTypes));
+                        checkPointType, checkPointNodeCoordinates, checkPointCautionFactors));
                 accumulatedDistance = halfOfRouteDistance;
                 checkPointNodeCoordinates = getCenter(now, nxt);
                 checkPointType = DirectionType.CAUTION;
-                checkPointCautionTypes = nowRoute.getCautionFactorsByList();
+                checkPointCautionFactors = nowRoute.getCautionFactorsByList();
             }
 
             if(nxt.equals(endNode)){
                 details.add(RouteDetailResDTO.of(accumulatedDistance, checkPointType,
-                        checkPointNodeCoordinates, checkPointCautionTypes));
+                        checkPointNodeCoordinates, checkPointCautionFactors));
                 details.add(RouteDetailResDTO.of(0, DirectionType.FINISH, nxt.getXY(), new ArrayList<>()));
                 break;
             }
@@ -294,11 +293,11 @@ public class RouteCalculationService {
                     continue;
                 }
                 details.add(RouteDetailResDTO.of(accumulatedDistance, checkPointType,
-                        checkPointNodeCoordinates, checkPointCautionTypes));
+                        checkPointNodeCoordinates, checkPointCautionFactors));
                 checkPointNodeCoordinates = nxt.getXY();
                 checkPointType = directionType;
                 accumulatedDistance = 0.0;
-                checkPointCautionTypes.clear();
+                checkPointCautionFactors.clear();
             }
 
             now = nxt;

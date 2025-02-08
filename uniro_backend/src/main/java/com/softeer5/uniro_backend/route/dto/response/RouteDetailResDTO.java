@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.route.dto.response;
 
-import com.softeer5.uniro_backend.route.entity.CautionType;
+import com.softeer5.uniro_backend.route.entity.CautionFactor;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -21,11 +21,11 @@ public class RouteDetailResDTO {
     @Schema(description = "상세 경로의 좌표", example = "{\"lng\": 127.123456, \"lat\": 37.123456}")
     private final Map<String, Double> coordinates;
     @Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
-    private final List<CautionType> cautionFactors;
+    private final List<CautionFactor> cautionFactors;
 
     public static RouteDetailResDTO of(double dist, DirectionType directionType,
                                        Map<String, Double> coordinates,
-                                       List<CautionType> cautionFactors) {
+                                       List<CautionFactor> cautionFactors) {
         return new RouteDetailResDTO(dist, directionType, coordinates, cautionFactors);
     }
 }

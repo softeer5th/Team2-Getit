@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.route.dto.response;
 
-import com.softeer5.uniro_backend.route.entity.CautionType;
+import com.softeer5.uniro_backend.route.entity.CautionFactor;
 import com.softeer5.uniro_backend.route.entity.DangerType;
 import com.softeer5.uniro_backend.route.entity.Route;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,7 +17,7 @@ public class GetRiskResDTO {
     @Schema(description = "route ID", example = "3")
     private final Long routeId;
     @Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
-    private final List<CautionType> cautionTypes;
+    private final List<CautionFactor> cautionFactors;
     @Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
     private final List<DangerType> dangerTypes;
 

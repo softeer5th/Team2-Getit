@@ -59,14 +59,14 @@ public class Route {
 	@Convert(converter = CautionListConverter.class)
 	@Column(name = "caution_factors")
 	@NotNull
-	private Set<CautionType> cautionFactors = new HashSet<>();
+	private Set<CautionFactor> cautionFactors = new HashSet<>();
 
 	@Convert(converter = DangerListConverter.class)
 	@Column(name = "danger_factors")
 	@NotNull
 	private Set<DangerType> dangerFactors = new HashSet<>();
 
-	public List<CautionType> getCautionFactorsByList(){
+	public List<CautionFactor> getCautionFactorsByList(){
 		return cautionFactors.stream().toList();
 	}
 
@@ -74,7 +74,7 @@ public class Route {
 		return dangerFactors.stream().toList();
 	}
 
-	public void setCautionFactors(List<CautionType> cautionFactors) {
+	public void setCautionFactors(List<CautionFactor> cautionFactors) {
 		this.cautionFactors.clear();
 		this.cautionFactors.addAll(cautionFactors);
 	}
@@ -86,7 +86,7 @@ public class Route {
 
 	@Builder
 	private Route(double cost, LineString path, Node node1, Node node2, Long univId,
-		Set<CautionType> cautionFactors, Set<DangerType> dangerFactors) {
+		Set<CautionFactor> cautionFactors, Set<DangerType> dangerFactors) {
 		this.cost = cost;
 		this.path = path;
 		this.node1 = node1;

@@ -3,7 +3,6 @@ package com.softeer5.uniro_backend.admin.aspect;
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.admin.setting.RevisionContext;
-import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -46,7 +45,7 @@ public class RevisionOperationAspect {
                 univId = (Long) args[i];
             }
             else if(args[i] instanceof PostRiskReqDTO postRiskReqDTO){
-                int cautionSize = postRiskReqDTO.getCautionTypes().size();
+                int cautionSize = postRiskReqDTO.getCautionFactors().size();
                 int dangerSize = postRiskReqDTO.getDangerTypes().size();
 
                 if (cautionSize > 0) {
