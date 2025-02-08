@@ -25,7 +25,6 @@ public class CoreRoute {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(columnDefinition = "geometry(LineString, 4326)") // WGS84 좌표계
 	private LineString path;
 
 	private Long node1Id;
