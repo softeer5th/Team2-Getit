@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { PanInfo, useDragControls } from "framer-motion";
 import { useSuspenseQueries } from "@tanstack/react-query";
 
@@ -9,8 +9,6 @@ import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetH
 import NavigationMap from "../component/NavgationMap";
 import BackButton from "../components/map/backButton";
 import AnimatedContainer from "../container/animatedContainer";
-import { mockNavigationRoute } from "../data/mock/hanyangRoute";
-import { NavigationRoute } from "../data/types/route";
 
 import useScrollControl from "../hooks/useScrollControl";
 import useUniversityInfo from "../hooks/useUniversityInfo";
@@ -35,7 +33,6 @@ const NavigationResultPage = () => {
 	const [isDetailView, setIsDetailView] = useState(false);
 	const [sheetHeight, setSheetHeight] = useState(CLOSED_SHEET_HEIGHT);
 	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
-	const [route, setRoute] = useState<NavigationRoute>(mockNavigationRoute);
 	const location = useLocation();
 
 	const { university } = useUniversityInfo();
@@ -74,7 +71,11 @@ const NavigationResultPage = () => {
 						);
 						return response;
 					} catch (e) {
-						return null;
+						alert("경로를 찾을 수 없습니다.");
+						return {
+							routes: [],
+							routeDetails: [],
+						};
 					}
 				},
 				retry: 1,

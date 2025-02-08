@@ -56,17 +56,26 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 		});
 
 		// waypoint 마커 찍기
-		routeDetails.forEach((routeDetail, index) => {
+		routeDetails.forEach((routeDetail) => {
 			const { coordinates } = routeDetail;
 			bounds.extend(coordinates);
 			const markerElement = createMarkerElement({
 				type: Markers.WAYPOINT,
 				className: "translate-waypoint",
 			});
+			// 만약 routeDetail에 cautionTypes가 있다면 caution 마커 찍기
+			if (routeDetail.cautionTypes && routeDetail.cautionTypes.length > 0) {
+				const markerElement = createMarkerElement({
+					type: Markers.CAUTION,
+					className: "traslate-marker",
+					hasAnimation: true,
+				});
+				createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
+			}
 			createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
 		});
 
-		// 시작 마커는 출발지 빌딩 표시
+		// 시작 마커는 출발지 빌딩
 		const startMarkerElement = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin?.buildingName,
@@ -78,7 +87,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 		createAdvancedMarker(AdvancedMarker, map, originCoord, startMarkerElement);
 		bounds.extend(originCoord);
 
-		// 끝 마커는 도착지 빌딩 표시
+		// 끝 마커는 도착지 빌딩
 		const endMarkerElement = createMarkerElement({
 			type: Markers.DESTINATION,
 			title: destination?.buildingName,
@@ -86,21 +95,20 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 			hasAnimation: true,
 		});
 
-		// 위험요소 마커 찍기
-		// risks.dangerRoutes.forEach((route) => {
-		// 	const { node1, node2, dangerTypes } = route;
-		// 	const type = Markers.DANGER;
-
-		// 	createAdvancedMarker(
-		// 		AdvancedMarker,
-		// 		map,
-		// 		new google.maps.LatLng({
-		// 			lat: (node1.lat + node2.lat) / 2,
-		// 			lng: (node1.lng + node2.lng) / 2,
-		// 		}),
-		// 		createMarkerElement({ type }),
-		// 	);
-		// });
+		// Cache 혹은 API에서 불러온 위험요소 마커 찍기
+		risks.dangerRoutes.forEach((route) => {
+			const { node1, node2 } = route;
+			const type = Markers.DANGER;
+			createAdvancedMarker(
+				AdvancedMarker,
+				map,
+				new google.maps.LatLng({
+					lat: (node1.lat + node2.lat) / 2,
+					lng: (node1.lng + node2.lng) / 2,
+				}),
+				createMarkerElement({ type }),
+			);
+		});
 
 		const { lat: destinationLat, lng: destinationLng }: google.maps.LatLngLiteral = destination!;
 		const destinationCoord = { lat: destinationLat, lng: destinationLng };
@@ -141,7 +149,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 		if (isDetailView) {
 			const { routeDetails } = routeResult;
 			markersRef.current = [];
-
+			// 그림 마커 찍기
 			routeDetails.forEach((routeDetail, index) => {
 				const { coordinates } = routeDetail;
 				const markerElement = createMarkerElement({
@@ -170,7 +178,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 			});
 			markersRef.current = [];
 		};
-	}, [isDetailView, AdvancedMarker, map]);
+	}, [isDetailView, AdvancedMarker, map, routeResult]);
 
 	return <div id="map" ref={mapRef} style={style} />;
 };

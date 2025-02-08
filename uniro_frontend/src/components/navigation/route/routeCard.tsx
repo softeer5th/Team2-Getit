@@ -4,7 +4,6 @@ import StraightIcon from "../../../assets/route/straight.svg?react";
 import RightIcon from "../../../assets/route/right.svg?react";
 import LeftIcon from "../../../assets/route/left.svg?react";
 import CautionText from "../../../assets/icon/cautionText.svg?react";
-import { Building } from "../../../data/types/node";
 import { RouteDetail } from "../../../data/types/route";
 import useRoutePoint from "../../../hooks/useRoutePoint";
 import { formatDistance } from "../../../utils/navigation/formatDistance";
@@ -17,18 +16,8 @@ const NumberIcon = ({ index }: { index: number }) => {
 	);
 };
 
-export const RouteCard = ({
-	index,
-	route,
-	originBuilding,
-	destinationBuilding,
-}: {
-	index: number;
-	route: RouteDetail;
-	originBuilding: Building;
-	destinationBuilding: Building;
-}) => {
-	const { dist: distance, directionType } = route;
+export const RouteCard = ({ index, route }: { index: number; route: RouteDetail }) => {
+	const { dist: distance, directionType, cautionTypes } = route;
 	const formattedDistance = formatDistance(distance);
 	const { origin, destination } = useRoutePoint();
 	switch (directionType.toLocaleLowerCase()) {
@@ -67,7 +56,7 @@ export const RouteCard = ({
 					</div>
 					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
 						<NumberIcon index={index} />
-						<div className="text-kor-body1 text-gray-900">우회전</div>
+						<div className="text-kor-body1 text-gray-900">급격한 우회전</div>
 					</div>
 				</div>
 			);
@@ -93,7 +82,7 @@ export const RouteCard = ({
 					</div>
 					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
 						<NumberIcon index={index} />
-						<div className="text-kor-body1 text-gray-900">좌회전</div>
+						<div className="text-kor-body1 text-gray-900">급격한 좌회전</div>
 					</div>
 				</div>
 			);
@@ -145,7 +134,9 @@ export const RouteCard = ({
 					</div>
 					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
 						<NumberIcon index={index} />
-						<div className="text-kor-body1 text-gray-900"></div>
+						<div className="text-kor-body1 text-gray-900">
+							{cautionTypes && cautionTypes.length > 0 ? cautionTypes.join() : "주의 요소가 없습니다."}
+						</div>
 					</div>
 				</div>
 			);
