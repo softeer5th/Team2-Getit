@@ -1,12 +1,11 @@
 package com.softeer5.uniro_backend.route.dto.request;
 
-import com.softeer5.uniro_backend.route.entity.CautionType;
-import com.softeer5.uniro_backend.route.entity.DangerType;
+import com.softeer5.uniro_backend.route.entity.CautionFactor;
+import com.softeer5.uniro_backend.route.entity.DangerFactor;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import java.util.List;
 
@@ -16,8 +15,8 @@ import java.util.List;
 public class PostRiskReqDTO {
 
     @Schema(description = "주의 요소 목록", example = "[\"SLOPE\", \"CURB\"]")
-    private List<CautionType> cautionTypes;
+    private List<CautionFactor> cautionFactors;
 
     @Schema(description = "위험 요소 목록", example = "[\"CURB\", \"STAIRS\"]")
-    private List<DangerType> dangerTypes;
+    private List<DangerFactor> dangerFactors;
 }

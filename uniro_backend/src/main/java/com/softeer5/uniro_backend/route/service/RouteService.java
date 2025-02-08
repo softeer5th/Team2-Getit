@@ -8,9 +8,7 @@ import java.util.stream.Collectors;
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
-import com.softeer5.uniro_backend.common.exception.custom.DangerCautionConflictException;
-import com.softeer5.uniro_backend.common.exception.custom.InvalidMapException;
-import com.softeer5.uniro_backend.common.exception.custom.RouteNotFoundException;
+import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.node.entity.Node;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -43,7 +41,7 @@ public class RouteService {
 
 		// 맵이 존재하지 않을 경우 예외
 		if(routes.isEmpty()) {
-			throw new RouteNotFoundException("Route Not Found", ROUTE_NOT_FOUND);
+			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
 		}
 
 		//인접 리스트
@@ -84,7 +82,7 @@ public class RouteService {
 			}
 
 			// 그 외의 경우의 수는 모두 사이클만 존재하거나, 규칙에 어긋난 맵
-			throw new InvalidMapException("Invalid Map", ErrorCode.INVALID_MAP);
+			throw new RouteException("Invalid Map", ErrorCode.INVALID_MAP);
 
 		}
 
@@ -212,7 +210,7 @@ public class RouteService {
 
 	public GetRiskResDTO getRisk(Long univId, Long routeId) {
 		Route route = routeRepository.findById(routeId)
-			.orElseThrow(() -> new RouteNotFoundException("Route not found", ROUTE_NOT_FOUND));
+			.orElseThrow(() -> new RouteException("Route not found", ROUTE_NOT_FOUND));
 		return GetRiskResDTO.of(route);
 	}
 
@@ -220,14 +218,14 @@ public class RouteService {
 	@Transactional
 	public void updateRisk(Long univId, Long routeId, PostRiskReqDTO postRiskReqDTO) {
 		Route route = routeRepository.findByIdAndUnivId(routeId, univId)
-				.orElseThrow(() -> new RouteNotFoundException("Route not Found", ROUTE_NOT_FOUND));
+				.orElseThrow(() -> new RouteException("Route not Found", ROUTE_NOT_FOUND));
 
-		if(!postRiskReqDTO.getCautionTypes().isEmpty() && !postRiskReqDTO.getDangerTypes().isEmpty()){
-			throw new DangerCautionConflictException("DangerFactors and CautionFactors can't exist simultaneously.",
+		if(!postRiskReqDTO.getCautionFactors().isEmpty() && !postRiskReqDTO.getDangerFactors().isEmpty()){
+			throw new RouteException("DangerFactors and CautionFactors can't exist simultaneously.",
 					ErrorCode.CAUTION_DANGER_CANT_EXIST_SIMULTANEOUSLY);
 		}
 
-		route.setCautionFactors(postRiskReqDTO.getCautionTypes());
-		route.setDangerFactors(postRiskReqDTO.getDangerTypes());
+		route.setCautionFactors(postRiskReqDTO.getCautionFactors());
+		route.setDangerFactors(postRiskReqDTO.getDangerFactors());
 	}
 }

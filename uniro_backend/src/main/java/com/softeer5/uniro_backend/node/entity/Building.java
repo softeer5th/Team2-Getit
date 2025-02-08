@@ -43,10 +43,10 @@ public class Building {
 	private Long univId;
 
 	public void update(UpdateBuildingNodeReqDTO dto) {
-		this.name = dto.getName();
+		this.name = dto.getBuildingName();
 		this.phoneNumber = dto.getPhoneNumber();
 		this.address = dto.getAddress();
-		this.imageUrl = dto.getImageUrl();
+		this.imageUrl = dto.getBuildingImageUrl();
 		this.level = dto.getLevel();
 	}
 

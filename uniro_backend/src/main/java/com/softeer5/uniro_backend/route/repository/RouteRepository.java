@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 
 import com.softeer5.uniro_backend.route.entity.Route;
 
-@Repository
 public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = {"node1", "node2"})

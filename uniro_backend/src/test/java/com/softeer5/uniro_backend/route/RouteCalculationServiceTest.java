@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
-import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
 import com.softeer5.uniro_backend.node.entity.Node;
@@ -144,7 +143,7 @@ class RouteCalculationServiceTest {
 
 			// when, Then
 			assertThatThrownBy(() -> routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests))
-				.isInstanceOf(SameStartAndEndPointException.class);
+				.isInstanceOf(RouteCalculationException.class);
 
 		}
 

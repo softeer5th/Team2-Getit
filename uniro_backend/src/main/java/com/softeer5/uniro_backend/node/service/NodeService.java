@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.softeer5.uniro_backend.common.CursorPage;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
-import com.softeer5.uniro_backend.common.exception.custom.BuildingNotFoundException;
+import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.node.dto.BuildingNode;
 import com.softeer5.uniro_backend.node.dto.response.GetBuildingResDTO;
@@ -61,7 +61,7 @@ public class NodeService {
 	public GetBuildingResDTO getBuilding(Long nodeId){
 		Optional<BuildingNode> buildingNode = buildingRepository.findByNodeIdWithNode(nodeId);
 		if(buildingNode.isEmpty()){
-			throw new BuildingNotFoundException("Building Not Found", ErrorCode.BUILDING_NOT_FOUND);
+			throw new BuildingException("Building Not Found", ErrorCode.BUILDING_NOT_FOUND);
 		}
 
 		return GetBuildingResDTO.of(buildingNode.get().getBuilding(), buildingNode.get().getNode());
@@ -91,7 +91,7 @@ public class NodeService {
 	@Transactional
 	public void updateBuildingNode(Long univId, Long nodeId, UpdateBuildingNodeReqDTO updateBuildingNodeReqDTO) {
 		Building building = buildingRepository.findByNodeIdAndUnivId(nodeId,univId)
-				.orElseThrow(()-> new BuildingNotFoundException("Building Not Found", ErrorCode.BUILDING_NOT_FOUND));
+				.orElseThrow(()-> new BuildingException("Building Not Found", ErrorCode.BUILDING_NOT_FOUND));
 		building.update(updateBuildingNodeReqDTO);
 		buildingRepository.save(building);
 	}
