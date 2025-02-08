@@ -85,6 +85,25 @@ public class RouteCalculationService {
         //길찾기 경로 결과 정리
         List<Route> shortestRoutes = reorderRoute(startNode, endNode, prevRoute);
 
+
+        Route startRoute = shortestRoutes.get(0);
+        Route endRoute = shortestRoutes.get(shortestRoutes.size() - 1);
+
+        //만약 시작 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외
+        if(isBuildingRoute(startRoute)){
+            startNode = startNode.getId().equals(startRoute.getNode1().getId()) ? startRoute.getNode2() : startRoute.getNode1();
+            shortestRoutes.remove(0);
+        }
+        //만약 종료 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외
+        if(isBuildingRoute(endRoute)){
+            endNode = endNode.getId().equals(endRoute.getNode1().getId()) ? endRoute.getNode2() : endRoute.getNode1();
+            shortestRoutes.remove(shortestRoutes.size() - 1);
+        }
+
+        if(startNodeId.equals(endNodeId)){
+            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
+        }
+
         boolean hasCaution = false;
         double totalCost = 0.0;
         double totalDistance = 0.0;
@@ -111,9 +130,18 @@ public class RouteCalculationService {
             routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
         }
 
+        //처음과 마지막을 제외한 구간에서 빌딩노드를 거쳐왔다면, 이는 유효한 길이 없는 것이므로 예외처리
+        if(totalCost > BUILDING_ROUTE_COST-1){
+            throw new UnreachableDestinationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+        }
+
         List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
         return FastestRouteResDTO.of(hasCaution, totalDistance, totalCost, routeInfoDTOS, details);
+    }
+
+    private boolean isBuildingRoute(Route route){
+        return route.getCost() > BUILDING_ROUTE_COST - 1;
     }
 
     private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap){
@@ -135,7 +163,7 @@ public class RouteCalculationService {
                     && currentDistance > costMap.get(currentNode.getId())) continue;
 
             for(Route route : adjMap.getOrDefault(currentNode.getId(), Collections.emptyList())){
-                if(!route.getDangerFactors().isEmpty())continue;
+                if(!route.getDangerFactors().isEmpty()) continue;
                 double newDistance = currentDistance + route.getCost();
                 Node nextNode = route.getNode1().getId().equals(currentNode.getId())?route.getNode2():route.getNode1();
                 if(!costMap.containsKey(nextNode.getId()) || costMap.get(nextNode.getId()) > newDistance){
