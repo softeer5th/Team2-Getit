@@ -1,5 +1,7 @@
 package com.softeer5.uniro_backend.fixture;
 
+import java.util.Collections;
+
 import org.locationtech.jts.geom.GeometryFactory;
 
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
@@ -14,6 +16,8 @@ public class RouteFixture {
 			.node1(node1)
 			.node2(node2)
 			.univId(1001L)
+			.cautionFactors(Collections.EMPTY_SET)
+			.dangerFactors(Collections.EMPTY_SET)
 			.build();
 	}
 }
