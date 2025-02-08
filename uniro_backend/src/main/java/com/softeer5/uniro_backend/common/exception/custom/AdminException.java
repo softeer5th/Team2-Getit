@@ -6,8 +6,8 @@ import com.softeer5.uniro_backend.common.exception.CustomException;
 import lombok.Getter;
 
 @Getter
-public class NodeNotFoundException extends CustomException {
-	public NodeNotFoundException(String message, ErrorCode errorCode) {
+public class AdminException extends CustomException {
+	public AdminException(String message, ErrorCode errorCode) {
 		super(message, errorCode);
 	}
 }
