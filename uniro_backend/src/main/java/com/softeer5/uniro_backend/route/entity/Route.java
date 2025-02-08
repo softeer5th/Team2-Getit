@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.softeer5.uniro_backend.resolver.CautionListConverter;
-import com.softeer5.uniro_backend.resolver.DangerListConverter;
+import com.softeer5.uniro_backend.common.resolver.CautionListConverter;
+import com.softeer5.uniro_backend.common.resolver.DangerListConverter;
 import com.softeer5.uniro_backend.node.entity.Node;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
