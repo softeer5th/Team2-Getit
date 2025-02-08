@@ -3,7 +3,6 @@ package com.softeer5.uniro_backend.node.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @RequiredArgsConstructor
@@ -24,5 +23,5 @@ public class CreateBuildingNodeReqDTO {
     @Schema(description = "이미지", example = "")
     private final String imageUrl; // 추후 S3학습 후 변경예정
     @Schema(description = "레벨(지도 축척에 따른 노출정도, 1~10)", example = "3")
-    private int level;
+    private final int level;
 }

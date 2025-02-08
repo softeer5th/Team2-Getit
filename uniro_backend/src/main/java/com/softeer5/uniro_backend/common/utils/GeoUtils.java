@@ -16,8 +16,8 @@ public final class GeoUtils {
 		return geometryFactory;
 	}
 
-	public static Point convertDoubleToPoint(double lat, double lng) {
-		return geometryFactory.createPoint(new Coordinate(lat, lng));
+	public static Point convertDoubleToPoint(double lng, double lat) {
+		return geometryFactory.createPoint(new Coordinate(lng, lat));
 	}
 
 	public static String convertDoubleToPointWTK(double lat, double lng) {
