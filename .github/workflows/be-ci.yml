@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - be
-      - fix/UNI-138
 
 jobs:
   build-springboot:
