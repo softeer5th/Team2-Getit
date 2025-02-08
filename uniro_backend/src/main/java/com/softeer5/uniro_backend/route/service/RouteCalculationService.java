@@ -297,7 +297,7 @@ public class RouteCalculationService {
                 checkPointNodeCoordinates = nxt.getXY();
                 checkPointType = directionType;
                 accumulatedDistance = 0.0;
-                checkPointCautionFactors.clear();
+                checkPointCautionFactors = Collections.emptyList();
             }
 
             now = nxt;
