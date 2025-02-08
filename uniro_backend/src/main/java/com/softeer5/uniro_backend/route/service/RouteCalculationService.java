@@ -236,13 +236,19 @@ public class RouteCalculationService {
 
     // 길의 길이를 리턴하는 메서드
     private double calculateDistance(Route route) {
-        Point p1 = route.getNode1().getCoordinates();
-        Point p2 = route.getNode2().getCoordinates();
+        double lng1 = route.getNode1().getCoordinates().getX();
+        double lat1 = route.getNode1().getCoordinates().getY();
+        double lng2 = route.getNode2().getCoordinates().getX();
+        double lat2 = route.getNode2().getCoordinates().getY();
 
-        double deltaX = p2.getX() - p1.getX();
-        double deltaY = p2.getY() - p1.getY();
+        double dLat = (lat2 - lat1) * METERS_PER_DEGREE;
 
-        return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        double avgLat = (lat1 + lat2) / 2.0;
+        double dLng = (lng2 - lng1) * METERS_PER_DEGREE * Math.cos(Math.toRadians(avgLat));
+
+        double distance = Math.sqrt(dLat * dLat + dLng * dLng);
+
+        return distance;
     }
 
     // 길 상세정보를 추출하는 메서드
