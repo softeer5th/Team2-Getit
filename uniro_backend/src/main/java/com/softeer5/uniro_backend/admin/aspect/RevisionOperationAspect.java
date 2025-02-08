@@ -46,7 +46,7 @@ public class RevisionOperationAspect {
             }
             else if(args[i] instanceof PostRiskReqDTO postRiskReqDTO){
                 int cautionSize = postRiskReqDTO.getCautionFactors().size();
-                int dangerSize = postRiskReqDTO.getDangerTypes().size();
+                int dangerSize = postRiskReqDTO.getDangerFactors().size();
 
                 if (cautionSize > 0) {
                     action = "주의요소 업데이트";

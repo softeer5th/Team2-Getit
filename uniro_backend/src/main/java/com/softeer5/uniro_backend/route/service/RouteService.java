@@ -220,12 +220,12 @@ public class RouteService {
 		Route route = routeRepository.findByIdAndUnivId(routeId, univId)
 				.orElseThrow(() -> new RouteException("Route not Found", ROUTE_NOT_FOUND));
 
-		if(!postRiskReqDTO.getCautionFactors().isEmpty() && !postRiskReqDTO.getDangerTypes().isEmpty()){
+		if(!postRiskReqDTO.getCautionFactors().isEmpty() && !postRiskReqDTO.getDangerFactors().isEmpty()){
 			throw new RouteException("DangerFactors and CautionFactors can't exist simultaneously.",
 					ErrorCode.CAUTION_DANGER_CANT_EXIST_SIMULTANEOUSLY);
 		}
 
 		route.setCautionFactors(postRiskReqDTO.getCautionFactors());
-		route.setDangerFactors(postRiskReqDTO.getDangerTypes());
+		route.setDangerFactors(postRiskReqDTO.getDangerFactors());
 	}
 }
