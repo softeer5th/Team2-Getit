@@ -30,7 +30,6 @@ public class Node {
 	private Long id;
 
 	@NotNull
-	@Column(columnDefinition = "POINT SRID 4326")
 	private Point coordinates;
 
 	private double height;
