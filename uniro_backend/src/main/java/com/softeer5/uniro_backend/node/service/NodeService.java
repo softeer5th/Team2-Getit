@@ -3,6 +3,8 @@ package com.softeer5.uniro_backend.node.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
+import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
 import com.softeer5.uniro_backend.node.entity.Building;
@@ -64,10 +66,11 @@ public class NodeService {
 		return GetBuildingResDTO.of(buildingNode.get().getBuilding(), buildingNode.get().getNode());
 	}
 
+	@RevisionOperation(RevisionOperationType.CREATE_BUILDING_NODE)
 	@Transactional
     public void createBuildingNode(CreateBuildingNodeReqDTO createBuildingNodeReqDTO) {
 		Node node = Node.builder()
-				.coordinates(convertDoubleToPoint(createBuildingNodeReqDTO.getLat(), createBuildingNodeReqDTO.getLng()))
+				.coordinates(convertDoubleToPoint(createBuildingNodeReqDTO.getLng(), createBuildingNodeReqDTO.getLat()))
 				.isCore(false)
 				.univId(createBuildingNodeReqDTO.getUnivId()).build();
 		mapClient.fetchHeights(List.of(node));

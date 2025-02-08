@@ -3,7 +3,7 @@ package com.softeer5.uniro_backend.admin.aspect;
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.admin.setting.RevisionContext;
-import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
+import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
 import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -28,6 +28,7 @@ public class RevisionOperationAspect {
         switch (opType) {
             case UPDATE_RISK -> result = updateRiskHandler(joinPoint);
             case CREATE_ROUTE -> result = updateRouteHandler(joinPoint);
+            case CREATE_BUILDING_NODE -> result = createBuildingNodeHandler(joinPoint);
             default -> result = joinPoint.proceed();
         }
 
@@ -79,6 +80,27 @@ public class RevisionOperationAspect {
         for (int i = 0; i < args.length; i++) {
             if (args[i] instanceof Long && "univId".equals(parameterNames[i])) {
                 univId = (Long) args[i];
+            }
+        }
+        RevisionContext.setUnivId(univId);
+        RevisionContext.setAction(action);
+        try{
+            return joinPoint.proceed();
+        }
+        finally {
+            RevisionContext.clear();
+        }
+    }
+
+    private Object createBuildingNodeHandler(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object[] args = joinPoint.getArgs();
+
+        Long univId = null;
+        String action = "빌딩 노드 추가";
+
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] instanceof CreateBuildingNodeReqDTO createBuildingNodeReqDTO) {
+                univId = createBuildingNodeReqDTO.getUnivId();
             }
         }
         RevisionContext.setUnivId(univId);
