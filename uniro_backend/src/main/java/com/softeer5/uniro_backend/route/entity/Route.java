@@ -2,6 +2,7 @@ package com.softeer5.uniro_backend.route.entity;
 
 import static jakarta.persistence.FetchType.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,6 +13,7 @@ import com.softeer5.uniro_backend.node.entity.Node;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.locationtech.jts.geom.LineString;
+import org.springframework.data.annotation.CreatedDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -66,6 +68,9 @@ public class Route {
 	@NotNull
 	private Set<DangerFactor> dangerFactors = new HashSet<>();
 
+	@CreatedDate
+	private LocalDateTime createdAt;
+
 	public List<CautionFactor> getCautionFactorsByList(){
 		return cautionFactors.stream().toList();
 	}
@@ -82,6 +87,12 @@ public class Route {
 	public void setDangerFactors(List<DangerFactor> dangerFactors) {
 		this.dangerFactors.clear();
 		this.dangerFactors.addAll(dangerFactors);
+	}
+
+	public void updateFromRevision(Route revRoute){
+		this.cautionFactors = revRoute.getCautionFactors();
+		this.dangerFactors = revRoute.getDangerFactors();
+		this.cost = revRoute.cost;
 	}
 
 	@Builder

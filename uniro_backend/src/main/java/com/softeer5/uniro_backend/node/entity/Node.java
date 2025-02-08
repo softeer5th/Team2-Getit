@@ -3,11 +3,13 @@ package com.softeer5.uniro_backend.node.entity;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import lombok.*;
 import org.hibernate.envers.Audited;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.annotation.CreatedDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,6 +42,9 @@ public class Node {
 	@Column(name = "univ_id")
 	@NotNull
 	private Long univId;
+
+	@CreatedDate
+	private LocalDateTime createdAt;
 
 	public Map<String, Double> getXY(){
 		return Map.of("lat", coordinates.getY(), "lng", coordinates.getX());
