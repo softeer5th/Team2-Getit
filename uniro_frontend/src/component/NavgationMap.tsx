@@ -39,8 +39,6 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 
 		if (routeResult.routes.length === 0) return;
 
-		const cautionFactor: Coord[] = [];
-
 		const { routes, routeDetails } = routeResult;
 
 		// 하나의 길 완성
@@ -55,7 +53,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 			strokeWeight: 2.0,
 		});
 
-		// waypoint 마커 찍기
+		// [간선] 마커 찍기
 		routeDetails.forEach((routeDetail) => {
 			const { coordinates } = routeDetail;
 			bounds.extend(coordinates);
@@ -63,7 +61,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 				type: Markers.WAYPOINT,
 				className: "translate-waypoint",
 			});
-			// 만약 routeDetail에 cautionTypes가 있다면 caution 마커 찍기
+			// routeDetail에 cautionTypes가 있다면 [주의] 마커를 넣기
 			if (routeDetail.cautionTypes && routeDetail.cautionTypes.length > 0) {
 				const markerElement = createMarkerElement({
 					type: Markers.CAUTION,
@@ -75,7 +73,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 			createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
 		});
 
-		// 시작 마커는 출발지 빌딩
+		// [시작] 마커는 출발지 (건물 기준)
 		const startMarkerElement = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin?.buildingName,
@@ -87,7 +85,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 		createAdvancedMarker(AdvancedMarker, map, originCoord, startMarkerElement);
 		bounds.extend(originCoord);
 
-		// 끝 마커는 도착지 빌딩
+		// [끝] 마커는 도착지 빌딩 (건물 기준)
 		const endMarkerElement = createMarkerElement({
 			type: Markers.DESTINATION,
 			title: destination?.buildingName,
@@ -95,7 +93,12 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 			hasAnimation: true,
 		});
 
-		// Cache 혹은 API에서 불러온 위험요소 마커 찍기
+		const { lat: destinationLat, lng: destinationLng }: google.maps.LatLngLiteral = destination!;
+		const destinationCoord = { lat: destinationLat, lng: destinationLng };
+		createAdvancedMarker(AdvancedMarker, map, destinationCoord, endMarkerElement);
+		bounds.extend(destinationCoord);
+
+		// React Query Cache 혹은 API에서 불러온 [위험] 마커 찍기
 		risks.dangerRoutes.forEach((route) => {
 			const { node1, node2 } = route;
 			const type = Markers.DANGER;
@@ -108,19 +111,6 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 				}),
 				createMarkerElement({ type }),
 			);
-		});
-
-		const { lat: destinationLat, lng: destinationLng }: google.maps.LatLngLiteral = destination!;
-		const destinationCoord = { lat: destinationLat, lng: destinationLng };
-		createAdvancedMarker(AdvancedMarker, map, destinationCoord, endMarkerElement);
-		bounds.extend(destinationCoord);
-
-		cautionFactor.forEach((coord) => {
-			const markerElement = createMarkerElement({
-				type: Markers.CAUTION,
-				hasAnimation: true,
-			});
-			createAdvancedMarker(AdvancedMarker, map, coord, markerElement);
 		});
 
 		boundsRef.current = bounds;
@@ -149,7 +139,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 		if (isDetailView) {
 			const { routeDetails } = routeResult;
 			markersRef.current = [];
-			// 그림 마커 찍기
+			// [그림] 마커 찍기
 			routeDetails.forEach((routeDetail, index) => {
 				const { coordinates } = routeDetail;
 				const markerElement = createMarkerElement({

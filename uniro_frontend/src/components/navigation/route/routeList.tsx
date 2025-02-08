@@ -22,10 +22,10 @@ const RouteList = ({ routes }: RouteListProps) => {
 				coordinates: { lat: origin!.lat, lng: origin!.lng },
 				cautionTypes: [],
 			},
-			...routes,
+			...routes.slice(0, -1),
 			{
 				dist: 0,
-				directionType: "destination" as Direction,
+				directionType: "finish" as Direction,
 				coordinates: { lat: destination!.lat, lng: destination!.lng },
 				cautionTypes: [],
 			},
@@ -35,7 +35,7 @@ const RouteList = ({ routes }: RouteListProps) => {
 	return (
 		<div className="w-full">
 			{addOriginAndDestination(routes).map((route, index) => (
-				<Fragment key={`${route.coordinates.lat}-fragment`}>
+				<Fragment key={`${route.dist}-${route.coordinates.lat}-fragment`}>
 					<Divider />
 					<div className="flex flex-col">
 						<RouteCard index={index} route={route} />
