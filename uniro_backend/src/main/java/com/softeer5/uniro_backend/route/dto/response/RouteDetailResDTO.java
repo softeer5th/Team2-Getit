@@ -1,11 +1,13 @@
 package com.softeer5.uniro_backend.route.dto.response;
 
+import com.softeer5.uniro_backend.route.entity.CautionType;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -18,8 +20,12 @@ public class RouteDetailResDTO {
     private final DirectionType directionType;
     @Schema(description = "상세 경로의 좌표", example = "{\"lng\": 127.123456, \"lat\": 37.123456}")
     private final Map<String, Double> coordinates;
+    @Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
+    private final List<CautionType> cautionFactors;
 
-    public static RouteDetailResDTO of(double dist, DirectionType directionType, Map<String, Double> coordinates) {
-        return new RouteDetailResDTO(dist, directionType, coordinates);
+    public static RouteDetailResDTO of(double dist, DirectionType directionType,
+                                       Map<String, Double> coordinates,
+                                       List<CautionType> cautionFactors) {
+        return new RouteDetailResDTO(dist, directionType, coordinates, cautionFactors);
     }
 }
