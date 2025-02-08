@@ -6,10 +6,8 @@ import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
-import com.softeer5.uniro_backend.common.exception.custom.NodeNotFoundException;
+import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
-import com.softeer5.uniro_backend.common.exception.custom.SameStartAndEndPointException;
-import com.softeer5.uniro_backend.common.exception.custom.UnreachableDestinationException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.node.entity.Node;
@@ -60,7 +58,7 @@ public class RouteCalculationService {
     public FastestRouteResDTO calculateFastestRoute(Long univId, Long startNodeId, Long endNodeId){
 
         if(startNodeId.equals(endNodeId)){
-            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
+            throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
 
         //인접 리스트
@@ -101,7 +99,7 @@ public class RouteCalculationService {
         }
 
         if(startNodeId.equals(endNodeId)){
-            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
+            throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
 
         boolean hasCaution = false;
@@ -132,7 +130,7 @@ public class RouteCalculationService {
 
         //처음과 마지막을 제외한 구간에서 빌딩노드를 거쳐왔다면, 이는 유효한 길이 없는 것이므로 예외처리
         if(totalCost > BUILDING_ROUTE_COST-1){
-            throw new UnreachableDestinationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+            throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
         }
 
         List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
@@ -175,7 +173,7 @@ public class RouteCalculationService {
         }
         //길 없는 경우
         if(!costMap.containsKey(endNode.getId())){
-            throw new UnreachableDestinationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+            throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
         }
 
         return prevRoute;
@@ -399,7 +397,7 @@ public class RouteCalculationService {
         Node startNode = nodeMap.get(getNodeKey(new Coordinate(startCoordinate.getLng(), startCoordinate.getLat())));
 
         if (startNode == null) {
-            throw new NodeNotFoundException("Start Node Not Found", NODE_NOT_FOUND);
+            throw new NodeException("Start Node Not Found", NODE_NOT_FOUND);
         }
 
         if(!startNode.isCore() && startNodeCount == CORE_NODE_CONDITION - 1){
@@ -468,7 +466,7 @@ public class RouteCalculationService {
         GeometryFactory geometryFactory = GeoUtils.getInstance();
 
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
-            throw new SameStartAndEndPointException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
+            throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
 
         STRtree strTree = new STRtree();
