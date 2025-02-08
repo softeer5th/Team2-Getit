@@ -17,12 +17,11 @@ import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.dto.response.RouteDetailResDTO;
 import com.softeer5.uniro_backend.route.dto.response.RouteInfoResDTO;
-import com.softeer5.uniro_backend.route.entity.CautionType;
+import com.softeer5.uniro_backend.route.entity.CautionFactor;
 import com.softeer5.uniro_backend.route.entity.DirectionType;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -37,12 +36,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RouteCalculationService {
     private final RouteRepository routeRepository;
     private final MapClient mapClient;
     private final NodeRepository nodeRepository;
+    private final GeometryFactory geometryFactory;
+
+    public RouteCalculationService(RouteRepository routeRepository, MapClient mapClient, NodeRepository nodeRepository) {
+        this.routeRepository = routeRepository;
+        this.mapClient = mapClient;
+        this.nodeRepository = nodeRepository;
+        this.geometryFactory = GeoUtils.getInstance();
+    }
 
     @AllArgsConstructor
     private class CostToNextNode implements Comparable<CostToNextNode> {
@@ -256,7 +262,7 @@ public class RouteCalculationService {
         Node now = startNode;
         Map<String,Double> checkPointNodeCoordinates = startNode.getXY();
         DirectionType checkPointType = DirectionType.STRAIGHT;
-        List<CautionType> checkPointCautionTypes = new ArrayList<>();
+        List<CautionFactor> checkPointCautionFactors = new ArrayList<>();
 
         // 길찾기 결과 상세정보 정리
         for(int i=0;i<shortestRoutes.size();i++){
@@ -267,16 +273,16 @@ public class RouteCalculationService {
             if(!nowRoute.getCautionFactors().isEmpty()){
                 double halfOfRouteDistance = calculateDistance(nowRoute)/2;
                 details.add(RouteDetailResDTO.of(accumulatedDistance - halfOfRouteDistance,
-                        checkPointType, checkPointNodeCoordinates, checkPointCautionTypes));
+                        checkPointType, checkPointNodeCoordinates, checkPointCautionFactors));
                 accumulatedDistance = halfOfRouteDistance;
                 checkPointNodeCoordinates = getCenter(now, nxt);
                 checkPointType = DirectionType.CAUTION;
-                checkPointCautionTypes = nowRoute.getCautionFactorsByList();
+                checkPointCautionFactors = nowRoute.getCautionFactorsByList();
             }
 
             if(nxt.equals(endNode)){
                 details.add(RouteDetailResDTO.of(accumulatedDistance, checkPointType,
-                        checkPointNodeCoordinates, checkPointCautionTypes));
+                        checkPointNodeCoordinates, checkPointCautionFactors));
                 details.add(RouteDetailResDTO.of(0, DirectionType.FINISH, nxt.getXY(), new ArrayList<>()));
                 break;
             }
@@ -287,11 +293,11 @@ public class RouteCalculationService {
                     continue;
                 }
                 details.add(RouteDetailResDTO.of(accumulatedDistance, checkPointType,
-                        checkPointNodeCoordinates, checkPointCautionTypes));
+                        checkPointNodeCoordinates, checkPointCautionFactors));
                 checkPointNodeCoordinates = nxt.getXY();
                 checkPointType = directionType;
                 accumulatedDistance = 0.0;
-                checkPointCautionTypes = Collections.emptyList();
+                checkPointCautionFactors = Collections.emptyList();
             }
 
             now = nxt;
@@ -314,7 +320,6 @@ public class RouteCalculationService {
     }
 
     private void createLinkedRouteAndSave(Long univId, List<Node> nodes) {
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
         Set<String> nodeSet = new HashSet<>();
         List<Node> nodeForSave = new ArrayList<>();
         List<Route> routeForSave = new ArrayList<>();
@@ -363,7 +368,6 @@ public class RouteCalculationService {
 
         Map<String, Node> nodeMap = new HashMap<>();
         STRtree strTree = new STRtree();
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
 
         int startNodeCount = 0;
         int endNodeCount = 0;
@@ -463,8 +467,6 @@ public class RouteCalculationService {
 
     private List<Node> checkSelfRouteCross(List<Node> nodes) {
 
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
-
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
             throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
@@ -521,7 +523,6 @@ public class RouteCalculationService {
     }
 
     private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree) {
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
         LineString newLine = geometryFactory.createLineString(new Coordinate[] {start, end});
         Envelope searchEnvelope = newLine.getEnvelopeInternal();
 
@@ -570,7 +571,6 @@ public class RouteCalculationService {
     }
 
     private Node getClosestNode(LineString intersectLine, Node start, Node end, Map<String, Node> nodeMap) {
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
         Coordinate[] coordinates = intersectLine.getCoordinates();
 
         double distance1 = start.getCoordinates().getCoordinate().distance(coordinates[0]) +

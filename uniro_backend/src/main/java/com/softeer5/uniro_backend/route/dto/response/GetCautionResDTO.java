@@ -3,8 +3,7 @@ package com.softeer5.uniro_backend.route.dto.response;
 import java.util.List;
 import java.util.Map;
 
-import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.route.entity.CautionType;
+import com.softeer5.uniro_backend.route.entity.CautionFactor;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -27,9 +26,9 @@ public class GetCautionResDTO {
 	private final Long routeId;
 
 	@Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
-	private final List<CautionType> cautionTypes;
+	private final List<CautionFactor> cautionFactors;
 
-	public static GetCautionResDTO of(Map<String, Double> node1, Map<String, Double> node2, Long routeId, List<CautionType> cautionTypes){
-		return new GetCautionResDTO(node1, node2, routeId, cautionTypes);
+	public static GetCautionResDTO of(Map<String, Double> node1, Map<String, Double> node2, Long routeId, List<CautionFactor> cautionFactors){
+		return new GetCautionResDTO(node1, node2, routeId, cautionFactors);
 	}
 }

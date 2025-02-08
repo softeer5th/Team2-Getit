@@ -1,7 +1,6 @@
 package com.softeer5.uniro_backend.route.dto.response;
 
 import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.route.entity.CautionType;
 import com.softeer5.uniro_backend.route.entity.Route;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -9,7 +8,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
-import java.util.Set;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

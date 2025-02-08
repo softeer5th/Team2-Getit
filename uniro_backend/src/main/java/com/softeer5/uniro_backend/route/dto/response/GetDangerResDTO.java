@@ -3,8 +3,7 @@ package com.softeer5.uniro_backend.route.dto.response;
 import java.util.List;
 import java.util.Map;
 
-import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.route.entity.DangerType;
+import com.softeer5.uniro_backend.route.entity.DangerFactor;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -26,13 +25,13 @@ public class GetDangerResDTO {
 	private final Long routeId;
 
 	@Schema(description = "위험 요소 타입 리스트", example = "[\"CURB\", \"STAIRS\"]")
-	private final List<DangerType> dangerTypes;
+	private final List<DangerFactor> dangerFactors;
 
-	public static GetDangerResDTO of(Map<String, Double> node1, Map<String, Double> node2, Long routeId, List<DangerType> dangerTypes){
-		return new GetDangerResDTO(node1, node2, routeId, dangerTypes);
+	public static GetDangerResDTO of(Map<String, Double> node1, Map<String, Double> node2, Long routeId, List<DangerFactor> dangerFactors){
+		return new GetDangerResDTO(node1, node2, routeId, dangerFactors);
 	}
 
-	public List<DangerType> getDangerTypes() {
-		return dangerTypes;
+	public List<DangerFactor> getDangerFactors() {
+		return dangerFactors;
 	}
 }
