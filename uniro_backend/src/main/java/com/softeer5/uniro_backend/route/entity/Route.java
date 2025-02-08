@@ -56,9 +56,6 @@ public class Route {
 	@Column(name = "univ_id")
 	private Long univId;
 
-	@Column(name = "core_route_id")
-	private Long coreRouteId;
-
 	@Convert(converter = CautionListConverter.class)
 	@Column(name = "caution_factors")
 	@NotNull
@@ -88,14 +85,13 @@ public class Route {
 	}
 
 	@Builder
-	private Route(double cost, LineString path, Node node1, Node node2, Long univId, Long coreRouteId,
+	private Route(double cost, LineString path, Node node1, Node node2, Long univId,
 		Set<CautionType> cautionFactors, Set<DangerType> dangerFactors) {
 		this.cost = cost;
 		this.path = path;
 		this.node1 = node1;
 		this.node2 = node2;
 		this.univId = univId;
-		this.coreRouteId = coreRouteId;
 		this.cautionFactors = cautionFactors;
 		this.dangerFactors = dangerFactors;
 	}
