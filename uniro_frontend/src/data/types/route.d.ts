@@ -43,7 +43,7 @@ export type RouteDetail = {
 	dist: number;
 	directionType: Direction;
 	coordinates: Coord;
-	cautionTypes: CautionIssueType[];
+	cautionFactors: CautionIssueType[];
 };
 
 export type NavigationRouteList = {

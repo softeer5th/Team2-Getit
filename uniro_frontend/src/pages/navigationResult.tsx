@@ -1,5 +1,4 @@
-import React, { useCallback, useState } from "react";
-import { PanInfo, useDragControls } from "framer-motion";
+import React, { useState } from "react";
 import { useSuspenseQueries } from "@tanstack/react-query";
 
 import Button from "../components/customButton";
@@ -13,13 +12,13 @@ import AnimatedContainer from "../container/animatedContainer";
 import useScrollControl from "../hooks/useScrollControl";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-import AnimatedSheetContainer from "../container/animatedSheetContainer";
 import { University } from "../data/types/university";
 import { getNavigationResult } from "../api/route";
 import { getAllRisks } from "../api/routes";
 import useRoutePoint from "../hooks/useRoutePoint";
 import { Building } from "../data/types/node";
 import { useLocation } from "react-router";
+import { useNavigationBottomSheet } from "../hooks/useNavigationBottomSheet";
 
 const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
 const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
@@ -31,10 +30,10 @@ const PADDING_FOR_MAP_BOUNDARY = 50;
 
 const NavigationResultPage = () => {
 	const [isDetailView, setIsDetailView] = useState(false);
-	const [sheetHeight, setSheetHeight] = useState(CLOSED_SHEET_HEIGHT);
 	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
 	const location = useLocation();
-
+	const { sheetHeight, setSheetHeight, dragControls, handleDrag, preventScroll, scrollRef } =
+		useNavigationBottomSheet();
 	const { university } = useUniversityInfo();
 	const { origin, destination, setOriginCoord, setDestinationCoord } = useRoutePoint();
 
@@ -71,7 +70,8 @@ const NavigationResultPage = () => {
 						);
 						return response;
 					} catch (e) {
-						return alert("경로를 찾을 수 없습니다.");
+						alert(`경로를 찾을 수 없습니다. (${e})`);
+						return null;
 					}
 				},
 				retry: 1,
@@ -86,8 +86,6 @@ const NavigationResultPage = () => {
 		],
 	});
 
-	const dragControls = useDragControls();
-
 	const showDetailView = () => {
 		setSheetHeight(MAX_SHEET_HEIGHT);
 		setTopBarHeight(PADDING_FOR_MAP_BOUNDARY);
@@ -99,13 +97,6 @@ const NavigationResultPage = () => {
 		setTopBarHeight(INITIAL_TOP_BAR_HEIGHT);
 		setIsDetailView(false);
 	};
-
-	const handleDrag = useCallback((event: Event, info: PanInfo) => {
-		setSheetHeight((prev) => {
-			const newHeight = prev - info.delta.y;
-			return Math.min(Math.max(newHeight, MIN_SHEET_HEIGHT), MAX_SHEET_HEIGHT);
-		});
-	}, []);
 
 	return (
 		<div className="relative h-dvh w-full max-w-[450px] mx-auto">
@@ -165,10 +156,12 @@ const NavigationResultPage = () => {
 			>
 				<BottomSheetHandle dragControls={dragControls} />
 				<div
+					ref={scrollRef}
 					className="w-full overflow-y-auto"
 					style={{
 						height: MAX_SHEET_HEIGHT - BOTTOM_SHEET_HANDLE_HEIGHT,
 					}}
+					onScroll={preventScroll}
 				>
 					<NavigationDescription isDetailView={true} navigationRoute={result[0].data!} />
 					<RouteList routes={result[0].data!.routeDetails} />
