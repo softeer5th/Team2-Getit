@@ -71,6 +71,13 @@ dependencies {
 
 	// actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	// test container
+	testImplementation 'org.testcontainers:testcontainers:1.19.5'
+	testImplementation 'org.testcontainers:junit-jupiter:1.19.5'
+	testImplementation 'org.testcontainers:jdbc:1.19.5'
+	testImplementation 'org.testcontainers:mysql:1.19.5'
+
 }
 
 tasks.named('test') {

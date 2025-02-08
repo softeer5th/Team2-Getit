@@ -4,8 +4,8 @@ spring:
       on-profile: test
 
   datasource:
-    url: jdbc:mysql://localhost:3306/uniro-test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:tc:mysql://localhost:3306/uniro-test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     username: root
     password:
   jpa:
