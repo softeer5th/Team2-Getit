@@ -93,14 +93,16 @@ public class RevisionOperationAspect {
     }
 
     private Object createBuildingNodeHandler(ProceedingJoinPoint joinPoint) throws Throwable {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        String[] parameterNames = signature.getParameterNames();
         Object[] args = joinPoint.getArgs();
 
         Long univId = null;
         String action = "빌딩 노드 추가";
 
         for (int i = 0; i < args.length; i++) {
-            if (args[i] instanceof CreateBuildingNodeReqDTO createBuildingNodeReqDTO) {
-                univId = createBuildingNodeReqDTO.getUnivId();
+            if (args[i] instanceof Long && "univId".equals(parameterNames[i])) {
+                univId = (Long) args[i];
             }
         }
         RevisionContext.setUnivId(univId);
