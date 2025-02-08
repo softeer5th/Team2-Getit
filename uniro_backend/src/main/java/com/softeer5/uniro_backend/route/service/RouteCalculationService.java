@@ -37,12 +37,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RouteCalculationService {
     private final RouteRepository routeRepository;
     private final MapClient mapClient;
     private final NodeRepository nodeRepository;
+    private final GeometryFactory geometryFactory;
+
+    public RouteCalculationService(RouteRepository routeRepository, MapClient mapClient, NodeRepository nodeRepository) {
+        this.routeRepository = routeRepository;
+        this.mapClient = mapClient;
+        this.nodeRepository = nodeRepository;
+        this.geometryFactory = GeoUtils.getInstance();
+    }
 
     @AllArgsConstructor
     private class CostToNextNode implements Comparable<CostToNextNode> {
@@ -314,7 +321,6 @@ public class RouteCalculationService {
     }
 
     private void createLinkedRouteAndSave(Long univId, List<Node> nodes) {
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
         Set<String> nodeSet = new HashSet<>();
         List<Node> nodeForSave = new ArrayList<>();
         List<Route> routeForSave = new ArrayList<>();
@@ -363,7 +369,6 @@ public class RouteCalculationService {
 
         Map<String, Node> nodeMap = new HashMap<>();
         STRtree strTree = new STRtree();
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
 
         int startNodeCount = 0;
         int endNodeCount = 0;
@@ -463,8 +468,6 @@ public class RouteCalculationService {
 
     private List<Node> checkSelfRouteCross(List<Node> nodes) {
 
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
-
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
             throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
@@ -521,7 +524,6 @@ public class RouteCalculationService {
     }
 
     private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree) {
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
         LineString newLine = geometryFactory.createLineString(new Coordinate[] {start, end});
         Envelope searchEnvelope = newLine.getEnvelopeInternal();
 
@@ -570,7 +572,6 @@ public class RouteCalculationService {
     }
 
     private Node getClosestNode(LineString intersectLine, Node start, Node end, Map<String, Node> nodeMap) {
-        GeometryFactory geometryFactory = GeoUtils.getInstance();
         Coordinate[] coordinates = intersectLine.getCoordinates();
 
         double distance1 = start.getCoordinates().getCoordinate().distance(coordinates[0]) +
