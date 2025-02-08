@@ -24,7 +24,7 @@ export const useNavigationBottomSheet = () => {
 			if (sheetHeight < MAX_SHEET_HEIGHT * ERROR_MARGIN_OF_SCROLL) {
 				event.preventDefault();
 				if (scrollRef.current) {
-					scrollRef.current.scrollTo({ top: 0, behavior: "smooth" }); // ✅ 부드러운 스크롤 적용
+					scrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
 				}
 			}
 		},
