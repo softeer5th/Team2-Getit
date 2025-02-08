@@ -30,5 +30,5 @@ public interface BuildingRepository extends JpaRepository<Building, Long>, Build
     """)
 	Optional<BuildingNode> findByNodeIdWithNode(Long nodeId);
 
-	Optional<Building> findByIdAndUnivId(Long id, Long univId);
+	Optional<Building> findByNodeIdAndUnivId(Long nodeId, Long univId);
 }
