@@ -146,35 +146,34 @@ const NavigationResultPage = () => {
 				<BackButton onClick={hideDetailView} />
 			</AnimatedContainer>
 
-			<AnimatedSheetContainer
+			<AnimatedContainer
 				isVisible={isDetailView}
-				height={sheetHeight}
-				className="bg-white rounded-t-2xl shadow-xl"
-				transition={{ type: "tween", duration: 0.3 }}
+				className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto"
+				positionDelta={MAX_SHEET_HEIGHT}
+				transition={{ type: "spring", damping: 20, duration: 0.3 }}
 				motionProps={{
 					drag: "y",
 					dragControls,
 					dragListener: false,
 					dragConstraints: {
 						top: 0,
-						bottom: 0,
+						bottom: MIN_SHEET_HEIGHT,
 					},
 					onDrag: handleDrag,
 					onDragEnd: handleDrag,
 				}}
 			>
 				<BottomSheetHandle dragControls={dragControls} />
-
 				<div
 					className="w-full overflow-y-auto"
 					style={{
-						height: sheetHeight - BOTTOM_SHEET_HANDLE_HEIGHT,
+						height: MAX_SHEET_HEIGHT - BOTTOM_SHEET_HANDLE_HEIGHT,
 					}}
 				>
 					<NavigationDescription isDetailView={true} navigationRoute={result[0].data!} />
 					<RouteList routes={result[0].data!.routeDetails} />
 				</div>
-			</AnimatedSheetContainer>
+			</AnimatedContainer>
 		</div>
 	);
 };
