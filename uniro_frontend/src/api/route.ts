@@ -28,20 +28,20 @@ export const getSingleRouteRisk = (
 	routeId: RouteId,
 ): Promise<{
 	routeId: NodeId;
-	dangerTypes: IssueTypeKey[];
-	cautionTypes: IssueTypeKey[];
+	dangerFactors: IssueTypeKey[];
+	cautionFactors: IssueTypeKey[];
 }> => {
 	return getFetch<{
 		routeId: NodeId;
-		dangerTypes: IssueTypeKey[];
-		cautionTypes: IssueTypeKey[];
+		dangerFactors: IssueTypeKey[];
+		cautionFactors: IssueTypeKey[];
 	}>(`/${univId}/routes/${routeId}/risk`);
 };
 
 export const postReport = (
 	univId: number,
 	routeId: RouteId,
-	body: { dangerTypes: DangerIssueType[]; cautionTypes: CautionIssueType[] },
+	body: { dangerFactors: DangerIssueType[]; cautionFactors: CautionIssueType[] },
 ): Promise<boolean> => {
 	return postFetch<void, string>(`/${univId}/route/risk/${routeId}`, body);
 };
