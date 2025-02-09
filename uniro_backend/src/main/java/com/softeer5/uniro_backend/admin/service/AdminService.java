@@ -2,6 +2,7 @@ package com.softeer5.uniro_backend.admin.service;
 
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 
+import com.softeer5.uniro_backend.admin.annotation.DisableAudit;
 import com.softeer5.uniro_backend.admin.dto.RevInfoDTO;
 import com.softeer5.uniro_backend.admin.entity.RevInfo;
 import com.softeer5.uniro_backend.admin.repository.NodeAuditRepository;
@@ -40,6 +41,7 @@ public class AdminService {
     }
 
     @Transactional
+    @DisableAudit
     public void rollbackRev(Long univId, Long versionId){
         RevInfo revInfo = revInfoRepository.findById(versionId)
             .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
