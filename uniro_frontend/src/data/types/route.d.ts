@@ -23,10 +23,6 @@ export interface DangerRoute extends Route {
 	dangerTypes: DangerIssueType[];
 }
 
-export interface NavigationRoute extends Route {
-	cautionTypes: CautionIssueType[];
-}
-
 export interface CoreRoute {
 	routeId: RouteId;
 	node1: Node;
@@ -47,12 +43,13 @@ export type RouteDetail = {
 	dist: number;
 	directionType: Direction;
 	coordinates: Coord;
+	cautionFactors: CautionIssueType[];
 };
 
 export type NavigationRouteList = {
 	hasCaution: boolean;
 	totalDistance: number;
 	totalCost: number;
-	routes: NavigationRoute[];
+	routes: Route[];
 	routeDetails: RouteDetail[];
 };
