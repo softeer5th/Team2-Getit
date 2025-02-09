@@ -130,6 +130,7 @@ public class RouteCalculationService {
                 firstNode = secondNode;
                 secondNode = temp;
             }
+            currentNode = secondNode;
 
             routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
         }
