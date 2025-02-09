@@ -17,9 +17,8 @@ const Map = ({ style }: MapProps) => {
   useEffect(() => {
     if (!map || !mapLoaded) return;
     const universityLatLng = getCurrentUniversityLngLat();
-    console.log("Setting center to:", universityLatLng);
     map.setCenter(universityLatLng);
-  }, [currentUniversity, mapLoaded]);
+  }, [currentUniversity, mapLoaded, getCurrentUniversityLngLat, map]);
 
   return (
     <div id="map" ref={mapRef} style={{ height: "100%", width: "100%" }}></div>
