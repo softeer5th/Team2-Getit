@@ -45,17 +45,19 @@ export default function ReportRoutePage() {
 	const newPolyLine = useRef<google.maps.Polyline>();
 	const [isActive, setIsActive] = useState<boolean>(false);
 
-	const [dangerMarkers, setDangerMarkers] = useState<{ element: AdvancedMarker, routeId: RouteId }[]>([]);
+	const [dangerMarkers, setDangerMarkers] = useState<{ element: AdvancedMarker; routeId: RouteId }[]>([]);
 	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(false);
 
-	const [cautionMarkers, setCautionMarkers] = useState<{ element: AdvancedMarker, routeId: RouteId }[]>([]);
+	const [cautionMarkers, setCautionMarkers] = useState<{ element: AdvancedMarker; routeId: RouteId }[]>([]);
 	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(false);
 
 	const { university } = useUniversityInfo();
 	useRedirectUndefined<University | undefined>([university]);
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
-	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(() => { navigate('/map') });
+	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(() => {
+		navigate("/map");
+	});
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
 
 	if (!university) return;
@@ -66,12 +68,11 @@ export default function ReportRoutePage() {
 				queryKey: ["routes", university.id],
 				queryFn: () => getAllRoutes(university.id),
 			},
-			{ queryKey: [university.id, 'risks'], queryFn: () => getAllRisks(university.id) },
-		]
+			{ queryKey: [university.id, "risks"], queryFn: () => getAllRisks(university.id) },
+		],
 	});
 
 	const [routes, risks] = result;
-
 
 	const { mutate } = useMutation({
 		mutationFn: ({
@@ -95,7 +96,7 @@ export default function ReportRoutePage() {
 				coords: [],
 			});
 			if (newPolyLine.current) newPolyLine.current.setPath([]);
-			queryClient.invalidateQueries({ queryKey: ["routes", university.id], });
+			queryClient.invalidateQueries({ queryKey: ["routes", university.id] });
 		},
 		onError: () => {
 			openFail();
@@ -120,7 +121,7 @@ export default function ReportRoutePage() {
 		const dangerMarkersWithId: { routeId: RouteId; element: AdvancedMarker }[] = [];
 
 		for (const route of dangerRoutes) {
-			const { routeId, node1, node2, dangerTypes } = route;
+			const { routeId, node1, node2, dangerFactors } = route;
 			const type = Markers.DANGER;
 
 			const dangerMarker = createAdvancedMarker(
@@ -137,10 +138,10 @@ export default function ReportRoutePage() {
 						return {
 							type: Markers.DANGER,
 							element: dangerMarker,
-							factors: dangerTypes,
-							id: routeId
-						}
-					})
+							factors: dangerFactors,
+							id: routeId,
+						};
+					});
 				},
 			);
 
@@ -152,7 +153,7 @@ export default function ReportRoutePage() {
 		const cautionMarkersWithId: { routeId: RouteId; element: AdvancedMarker }[] = [];
 
 		for (const route of cautionRoutes) {
-			const { routeId, node1, node2, cautionTypes } = route;
+			const { routeId, node1, node2, cautionFactors } = route;
 			const type = Markers.CAUTION;
 
 			const cautionMarker = createAdvancedMarker(
@@ -169,10 +170,10 @@ export default function ReportRoutePage() {
 						return {
 							type: Markers.CAUTION,
 							element: cautionMarker,
-							factors: cautionTypes,
-							id: routeId
-						}
-					})
+							factors: cautionFactors,
+							id: routeId,
+						};
+					});
 				},
 			);
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
@@ -184,14 +185,22 @@ export default function ReportRoutePage() {
 	const toggleCautionButton = () => {
 		if (!map) return;
 		setIsCautionActive((isActive) => {
-			toggleMarkers(!isActive, cautionMarkers.map(marker => marker.element), map);
+			toggleMarkers(
+				!isActive,
+				cautionMarkers.map((marker) => marker.element),
+				map,
+			);
 			return !isActive;
 		});
 	};
 	const toggleDangerButton = () => {
 		if (!map) return;
 		setIsDangerActive((isActive) => {
-			toggleMarkers(!isActive, dangerMarkers.map(marker => marker.element), map);
+			toggleMarkers(
+				!isActive,
+				dangerMarkers.map((marker) => marker.element),
+				map,
+			);
 			return !isActive;
 		});
 	};
@@ -331,7 +340,7 @@ export default function ReportRoutePage() {
 
 		if (map && AdvancedMarker) {
 			map.addListener("click", (e: ClickEvent) => {
-				setSelectedMarker(undefined)
+				setSelectedMarker(undefined);
 				if (originPoint.current) {
 					const point = LatLngToLiteral(e.latLng);
 					setNewPoints((prevPoints) => {
@@ -364,7 +373,6 @@ export default function ReportRoutePage() {
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
-
 		if (isSelect) {
 			if (marker.type === Markers.DANGER) {
 				const key = marker.factors[0] as DangerIssueType;
@@ -373,8 +381,7 @@ export default function ReportRoutePage() {
 					title: key && DangerIssue[key],
 					hasTopContent: true,
 				});
-			}
-			else if (marker.type === Markers.CAUTION) {
+			} else if (marker.type === Markers.CAUTION) {
 				const key = marker.factors[0] as CautionIssueType;
 				marker.element.content = createMarkerElement({
 					type: marker.type,

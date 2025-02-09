@@ -18,6 +18,6 @@ export type GetAllRouteRepsonse = {
 
 export type GetSingleRouteRiskResponse = {
 	routeId: NodeId;
-	dangerTypes?: IssueTypeKey[];
-	cautionTypes?: IssueTypeKey[];
+	dangerFactors?: IssueTypeKey[];
+	cautionFactors?: IssueTypeKey[];
 };

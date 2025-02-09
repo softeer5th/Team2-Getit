@@ -52,10 +52,10 @@ export default function MapPage() {
 
 	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; nodeId: NodeId }[]>([]);
 
-	const [dangerMarkers, setDangerMarkers] = useState<{ element: AdvancedMarker, routeId: RouteId }[]>([]);
+	const [dangerMarkers, setDangerMarkers] = useState<{ element: AdvancedMarker; routeId: RouteId }[]>([]);
 	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(false);
 
-	const [cautionMarkers, setCautionMarkers] = useState<{ element: AdvancedMarker, routeId: RouteId }[]>([]);
+	const [cautionMarkers, setCautionMarkers] = useState<{ element: AdvancedMarker; routeId: RouteId }[]>([]);
 	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(false);
 
 	const [universityMarker, setUniversityMarker] = useState<AdvancedMarker>();
@@ -72,16 +72,18 @@ export default function MapPage() {
 
 	const results = useSuspenseQueries({
 		queries: [
-			{ queryKey: [university.id, 'risks'], queryFn: () => getAllRisks(university.id) },
+			{ queryKey: [university.id, "risks"], queryFn: () => getAllRisks(university.id) },
 			{
-				queryKey: [university.id, 'buildings'], queryFn: () => getAllBuildings(university.id, {
-					leftUpLat: 38,
-					leftUpLng: 127,
-					rightDownLat: 37,
-					rightDownLng: 128
-				})
-			}
-		]
+				queryKey: [university.id, "buildings"],
+				queryFn: () =>
+					getAllBuildings(university.id, {
+						leftUpLat: 38,
+						leftUpLng: 127,
+						rightDownLat: 37,
+						rightDownLng: 128,
+					}),
+			},
+		],
 	});
 
 	const [risks, buildings] = results;
@@ -97,16 +99,16 @@ export default function MapPage() {
 				const curZoom = map.getZoom() as number;
 				prevZoom.current = prev;
 
-				return curZoom
+				return curZoom;
 			});
-		})
+		});
 
 		const centerMarker = createUniversityMarker(
 			AdvancedMarker,
 			map,
 			HanyangUniversity,
 			university ? university.name : "",
-		)
+		);
 		setUniversityMarker(centerMarker);
 	};
 
@@ -149,7 +151,7 @@ export default function MapPage() {
 		const dangerMarkersWithId: { routeId: RouteId; element: AdvancedMarker }[] = [];
 
 		for (const route of dangerRoutes) {
-			const { routeId, node1, node2, dangerTypes } = route;
+			const { routeId, node1, node2, dangerFactors } = route;
 			const type = Markers.DANGER;
 
 			const dangerMarker = createAdvancedMarker(
@@ -169,10 +171,10 @@ export default function MapPage() {
 							id: routeId,
 							type: type,
 							element: dangerMarker,
-							factors: dangerTypes,
+							factors: dangerFactors,
 							from: "Marker",
-						}
-					})
+						};
+					});
 				},
 			);
 
@@ -184,7 +186,7 @@ export default function MapPage() {
 		const cautionMarkersWithId: { routeId: RouteId; element: AdvancedMarker }[] = [];
 
 		for (const route of cautionRoutes) {
-			const { routeId, node1, node2, cautionTypes } = route;
+			const { routeId, node1, node2, cautionFactors } = route;
 			const type = Markers.CAUTION;
 
 			const cautionMarker = createAdvancedMarker(
@@ -204,10 +206,10 @@ export default function MapPage() {
 							id: routeId,
 							type: type,
 							element: cautionMarker,
-							factors: cautionTypes,
+							factors: cautionFactors,
 							from: "Marker",
-						}
-					})
+						};
+					});
 				},
 			);
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
@@ -225,7 +227,11 @@ export default function MapPage() {
 			});
 		}
 		setIsCautionActive((isActive) => {
-			toggleMarkers(!isActive, cautionMarkers.map(marker => marker.element), map);
+			toggleMarkers(
+				!isActive,
+				cautionMarkers.map((marker) => marker.element),
+				map,
+			);
 			return !isActive;
 		});
 	};
@@ -238,7 +244,11 @@ export default function MapPage() {
 			});
 		}
 		setIsDangerActive((isActive) => {
-			toggleMarkers(!isActive, dangerMarkers.map(marker => marker.element), map);
+			toggleMarkers(
+				!isActive,
+				dangerMarkers.map((marker) => marker.element),
+				map,
+			);
 			return !isActive;
 		});
 	};
@@ -276,7 +286,7 @@ export default function MapPage() {
 				map.setOptions({
 					center: { lat: marker.property.lat, lng: marker.property.lng },
 					zoom: 19,
-				})
+				});
 				setSheetOpen(true);
 			}
 
@@ -305,15 +315,12 @@ export default function MapPage() {
 					title: marker.property.buildingName,
 					className: "translate-routemarker",
 				});
-			}
-
-			else if (marker.id === destination?.nodeId) {
+			} else if (marker.id === destination?.nodeId) {
 				marker.element.content = createMarkerElement({
 					type: Markers.DESTINATION,
 					title: destination.buildingName,
 					className: "translate-routemarker",
 				});
-
 			}
 
 			marker.element.content = createMarkerElement({
@@ -324,15 +331,14 @@ export default function MapPage() {
 		} else {
 			if (isSelect) {
 				if (marker.type === Markers.DANGER) {
-					const key = marker.factors && marker.factors[0] as DangerIssueType;
+					const key = marker.factors && (marker.factors[0] as DangerIssueType);
 					marker.element.content = createMarkerElement({
 						type: marker.type,
 						title: key && DangerIssue[key],
 						hasTopContent: true,
 					});
-				}
-				else if (marker.type === Markers.CAUTION) {
-					const key = marker.factors && marker.factors[0] as CautionIssueType;
+				} else if (marker.type === Markers.CAUTION) {
+					const key = marker.factors && (marker.factors[0] as CautionIssueType);
 					marker.element.content = createMarkerElement({
 						type: marker.type,
 						title: key && CautionIssue[key],
@@ -432,26 +438,33 @@ export default function MapPage() {
 	useEffect(() => {
 		if (!map) return;
 
-		const _buildingMarkers = buildingMarkers.map(buildingMarker => buildingMarker.element);
+		const _buildingMarkers = buildingMarkers.map((buildingMarker) => buildingMarker.element);
 
 		if (prevZoom.current >= 17 && zoom <= 16) {
 			if (isCautionAcitve) {
 				setIsCautionActive(false);
-				toggleMarkers(false, cautionMarkers.map(marker => marker.element), map);
+				toggleMarkers(
+					false,
+					cautionMarkers.map((marker) => marker.element),
+					map,
+				);
 			}
 			if (isDangerAcitve) {
 				setIsDangerActive(false);
-				toggleMarkers(false, dangerMarkers.map(marker => marker.element), map);
+				toggleMarkers(
+					false,
+					dangerMarkers.map((marker) => marker.element),
+					map,
+				);
 			}
 
 			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
 			toggleMarkers(false, _buildingMarkers, map);
-		}
-		else if ((prevZoom.current <= 16 && zoom >= 17)) {
+		} else if (prevZoom.current <= 16 && zoom >= 17) {
 			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
 			toggleMarkers(true, _buildingMarkers, map);
 		}
-	}, [map, zoom])
+	}, [map, zoom]);
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">

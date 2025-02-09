@@ -39,7 +39,7 @@ const ReportForm = () => {
 
 	useRedirectUndefined<University | RouteId | undefined>([university, routeId]);
 
-	console.log(routeId)
+	console.log(routeId);
 
 	if (!routeId) return;
 
@@ -52,8 +52,8 @@ const ReportForm = () => {
 			} catch (e) {
 				return {
 					routeId: -1,
-					dangerTypes: [],
-					cautionTypes: [],
+					dangerFactors: [],
+					cautionFactors: [],
 				};
 			}
 		},
@@ -70,18 +70,18 @@ const ReportForm = () => {
 	}, [data]);
 
 	const [reportMode, setReportMode] = useState<ReportModeType | null>(
-		data.cautionTypes.length > 0 || data.dangerTypes.length > 0 ? "update" : "create",
+		data.cautionFactors.length > 0 || data.dangerFactors.length > 0 ? "update" : "create",
 	);
 
 	const [formData, setFormData] = useState<ReportFormData>({
 		passableStatus:
 			reportMode === "create"
 				? PassableStatus.INITIAL
-				: data.cautionTypes.length > 0
+				: data.cautionFactors.length > 0
 					? PassableStatus.CAUTION
 					: PassableStatus.DANGER,
-		dangerIssues: data.dangerTypes,
-		cautionIssues: data.cautionTypes,
+		dangerIssues: data.dangerFactors,
+		cautionIssues: data.cautionFactors,
 	});
 
 	useEffect(() => {
@@ -125,8 +125,8 @@ const ReportForm = () => {
 	const { mutate } = useMutation({
 		mutationFn: () =>
 			postReport(university?.id ?? 1001, routeId, {
-				dangerTypes: formData.dangerIssues,
-				cautionTypes: formData.cautionIssues,
+				dangerFactors: formData.dangerIssues,
+				cautionFactors: formData.cautionIssues,
 			}),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
