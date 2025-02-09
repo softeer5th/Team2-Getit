@@ -1,3 +1,5 @@
+import { BadRequestError, NotFoundError } from "../../constant/error";
+
 export default function Fetch() {
 	const baseURL = import.meta.env.VITE_REACT_SERVER_BASE_URL;
 
@@ -11,7 +13,13 @@ export default function Fetch() {
 		});
 
 		if (!response.ok) {
-			throw new Error(`${response.status}-${response.statusText}`);
+			if (response.status === 400) {
+				throw new BadRequestError("Bad Request");
+			} else if (response.status === 404) {
+				throw new NotFoundError("Not Found");
+			} else {
+				throw new Error("UnExpected Error");
+			}
 		}
 
 		return response.json();
@@ -27,7 +35,13 @@ export default function Fetch() {
 		});
 
 		if (!response.ok) {
-			throw new Error(`${response.status}-${response.statusText}`);
+			if (response.status === 400) {
+				throw new BadRequestError("Bad Request");
+			} else if (response.status === 404) {
+				throw new NotFoundError("Not Found");
+			} else {
+				throw new Error("UnExpected Error");
+			}
 		}
 
 		return response.ok;
