@@ -51,8 +51,8 @@ export default function ReportRiskPage() {
 				queryKey: ["routes", university.id],
 				queryFn: () => getAllRoutes(university.id),
 			},
-			{ queryKey: [university.id, 'risks'], queryFn: () => getAllRisks(university.id) },
-		]
+			{ queryKey: [university.id, "risks"], queryFn: () => getAllRisks(university.id) },
+		],
 	});
 
 	const [routes, risks] = result;
@@ -63,8 +63,8 @@ export default function ReportRiskPage() {
 			return;
 		}
 
-		setReportRouteId(reportMarker.route)
-	}
+		setReportRouteId(reportMarker.route);
+	};
 
 	const resetMarker = (prevMarker: MarkerTypesWithElement) => {
 		if (prevMarker.type === Markers.REPORT) {
@@ -80,7 +80,7 @@ export default function ReportRiskPage() {
 		const { dangerRoutes, cautionRoutes } = risks.data;
 
 		for (const route of dangerRoutes) {
-			const { routeId, node1, node2, dangerTypes } = route;
+			const { routeId, node1, node2, dangerFactors } = route;
 			const type = Markers.DANGER;
 
 			const dangerMarker = createAdvancedMarker(
@@ -99,15 +99,15 @@ export default function ReportRiskPage() {
 							type: Markers.DANGER,
 							element: dangerMarker,
 							route: routeId,
-							factors: dangerTypes,
-						}
-					})
+							factors: dangerFactors,
+						};
+					});
 				},
 			);
 		}
 
 		for (const route of cautionRoutes) {
-			const { routeId, node1, node2, cautionTypes } = route;
+			const { routeId, node1, node2, cautionFactors } = route;
 			const type = Markers.CAUTION;
 
 			const cautionMarker = createAdvancedMarker(
@@ -126,9 +126,9 @@ export default function ReportRiskPage() {
 							type: Markers.CAUTION,
 							element: cautionMarker,
 							route: routeId,
-							factors: cautionTypes,
-						}
-					})
+							factors: cautionFactors,
+						};
+					});
 				},
 			);
 		}
@@ -160,8 +160,6 @@ export default function ReportRiskPage() {
 				strokeColor: "#808080",
 			});
 
-
-
 			routePolyLine.addListener("click", (e: ClickEvent) => {
 				const edges: CoreRoute[] = subRoutes.map(({ routeId, node1, node2 }) => {
 					return { routeId, node1, node2 };
@@ -187,10 +185,9 @@ export default function ReportRiskPage() {
 					return {
 						type: Markers.REPORT,
 						element: newReportMarker,
-						route: nearestEdge.routeId
-					}
-				})
-
+						route: nearestEdge.routeId,
+					};
+				});
 			});
 
 			const startNode = subRoutes[0].node1;
@@ -203,7 +200,6 @@ export default function ReportRiskPage() {
 			);
 		}
 	};
-
 
 	useEffect(() => {
 		drawRoute(routes.data);
@@ -220,7 +216,6 @@ export default function ReportRiskPage() {
 					return undefined;
 				});
 			});
-
 		}
 	}, [map, AdvancedMarker, Polyline]);
 
@@ -236,18 +231,16 @@ export default function ReportRiskPage() {
 	const changeMarkerStyle = (marker: reportMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
-
 		if (isSelect) {
 			if (marker.type === Markers.DANGER) {
-				const key = marker.factors && marker.factors[0] as DangerIssueType;
+				const key = marker.factors && (marker.factors[0] as DangerIssueType);
 				marker.element.content = createMarkerElement({
 					type: marker.type,
 					title: key && DangerIssue[key],
 					hasTopContent: true,
 				});
-			}
-			else if (marker.type === Markers.CAUTION) {
-				const key = marker.factors && marker.factors[0] as CautionIssueType;
+			} else if (marker.type === Markers.CAUTION) {
+				const key = marker.factors && (marker.factors[0] as CautionIssueType);
 				marker.element.content = createMarkerElement({
 					type: marker.type,
 					title: key && CautionIssue[key],
@@ -266,8 +259,9 @@ export default function ReportRiskPage() {
 	useEffect(() => {
 		if (!reportMarker) return;
 
-		if (reportMarker.type === Markers.REPORT) setMessage(ReportRiskMessage.CREATE)
-		else if (reportMarker.type === Markers.DANGER || reportMarker.type === Markers.CAUTION) setMessage(ReportRiskMessage.UPDATE)
+		if (reportMarker.type === Markers.REPORT) setMessage(ReportRiskMessage.CREATE);
+		else if (reportMarker.type === Markers.DANGER || reportMarker.type === Markers.CAUTION)
+			setMessage(ReportRiskMessage.UPDATE);
 		else setMessage(ReportRiskMessage.DEFAULT);
 
 		changeMarkerStyle(reportMarker, true);

@@ -16,11 +16,11 @@ export type Route = {
 export type Direction = "origin" | "right" | "straight" | "left" | "uturn" | "destination" | "caution";
 
 export interface CautionRoute extends Route {
-	cautionTypes: CautionIssueType[];
+	cautionFactors: CautionIssueType[];
 }
 
 export interface DangerRoute extends Route {
-	dangerTypes: DangerIssueType[];
+	dangerFactors: DangerIssueType[];
 }
 
 export interface CoreRoute {
