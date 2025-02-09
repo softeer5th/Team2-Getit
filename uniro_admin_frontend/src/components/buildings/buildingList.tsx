@@ -13,41 +13,26 @@ import BuildingCard from "./buildingCard";
 //   address: string;
 // }
 
-const buildingMockData: Building[] = [
-  {
-    nodeId: 1,
-    buildingName: "Building 1",
-    buildingImageUrl: "https://via.placeholder.com/150",
-    phoneNumber: "123-456-7890",
-    address: "1234 Main St, City, State 12345",
-  },
-  {
-    nodeId: 2,
-    buildingName: "Building 2",
-    buildingImageUrl: "https://via.placeholder.com/150",
-    phoneNumber: "123-456-7890",
-    address: "1234 Main St, City, State 12345",
-  },
-  {
-    nodeId: 3,
-    buildingName: "Building 3",
-    buildingImageUrl: "https://via.placeholder.com/150",
-    phoneNumber: "123-456-7890",
-    address: "1234 Main St, City, State 12345",
-  },
-];
+type BuildingListProps = {
+  buildings: Building[];
+  selectedBuildingId: number | null;
+};
 
-const BuildingList = () => {
+const BuildingList = ({ selectedBuildingId, buildings }: BuildingListProps) => {
   return (
     <div className="flex-1 flex flex-col w-full h-full overflow-y-scroll px-1 space-y-2 mb-2 ">
-      {buildingMockData.map((building) => {
-        return (
-          <BuildingCard
-            key={building.nodeId}
-            buildingName={building.buildingName}
-          />
-        );
-      })}
+      {buildings &&
+        buildings.map((building) => {
+          const { nodeId, buildingName } = building;
+          return (
+            <BuildingCard
+              key={building.nodeId}
+              isSelected={selectedBuildingId === building.nodeId}
+              nodeId={nodeId}
+              buildingName={buildingName}
+            />
+          );
+        })}
     </div>
   );
 };

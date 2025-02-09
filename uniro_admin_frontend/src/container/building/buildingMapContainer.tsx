@@ -1,7 +1,7 @@
 import React, { forwardRef } from "react";
 type BuildingMapContainerProps = {
-  mode: "add" | "connect";
-  setMode: React.Dispatch<React.SetStateAction<"add" | "connect">>;
+  mode: "add" | "connect" | "view";
+  setMode: React.Dispatch<React.SetStateAction<"add" | "connect" | "view">>;
 };
 
 const BuildingMapContainer = forwardRef<

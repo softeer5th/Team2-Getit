@@ -4,7 +4,7 @@ import { useQueries } from "@tanstack/react-query";
 import { transformAllRoutes } from "../utils/route";
 import useMap from "../hooks/useMap";
 import useSearchBuilding from "../hooks/useUniversityRecord";
-import { CoreRoute, CoreRoutesList, Route } from "../data/types/route";
+import { CoreRoute, CoreRoutesList } from "../data/types/route";
 import createMarkerElement from "../components/map/mapMarkers";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 
