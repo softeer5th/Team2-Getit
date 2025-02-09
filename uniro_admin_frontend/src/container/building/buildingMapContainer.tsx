@@ -2,27 +2,38 @@ import React, { forwardRef } from "react";
 type BuildingMapContainerProps = {
   mode: "add" | "connect" | "view";
   setMode: React.Dispatch<React.SetStateAction<"add" | "connect" | "view">>;
+  resetToAddMode: () => void;
 };
 
 const BuildingMapContainer = forwardRef<
   HTMLDivElement,
   BuildingMapContainerProps
->(({ mode, setMode }: BuildingMapContainerProps, ref) => {
+>(({ mode, resetToAddMode }: BuildingMapContainerProps, ref) => {
   return (
     <div className="flex flex-col w-3/5 h-full pb-4 px-1">
       <div className="flex gap-2 p-4">
+        <button
+          className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+            mode === "view"
+              ? "bg-blue-500 text-white"
+              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-200"
+          }`}
+          onClick={() => alert("건물 목록이나, 건물을 직접 클릭해주세요!")}
+        >
+          건물 노드 수정
+        </button>
+
         <button
           className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
             mode === "add"
               ? "bg-blue-500 text-white"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-200"
           }`}
-          onClick={() => setMode("add")}
+          onClick={() => resetToAddMode()}
         >
           건물 노드 추가
         </button>
 
-        {/* 건물 -> 길 생성 버튼 */}
         <button
           className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
             mode === "connect"

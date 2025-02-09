@@ -8,15 +8,17 @@ import { Coord } from "../data/types/coord";
 import useSearchBuilding from "../hooks/useUniversityRecord";
 
 import createMarkerElement from "../components/map/mapMarkers";
-import { useQueries } from "@tanstack/react-query";
+import { QueryClient, useQueries } from "@tanstack/react-query";
 import { getAllRoutes } from "../api/route";
 import { CoreRoutesList } from "../data/types/route";
 import { getAllBuildings } from "../api/nodes";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import { NodeId } from "../data/types/node";
 import { Markers } from "../constant/enum/markerEnum";
+import { build } from "vite";
 
 const BuildingPage = () => {
+  const queryClient = new QueryClient();
   const result = useQueries({
     queries: [
       { queryKey: ["1001", "routes"], queryFn: () => getAllRoutes(1001) },
@@ -63,9 +65,9 @@ const BuildingPage = () => {
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
     if (!e.latLng) return;
-    if (selectedBuildingId !== 0) {
-      setSelectedBuildingId(0);
-    }
+
+    setSelectedBuildingId(0);
+    setMode("add");
     setSelectedCoord({
       lat: e.latLng.lat(),
       lng: e.latLng.lng(),
@@ -158,6 +160,8 @@ const BuildingPage = () => {
 
       buildingMarker.addListener("click", () => {
         setSelectedBuildingId(nodeId);
+        map.setCenter({ lat, lng });
+        map.setZoom(18);
         setMode("view");
       });
     }
@@ -175,6 +179,7 @@ const BuildingPage = () => {
       map.addListener("rightclick", () => {
         setSelectedCoord(undefined);
         setSelectedBuildingId(0);
+
         if (markerRef.current) markerRef.current.map = null;
       });
     }
@@ -205,17 +210,54 @@ const BuildingPage = () => {
 
   useEffect(() => {}, [routes]);
 
+  const setCenterToCoordinate = (nodeId: number, coord: Coord) => {
+    if (map) {
+      map.setZoom(18);
+      map.setCenter(coord);
+      setSelectedBuildingId(nodeId);
+      setMode("view");
+    }
+  };
+
+  // 새로고침 기능
+  const refreshBuildings = () => {
+    queryClient.invalidateQueries({ queryKey: [1001, "buildings"] });
+    buildings.refetch();
+  };
+
+  const resetToAddMode = () => {
+    setMode("add");
+    setSelectedBuildingId(0);
+    if (map) {
+      map.setZoom(17);
+      map.setCenter(getCurrentUniversityLngLat());
+    }
+  };
+
   return (
     <MainContainer>
       <BuildingListContainer
+        setCenterToCoordinate={setCenterToCoordinate}
         selectedBuildingId={selectedBuildingId}
         buildings={buildings.data!}
+        refreshBuildings={refreshBuildings}
+        refetching={buildings.isRefetching}
       />
-      <BuildingMapContainer ref={mapRef} mode={mode} setMode={setMode} />
+      <BuildingMapContainer
+        ref={mapRef}
+        mode={mode}
+        setMode={setMode}
+        resetToAddMode={resetToAddMode}
+      />
       <BuildingAddContainer
         selectedCoord={selectedCoord}
         setSelectedCoord={setSelectedCoord}
         markerRef={markerRef}
+        selectedBuilding={
+          buildings.data?.find(
+            (building) => building.nodeId === selectedBuildingId
+          ) || null
+        }
       />
     </MainContainer>
   );
