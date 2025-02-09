@@ -17,6 +17,7 @@ import ErrorPage from "./pages/error";
 import { Suspense } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ErrorBoundary from "./components/error/ErrorBoundary";
+import Errortest from "./pages/errorTest";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ function App() {
 						/** 에러 페이지 */
 						<Route path="/error" element={<ErrorPage />} />
 						<Route path="/error/offline" element={<OfflinePage />} />
+						<Route path="/error/test" element={<Errortest />} />
 					</Routes>
 				</Suspense>
 			</ErrorBoundary>
