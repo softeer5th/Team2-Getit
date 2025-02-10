@@ -136,7 +136,6 @@ public class RouteService {
 				routeSet.add(r.getId());
 
 				while (true) {
-					System.out.println(currentNode.getId());
 					//코어노드를 만나면 queue에 넣을지 판단한 뒤 종료 (제자리로 돌아오는 경우도 포함)
 					if (currentNode.isCore() || currentNode.getId().equals(now.getId())) {
 						if (!visitedCoreNodes.contains(currentNode.getId())) {
