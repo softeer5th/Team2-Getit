@@ -1,6 +1,8 @@
 package com.softeer5.uniro_backend.route.service;
 
+import static com.softeer5.uniro_backend.common.constant.UniroConst.BUILDING_ROUTE_COST;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
+import static com.softeer5.uniro_backend.common.utils.GeoUtils.getInstance;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -8,10 +10,16 @@ import java.util.stream.Collectors;
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
+import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
+import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.node.entity.Node;
 
+import com.softeer5.uniro_backend.node.repository.BuildingRepository;
+import com.softeer5.uniro_backend.node.repository.NodeRepository;
+import com.softeer5.uniro_backend.route.dto.request.CreateBuildingRouteReqDTO;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +42,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class RouteService {
 	private final RouteRepository routeRepository;
+	private final NodeRepository nodeRepository;
+	private final BuildingRepository buildingRepository;
 
 
 	public GetAllRoutesResDTO getAllRoutes(Long univId) {
@@ -227,5 +237,34 @@ public class RouteService {
 
 		route.setCautionFactors(postRiskReqDTO.getCautionFactors());
 		route.setDangerFactors(postRiskReqDTO.getDangerFactors());
+	}
+
+	//revision 어노테이션 필요
+	@Transactional
+	public void createBuildingRoute(Long univId, CreateBuildingRouteReqDTO createBuildingRouteReqDTO) {
+		GeometryFactory geometryFactory = getInstance();
+
+		if(!buildingRepository.existsByNodeIdAndUnivId(createBuildingRouteReqDTO.getBuildingNodeId(), univId)) {
+			throw new BuildingException("Not Building Node", NOT_BUILDING_NODE);
+		}
+
+		Node buildingNode = nodeRepository.findById(createBuildingRouteReqDTO.getBuildingNodeId())
+				.orElseThrow(()-> new NodeException("Node not found", NODE_NOT_FOUND));
+
+		Node connectedNode = nodeRepository.findById(createBuildingRouteReqDTO.getNodeId())
+				.orElseThrow(()-> new NodeException("Node not found", NODE_NOT_FOUND));
+
+		Route route = Route.builder()
+				.cost(BUILDING_ROUTE_COST)
+				.path(geometryFactory.createLineString(
+						new Coordinate[] {buildingNode.getCoordinates().getCoordinate(),
+								connectedNode.getCoordinates().getCoordinate()}))
+				.node1(buildingNode)
+				.node2(connectedNode)
+				.cautionFactors(Collections.EMPTY_SET)
+				.dangerFactors(Collections.EMPTY_SET)
+				.univId(univId).build();
+
+		routeRepository.save(route);
 	}
 }

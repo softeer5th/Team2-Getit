@@ -55,6 +55,7 @@ public class NodeController implements NodeApi {
 		return ResponseEntity.ok().body(buildingResDTO);
 	}
 
+	@Override
 	@PostMapping("{univId}/nodes/building")
 	public ResponseEntity<Void> createBuildingNode(@PathVariable("univId") Long univId,
 												   @RequestBody CreateBuildingNodeReqDTO createBuildingNodeReqDTO){
