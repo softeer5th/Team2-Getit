@@ -63,12 +63,5 @@ public class NodeController implements NodeApi {
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
-	@PutMapping("{univId}/nodes/building/{nodeId}")
-	public ResponseEntity<Void> updateBuildingNode(@PathVariable("univId") Long univId,
-												   @PathVariable("nodeId") Long nodeId,
-											@RequestBody UpdateBuildingNodeReqDTO updateBuildingNodeReqDTO){
-		nodeService.updateBuildingNode(univId, nodeId,updateBuildingNodeReqDTO);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-	}
 
 }

@@ -64,12 +64,4 @@ public interface NodeApi {
 	ResponseEntity<Void> createBuildingNode(@PathVariable("univId") Long univId,
 											@RequestBody CreateBuildingNodeReqDTO createBuildingNodeReqDTO);
 
-	@Operation(summary = "건물 노드 업데이트")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "건물 노드 업데이트"),
-			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
-	})
-	ResponseEntity<Void> updateBuildingNode(@PathVariable("univId") Long univId,
-											@PathVariable("nodeId") Long nodeId,
-											@RequestBody UpdateBuildingNodeReqDTO updateBuildingNodeReqDTO);
 }

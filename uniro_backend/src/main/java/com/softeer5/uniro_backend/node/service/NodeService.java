@@ -88,11 +88,4 @@ public class NodeService {
 		buildingRepository.save(building);
     }
 
-	@Transactional
-	public void updateBuildingNode(Long univId, Long nodeId, UpdateBuildingNodeReqDTO updateBuildingNodeReqDTO) {
-		Building building = buildingRepository.findByNodeIdAndUnivId(nodeId,univId)
-				.orElseThrow(()-> new BuildingException("Building Not Found", ErrorCode.BUILDING_NOT_FOUND));
-		building.update(updateBuildingNodeReqDTO);
-		buildingRepository.save(building);
-	}
 }
