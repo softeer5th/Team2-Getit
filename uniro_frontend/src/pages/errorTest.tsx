@@ -21,8 +21,8 @@ export default function Errortest() {
 		undefined,
 		{
 			fallback: {
-				400: { mainTitle: "400 제목", subTitle: "400 부제목" },
-				404: { mainTitle: "404 제목", subTitle: "404 부제목" },
+				400: { mainTitle: "400 제목", subTitle: ["400 부제목"] },
+				404: { mainTitle: "404 제목", subTitle: ["404 부제목"] },
 			},
 			onClose: () => { alert('close callback') }
 		}
@@ -35,8 +35,8 @@ export default function Errortest() {
 		undefined,
 		{
 			fallback: {
-				400: { mainTitle: "400 제목", subTitle: "400 부제목" },
-				404: { mainTitle: "404 제목", subTitle: "404 부제목" },
+				400: { mainTitle: "400 제목", subTitle: ["400 부제목"] },
+				404: { mainTitle: "404 제목", subTitle: ["404 부제목"] },
 			},
 			onClose: () => { }
 		}
@@ -50,8 +50,8 @@ export default function Errortest() {
 		undefined,
 		{
 			fallback: {
-				400: { mainTitle: "400 제목", subTitle: "400 부제목" },
-				404: { mainTitle: "404 제목", subTitle: "404 부제목" },
+				400: { mainTitle: "400 제목", subTitle: ["400 부제목"] },
+				404: { mainTitle: "404 제목", subTitle: ["404 부제목"] },
 			},
 			onClose: () => { }
 		}

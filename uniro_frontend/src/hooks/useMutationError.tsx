@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 type Fallback = {
 	[K in Exclude<ERROR_STATUS, ERROR_STATUS.INTERNAL_ERROR>]: {
 		mainTitle: string;
-		subTitle: string;
+		subTitle: string[];
 	};
 };
 
@@ -43,9 +43,9 @@ export default function useMutationError<TData, TError, TVariables, TContext>(
 
 		const { fallback } = handleError;
 
-		let title = {
+		let title: { mainTitle: string, subTitle: string[] } = {
 			mainTitle: "",
-			subTitle: "",
+			subTitle: [],
 		}
 
 		if (error instanceof NotFoundError) {
@@ -58,11 +58,12 @@ export default function useMutationError<TData, TError, TVariables, TContext>(
 
 		return (
 			<div className="fixed inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.2)]">
-				<div className="w-full max-w-[365px] flex flex-col bg-gray-100 rounded-400 overflow-hidden">
+				< div className="w-full max-w-[365px] flex flex-col bg-gray-100 rounded-400 overflow-hidden" >
 					<div className="flex flex-col justify-center space-y-1 py-[25px]">
 						<p className="text-kor-body1 font-bold text-system-red">{title.mainTitle}</p>
 						<div className="space-y-0">
-							<p className="text-kor-body3 font-regular text-gray-700">{title.subTitle}</p>
+							{title.subTitle.map((_subtitle, index) =>
+								<p key={`error-modal-subtitle-${index}`} className="text-kor-body3 font-regular text-gray-700">{_subtitle}</p>)}
 						</div>
 					</div>
 					<button
@@ -71,8 +72,8 @@ export default function useMutationError<TData, TError, TVariables, TContext>(
 					>
 						확인
 					</button>
-				</div>
-			</div>
+				</div >
+			</div >
 		)
 	}
 
