@@ -27,6 +27,7 @@ public class RevisionOperationAspect {
         switch (opType) {
             case UPDATE_RISK -> result = updateRiskHandler(joinPoint);
             case CREATE_ROUTE -> result = updateRouteHandler(joinPoint);
+            case CREATE_BUILDING_NODE -> result = createBuildingNodeHandler(joinPoint);
             default -> result = joinPoint.proceed();
         }
 
@@ -74,6 +75,29 @@ public class RevisionOperationAspect {
 
 		Long univId = null;
 		String action = "새로운 길 추가";
+
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] instanceof Long && "univId".equals(parameterNames[i])) {
+                univId = (Long) args[i];
+            }
+        }
+        RevisionContext.setUnivId(univId);
+        RevisionContext.setAction(action);
+        try{
+            return joinPoint.proceed();
+        }
+        finally {
+            RevisionContext.clear();
+        }
+    }
+
+    private Object createBuildingNodeHandler(ProceedingJoinPoint joinPoint) throws Throwable {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        String[] parameterNames = signature.getParameterNames();
+        Object[] args = joinPoint.getArgs();
+
+        Long univId = null;
+        String action = "빌딩 노드 추가";
 
         for (int i = 0; i < args.length; i++) {
             if (args[i] instanceof Long && "univId".equals(parameterNames[i])) {

@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.node.dto;
+package com.softeer5.uniro_backend.node.dto.response;
 
 import com.softeer5.uniro_backend.node.entity.Building;
 import com.softeer5.uniro_backend.node.entity.Node;
