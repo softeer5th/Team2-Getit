@@ -15,7 +15,6 @@ import { getAllBuildings } from "../api/nodes";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import { NodeId } from "../data/types/node";
 import { Markers } from "../constant/enum/markerEnum";
-import { build } from "vite";
 
 const BuildingPage = () => {
   const queryClient = new QueryClient();
