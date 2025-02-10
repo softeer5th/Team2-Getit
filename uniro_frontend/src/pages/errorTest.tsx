@@ -13,44 +13,49 @@ const postReport = (
 };
 
 export default function Errortest() {
-	const [Modal400, result400] = useMutationError(
+	const [Modal400, { mutate: mutate400 }] = useMutationError(
 		{
 			//@ts-expect-error 강제 에러 발생
 			mutationFn: () => postReport(1001, 1, { cautionFactors: ["TEST"], dangerFactors: [] }),
 		},
 		undefined,
 		{
-			400: { mainTitle: "400 제목", subTitle: "400 부제목" },
-			404: { mainTitle: "404 제목", subTitle: "404 부제목" },
-		},
+			fallback: {
+				400: { mainTitle: "400 제목", subTitle: "400 부제목" },
+				404: { mainTitle: "404 제목", subTitle: "404 부제목" },
+			},
+			onClose: () => { alert('close callback') }
+		}
 	);
 
-	const [Modal404, result404] = useMutationError(
+	const [Modal404, { mutate: mutate404 }] = useMutationError(
 		{
 			mutationFn: () => postReport(1, 1, { cautionFactors: [], dangerFactors: [] }),
 		},
 		undefined,
 		{
-			400: { mainTitle: "400 제목", subTitle: "400 부제목" },
-			404: { mainTitle: "404 제목", subTitle: "404 부제목" },
-		},
+			fallback: {
+				400: { mainTitle: "400 제목", subTitle: "400 부제목" },
+				404: { mainTitle: "404 제목", subTitle: "404 부제목" },
+			},
+			onClose: () => { }
+		}
 	);
 
-	const [Modal500, result500] = useMutationError(
+	const [Modal500, { mutate: mutate500 }] = useMutationError(
 		{
 			//@ts-expect-error 강제 에러 발생
-			mutationFn: () => postReportRoute(1001, {}),
+			mutationFn: () => postReportRoute(1001, { startNodeId: 1, endNodeId: 1 }),
 		},
 		undefined,
 		{
-			400: { mainTitle: "400 제목", subTitle: "400 부제목" },
-			404: { mainTitle: "404 제목", subTitle: "404 부제목" },
-		},
+			fallback: {
+				400: { mainTitle: "400 제목", subTitle: "400 부제목" },
+				404: { mainTitle: "404 제목", subTitle: "404 부제목" },
+			},
+			onClose: () => { }
+		}
 	);
-
-	const { mutate: mutate400 } = result400;
-	const { mutate: mutate404 } = result404;
-	const { mutate: mutate500 } = result500;
 
 	return (
 		<div>
