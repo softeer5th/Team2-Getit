@@ -1,6 +1,7 @@
 package com.softeer5.uniro_backend.route.service;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.BUILDING_ROUTE_COST;
+import static com.softeer5.uniro_backend.common.constant.UniroConst.CORE_NODE_CONDITION;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 import static com.softeer5.uniro_backend.common.utils.GeoUtils.getInstance;
 import static com.softeer5.uniro_backend.common.utils.RouteUtils.isBuildingRoute;
@@ -246,7 +247,7 @@ public class RouteService {
 		}
 
 		int buildingRouteCount = routeRepository.countByUnivIdAndNodeId(univId, buildingNodeId);
-		if(buildingRouteCount>=2){
+		if(buildingRouteCount>=CORE_NODE_CONDITION-1){
 			buildingNode.setCore(true);
 		}
 
