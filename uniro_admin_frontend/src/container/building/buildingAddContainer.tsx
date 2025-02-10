@@ -60,6 +60,7 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
     mutationFn: (body: { buildingNodeId: NodeId; nodeId: NodeId }) =>
       postBuildingRoute(1001, body),
     onSuccess: () => {
+      alert("경로가 추가되었습니다.");
       queryClient.invalidateQueries({ queryKey: [1001, "routes"] });
     },
     onError: (error) => {
@@ -128,6 +129,7 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
           buildingNodeId: selectedBuilding.nodeId,
           nodeId: selectedNode[0].nodeId,
         });
+
         resetConnectMode();
         return;
       }
