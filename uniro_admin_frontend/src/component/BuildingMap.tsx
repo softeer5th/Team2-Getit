@@ -5,7 +5,7 @@ import useSearchBuilding from "../hooks/useUniversityRecord";
 type MapProps = {
   style?: React.CSSProperties;
 };
-const Map = ({ style }: MapProps) => {
+const BuildingMap = ({ style }: MapProps) => {
   const { mapRef, map, mapLoaded } = useMap();
 
   const { getCurrentUniversityLngLat, currentUniversity } = useSearchBuilding();
@@ -25,4 +25,4 @@ const Map = ({ style }: MapProps) => {
   );
 };
 
-export default Map;
+export default BuildingMap;
