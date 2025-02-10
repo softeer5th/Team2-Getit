@@ -20,7 +20,7 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
   selectedBuilding,
 }) => {
   const [buildingName, setBuildingName] = useState("");
-  const [buildingPhoto, setBuildingPhoto] = useState<File | null>(null);
+  const [buildingPhoto, setBuildingPhoto] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
@@ -28,10 +28,12 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
     if (selectedBuilding) {
       setBuildingName(selectedBuilding?.buildingName);
       setPhone(selectedBuilding?.phoneNumber || "");
+      setBuildingPhoto(selectedBuilding?.buildingImageUrl || "");
       setAddress(selectedBuilding.address || "");
     } else {
       setBuildingName("");
       setPhone("");
+      setBuildingPhoto("");
       setAddress("");
     }
   }, [selectedBuilding]);
@@ -44,30 +46,28 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
       return;
     }
 
-    const formData = new FormData();
-    formData.append("buildingName", buildingName);
-    formData.append("phone", phone);
-    formData.append("address", address);
-
-    if (selectedBuilding) {
-      formData.append("buildingId", selectedBuilding.nodeId.toString());
-      console.log("건물 수정됨", Object.fromEntries(formData.entries()));
-      alert("건물이 수정되었습니다!");
-    } else if (selectedCoord) {
-      formData.append("lat", selectedCoord.lat.toString());
-      formData.append("lng", selectedCoord.lng.toString());
-      if (buildingPhoto) {
-        formData.append("buildingPhoto", buildingPhoto);
-      }
-      console.log("새 건물 추가됨", Object.fromEntries(formData.entries()));
-      alert("건물이 추가되었습니다!");
+    if (!buildingName || !buildingPhoto || !phone || !address) {
+      alert("모든 필드를 입력해주세요.");
+      return;
     }
 
+    const payload = {
+      buildingName,
+      buildingPhoto,
+      phone,
+      address,
+      lat: selectedCoord?.lat || selectedBuilding?.lat,
+      lng: selectedCoord?.lng || selectedBuilding?.lng,
+    };
+    console.log(payload);
+    alert(
+      selectedBuilding ? "건물이 수정되었습니다." : "건물이 추가되었습니다."
+    );
     // 폼 초기화
     if (setSelectedCoord) setSelectedCoord(undefined);
     if (markerRef.current) markerRef.current.map = null;
     setBuildingName("");
-    setBuildingPhoto(null);
+    setBuildingPhoto("");
     setPhone("");
     setAddress("");
   };
@@ -101,21 +101,14 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
               required
             />
 
-            {!selectedBuilding && (
-              <>
-                <div className="text-kor-body1 mb-1">건물 사진</div>
-                <input
-                  type="file"
-                  className="w-full h-10 border-2 border-gray-300 rounded-md p-2 mb-4 cursor-pointer"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      setBuildingPhoto(e.target.files[0]);
-                    }
-                  }}
-                />
-              </>
-            )}
+            <div className="text-kor-body1 mb-1">건물 사진</div>
+            <input
+              type="text"
+              className="w-full h-10 border-2 border-gray-300 rounded-md p-2 mb-4"
+              value={buildingPhoto}
+              onChange={(e) => setBuildingPhoto(e.target.value)}
+              required
+            />
 
             <div className="text-kor-body1 mb-1">전화번호</div>
             <input
