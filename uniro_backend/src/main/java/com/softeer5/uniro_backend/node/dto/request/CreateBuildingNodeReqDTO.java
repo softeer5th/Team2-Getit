@@ -1,6 +1,7 @@
 package com.softeer5.uniro_backend.node.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,10 +10,13 @@ import lombok.RequiredArgsConstructor;
 @Schema(name = "CreateBuildingNodeReqDTO", description = "건물 노드 생성 요청 DTO")
 public class CreateBuildingNodeReqDTO {
     @Schema(description = "x 좌표", example = "127.123456")
+    @NotNull
     private final double lng;
     @Schema(description = "y 좌표", example = "37.123456")
+    @NotNull
     private final double lat;
     @Schema(description = "건물명", example = "공학관")
+    @NotNull
     private final String buildingName;
     @Schema(description = "전화번호", example = "02-1234-1234")
     private final String phoneNumber;

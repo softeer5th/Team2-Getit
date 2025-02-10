@@ -3,6 +3,7 @@ package com.softeer5.uniro_backend.node.controller;
 import java.util.List;
 
 import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +59,7 @@ public class NodeController implements NodeApi {
 	@Override
 	@PostMapping("{univId}/nodes/building")
 	public ResponseEntity<Void> createBuildingNode(@PathVariable("univId") Long univId,
-												   @RequestBody CreateBuildingNodeReqDTO createBuildingNodeReqDTO){
+												   @RequestBody @Valid CreateBuildingNodeReqDTO createBuildingNodeReqDTO){
 		nodeService.createBuildingNode(univId, createBuildingNodeReqDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
