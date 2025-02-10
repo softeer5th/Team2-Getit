@@ -182,6 +182,31 @@ class RouteCalculationServiceTest {
 			assertThat(result.get(3).isCore()).isTrue();
 		}
 
+		@Test
+		void 기존_경로와_동일한_경우_예외발생() {
+			// Given
+			Long univId = 1001L;
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(1, 1),
+				new CreateRouteReqDTO(2, 2)
+			);
+
+			Node node1 = NodeFixture.createNode(0, 0);
+			Node node2 = NodeFixture.createNode(1, 1);
+			Node node3 = NodeFixture.createNode(2, 2);
+			Route route = RouteFixture.createRoute(node1, node2);
+			Route route2 = RouteFixture.createRoute(node2, node3);
+
+			nodeRepository.saveAll(List.of(node1, node2, node3));
+			routeRepository.saveAll(List.of(route, route2));
+
+			// when, then
+			assertThatThrownBy(() -> routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests))
+				.isInstanceOf(RouteCalculationException.class)
+				.hasMessageContaining("intersection is only allowed by point");
+		}
+
 	}
 
 
