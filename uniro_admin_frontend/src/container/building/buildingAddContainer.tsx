@@ -128,12 +128,14 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
           buildingNodeId: selectedBuilding.nodeId,
           nodeId: selectedNode[0].nodeId,
         });
+        resetConnectMode();
         return;
       }
       addBuildingRoute.mutate({
         buildingNodeId: selectedBuilding.nodeId,
         nodeId: selectedNode[1].nodeId,
       });
+      resetConnectMode();
       return;
     }
     alert("노드를 2개 선택해주세요.");
