@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.softeer5.uniro_backend.route.service.RouteService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -51,7 +52,7 @@ public class RouteController implements RouteApi {
 	@PostMapping("/{univId}/route/risk/{routeId}")
 	public ResponseEntity<Void> updateRisk (@PathVariable("univId") Long univId,
 									   @PathVariable("routeId") Long routeId,
-									   @RequestBody PostRiskReqDTO postRiskReqDTO){
+									   @RequestBody @Valid PostRiskReqDTO postRiskReqDTO){
 		routeService.updateRisk(univId,routeId,postRiskReqDTO);
 		return ResponseEntity.ok().build();
 	}
@@ -59,7 +60,7 @@ public class RouteController implements RouteApi {
 	@Override
 	@PostMapping("/{univId}/route")
 	public ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
-											 @RequestBody CreateRoutesReqDTO routes){
+											 @RequestBody @Valid CreateRoutesReqDTO routes){
 		routeCalculationService.createRoute(univId, routes);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}

@@ -8,6 +8,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+
+    // common
+    INVALID_INPUT_VALUE(400, "적절하지 않은 요청값입니다."),
+
     // 길찾기
     FASTEST_ROUTE_NOT_FOUND(422, "경로가 없습니다."),
     SAME_START_AND_END_POINT(400, "출발지와 도착지가 같습니다."),
