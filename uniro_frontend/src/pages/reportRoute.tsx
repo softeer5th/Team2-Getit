@@ -9,7 +9,7 @@ import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import { AdvancedMarker } from "../data/types/marker";
 import Button from "../components/customButton";
-import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
+import { CautionToggleButton, DangerToggleButton, UndoButton } from "../components/map/floatingButtons";
 import toggleMarkers from "../utils/markers/toggleMarkers";
 import BackButton from "../components/map/backButton";
 import useUniversityInfo from "../hooks/useUniversityInfo";
@@ -25,6 +25,7 @@ import { useNavigate } from "react-router";
 import { getAllRisks } from "../api/routes";
 import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
+import removeMarkers from "../utils/markers/removeMarkers";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -36,7 +37,7 @@ type SelectedMarkerTypes = {
 export default function ReportRoutePage() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
+	const { map, mapRef, AdvancedMarker, Polyline, spherical } = useMap({ zoom: 18, minZoom: 17 });
 	const originPoint = useRef<{ point: Node; element: AdvancedMarker } | undefined>();
 	const [newPoints, setNewPoints] = useState<{ element: AdvancedMarker | null; coords: (Coord | Node)[] }>({
 		element: null,
@@ -59,6 +60,7 @@ export default function ReportRoutePage() {
 		navigate("/map");
 	});
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
+	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
 
 	if (!university) return;
 
@@ -95,6 +97,10 @@ export default function ReportRoutePage() {
 				element: null,
 				coords: [],
 			});
+			setTempWayPoints((prevMarkers) => {
+				removeMarkers(prevMarkers);
+				return []
+			})
 			if (newPolyLine.current) newPolyLine.current.setPath([]);
 			queryClient.invalidateQueries({ queryKey: ["routes", university.id] });
 		},
@@ -109,6 +115,10 @@ export default function ReportRoutePage() {
 				element: null,
 				coords: [],
 			});
+			setTempWayPoints((prevMarkers) => {
+				removeMarkers(prevMarkers);
+				return []
+			})
 			if (newPolyLine.current) newPolyLine.current.setPath([]);
 		},
 	});
@@ -214,7 +224,7 @@ export default function ReportRoutePage() {
 		const lastPoint = newPoints.coords[newPoints.coords.length - 1] as Node | Coord;
 
 		for (const edge of edges) {
-			const subNode = createSubNodes(new Polyline({ path: edge })).slice(0, -1);
+			const subNode = createSubNodes(spherical, new Polyline({ path: edge })).slice(0, -1);
 			subNodes.push(...subNode);
 		}
 
@@ -263,7 +273,7 @@ export default function ReportRoutePage() {
 				});
 
 				const point = LatLngToLiteral(e.latLng);
-				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
+				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(spherical, edges, point);
 
 				const tempWaypointMarker = createAdvancedMarker(
 					AdvancedMarker,
@@ -274,6 +284,8 @@ export default function ReportRoutePage() {
 						className: "translate-waypoint",
 					}),
 				);
+
+				setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker])
 
 				if (originPoint.current) {
 					setNewPoints((prevPoints) => {
@@ -324,6 +336,58 @@ export default function ReportRoutePage() {
 			);
 		}
 	};
+
+	/** Undo 함수 
+	 * 되돌리기 버튼을 누를 경우, 마지막에 생성된 점을 제거
+	 * 기존 점의 개수가 1개, 2개, (0개 혹은 3개 이상) 총 3개의 Case를 나눈다.
+	 * 1개 : originMarker를 제거하고
+	 * 2개 : , 도착마커를 제거한다.
+	 * 0개 혹은 3개 이상, 도착마커를 이동시킨다.
+	*/
+	const undoPoints = () => {
+		const deleteNode = [...newPoints.coords].pop();
+
+		if (deleteNode && "nodeId" in deleteNode) {
+			setTempWayPoints((prevPoints) => {
+				const lastMarker = prevPoints.slice(-1)[0];
+
+				lastMarker.map = null;
+
+				return [...prevPoints.slice(0, -1)]
+			})
+		}
+		if (newPoints.coords.length === 2) {
+			setNewPoints((prevPoints) => {
+				if (prevPoints.element) prevPoints.element.map = null;
+				return {
+					element: null,
+					coords: [prevPoints.coords[0]]
+				}
+			})
+			return;
+		}
+		else if (newPoints.coords.length === 1) {
+			if (originPoint.current) {
+				originPoint.current.element.map = null;
+			}
+			originPoint.current = undefined;
+			setNewPoints({
+				coords: [],
+				element: null
+			})
+			return;
+		}
+
+		setNewPoints((prevPoints) => {
+			const tempPoints = prevPoints.coords.slice(0, -1);
+			const lastPoint = tempPoints.slice(-1)[0];
+			if (prevPoints.element) prevPoints.element.position = lastPoint;
+			return {
+				element: prevPoints.element,
+				coords: tempPoints
+			}
+		})
+	}
 
 	useEffect(() => {
 		if (newPolyLine.current) {
@@ -420,6 +484,7 @@ export default function ReportRoutePage() {
 				</div>
 			)}
 			<div className="absolute right-4 bottom-[90px] space-y-2">
+				<UndoButton disabled={newPoints.coords.length === 0} onClick={undoPoints} />
 				<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
 				<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
 			</div>

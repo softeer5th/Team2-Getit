@@ -1,14 +1,11 @@
 import { AdvancedMarker } from "../../data/types/marker";
+import removeMarkers from "./removeMarkers";
 
 /** Marker 보이기 안보이기 토글 */
 export default function toggleMarkers(isActive: boolean, markers: AdvancedMarker[], map: google.maps.Map) {
 	if (isActive) {
-		for (const marker of markers) {
-			marker.map = map;
-		}
+		markers.forEach((marker) => (marker.map = map));
 	} else {
-		for (const marker of markers) {
-			marker.map = null;
-		}
+		removeMarkers(markers);
 	}
 }
