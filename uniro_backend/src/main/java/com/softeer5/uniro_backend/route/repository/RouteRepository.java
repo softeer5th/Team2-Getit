@@ -57,4 +57,15 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     Optional<Route> findByIdAndUnivId (Long id, Long univId);
 
+    @Query(value = """
+    SELECT COUNT(*) FROM Route r
+    WHERE r.univId = :univId
+    AND (
+        r.node1.id = :nodeId
+        OR 
+        r.node2.id = :nodeId
+    )
+            """)
+    int countByUnivIdAndNodeId(Long univId, Long nodeId);
+
 }
