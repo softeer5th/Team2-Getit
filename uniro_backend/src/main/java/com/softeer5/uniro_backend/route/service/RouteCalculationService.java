@@ -83,6 +83,10 @@ public class RouteCalculationService {
         Node startNode = nodeMap.get(startNodeId);
         Node endNode = nodeMap.get(endNodeId);
 
+        if(startNode == null || endNode == null){
+            throw new NodeException("Node Not Found", NODE_NOT_FOUND);
+        }
+
         //길찾기 알고리즘 수행
         Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap);
 
