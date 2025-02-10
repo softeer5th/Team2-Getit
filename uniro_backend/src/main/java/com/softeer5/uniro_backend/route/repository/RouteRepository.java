@@ -61,9 +61,9 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     SELECT COUNT(*) FROM Route r
     WHERE r.univId = :univId
     AND (
-        r.node1.id = :node1Id
+        r.node1.id = :nodeId
         OR 
-        r.node2.id = :node1Id
+        r.node2.id = :nodeId
     )
             """)
     int countByUnivIdAndNodeId(Long univId, Long nodeId);
