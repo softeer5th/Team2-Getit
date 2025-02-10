@@ -7,7 +7,7 @@ import { postReportRoute } from "../api/route";
 const postReport = (
 	univId: number,
 	routeId: RouteId,
-	body: { dangerTypes: DangerIssueType[]; cautionTypes: CautionIssueType[] },
+	body: { dangerFactors: DangerIssueType[]; cautionFactors: CautionIssueType[] },
 ): Promise<boolean> => {
 	return postFetch<void, string>(`/${univId}/route/risk/${routeId}`, body);
 };
@@ -16,7 +16,7 @@ export default function Errortest() {
 	const [Modal400, result400] = useMutationError(
 		{
 			//@ts-expect-error 강제 에러 발생
-			mutationFn: () => postReport(1001, 1, { cautionTypes: ["TEST"], dangerTypes: [] }),
+			mutationFn: () => postReport(1001, 1, { cautionFactors: ["TEST"], dangerFactors: [] }),
 		},
 		undefined,
 		{
@@ -27,7 +27,7 @@ export default function Errortest() {
 
 	const [Modal404, result404] = useMutationError(
 		{
-			mutationFn: () => postReport(1, 1, { cautionTypes: [], dangerTypes: [] }),
+			mutationFn: () => postReport(1, 1, { cautionFactors: [], dangerFactors: [] }),
 		},
 		undefined,
 		{
