@@ -1,6 +1,5 @@
 package com.softeer5.uniro_backend.node.entity;
 
-import com.softeer5.uniro_backend.node.dto.request.UpdateBuildingNodeReqDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

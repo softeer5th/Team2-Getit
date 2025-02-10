@@ -7,7 +7,6 @@ import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
-import com.softeer5.uniro_backend.node.dto.request.UpdateBuildingNodeReqDTO;
 import com.softeer5.uniro_backend.node.entity.Building;
 import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
