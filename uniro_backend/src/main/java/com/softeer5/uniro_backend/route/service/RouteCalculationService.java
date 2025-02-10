@@ -231,9 +231,9 @@ public class RouteCalculationService {
         if (angle < 30) {
             return DirectionType.STRAIGHT;
         } else if (angle >= 30 && angle < 150) {
-            return (crossProduct > 0) ? DirectionType.RIGHT : DirectionType.LEFT;
+            return (crossProduct > 0) ? DirectionType.LEFT : DirectionType.RIGHT;
         } else if (angle >= 150 && angle < 180) {
-            return (crossProduct > 0) ? DirectionType.SHARP_RIGHT : DirectionType.SHARP_LEFT;
+            return (crossProduct > 0) ? DirectionType.SHARP_LEFT : DirectionType.SHARP_RIGHT;
         } else {
             return DirectionType.STRAIGHT;
         }
