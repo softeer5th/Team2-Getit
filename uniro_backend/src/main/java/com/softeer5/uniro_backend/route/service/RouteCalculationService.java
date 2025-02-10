@@ -557,7 +557,7 @@ public class RouteCalculationService {
                     }
                 }
                 else if (intersection instanceof LineString) {
-                    if (isSelfCheck) {
+                    if (isSelfCheck && existingLine.equalsTopo(newLine)) {
                         continue;
                     }
 
