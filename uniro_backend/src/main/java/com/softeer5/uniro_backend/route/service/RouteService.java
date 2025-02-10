@@ -239,7 +239,7 @@ public class RouteService {
 		route.setDangerFactors(postRiskReqDTO.getDangerFactors());
 	}
 
-	//revision 어노테이션 필요
+	@RevisionOperation(RevisionOperationType.CREATE_BUILDING_ROUTE)
 	@Transactional
 	public void createBuildingRoute(Long univId, CreateBuildingRouteReqDTO createBuildingRouteReqDTO) {
 		GeometryFactory geometryFactory = getInstance();
