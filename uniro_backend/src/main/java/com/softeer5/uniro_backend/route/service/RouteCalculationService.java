@@ -457,7 +457,7 @@ public class RouteCalculationService {
         while (iterator.hasNext()) {
             Node cur = iterator.next();
             LineString intersectLine = findIntersectLineString(prev.getCoordinates().getCoordinate(), cur.getCoordinates()
-                .getCoordinate(), strTree);
+                .getCoordinate(), strTree, false);
             if (intersectLine != null) {
                 Node midNode = getClosestNode(intersectLine, prev, cur, nodeMap);
                 midNode.setCore(true);
@@ -496,7 +496,7 @@ public class RouteCalculationService {
             Node nextNode = nodes.get(i + 1);
 
             LineString intersectLine = findIntersectLineString(curNode.getCoordinates().getCoordinate(),
-                nextNode.getCoordinates().getCoordinate(), strTree);
+                nextNode.getCoordinates().getCoordinate(), strTree, true);
 
             if (intersectLine != null) {
                 Coordinate[] coordinates = intersectLine.getCoordinates();
@@ -527,7 +527,7 @@ public class RouteCalculationService {
         return nodes;
     }
 
-    private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree) {
+    private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree, boolean isSelfCheck) {
         LineString newLine = geometryFactory.createLineString(new Coordinate[] {start, end});
         Envelope searchEnvelope = newLine.getEnvelopeInternal();
 
@@ -540,11 +540,6 @@ public class RouteCalculationService {
         // 2️⃣ 실제로 선분이 겹치는지 확인
         for (Object obj : candidates) {
             LineString existingLine = (LineString)obj;
-
-            // 동일한 선이면 continue
-            if(existingLine.equalsTopo(newLine)){
-                continue;
-            }
 
             if (existingLine.intersects(newLine)) {
                 Geometry intersection = existingLine.intersection(newLine);
@@ -566,6 +561,10 @@ public class RouteCalculationService {
                     }
                 }
                 else if (intersection instanceof LineString) {
+                    if (isSelfCheck && existingLine.equalsTopo(newLine)) {
+                        continue;
+                    }
+
                     throw new RouteCalculationException("intersection is only allowed by point", INTERSECTION_ONLY_ALLOWED_POINT);
                 }
 
