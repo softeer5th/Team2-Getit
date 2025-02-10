@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Building, Node } from "../../data/types/node";
+import { Building, Node, NodeId } from "../../data/types/node";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postBuilding } from "../../api/nodes";
+import { postBuildingRoute } from "../../api/route";
 
 type Coord = {
   lat: number;
@@ -52,6 +53,17 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
     },
     onError: (error) => {
       alert("건물 추가에 실패했습니다.");
+    },
+  });
+
+  const addBuildingRoute = useMutation({
+    mutationFn: (body: { buildingNodeId: NodeId; nodeId: NodeId }) =>
+      postBuildingRoute(1001, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [1001, "routes"] });
+    },
+    onError: (error) => {
+      alert("경로 추가에 실패했습니다.");
     },
   });
 
@@ -107,6 +119,25 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
     setBuildingPhoto("");
     setPhone("");
     setAddress("");
+  };
+
+  const handleConnectSubmit = () => {
+    if (selectedNode.length === 2 && selectedBuilding) {
+      if (isSelectedNode1) {
+        addBuildingRoute.mutate({
+          buildingNodeId: selectedBuilding.nodeId,
+          nodeId: selectedNode[0].nodeId,
+        });
+        return;
+      }
+      addBuildingRoute.mutate({
+        buildingNodeId: selectedBuilding.nodeId,
+        nodeId: selectedNode[1].nodeId,
+      });
+      return;
+    }
+    alert("노드를 2개 선택해주세요.");
+    return;
   };
 
   return (
@@ -281,17 +312,7 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
                 </div>
               </div>
               <button
-                onClick={() => {
-                  drawSingleRoute(
-                    {
-                      nodeId: selectedNode[0].nodeId,
-                      lat: selectedBuilding?.lat ?? 0,
-                      lng: selectedBuilding?.lng ?? 0,
-                    },
-                    selectedNode[1]
-                  );
-                  setIsSelectedNode1(false);
-                }}
+                onClick={() => handleConnectSubmit()}
                 className="px-4 py-2 rounded-md text-sm font-semibold transition-colors 
                 bg-red-500 text-white hover:bg-red-600"
               >
