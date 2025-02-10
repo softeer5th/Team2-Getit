@@ -18,7 +18,6 @@ public class CreateRoutesReqDTO {
     private final Long startNodeId;
 
     @Schema(description = "종료 노드 id", example = "4")
-    @NotNull
     private final Long endNodeId;
 
     @Schema(description = "노드 좌표", example = "")
