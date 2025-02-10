@@ -7,6 +7,7 @@ const useMap = (mapOptions?: google.maps.MapOptions) => {
 	const [overlay, setOverlay] = useState<google.maps.OverlayView | null>(null);
 	const [AdvancedMarker, setAdvancedMarker] = useState<typeof google.maps.marker.AdvancedMarkerElement | null>(null);
 	const [Polyline, setPolyline] = useState<typeof google.maps.Polyline | null>(null);
+	const [spherical, setSpherical] = useState<typeof google.maps.geometry.spherical | null>(null);
 	const [mapLoaded, setMapLoaded] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -14,12 +15,13 @@ const useMap = (mapOptions?: google.maps.MapOptions) => {
 
 		const initMap = async () => {
 			try {
-				const { map, overlay, AdvancedMarkerElement, Polyline } = await initializeMap(
+				const { map, overlay, AdvancedMarkerElement, Polyline, spherical } = await initializeMap(
 					mapRef.current,
 					mapOptions,
 				);
 				setMap(map);
 				setOverlay(overlay);
+				setSpherical(() => spherical);
 				setAdvancedMarker(() => AdvancedMarkerElement);
 				setPolyline(() => Polyline);
 				setMapLoaded(true);
@@ -37,7 +39,7 @@ const useMap = (mapOptions?: google.maps.MapOptions) => {
 		};
 	}, []);
 
-	return { mapRef, map, overlay, AdvancedMarker, Polyline, mapLoaded };
+	return { mapRef, map, overlay, AdvancedMarker, Polyline, spherical, mapLoaded };
 };
 
 export default useMap;

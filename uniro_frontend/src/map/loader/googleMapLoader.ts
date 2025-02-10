@@ -9,8 +9,9 @@ const GoogleMapsLoader = new Loader({
 const loadGoogleMapsLibraries = async () => {
 	const { Map, OverlayView, Polyline } = await GoogleMapsLoader.importLibrary("maps");
 	const { AdvancedMarkerElement } = await GoogleMapsLoader.importLibrary("marker");
+	const { spherical } = await GoogleMapsLoader.importLibrary("geometry");
 
-	return { Map, OverlayView, AdvancedMarkerElement, Polyline };
+	return { Map, OverlayView, AdvancedMarkerElement, Polyline, spherical };
 };
 
 export default loadGoogleMapsLibraries;
