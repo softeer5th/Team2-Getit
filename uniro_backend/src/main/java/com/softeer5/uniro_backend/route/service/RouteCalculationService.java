@@ -2,6 +2,7 @@ package com.softeer5.uniro_backend.route.service;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
+import static com.softeer5.uniro_backend.common.utils.RouteUtils.isBuildingRoute;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
@@ -147,10 +148,6 @@ public class RouteCalculationService {
         List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
         return FastestRouteResDTO.of(hasCaution, totalDistance, totalCost, routeInfoDTOS, details);
-    }
-
-    private boolean isBuildingRoute(Route route){
-        return route.getCost() > BUILDING_ROUTE_COST - 1;
     }
 
     private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap){
