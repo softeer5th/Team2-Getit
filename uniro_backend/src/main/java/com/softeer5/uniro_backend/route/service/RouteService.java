@@ -3,6 +3,7 @@ package com.softeer5.uniro_backend.route.service;
 import static com.softeer5.uniro_backend.common.constant.UniroConst.BUILDING_ROUTE_COST;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 import static com.softeer5.uniro_backend.common.utils.GeoUtils.getInstance;
+import static com.softeer5.uniro_backend.common.utils.RouteUtils.isBuildingRoute;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,7 +61,7 @@ public class RouteService {
 		//BFS를 시작할 노드
 		Node startNode = null;
 		for(Route route : routes) {
-			//TODO if(isBuildingNode(route))continue;
+			if(isBuildingRoute(route))continue;
 			adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
 			adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
 			nodeMap.put(route.getNode1().getId(), route.getNode1());
@@ -86,23 +87,26 @@ public class RouteService {
 					.map(Map.Entry::getKey)
 					.collect(Collectors.toList());
 
-			//TODO 끝 노드가 2개인 경우 둘 중 하나에서 출발 (0개도 가능(사이클))
+			//끝 노드가 2개인 경우 둘 중 하나에서 출발
 			if(endNodes.size()==2){
 				startNode = nodeMap.get(endNodes.get(0));
-				return GetAllRoutesResDTO.of(nodeInfos, List.of(getSingleRoutes(adjMap, startNode)));
-				//TODO 합치기
+			}
+			else if(endNodes.isEmpty()){
+				//사이클인 경우 아무 노드나 코어노드로 설정
+				startNode = routes.get(0).getNode1();
+			}
+			else{
+				// 그 외의 경우의 수는 모두 사이클만 존재하거나, 규칙에 어긋난 맵
+				throw new RouteException("Invalid Map", ErrorCode.INVALID_MAP);
 			}
 
-			// 그 외의 경우의 수는 모두 사이클만 존재하거나, 규칙에 어긋난 맵
-			throw new RouteException("Invalid Map", ErrorCode.INVALID_MAP);
 
 		}
-
 
 		return GetAllRoutesResDTO.of(nodeInfos, getCoreRoutes(adjMap, startNode));
 	}
 
-	// coreRoute를 만들어주는 메서드 //TODO 사이클 예외처리 필요
+	// coreRoute를 만들어주는 메서드
 	private List<CoreRouteResDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
 		List<CoreRouteResDTO> result = new ArrayList<>();
 		// core node간의 BFS 할 때 방문여부를 체크하는 set
@@ -132,8 +136,9 @@ public class RouteService {
 				routeSet.add(r.getId());
 
 				while (true) {
-					//코어노드를 만나면 queue에 넣을지 판단한 뒤 종료
-					if (currentNode.isCore()) {
+					System.out.println(currentNode.getId());
+					//코어노드를 만나면 queue에 넣을지 판단한 뒤 종료 (제자리로 돌아오는 경우도 포함)
+					if (currentNode.isCore() || currentNode.getId().equals(now.getId())) {
 						if (!visitedCoreNodes.contains(currentNode.getId())) {
 							visitedCoreNodes.add(currentNode.getId());
 							nodeQueue.add(currentNode);
@@ -157,28 +162,6 @@ public class RouteService {
 
 		}
 		return result;
-	}
-
-	private CoreRouteResDTO getSingleRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
-		List<RouteCoordinatesInfoResDTO> coreRoute = new ArrayList<>();
-		Set<Long> visitedNodes = new HashSet<>();
-		visitedNodes.add(startNode.getId());
-
-
-		Node currentNode = startNode;
-		boolean flag = true;
-		while(flag){
-			flag = false;
-			for (Route r : adjMap.get(currentNode.getId())) {
-				Node nextNode = r.getNode1().getId().equals(currentNode.getId()) ? r.getNode2() : r.getNode1();
-				if(visitedNodes.contains(nextNode.getId())) continue;
-				coreRoute.add(RouteCoordinatesInfoResDTO.of(r.getId(), currentNode.getId(), nextNode.getId()));
-				flag = true;
-				visitedNodes.add(nextNode.getId());
-				currentNode = nextNode;
-			}
-		}
-		return CoreRouteResDTO.of(startNode.getId(), currentNode.getId(), coreRoute);
 	}
 
 	public GetRiskRoutesResDTO getRiskRoutes(Long univId) {
