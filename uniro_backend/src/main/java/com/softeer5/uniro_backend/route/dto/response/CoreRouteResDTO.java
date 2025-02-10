@@ -16,7 +16,7 @@ public class CoreRouteResDTO {
     private final Long coreNode1Id;
 
     @Schema(description = "코어 노드 2", example = "13")
-    private final Long cordNode2Id;
+    private final Long coreNode2Id;
 
     @Schema(description = "간선 정보", example = "")
     private final List<RouteCoordinatesInfoResDTO> routes;
