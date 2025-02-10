@@ -25,6 +25,7 @@ import { useNavigate } from "react-router";
 import { getAllRisks } from "../api/routes";
 import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
+import removeMarkers from "../utils/markers/removeMarkers";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -59,6 +60,7 @@ export default function ReportRoutePage() {
 		navigate("/map");
 	});
 	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
+	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
 
 	if (!university) return;
 
@@ -95,6 +97,10 @@ export default function ReportRoutePage() {
 				element: null,
 				coords: [],
 			});
+			setTempWayPoints((prevMarkers) => {
+				removeMarkers(prevMarkers);
+				return []
+			})
 			if (newPolyLine.current) newPolyLine.current.setPath([]);
 			queryClient.invalidateQueries({ queryKey: ["routes", university.id] });
 		},
@@ -109,6 +115,10 @@ export default function ReportRoutePage() {
 				element: null,
 				coords: [],
 			});
+			setTempWayPoints((prevMarkers) => {
+				removeMarkers(prevMarkers);
+				return []
+			})
 			if (newPolyLine.current) newPolyLine.current.setPath([]);
 		},
 	});
@@ -274,6 +284,8 @@ export default function ReportRoutePage() {
 						className: "translate-waypoint",
 					}),
 				);
+
+				setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker])
 
 				if (originPoint.current) {
 					setNewPoints((prevPoints) => {
