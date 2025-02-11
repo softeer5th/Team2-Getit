@@ -17,7 +17,7 @@ import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
 import createAdvancedMarker, { createUniversityMarker } from "../utils/markers/createAdvanedMarker";
 import toggleMarkers from "../utils/markers/toggleMarkers";
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import useModal from "../hooks/useModal";
 import ReportModal from "../components/map/reportModal";
 import useUniversityInfo from "../hooks/useUniversityInfo";
@@ -28,9 +28,11 @@ import { CautionIssueType, DangerIssueType, MarkerTypes } from "../data/types/en
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 
 /** API 호출 */
-import { useSuspenseQueries } from "@tanstack/react-query";
+import { useQuery, useSuspenseQueries } from "@tanstack/react-query";
 import { getAllRisks } from "../api/routes";
 import { getAllBuildings } from "../api/nodes";
+import { getNavigationResult } from "../api/route";
+import useQueryError from "../hooks/useQueryError";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -68,7 +70,31 @@ export default function MapPage() {
 	const { university } = useUniversityInfo();
 	useRedirectUndefined<University | undefined>([university]);
 
+	const navigate = useNavigate();
 	if (!university) return;
+
+	const [FailModal, { status, data, refetch: findFastRoute }] = useQueryError({
+		queryKey: ['fastRoute', university.id, origin?.nodeId, destination?.nodeId],
+		queryFn: () => getNavigationResult(university.id, origin ? origin?.nodeId : -1, destination ? destination?.nodeId : -1),
+		enabled: false,
+		retry: 0,
+	},
+		undefined,
+		() => { navigate('/result') },
+		{
+			fallback: {
+				400: {
+					mainTitle: "잘못된 요청입니다.", subTitle: ["새로고침 후 다시 시도 부탁드립니다."]
+				},
+				404: {
+					mainTitle: "해당 경로를 찾을 수 없습니다.", subTitle: ["해당 건물이 길이랑 연결되지 않았습니다."]
+				},
+				422: {
+					mainTitle: "해당 경로를 찾을 수 없습니다.", subTitle: ["위험 요소 버튼을 클릭하여,", "통행할 수 없는 원인을 파악하실 수 있습니다."]
+				}
+			}
+		}
+	)
 
 	const results = useSuspenseQueries({
 		queries: [
@@ -495,9 +521,9 @@ export default function MapPage() {
 			</BottomSheet>
 			{origin && destination && origin.nodeId !== destination.nodeId ? (
 				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */
-				<Link to="/result" className="absolute bottom-6 space-y-2 w-full px-4">
+				<div onClick={() => findFastRoute()} className="absolute bottom-6 space-y-2 w-full px-4">
 					<Button variant="primary">길찾기</Button>
-				</Link>
+				</div>
 			) : (
 				/** 출발지랑 도착지가 존재하지 않거나, 같은 경우 기존 Button UI 보이기 */
 				<>
@@ -511,6 +537,7 @@ export default function MapPage() {
 				</>
 			)}
 			{isOpen && <ReportModal close={close} />}
+			<FailModal />
 		</div>
 	);
 }

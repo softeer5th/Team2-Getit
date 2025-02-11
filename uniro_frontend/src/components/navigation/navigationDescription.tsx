@@ -9,6 +9,8 @@ import { NavigationRouteList } from "../../data/types/route";
 import useRoutePoint from "../../hooks/useRoutePoint";
 import { formatDistance } from "../../utils/navigation/formatDistance";
 import { Link } from "react-router";
+import useUniversityInfo from "../../hooks/useUniversityInfo";
+import { useQueryClient } from "@tanstack/react-query";
 
 const TITLE = "전동휠체어 예상소요시간";
 
@@ -21,12 +23,20 @@ const NavigationDescription = ({ isDetailView, navigationRoute }: TopBarProps) =
 	const { origin, destination } = useRoutePoint();
 	const { totalCost, totalDistance, hasCaution } = navigationRoute;
 
+	const { university } = useUniversityInfo();
+	const queryClient = useQueryClient();
+
+	/** 지도 페이지로 돌아가게 될 경우, 캐시를 삭제하기 */
+	const removeQuery = () => {
+		queryClient.removeQueries({ queryKey: ['fastRoute', university?.id, origin?.nodeId, destination?.nodeId] })
+	}
+
 	return (
 		<div className="w-full p-5">
 			<div className={`w-full flex flex-row items-center ${isDetailView ? "justify-start" : "justify-between"}`}>
 				<span className="text-left text-kor-body3 text-primary-500 flex-1 font-semibold">{TITLE}</span>
 				{!isDetailView && (
-					<Link to="/map">
+					<Link to="/map" onClick={removeQuery}>
 						<Cancel />
 					</Link>
 				)}
