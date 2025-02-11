@@ -73,28 +73,39 @@ export default function MapPage() {
 	const navigate = useNavigate();
 	if (!university) return;
 
-	const [FailModal, { status, data, refetch: findFastRoute }] = useQueryError({
-		queryKey: ['fastRoute', university.id, origin?.nodeId, destination?.nodeId],
-		queryFn: () => getNavigationResult(university.id, origin ? origin?.nodeId : -1, destination ? destination?.nodeId : -1),
-		enabled: false,
-		retry: 0,
-	},
+	const [FailModal, { status, data, refetch: findFastRoute }] = useQueryError(
+		{
+			queryKey: ["fastRoute", university.id, origin?.nodeId, destination?.nodeId],
+			queryFn: () =>
+				getNavigationResult(
+					university.id,
+					origin ? origin?.nodeId : -1,
+					destination ? destination?.nodeId : -1,
+				),
+			enabled: false,
+			retry: 0,
+		},
 		undefined,
-		() => { navigate('/result') },
+		() => {
+			navigate("/result");
+		},
 		{
 			fallback: {
 				400: {
-					mainTitle: "잘못된 요청입니다.", subTitle: ["새로고침 후 다시 시도 부탁드립니다."]
+					mainTitle: "잘못된 요청입니다.",
+					subTitle: ["새로고침 후 다시 시도 부탁드립니다."],
 				},
 				404: {
-					mainTitle: "해당 경로를 찾을 수 없습니다.", subTitle: ["해당 건물이 길이랑 연결되지 않았습니다."]
+					mainTitle: "해당 경로를 찾을 수 없습니다.",
+					subTitle: ["해당 건물이 길이랑 연결되지 않았습니다."],
 				},
 				422: {
-					mainTitle: "해당 경로를 찾을 수 없습니다.", subTitle: ["위험 요소 버튼을 클릭하여,", "통행할 수 없는 원인을 파악하실 수 있습니다."]
-				}
-			}
-		}
-	)
+					mainTitle: "해당 경로를 찾을 수 없습니다.",
+					subTitle: ["위험 요소 버튼을 클릭하여,", "통행할 수 없는 원인을 파악하실 수 있습니다."],
+				},
+			},
+		},
+	);
 
 	const results = useSuspenseQueries({
 		queries: [
@@ -468,7 +479,6 @@ export default function MapPage() {
 
 		if (prevZoom.current >= 17 && zoom <= 16) {
 			if (isCautionAcitve) {
-				setIsCautionActive(false);
 				toggleMarkers(
 					false,
 					cautionMarkers.map((marker) => marker.element),
@@ -476,7 +486,6 @@ export default function MapPage() {
 				);
 			}
 			if (isDangerAcitve) {
-				setIsDangerActive(false);
 				toggleMarkers(
 					false,
 					dangerMarkers.map((marker) => marker.element),
@@ -487,6 +496,21 @@ export default function MapPage() {
 			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
 			toggleMarkers(false, _buildingMarkers, map);
 		} else if (prevZoom.current <= 16 && zoom >= 17) {
+			if (isCautionAcitve) {
+				toggleMarkers(
+					true,
+					cautionMarkers.map((marker) => marker.element),
+					map,
+				);
+			}
+			if (isDangerAcitve) {
+				toggleMarkers(
+					true,
+					dangerMarkers.map((marker) => marker.element),
+					map,
+				);
+			}
+
 			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
 			toggleMarkers(true, _buildingMarkers, map);
 		}
