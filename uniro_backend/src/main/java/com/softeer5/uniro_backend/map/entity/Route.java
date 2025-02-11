@@ -2,6 +2,7 @@ package com.softeer5.uniro_backend.map.entity;
 
 import static jakarta.persistence.FetchType.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,10 +12,13 @@ import com.softeer5.uniro_backend.common.resolver.DangerListConverter;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.locationtech.jts.geom.LineString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +34,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Audited
+@EntityListeners(AuditingEntityListener.class)
 public class Route {
 
 	@Id
@@ -65,6 +70,10 @@ public class Route {
 	@NotNull
 	private Set<DangerFactor> dangerFactors = new HashSet<>();
 
+	@CreatedDate
+	@Column(name = "created_at")
+	private LocalDateTime createdAt;
+
 	public List<CautionFactor> getCautionFactorsByList(){
 		return cautionFactors.stream().toList();
 	}
@@ -81,6 +90,12 @@ public class Route {
 	public void setDangerFactors(List<DangerFactor> dangerFactors) {
 		this.dangerFactors.clear();
 		this.dangerFactors.addAll(dangerFactors);
+	}
+
+	public void updateFromRevision(Route revRoute){
+		this.cautionFactors = revRoute.getCautionFactors();
+		this.dangerFactors = revRoute.getDangerFactors();
+		this.cost = revRoute.cost;
 	}
 
 	@Builder

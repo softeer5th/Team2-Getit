@@ -21,4 +21,12 @@ public interface AdminApi {
     })
     ResponseEntity<List<RevInfoDTO>> getAllRev(@PathVariable("univId") Long univId);
 
+    @Operation(summary = "특정 버전으로 롤백")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "특정 버전으로 롤백 성공"),
+        @ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+    })
+    ResponseEntity<Void> rollbackRev(
+		@PathVariable("univId") Long univId,
+		@PathVariable("versionId") Long versionId);
 }

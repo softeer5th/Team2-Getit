@@ -1,10 +1,12 @@
 package com.softeer5.uniro_backend.map.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -55,6 +57,11 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
                                                     @Param("rev_path")String revPath);
 
     Optional<Route> findByIdAndUnivId (Long id, Long univId);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("DELETE FROM Route r WHERE r.univId =:univId AND r.createdAt > :versionTimeStamp")
+    void deleteAllByCreatedAt(@Param("univId") Long univId, @Param("versionTimeStamp") LocalDateTime versionTimeStamp);
 
     @Query(value = """
     SELECT COUNT(*) FROM Route r

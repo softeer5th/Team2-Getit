@@ -32,7 +32,10 @@ public enum ErrorCode {
     NODE_NOT_FOUND(404, "유효한 노드를 찾을 수 없습니다."),
 
     // 경로 계산
-    INTERSECTION_ONLY_ALLOWED_POINT(400, "기존 경로와 겹칠 수 없습니다.")
+    INTERSECTION_ONLY_ALLOWED_POINT(400, "기존 경로와 겹칠 수 없습니다."),
+
+    // 어드민
+    INVALID_VERSION_ID(400, "유효하지 않은 버전 id 입니다.")
     ;
 
     private final int httpStatus;
