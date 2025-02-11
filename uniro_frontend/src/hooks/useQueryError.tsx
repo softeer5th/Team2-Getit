@@ -1,9 +1,9 @@
-import { QueryClient, useMutation, UseMutationOptions, UseMutationResult } from "@tanstack/react-query";
-import { NotFoundError, BadRequestError, ERROR_STATUS } from "../constant/error";
+import { QueryClient, useQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
+import { NotFoundError, BadRequestError, ERROR_STATUS, UnProcessableError } from "../constant/error";
 import { useEffect, useState } from "react";
 
 type Fallback = {
-	[K in Exclude<ERROR_STATUS, ERROR_STATUS.INTERNAL_ERROR>]: {
+	[K in Exclude<ERROR_STATUS, ERROR_STATUS.INTERNAL_ERROR>]?: {
 		mainTitle: string;
 		subTitle: string[];
 	};
@@ -14,24 +14,31 @@ type HandleError = {
 	onClose?: () => void;
 }
 
-type UseMutationErrorReturn<TData, TError, TVariables, TContext> = [
+type UseQueryErrorReturn<TData, TError> = [
 	React.FC,
-	UseMutationResult<TData, TError, TVariables, TContext>
+	UseQueryResult<TData, TError>
 ];
 
-export default function useMutationError<TData, TError, TVariables, TContext>(
-	options: UseMutationOptions<TData, TError, TVariables, TContext>,
+export default function useQueryError<TQueryFnData, TError, TData>(
+	options: UseQueryOptions<TQueryFnData, TError, TData>,
 	queryClient?: QueryClient,
+	handleSuccess?: () => void,
 	handleError?: HandleError,
-): UseMutationErrorReturn<TData, TError, TVariables, TContext> {
+): UseQueryErrorReturn<TData, TError> {
 	const [isOpen, setOpen] = useState<boolean>(false);
-	const result = useMutation<TData, TError, TVariables, TContext>(options, queryClient);
+	const result = useQuery<TQueryFnData, TError, TData, readonly unknown[]>(options, queryClient);
 
-	const { isError, error } = result;
+	const { isError, error, status } = result;
 
 	useEffect(() => {
 		setOpen(isError)
 	}, [isError])
+
+	/** 페이지 이동하여도 status는 success로 남아있으므로 필요시, removeQueries하여 캐시 삭제 */
+	/** 추가적인 로직 고민하기 */
+	useEffect(() => {
+		if (status === "success" && handleSuccess) handleSuccess();
+	}, [status])
 
 	const close = () => {
 		if (handleError?.onClose) handleError?.onClose();
@@ -54,6 +61,10 @@ export default function useMutationError<TData, TError, TVariables, TContext>(
 		else if (error instanceof BadRequestError) {
 			title = fallback[400] ?? title;
 		}
+		else if (error instanceof UnProcessableError) {
+			title = fallback[422] ?? title;
+		}
+
 		else throw error;
 
 		return (
