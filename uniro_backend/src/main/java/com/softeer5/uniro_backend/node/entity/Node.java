@@ -3,11 +3,15 @@ package com.softeer5.uniro_backend.node.entity;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
+import jakarta.persistence.EntityListeners;
 import lombok.*;
 import org.hibernate.envers.Audited;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,11 +22,10 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
 @Audited
+@EntityListeners(AuditingEntityListener.class)
 public class Node {
 
 	@Id
@@ -40,6 +43,9 @@ public class Node {
 	@Column(name = "univ_id")
 	@NotNull
 	private Long univId;
+
+	@CreatedDate
+	private LocalDateTime createdAt;
 
 	public Map<String, Double> getXY(){
 		return Map.of("lat", coordinates.getY(), "lng", coordinates.getX());
@@ -62,6 +68,9 @@ public class Node {
 	}
 
 	public void setCore(boolean isCore){
+		this.isCore = isCore;
+	}
+	public void updateFromRevision(boolean isCore){
 		this.isCore = isCore;
 	}
 
