@@ -76,62 +76,69 @@ export default function ReportRoutePage() {
 
 	const [routes, risks] = result;
 
-	const [ErrorModal, { mutate }] = useMutationError({
-		mutationFn: ({
-			startNodeId,
-			coordinates,
-			endNodeId,
-		}: {
-			startNodeId: NodeId;
-			endNodeId: NodeId | null;
-			coordinates: Coord[];
-		}) => postReportRoute(university.id, { startNodeId, endNodeId, coordinates }),
-		onSuccess: () => {
-			openSuccess();
-			if (newPoints.element) newPoints.element.map = null;
-			if (originPoint.current) {
-				originPoint.current.element.map = null;
-				originPoint.current = undefined;
-			}
-			setNewPoints({
-				element: null,
-				coords: [],
-			});
-			setTempWayPoints((prevMarkers) => {
-				removeMarkers(prevMarkers);
-				return []
-			})
-			if (newPolyLine.current) newPolyLine.current.setPath([]);
-			queryClient.invalidateQueries({ queryKey: ["routes", university.id] });
-		},
-		onError: () => {
-			if (newPoints.element) newPoints.element.map = null;
-			if (originPoint.current) {
-				originPoint.current.element.map = null;
-				originPoint.current = undefined;
-			}
-			setNewPoints({
-				element: null,
-				coords: [],
-			});
-			setTempWayPoints((prevMarkers) => {
-				removeMarkers(prevMarkers);
-				return []
-			})
-			if (newPolyLine.current) newPolyLine.current.setPath([]);
-		},
-	}, undefined, {
-		fallback: {
-			400: {
-				mainTitle: "경로를 생성하는데 실패하였습니다!",
-				subTitle: ["선택하신 경로는 생성이 불가능합니다.", "선 위에서 시작하여, 빈 곳을 이어주시기 바랍니다."]
+	const [ErrorModal, { mutate, status }] = useMutationError(
+		{
+			mutationFn: ({
+				startNodeId,
+				coordinates,
+				endNodeId,
+			}: {
+				startNodeId: NodeId;
+				endNodeId: NodeId | null;
+				coordinates: Coord[];
+			}) => postReportRoute(university.id, { startNodeId, endNodeId, coordinates }),
+			onSuccess: () => {
+				openSuccess();
+				if (newPoints.element) newPoints.element.map = null;
+				if (originPoint.current) {
+					originPoint.current.element.map = null;
+					originPoint.current = undefined;
+				}
+				setNewPoints({
+					element: null,
+					coords: [],
+				});
+				setTempWayPoints((prevMarkers) => {
+					removeMarkers(prevMarkers);
+					return [];
+				});
+				if (newPolyLine.current) newPolyLine.current.setPath([]);
+				queryClient.invalidateQueries({ queryKey: ["routes", university.id] });
 			},
-			404: {
-				mainTitle: "경로를 생성하는데 실패하였습니다!",
-				subTitle: ["선택하신 점이 관리자에 의해 제거되었습니다.", "다른 점을 선택하여 제보 부탁드립니다."]
-			}
-		}
-	});
+			onError: () => {
+				if (newPoints.element) newPoints.element.map = null;
+				if (originPoint.current) {
+					originPoint.current.element.map = null;
+					originPoint.current = undefined;
+				}
+				setNewPoints({
+					element: null,
+					coords: [],
+				});
+				setTempWayPoints((prevMarkers) => {
+					removeMarkers(prevMarkers);
+					return [];
+				});
+				if (newPolyLine.current) newPolyLine.current.setPath([]);
+			},
+		},
+		undefined,
+		{
+			fallback: {
+				400: {
+					mainTitle: "경로를 생성하는데 실패하였습니다!",
+					subTitle: [
+						"선택하신 경로는 생성이 불가능합니다.",
+						"선 위에서 시작하여, 빈 곳을 이어주시기 바랍니다.",
+					],
+				},
+				404: {
+					mainTitle: "경로를 생성하는데 실패하였습니다!",
+					subTitle: ["선택하신 점이 관리자에 의해 제거되었습니다.", "다른 점을 선택하여 제보 부탁드립니다."],
+				},
+			},
+		},
+	);
 
 	const addRiskMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
@@ -242,13 +249,16 @@ export default function ReportRoutePage() {
 
 		if (!originPoint.current) return;
 
-		if ("nodeId" in lastPoint) {
-			mutate({
-				startNodeId: originPoint.current.point.nodeId,
-				endNodeId: lastPoint.nodeId,
-				coordinates: subNodes,
-			});
-		} else mutate({ startNodeId: originPoint.current.point.nodeId, coordinates: subNodes, endNodeId: null });
+		mutate({
+			startNodeId: originPoint.current.point.nodeId,
+			endNodeId: "nodeId" in lastPoint ? lastPoint.nodeId : null,
+			coordinates: subNodes,
+		});
+		mutate({
+			startNodeId: originPoint.current.point.nodeId,
+			endNodeId: "nodeId" in lastPoint ? lastPoint.nodeId : null,
+			coordinates: subNodes,
+		});
 	};
 
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
@@ -295,7 +305,7 @@ export default function ReportRoutePage() {
 					}),
 				);
 
-				setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker])
+				setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker]);
 
 				if (originPoint.current) {
 					setNewPoints((prevPoints) => {
@@ -347,13 +357,13 @@ export default function ReportRoutePage() {
 		}
 	};
 
-	/** Undo 함수 
+	/** Undo 함수
 	 * 되돌리기 버튼을 누를 경우, 마지막에 생성된 점을 제거
 	 * 기존 점의 개수가 1개, 2개, (0개 혹은 3개 이상) 총 3개의 Case를 나눈다.
 	 * 1개 : originMarker를 제거하고
 	 * 2개 : , 도착마커를 제거한다.
 	 * 0개 혹은 3개 이상, 도착마커를 이동시킨다.
-	*/
+	 */
 	const undoPoints = () => {
 		const deleteNode = [...newPoints.coords].pop();
 
@@ -363,28 +373,27 @@ export default function ReportRoutePage() {
 
 				lastMarker.map = null;
 
-				return [...prevPoints.slice(0, -1)]
-			})
+				return [...prevPoints.slice(0, -1)];
+			});
 		}
 		if (newPoints.coords.length === 2) {
 			setNewPoints((prevPoints) => {
 				if (prevPoints.element) prevPoints.element.map = null;
 				return {
 					element: null,
-					coords: [prevPoints.coords[0]]
-				}
-			})
+					coords: [prevPoints.coords[0]],
+				};
+			});
 			return;
-		}
-		else if (newPoints.coords.length === 1) {
+		} else if (newPoints.coords.length === 1) {
 			if (originPoint.current) {
 				originPoint.current.element.map = null;
 			}
 			originPoint.current = undefined;
 			setNewPoints({
 				coords: [],
-				element: null
-			})
+				element: null,
+			});
 			return;
 		}
 
@@ -394,10 +403,10 @@ export default function ReportRoutePage() {
 			if (prevPoints.element) prevPoints.element.position = lastPoint;
 			return {
 				element: prevPoints.element,
-				coords: tempPoints
-			}
-		})
-	}
+				coords: tempPoints,
+			};
+		});
+	};
 
 	useEffect(() => {
 		if (newPolyLine.current) {
@@ -490,7 +499,12 @@ export default function ReportRoutePage() {
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
 				<div className="absolute w-full bottom-6 px-4">
-					<Button onClick={reportNewRoute}>제보하기</Button>
+					<Button
+						onClick={reportNewRoute}
+						variant={status === "pending" || status === "success" ? "disabled" : "primary"}
+					>
+						{status === "pending" ? "제보하는 중.." : "제보하기"}
+					</Button>
 				</div>
 			)}
 			<div className="absolute right-4 bottom-[90px] space-y-2">
