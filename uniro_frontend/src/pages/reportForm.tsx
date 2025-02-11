@@ -39,8 +39,6 @@ const ReportForm = () => {
 
 	useRedirectUndefined<University | RouteId | undefined>([university, routeId]);
 
-	console.log(routeId);
-
 	if (!routeId) return;
 
 	const { data } = useSuspenseQuery({
@@ -120,7 +118,7 @@ const ReportForm = () => {
 				cautionFactors: formData.cautionIssues,
 			}),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
+			queryClient.removeQueries({ queryKey: [university?.id ?? 1001, 'risks'] });
 			openSuccess();
 		},
 		onError: () => {

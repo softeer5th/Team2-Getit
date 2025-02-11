@@ -3,7 +3,7 @@ import { NotFoundError, BadRequestError, ERROR_STATUS } from "../constant/error"
 import { useEffect, useState } from "react";
 
 type Fallback = {
-	[K in Exclude<ERROR_STATUS, ERROR_STATUS.INTERNAL_ERROR>]: {
+	[K in Exclude<ERROR_STATUS, ERROR_STATUS.INTERNAL_ERROR>]?: {
 		mainTitle: string;
 		subTitle: string[];
 	};
