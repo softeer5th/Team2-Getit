@@ -8,11 +8,6 @@ public class CustomReversionListener implements RevisionListener {
     public void newRevision(Object revisionEntity) {
         RevInfo revinfo = (RevInfo) revisionEntity;
 
-        if(revinfo.getUnivId() == null) {
-            revinfo.setUnivId(0L);
-            return;
-        }
-
         revinfo.setUnivId(RevisionContext.getUnivId());
         revinfo.setAction(RevisionContext.getAction());
     }
