@@ -1,4 +1,4 @@
-import { BadRequestError, NotFoundError } from "../../constant/error";
+import { BadRequestError, NotFoundError, UnProcessableError } from "../../constant/error";
 
 export default function Fetch() {
 	const baseURL = import.meta.env.VITE_REACT_SERVER_BASE_URL;
@@ -17,6 +17,8 @@ export default function Fetch() {
 				throw new BadRequestError("Bad Request");
 			} else if (response.status === 404) {
 				throw new NotFoundError("Not Found");
+			} else if (response.status === 422) {
+				throw new UnProcessableError("UnProcessable");
 			} else {
 				throw new Error("UnExpected Error");
 			}
