@@ -207,6 +207,102 @@ class RouteCalculationServiceTest {
 				.hasMessageContaining("intersection is only allowed by point");
 		}
 
+		@Test
+		@DisplayName("wiki 페이지 TC.4")
+		void 지나치면서_셀프_크로스_되는_경우_새로_추가될_노드와_연결된다() {
+			// Given
+			Long univId = 1001L;
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(0, 0.5),
+				new CreateRouteReqDTO(0, 1.5),
+				new CreateRouteReqDTO(0, 2.5),
+				new CreateRouteReqDTO(1, 2),
+				new CreateRouteReqDTO(-3, 1)
+			);
+
+			Node node1 = NodeFixture.createNode(0, 0);
+			Node node2 = NodeFixture.createNode(0, -1);
+
+			Route route1 = RouteFixture.createRoute(node1, node2);
+
+			nodeRepository.saveAll(List.of(node1, node2));
+			routeRepository.saveAll(List.of(route1));
+
+			// When
+			List<Node> result = routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests);
+
+			// Then
+			assertThat(result).hasSize(7);
+			assertThat(result.get(0).isCore()).isFalse();
+			assertThat(result.get(2).isCore()).isTrue();
+			System.out.println(result);
+		}
+
+		@Test
+		@DisplayName("wiki 페이지 TC.5")
+		void 새로_추가될_노드와_연결되면서_셀프_크로스_되는_경우_새로_추가될_노드와_연결된다() {
+			// Given
+			Long univId = 1001L;
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(0, 0.5),
+				new CreateRouteReqDTO(0, 1.5),
+				new CreateRouteReqDTO(0, 2.5),
+				new CreateRouteReqDTO(1, 2),
+				new CreateRouteReqDTO(0, 1.5),
+				new CreateRouteReqDTO(-3, 1)
+			);
+
+			Node node1 = NodeFixture.createNode(0, 0);
+			Node node2 = NodeFixture.createNode(0, -1);
+
+			Route route1 = RouteFixture.createRoute(node1, node2);
+
+			nodeRepository.saveAll(List.of(node1, node2));
+			routeRepository.saveAll(List.of(route1));
+
+			// When
+			List<Node> result = routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests);
+
+			// Then
+			assertThat(result).hasSize(7);
+			assertThat(result.get(0).isCore()).isFalse();
+			System.out.println(result);
+			assertThat(result.get(2).isCore()).isTrue();
+		}
+
+		@Test
+		@DisplayName("wiki 페이지 TC.6")
+		void 첫번째_노드에_연결연결되면서_셀프_크로스_되는_경우_새로_추가될_노드와_연결된다_() {
+			// Given
+			Long univId = 1001L;
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(0, 1),
+				new CreateRouteReqDTO(0, 2),
+				new CreateRouteReqDTO(1, 2),
+				new CreateRouteReqDTO(0, 0),
+				new CreateRouteReqDTO(-2, 0)
+			);
+
+			Node node0 = NodeFixture.createNode(1, -1);
+			Node node1 = NodeFixture.createNode(0, 0);
+
+			Route route1 = RouteFixture.createRoute(node0, node1);
+
+			nodeRepository.saveAll(List.of(node1, node0));
+			routeRepository.saveAll(List.of(route1));
+
+			// When
+			List<Node> result = routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests);
+
+			// Then
+			assertThat(result).hasSize(6);
+			assertThat(result.get(0).isCore()).isTrue();
+			System.out.println(result);
+		}
+
 	}
 
 
