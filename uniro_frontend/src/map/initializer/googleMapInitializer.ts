@@ -1,3 +1,4 @@
+import { HanyangUniversityBounds } from "../../constant/bounds";
 import { HanyangUniversity } from "../../constant/university";
 
 import loadGoogleMapsLibraries from "../loader/googleMapLoader";
@@ -28,7 +29,7 @@ export const initializeMap = async (
 		draggable: true,
 		scrollwheel: true,
 		disableDoubleClickZoom: false,
-		gestureHandling: "auto",
+		gestureHandling: "greedy",
 		clickableIcons: false,
 		disableDefaultUI: true,
 		// restriction: {
