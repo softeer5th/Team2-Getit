@@ -89,6 +89,9 @@ public class RouteCalculationService {
         Node endNode = nodeMap.get(endNodeId);
 
         if(startNode == null){
+            if(buildingRepository.existsByNodeIdAndUnivId(startNodeId, univId)){
+                throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+            }
             throw new NodeException("Node Not Found", NODE_NOT_FOUND);
         }
         if(endNode == null){
