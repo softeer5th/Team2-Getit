@@ -15,7 +15,7 @@ import BackButton from "../components/map/backButton";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 import { University } from "../data/types/university";
-import { useMutation, useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import { getAllRoutes, postReportRoute } from "../api/route";
 import { CoreRoute, CoreRoutesList, Route, RouteId } from "../data/types/route";
 import { Node, NodeId } from "../data/types/node";
@@ -26,6 +26,7 @@ import { getAllRisks } from "../api/routes";
 import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import removeMarkers from "../utils/markers/removeMarkers";
+import useMutationError from "../hooks/useMutationError";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -59,7 +60,6 @@ export default function ReportRoutePage() {
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(() => {
 		navigate("/map");
 	});
-	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
 	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
 
 	if (!university) return;
@@ -76,7 +76,7 @@ export default function ReportRoutePage() {
 
 	const [routes, risks] = result;
 
-	const { mutate } = useMutation({
+	const [ErrorModal, { mutate }] = useMutationError({
 		mutationFn: ({
 			startNodeId,
 			coordinates,
@@ -105,7 +105,6 @@ export default function ReportRoutePage() {
 			queryClient.invalidateQueries({ queryKey: ["routes", university.id] });
 		},
 		onError: () => {
-			openFail();
 			if (newPoints.element) newPoints.element.map = null;
 			if (originPoint.current) {
 				originPoint.current.element.map = null;
@@ -121,6 +120,17 @@ export default function ReportRoutePage() {
 			})
 			if (newPolyLine.current) newPolyLine.current.setPath([]);
 		},
+	}, undefined, {
+		fallback: {
+			400: {
+				mainTitle: "경로를 생성하는데 실패하였습니다!",
+				subTitle: ["선택하신 경로는 생성이 불가능합니다.", "선 위에서 시작하여, 빈 곳을 이어주시기 바랍니다."]
+			},
+			404: {
+				mainTitle: "경로를 생성하는데 실패하였습니다!",
+				subTitle: ["선택하신 점이 관리자에 의해 제거되었습니다.", "다른 점을 선택하여 제보 부탁드립니다."]
+			}
+		}
 	});
 
 	const addRiskMarker = () => {
@@ -499,19 +509,7 @@ export default function ReportRoutePage() {
 					</div>
 				</SuccessModal>
 			)}
-			{isFailOpen && (
-				<FailModal>
-					<p className="text-kor-body1 font-bold text-system-red">경로를 생성하는데 실패하였습니다!</p>
-					<div className="space-y-0">
-						<p className="text-kor-body3 font-regular text-gray-700">
-							선택하신 경로는 생성이 불가능합니다.
-						</p>
-						<p className="text-kor-body3 font-regular text-gray-700">
-							선 위에서 시작하여, 빈 곳을 이어주시기 바랍니다.
-						</p>
-					</div>
-				</FailModal>
-			)}
+			<ErrorModal />
 		</div>
 	);
 }
