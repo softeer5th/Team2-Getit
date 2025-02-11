@@ -411,6 +411,7 @@ public class RouteCalculationService {
         }
         createdNodes.add(startNode);
 
+        // 기존에 저장된 노드와 일치하거나 or 새로운 노드와 겹칠 경우 -> 동일한 것으로 판단
         for (int i = 1; i < requests.size(); i++) {
             CreateRouteReqDTO cur = requests.get(i);
 
@@ -434,21 +435,22 @@ public class RouteCalculationService {
                 .build();
 
             createdNodes.add(curNode);
+            nodeMap.putIfAbsent(curNode.getNodeKey(), curNode);
         }
 
         // 2. 두번째 노드 ~ N-1번째 노드
         // 현재 노드와 다음 노드가 기존 route와 겹치는지 확인
-        checkForRouteIntersections(createdNodes, strTree, nodeMap);
+        List<Node> crossCheckedNodes = checkForRouteIntersections(createdNodes, strTree, nodeMap);
 
         // 3. 자가 크로스 or 중복점 (첫점과 끝점 동일) 확인
-        List<Node> checkedSelfRouteCrossNodes = checkSelfRouteCross(createdNodes);
+        List<Node> selfCrossCheckedNodes = checkSelfRouteCross(crossCheckedNodes);
 
-        return checkedSelfRouteCrossNodes;
+        return selfCrossCheckedNodes;
     }
 
-    private void checkForRouteIntersections(List<Node> nodes, STRtree strTree, Map<String, Node> nodeMap) {
+    private List<Node> checkForRouteIntersections(List<Node> nodes, STRtree strTree, Map<String, Node> nodeMap) {
         ListIterator<Node> iterator = nodes.listIterator();
-        if (!iterator.hasNext()) return;
+        if (!iterator.hasNext()) return Collections.emptyList();
         Node prev = iterator.next();
 
         while (iterator.hasNext()) {
@@ -464,66 +466,62 @@ public class RouteCalculationService {
             }
             prev = cur;
         }
+
+        return nodes;
     }
 
 
     private List<Node> checkSelfRouteCross(List<Node> nodes) {
-
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
             throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
 
-        STRtree strTree = new STRtree();
+        ListIterator<Node> iterator = nodes.listIterator();
+        if (!iterator.hasNext()) return Collections.emptyList();
+
+        Node prev = iterator.next();
         Map<String, Node> nodeMap = new HashMap<>();
 
-        for (int i = 0; i < nodes.size() - 1; i++) {
-            Node curNode = nodes.get(i);
-            Node nextNode = nodes.get(i + 1);
-            LineString line = geometryFactory.createLineString(
-                new Coordinate[] {curNode.getCoordinates().getCoordinate(), nextNode.getCoordinates().getCoordinate()});
-            Envelope envelope = line.getEnvelopeInternal();  // MBR 생성
-            strTree.insert(envelope, line);
+        while(iterator.hasNext()){
+            STRtree strTree = new STRtree();
 
-            nodeMap.putIfAbsent(curNode.getNodeKey(), curNode);
-            nodeMap.putIfAbsent(nextNode.getNodeKey(), nextNode);
-        }
+            int last = iterator.nextIndex();
+            for (int i = 0; i < last; i++) {
+                Node prevCurNode = nodes.get(i);
+                Node prevNextNode = nodes.get(i + 1);
+                LineString line = geometryFactory.createLineString(
+                    new Coordinate[] {prevCurNode.getCoordinates().getCoordinate(), prevNextNode.getCoordinates().getCoordinate()});
+                Envelope envelope = line.getEnvelopeInternal();  // MBR 생성
+                strTree.insert(envelope, line);
 
-        for (int i = 0; i < nodes.size() - 1; i++) {
-            Node curNode = nodes.get(i);
-            Node nextNode = nodes.get(i + 1);
-
-            LineString intersectLine = findIntersectLineString(curNode.getCoordinates().getCoordinate(),
-                nextNode.getCoordinates().getCoordinate(), strTree, true);
-
-            if (intersectLine != null) {
-                Coordinate[] coordinates = intersectLine.getCoordinates();
-
-                double distance1 =
-                    curNode.getCoordinates().getCoordinate().distance(coordinates[0]) + nextNode.getCoordinates()
-                        .getCoordinate()
-                        .distance(coordinates[0]);
-                double distance2 =
-                    curNode.getCoordinates().getCoordinate().distance(coordinates[1]) + nextNode.getCoordinates()
-                        .getCoordinate()
-                        .distance(coordinates[1]);
-
-                Node midNode;
-
-                if (distance1 <= distance2) {
-                    midNode = nodeMap.get(getNodeKey(coordinates[0]));
-                } else {
-                    midNode = nodeMap.get(getNodeKey(coordinates[1]));
-                }
-
-                midNode.setCore(true);
-
-                nodes.add(midNode);
+                nodeMap.putIfAbsent(prevCurNode.getNodeKey(), prevCurNode);
+                nodeMap.putIfAbsent(prevNextNode.getNodeKey(), prevNextNode);
             }
+
+            Node cur = iterator.next();
+            LineString intersectLine = findIntersectLineString(prev.getCoordinates().getCoordinate(),
+				cur.getCoordinates().getCoordinate(), strTree, true);
+            if(intersectLine != null){
+                Node midNode = getClosestNode(intersectLine, prev, cur, nodeMap);
+                midNode.setCore(true);
+                iterator.previous();
+                iterator.add(midNode);
+                cur = midNode;
+            }
+            prev = cur;
         }
 
         return nodes;
     }
 
+    /**
+     * @param start 시작 좌표
+     * @param end 끝 좌표
+     * @implSpec 선분과 겹치는 선분이 있는지 확인
+     * @return 겹치는 선분이 있으면 해당 선분 반환, 없으면 null 반환
+     *
+     * @implNote
+     * */
     private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree, boolean isSelfCheck) {
         LineString newLine = geometryFactory.createLineString(new Coordinate[] {start, end});
         Envelope searchEnvelope = newLine.getEnvelopeInternal();
