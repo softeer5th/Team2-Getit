@@ -56,8 +56,8 @@ export default function useMutationError<TData, TError, TVariables, TContext>(
 		} else throw error;
 
 		return (
-			<div className="fixed inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.2)]">
-				<div className="w-full max-w-[365px] flex flex-col bg-gray-100 rounded-400 overflow-hidden">
+			<div className="fixed inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.2)] z-100">
+				< div className="w-full max-w-[365px] flex flex-col bg-gray-100 rounded-400 overflow-hidden" >
 					<div className="flex flex-col justify-center space-y-1 py-[25px]">
 						<p className="text-kor-body1 font-bold text-system-red">{title.mainTitle}</p>
 						<div className="space-y-0">
