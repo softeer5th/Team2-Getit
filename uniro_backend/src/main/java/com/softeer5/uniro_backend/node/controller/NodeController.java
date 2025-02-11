@@ -2,14 +2,14 @@ package com.softeer5.uniro_backend.node.controller;
 
 import java.util.List;
 
+import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.softeer5.uniro_backend.node.dto.GetBuildingResDTO;
-import com.softeer5.uniro_backend.node.dto.SearchBuildingResDTO;
+import com.softeer5.uniro_backend.node.dto.response.GetBuildingResDTO;
+import com.softeer5.uniro_backend.node.dto.response.SearchBuildingResDTO;
 import com.softeer5.uniro_backend.node.service.NodeService;
 
 import lombok.RequiredArgsConstructor;
@@ -55,5 +55,14 @@ public class NodeController implements NodeApi {
 		GetBuildingResDTO buildingResDTO = nodeService.getBuilding(nodeId);
 		return ResponseEntity.ok().body(buildingResDTO);
 	}
+
+	@Override
+	@PostMapping("{univId}/nodes/building")
+	public ResponseEntity<Void> createBuildingNode(@PathVariable("univId") Long univId,
+												   @RequestBody @Valid CreateBuildingNodeReqDTO createBuildingNodeReqDTO){
+		nodeService.createBuildingNode(univId, createBuildingNodeReqDTO);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
+
 
 }

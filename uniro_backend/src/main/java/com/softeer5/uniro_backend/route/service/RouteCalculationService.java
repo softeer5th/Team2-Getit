@@ -2,6 +2,7 @@ package com.softeer5.uniro_backend.route.service;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
+import static com.softeer5.uniro_backend.common.utils.RouteUtils.isBuildingRoute;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
@@ -11,6 +12,7 @@ import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationExcept
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.node.repository.BuildingRepository;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
 import com.softeer5.uniro_backend.route.dto.request.CreateRouteReqDTO;
 import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
@@ -42,12 +44,15 @@ public class RouteCalculationService {
     private final MapClient mapClient;
     private final NodeRepository nodeRepository;
     private final GeometryFactory geometryFactory;
+    private final BuildingRepository buildingRepository;
 
-    public RouteCalculationService(RouteRepository routeRepository, MapClient mapClient, NodeRepository nodeRepository) {
+    public RouteCalculationService(RouteRepository routeRepository, MapClient mapClient, NodeRepository nodeRepository,
+                                   BuildingRepository buildingRepository) {
         this.routeRepository = routeRepository;
         this.mapClient = mapClient;
         this.nodeRepository = nodeRepository;
         this.geometryFactory = GeoUtils.getInstance();
+        this.buildingRepository = buildingRepository;
     }
 
     @AllArgsConstructor
@@ -83,6 +88,21 @@ public class RouteCalculationService {
         Node startNode = nodeMap.get(startNodeId);
         Node endNode = nodeMap.get(endNodeId);
 
+        if(startNode == null){
+            if(buildingRepository.existsByNodeIdAndUnivId(startNodeId, univId)){
+                throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+            }
+            throw new NodeException("Node Not Found", NODE_NOT_FOUND);
+        }
+        if(endNode == null){
+            if(buildingRepository.existsByNodeIdAndUnivId(endNodeId, univId)){
+                throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+            }
+            else{
+                throw new NodeException("Node Not Found", NODE_NOT_FOUND);
+            }
+        }
+
         //길찾기 알고리즘 수행
         Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap);
 
@@ -95,6 +115,9 @@ public class RouteCalculationService {
 
         //만약 시작 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외
         if(isBuildingRoute(startRoute)){
+            if(startRoute.getId().equals(endRoute.getId())){
+                throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
+            }
             startNode = startNode.getId().equals(startRoute.getNode1().getId()) ? startRoute.getNode2() : startRoute.getNode1();
             shortestRoutes.remove(0);
         }
@@ -130,6 +153,7 @@ public class RouteCalculationService {
                 firstNode = secondNode;
                 secondNode = temp;
             }
+            currentNode = secondNode;
 
             routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
         }
@@ -142,10 +166,6 @@ public class RouteCalculationService {
         List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
         return FastestRouteResDTO.of(hasCaution, totalDistance, totalCost, routeInfoDTOS, details);
-    }
-
-    private boolean isBuildingRoute(Route route){
-        return route.getCost() > BUILDING_ROUTE_COST - 1;
     }
 
     private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap){
@@ -230,9 +250,9 @@ public class RouteCalculationService {
         if (angle < 30) {
             return DirectionType.STRAIGHT;
         } else if (angle >= 30 && angle < 150) {
-            return (crossProduct > 0) ? DirectionType.RIGHT : DirectionType.LEFT;
+            return (crossProduct > 0) ? DirectionType.LEFT : DirectionType.RIGHT;
         } else if (angle >= 150 && angle < 180) {
-            return (crossProduct > 0) ? DirectionType.SHARP_RIGHT : DirectionType.SHARP_LEFT;
+            return (crossProduct > 0) ? DirectionType.SHARP_LEFT : DirectionType.SHARP_RIGHT;
         } else {
             return DirectionType.STRAIGHT;
         }
@@ -297,7 +317,7 @@ public class RouteCalculationService {
                 checkPointNodeCoordinates = nxt.getXY();
                 checkPointType = directionType;
                 accumulatedDistance = 0.0;
-                checkPointCautionFactors.clear();
+                checkPointCautionFactors = Collections.emptyList();
             }
 
             now = nxt;
@@ -409,6 +429,7 @@ public class RouteCalculationService {
         }
         createdNodes.add(startNode);
 
+        // 기존에 저장된 노드와 일치하거나 or 새로운 노드와 겹칠 경우 -> 동일한 것으로 판단
         for (int i = 1; i < requests.size(); i++) {
             CreateRouteReqDTO cur = requests.get(i);
 
@@ -432,27 +453,28 @@ public class RouteCalculationService {
                 .build();
 
             createdNodes.add(curNode);
+            nodeMap.putIfAbsent(curNode.getNodeKey(), curNode);
         }
 
         // 2. 두번째 노드 ~ N-1번째 노드
         // 현재 노드와 다음 노드가 기존 route와 겹치는지 확인
-        checkForRouteIntersections(createdNodes, strTree, nodeMap);
+        List<Node> crossCheckedNodes = checkForRouteIntersections(createdNodes, strTree, nodeMap);
 
         // 3. 자가 크로스 or 중복점 (첫점과 끝점 동일) 확인
-        List<Node> checkedSelfRouteCrossNodes = checkSelfRouteCross(createdNodes);
+        List<Node> selfCrossCheckedNodes = checkSelfRouteCross(crossCheckedNodes);
 
-        return checkedSelfRouteCrossNodes;
+        return selfCrossCheckedNodes;
     }
 
-    private void checkForRouteIntersections(List<Node> nodes, STRtree strTree, Map<String, Node> nodeMap) {
+    private List<Node> checkForRouteIntersections(List<Node> nodes, STRtree strTree, Map<String, Node> nodeMap) {
         ListIterator<Node> iterator = nodes.listIterator();
-        if (!iterator.hasNext()) return;
+        if (!iterator.hasNext()) return Collections.emptyList();
         Node prev = iterator.next();
 
         while (iterator.hasNext()) {
             Node cur = iterator.next();
             LineString intersectLine = findIntersectLineString(prev.getCoordinates().getCoordinate(), cur.getCoordinates()
-                .getCoordinate(), strTree);
+                .getCoordinate(), strTree, false);
             if (intersectLine != null) {
                 Node midNode = getClosestNode(intersectLine, prev, cur, nodeMap);
                 midNode.setCore(true);
@@ -462,67 +484,63 @@ public class RouteCalculationService {
             }
             prev = cur;
         }
+
+        return nodes;
     }
 
 
     private List<Node> checkSelfRouteCross(List<Node> nodes) {
-
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
             throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
 
-        STRtree strTree = new STRtree();
+        ListIterator<Node> iterator = nodes.listIterator();
+        if (!iterator.hasNext()) return Collections.emptyList();
+
+        Node prev = iterator.next();
         Map<String, Node> nodeMap = new HashMap<>();
 
-        for (int i = 0; i < nodes.size() - 1; i++) {
-            Node curNode = nodes.get(i);
-            Node nextNode = nodes.get(i + 1);
-            LineString line = geometryFactory.createLineString(
-                new Coordinate[] {curNode.getCoordinates().getCoordinate(), nextNode.getCoordinates().getCoordinate()});
-            Envelope envelope = line.getEnvelopeInternal();  // MBR 생성
-            strTree.insert(envelope, line);
+        while(iterator.hasNext()){
+            STRtree strTree = new STRtree();
 
-            nodeMap.putIfAbsent(curNode.getNodeKey(), curNode);
-            nodeMap.putIfAbsent(nextNode.getNodeKey(), nextNode);
-        }
+            int last = iterator.nextIndex();
+            for (int i = 0; i < last; i++) {
+                Node prevCurNode = nodes.get(i);
+                Node prevNextNode = nodes.get(i + 1);
+                LineString line = geometryFactory.createLineString(
+                    new Coordinate[] {prevCurNode.getCoordinates().getCoordinate(), prevNextNode.getCoordinates().getCoordinate()});
+                Envelope envelope = line.getEnvelopeInternal();  // MBR 생성
+                strTree.insert(envelope, line);
 
-        for (int i = 0; i < nodes.size() - 1; i++) {
-            Node curNode = nodes.get(i);
-            Node nextNode = nodes.get(i + 1);
-
-            LineString intersectLine = findIntersectLineString(curNode.getCoordinates().getCoordinate(),
-                nextNode.getCoordinates().getCoordinate(), strTree);
-
-            if (intersectLine != null) {
-                Coordinate[] coordinates = intersectLine.getCoordinates();
-
-                double distance1 =
-                    curNode.getCoordinates().getCoordinate().distance(coordinates[0]) + nextNode.getCoordinates()
-                        .getCoordinate()
-                        .distance(coordinates[0]);
-                double distance2 =
-                    curNode.getCoordinates().getCoordinate().distance(coordinates[1]) + nextNode.getCoordinates()
-                        .getCoordinate()
-                        .distance(coordinates[1]);
-
-                Node midNode;
-
-                if (distance1 <= distance2) {
-                    midNode = nodeMap.get(getNodeKey(coordinates[0]));
-                } else {
-                    midNode = nodeMap.get(getNodeKey(coordinates[1]));
-                }
-
-                midNode.setCore(true);
-
-                nodes.add(midNode);
+                nodeMap.putIfAbsent(prevCurNode.getNodeKey(), prevCurNode);
+                nodeMap.putIfAbsent(prevNextNode.getNodeKey(), prevNextNode);
             }
+
+            Node cur = iterator.next();
+            LineString intersectLine = findIntersectLineString(prev.getCoordinates().getCoordinate(),
+				cur.getCoordinates().getCoordinate(), strTree, true);
+            if(intersectLine != null){
+                Node midNode = getClosestNode(intersectLine, prev, cur, nodeMap);
+                midNode.setCore(true);
+                iterator.previous();
+                iterator.add(midNode);
+                cur = midNode;
+            }
+            prev = cur;
         }
 
         return nodes;
     }
 
-    private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree) {
+    /**
+     * @param start 시작 좌표
+     * @param end 끝 좌표
+     * @implSpec 선분과 겹치는 선분이 있는지 확인
+     * @return 겹치는 선분이 있으면 해당 선분 반환, 없으면 null 반환
+     *
+     * @implNote
+     * */
+    private LineString findIntersectLineString(Coordinate start, Coordinate end, STRtree strTree, boolean isSelfCheck) {
         LineString newLine = geometryFactory.createLineString(new Coordinate[] {start, end});
         Envelope searchEnvelope = newLine.getEnvelopeInternal();
 
@@ -535,11 +553,6 @@ public class RouteCalculationService {
         // 2️⃣ 실제로 선분이 겹치는지 확인
         for (Object obj : candidates) {
             LineString existingLine = (LineString)obj;
-
-            // 동일한 선이면 continue
-            if(existingLine.equalsTopo(newLine)){
-                continue;
-            }
 
             if (existingLine.intersects(newLine)) {
                 Geometry intersection = existingLine.intersection(newLine);
@@ -561,6 +574,10 @@ public class RouteCalculationService {
                     }
                 }
                 else if (intersection instanceof LineString) {
+                    if (isSelfCheck && existingLine.equalsTopo(newLine)) {
+                        continue;
+                    }
+
                     throw new RouteCalculationException("intersection is only allowed by point", INTERSECTION_ONLY_ALLOWED_POINT);
                 }
 

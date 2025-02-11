@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.route.controller;
 
+import com.softeer5.uniro_backend.route.dto.request.CreateBuildingRouteReqDTO;
 import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.dto.response.GetAllRoutesResDTO;
@@ -8,12 +9,14 @@ import com.softeer5.uniro_backend.route.dto.response.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
 import com.softeer5.uniro_backend.route.service.RouteCalculationService;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.softeer5.uniro_backend.route.service.RouteService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -49,7 +52,7 @@ public class RouteController implements RouteApi {
 	@PostMapping("/{univId}/route/risk/{routeId}")
 	public ResponseEntity<Void> updateRisk (@PathVariable("univId") Long univId,
 									   @PathVariable("routeId") Long routeId,
-									   @RequestBody PostRiskReqDTO postRiskReqDTO){
+									   @RequestBody @Valid PostRiskReqDTO postRiskReqDTO){
 		routeService.updateRisk(univId,routeId,postRiskReqDTO);
 		return ResponseEntity.ok().build();
 	}
@@ -57,7 +60,7 @@ public class RouteController implements RouteApi {
 	@Override
 	@PostMapping("/{univId}/route")
 	public ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
-											 @RequestBody CreateRoutesReqDTO routes){
+											 @RequestBody @Valid CreateRoutesReqDTO routes){
 		routeCalculationService.createRoute(univId, routes);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
@@ -70,4 +73,13 @@ public class RouteController implements RouteApi {
 		FastestRouteResDTO fastestRouteResDTO = routeCalculationService.calculateFastestRoute(univId, startNodeId, endNodeId);
 		return ResponseEntity.ok(fastestRouteResDTO);
 	}
+
+	@Override
+	@PostMapping("/{univId}/routes/building")
+	public ResponseEntity<Void> createBuildingRoute(@PathVariable("univId") Long univId,
+													@RequestBody @Valid CreateBuildingRouteReqDTO createBuildingRouteReqDTO){
+		routeService.createBuildingRoute(univId,createBuildingRouteReqDTO);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
+
 }

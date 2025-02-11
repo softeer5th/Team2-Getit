@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @Getter
-@Schema(name = "CoreRouteResDTO", description = "코어 루트 정보 DTO")
+@Schema(name = "BuildingRouteResDTO", description = "빌딩 루트 정보 DTO")
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class CoreRouteResDTO {
+public class BuildingRouteResDTO {
 
     @Schema(description = "코어 노드 1", example = "32")
     private final Long coreNode1Id;
@@ -21,7 +21,7 @@ public class CoreRouteResDTO {
     @Schema(description = "간선 정보", example = "")
     private final List<RouteCoordinatesInfoResDTO> routes;
 
-    public static CoreRouteResDTO of(Long startNode, Long endNode, List<RouteCoordinatesInfoResDTO> routes){
-        return new CoreRouteResDTO(startNode, endNode, routes);
+    public static BuildingRouteResDTO of(Long startNode, Long endNode, List<RouteCoordinatesInfoResDTO> routes){
+        return new BuildingRouteResDTO(startNode, endNode, routes);
     }
 }

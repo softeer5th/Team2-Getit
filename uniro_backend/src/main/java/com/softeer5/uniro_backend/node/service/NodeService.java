@@ -3,6 +3,13 @@ package com.softeer5.uniro_backend.node.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
+import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
+import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.node.dto.request.CreateBuildingNodeReqDTO;
+import com.softeer5.uniro_backend.node.entity.Building;
+import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.node.repository.NodeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,17 +18,21 @@ import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.node.dto.BuildingNode;
-import com.softeer5.uniro_backend.node.dto.GetBuildingResDTO;
-import com.softeer5.uniro_backend.node.dto.SearchBuildingResDTO;
+import com.softeer5.uniro_backend.node.dto.response.GetBuildingResDTO;
+import com.softeer5.uniro_backend.node.dto.response.SearchBuildingResDTO;
 import com.softeer5.uniro_backend.node.repository.BuildingRepository;
 
 import lombok.RequiredArgsConstructor;
+
+import static com.softeer5.uniro_backend.common.utils.GeoUtils.convertDoubleToPoint;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class NodeService {
 	private final BuildingRepository buildingRepository;
+	private final NodeRepository nodeRepository;
+	private final MapClient mapClient;
 
 	public List<GetBuildingResDTO> getBuildings(
 		Long univId, int level,
@@ -54,5 +65,26 @@ public class NodeService {
 
 		return GetBuildingResDTO.of(buildingNode.get().getBuilding(), buildingNode.get().getNode());
 	}
+
+	@RevisionOperation(RevisionOperationType.CREATE_BUILDING_NODE)
+	@Transactional
+    public void createBuildingNode(Long univId, CreateBuildingNodeReqDTO createBuildingNodeReqDTO) {
+		Node node = Node.builder()
+				.coordinates(convertDoubleToPoint(createBuildingNodeReqDTO.getLng(), createBuildingNodeReqDTO.getLat()))
+				.isCore(false)
+				.univId(univId).build();
+		mapClient.fetchHeights(List.of(node));
+		nodeRepository.save(node);
+
+		Building building = Building.builder()
+				.phoneNumber(createBuildingNodeReqDTO.getPhoneNumber())
+				.address(createBuildingNodeReqDTO.getAddress())
+				.name(createBuildingNodeReqDTO.getBuildingName())
+				.imageUrl(createBuildingNodeReqDTO.getBuildingImageUrl())
+				.level(createBuildingNodeReqDTO.getLevel())
+				.nodeId(node.getId())
+				.univId(univId).build();
+		buildingRepository.save(building);
+    }
 
 }

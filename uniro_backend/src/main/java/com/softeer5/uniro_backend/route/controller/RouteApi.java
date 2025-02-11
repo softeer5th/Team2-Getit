@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.route.controller;
 
+import com.softeer5.uniro_backend.route.dto.request.CreateBuildingRouteReqDTO;
 import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.route.dto.response.FastestRouteResDTO;
 import com.softeer5.uniro_backend.route.dto.response.GetAllRoutesResDTO;
@@ -7,6 +8,7 @@ import com.softeer5.uniro_backend.route.dto.response.GetRiskResDTO;
 import com.softeer5.uniro_backend.route.dto.response.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -69,4 +71,13 @@ public interface RouteApi {
 	ResponseEntity<FastestRouteResDTO> calculateFastestRoute(@PathVariable("univId") Long univId,
 																	@RequestParam Long startNodeId,
 																	@RequestParam Long endNodeId);
+
+
+	@Operation(summary = "빌딩 노드와 연결된 길 생성")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "빌딩 노드와 연결된 길 생성 성공"),
+			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	ResponseEntity<Void> createBuildingRoute(@PathVariable("univId") Long univId,
+													@RequestBody @Valid CreateBuildingRouteReqDTO createBuildingRouteReqDTO);
 }
