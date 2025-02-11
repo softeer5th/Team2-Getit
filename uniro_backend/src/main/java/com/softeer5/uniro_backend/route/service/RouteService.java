@@ -20,20 +20,13 @@ import com.softeer5.uniro_backend.node.entity.Node;
 import com.softeer5.uniro_backend.node.repository.BuildingRepository;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
 import com.softeer5.uniro_backend.route.dto.request.CreateBuildingRouteReqDTO;
+import com.softeer5.uniro_backend.route.dto.response.*;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.softeer5.uniro_backend.route.dto.response.CoreRouteResDTO;
-import com.softeer5.uniro_backend.route.dto.response.GetAllRoutesResDTO;
-import com.softeer5.uniro_backend.route.dto.response.GetCautionResDTO;
-import com.softeer5.uniro_backend.route.dto.response.GetDangerResDTO;
-import com.softeer5.uniro_backend.route.dto.response.GetRiskResDTO;
-import com.softeer5.uniro_backend.route.dto.response.GetRiskRoutesResDTO;
-import com.softeer5.uniro_backend.route.dto.response.NodeInfoResDTO;
 import com.softeer5.uniro_backend.route.dto.request.PostRiskReqDTO;
-import com.softeer5.uniro_backend.route.dto.response.RouteCoordinatesInfoResDTO;
 import com.softeer5.uniro_backend.route.entity.Route;
 import com.softeer5.uniro_backend.route.repository.RouteRepository;
 
@@ -59,14 +52,20 @@ public class RouteService {
 		//인접 리스트
 		Map<Long, List<Route>> adjMap = new HashMap<>();
 		Map<Long, Node> nodeMap = new HashMap<>();
+		List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
 		//BFS를 시작할 노드
 		Node startNode = null;
 		for(Route route : routes) {
-			if(isBuildingRoute(route))continue;
-			adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
-			adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
 			nodeMap.put(route.getNode1().getId(), route.getNode1());
 			nodeMap.put(route.getNode2().getId(), route.getNode2());
+			if(isBuildingRoute(route)) {
+				List<RouteCoordinatesInfoResDTO> routeCoordinates = new ArrayList<>();
+				routeCoordinates.add(RouteCoordinatesInfoResDTO.of(route.getId(), route.getNode1().getId(),route.getNode2().getId()));
+				buildingRoutes.add(BuildingRouteResDTO.of(route.getNode1().getId(), route.getNode2().getId(), routeCoordinates));
+				continue;
+			}
+			adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
+			adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
 
 			if(startNode != null) continue;
 			if(route.getNode1().isCore()) startNode = route.getNode1();
@@ -104,7 +103,7 @@ public class RouteService {
 
 		}
 
-		return GetAllRoutesResDTO.of(nodeInfos, getCoreRoutes(adjMap, startNode));
+		return GetAllRoutesResDTO.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
 	}
 
 	// coreRoute를 만들어주는 메서드

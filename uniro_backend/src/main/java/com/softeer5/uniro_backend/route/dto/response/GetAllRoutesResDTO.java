@@ -18,8 +18,11 @@ public class GetAllRoutesResDTO {
     private final List<NodeInfoResDTO> nodeInfos;
     @Schema(description = "루트 정보 (id, startNodeId, endNodeId)", example = "")
     private final List<CoreRouteResDTO> coreRoutes;
+    @Schema(description = "빌딩 루트 정보 (id, startNodeId, endNodeId)", example = "")
+    private final List<BuildingRouteResDTO> buildingRoutes;
 
-    public static GetAllRoutesResDTO of(List<NodeInfoResDTO> nodeInfos, List<CoreRouteResDTO> coreRoutes){
-        return new GetAllRoutesResDTO(nodeInfos, coreRoutes);
+    public static GetAllRoutesResDTO of(List<NodeInfoResDTO> nodeInfos, List<CoreRouteResDTO> coreRoutes,
+                                        List<BuildingRouteResDTO> buildingRoutes){
+        return new GetAllRoutesResDTO(nodeInfos, coreRoutes, buildingRoutes);
     }
 }
