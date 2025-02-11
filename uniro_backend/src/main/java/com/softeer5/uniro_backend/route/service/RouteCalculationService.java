@@ -112,6 +112,9 @@ public class RouteCalculationService {
 
         //만약 시작 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외
         if(isBuildingRoute(startRoute)){
+            if(startRoute.getId().equals(endRoute.getId())){
+                throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
+            }
             startNode = startNode.getId().equals(startRoute.getNode1().getId()) ? startRoute.getNode2() : startRoute.getNode1();
             shortestRoutes.remove(0);
         }
