@@ -72,6 +72,7 @@ public class Route {
 	private Set<DangerFactor> dangerFactors = new HashSet<>();
 
 	@CreatedDate
+	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
 	public List<CautionFactor> getCautionFactorsByList(){
