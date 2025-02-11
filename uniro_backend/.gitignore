@@ -39,4 +39,4 @@ out/
 ### properties
 *.properties
 *.sql
-src/test/resources/sql/*.sql
+!src/test/resources/sql/*.sql
