@@ -11,14 +11,12 @@ import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
-import com.softeer5.uniro_backend.map.dto.response.FastestRouteResDTO;
-import com.softeer5.uniro_backend.map.dto.response.RouteDetailResDTO;
-import com.softeer5.uniro_backend.map.dto.response.RouteInfoResDTO;
 import com.softeer5.uniro_backend.map.entity.CautionFactor;
 import com.softeer5.uniro_backend.map.entity.DirectionType;
 import com.softeer5.uniro_backend.map.entity.Route;
@@ -329,6 +327,63 @@ public class RouteCalculationService {
     private Map<String,Double> getCenter(Node n1, Node n2){
         return Map.of("lat", (n1.getCoordinates().getY() + n2.getCoordinates().getY())/2
                 , "lng", (n1.getCoordinates().getX() + n2.getCoordinates().getX())/2);
+    }
+
+    // coreRoute를 만들어주는 메서드
+    public List<CoreRouteResDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
+        List<CoreRouteResDTO> result = new ArrayList<>();
+        // core node간의 BFS 할 때 방문여부를 체크하는 set
+        Set<Long> visitedCoreNodes = new HashSet<>();
+        // 길 중복을 처리하기 위한 set
+        Set<Long> routeSet = new HashSet<>();
+
+        // BFS 전처리
+        Queue<Node> nodeQueue = new LinkedList<>();
+        nodeQueue.add(startNode);
+        visitedCoreNodes.add(startNode.getId());
+
+        // BFS
+        while(!nodeQueue.isEmpty()) {
+            // 현재 노드 (코어노드)
+            Node now = nodeQueue.poll();
+            for(Route r : adjMap.get(now.getId())) {
+                // 만약 now-nxt를 연결하는 길이 이미 등록되어있다면, 해당 coreRoute는 이미 등록된 것이므로 continue;
+                if(routeSet.contains(r.getId())) continue;
+
+                // 다음 노드 (서브노드일수도 있고 코어노드일 수도 있음)
+                Node currentNode = now.getId().equals(r.getNode1().getId()) ? r.getNode2() : r.getNode1();
+
+                // 코어루트를 이루는 node들을 List로 저장
+                List<RouteCoordinatesInfoResDTO> coreRoute = new ArrayList<>();
+                coreRoute.add(RouteCoordinatesInfoResDTO.of(r.getId(),now.getId(), currentNode.getId()));
+                routeSet.add(r.getId());
+
+                while (true) {
+                    //코어노드를 만나면 queue에 넣을지 판단한 뒤 종료 (제자리로 돌아오는 경우도 포함)
+                    if (currentNode.isCore() || currentNode.getId().equals(now.getId())) {
+                        if (!visitedCoreNodes.contains(currentNode.getId())) {
+                            visitedCoreNodes.add(currentNode.getId());
+                            nodeQueue.add(currentNode);
+                        }
+                        break;
+                    }
+                    // 끝점인 경우 종료
+                    if (adjMap.get(currentNode.getId()).size() == 1) break;
+
+                    // 서브노드에 연결된 두 route 중 방문하지 않았던 route를 선택한 뒤, currentNode를 업데이트
+                    for (Route R : adjMap.get(currentNode.getId())) {
+                        if (routeSet.contains(R.getId())) continue;
+                        Node nextNode = R.getNode1().getId().equals(currentNode.getId()) ? R.getNode2() : R.getNode1();
+                        coreRoute.add(RouteCoordinatesInfoResDTO.of(R.getId(), currentNode.getId(), nextNode.getId()));
+                        routeSet.add(R.getId());
+                        currentNode = nextNode;
+                    }
+                }
+                result.add(CoreRouteResDTO.of(now.getId(), currentNode.getId(), coreRoute));
+            }
+
+        }
+        return result;
     }
 
     @Transactional
