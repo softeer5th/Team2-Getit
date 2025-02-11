@@ -54,5 +54,5 @@ export const postReportRoute = (
 		coordinates: Coord[];
 	},
 ): Promise<boolean> => {
-	return postFetch<void, Coord[] | NodeId | null>(`/1/route`, body);
+	return postFetch<void, Coord[] | NodeId | null>(`/${univId}/route`, body);
 };
