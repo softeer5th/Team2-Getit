@@ -73,28 +73,39 @@ export default function MapPage() {
 	const navigate = useNavigate();
 	if (!university) return;
 
-	const [FailModal, { status, data, refetch: findFastRoute }] = useQueryError({
-		queryKey: ['fastRoute', university.id, origin?.nodeId, destination?.nodeId],
-		queryFn: () => getNavigationResult(university.id, origin ? origin?.nodeId : -1, destination ? destination?.nodeId : -1),
-		enabled: false,
-		retry: 0,
-	},
+	const [FailModal, { status, data, refetch: findFastRoute }] = useQueryError(
+		{
+			queryKey: ["fastRoute", university.id, origin?.nodeId, destination?.nodeId],
+			queryFn: () =>
+				getNavigationResult(
+					university.id,
+					origin ? origin?.nodeId : -1,
+					destination ? destination?.nodeId : -1,
+				),
+			enabled: false,
+			retry: 0,
+		},
 		undefined,
-		() => { navigate('/result') },
+		() => {
+			navigate("/result");
+		},
 		{
 			fallback: {
 				400: {
-					mainTitle: "잘못된 요청입니다.", subTitle: ["새로고침 후 다시 시도 부탁드립니다."]
+					mainTitle: "잘못된 요청입니다.",
+					subTitle: ["새로고침 후 다시 시도 부탁드립니다."],
 				},
 				404: {
-					mainTitle: "해당 경로를 찾을 수 없습니다.", subTitle: ["해당 건물이 길이랑 연결되지 않았습니다."]
+					mainTitle: "해당 경로를 찾을 수 없습니다.",
+					subTitle: ["해당 건물이 길이랑 연결되지 않았습니다."],
 				},
 				422: {
-					mainTitle: "해당 경로를 찾을 수 없습니다.", subTitle: ["위험 요소 버튼을 클릭하여,", "통행할 수 없는 원인을 파악하실 수 있습니다."]
-				}
-			}
-		}
-	)
+					mainTitle: "해당 경로를 찾을 수 없습니다.",
+					subTitle: ["위험 요소 버튼을 클릭하여,", "통행할 수 없는 원인을 파악하실 수 있습니다."],
+				},
+			},
+		},
+	);
 
 	const results = useSuspenseQueries({
 		queries: [
@@ -357,17 +368,15 @@ export default function MapPage() {
 		} else {
 			if (isSelect) {
 				if (marker.type === Markers.DANGER) {
-					const key = marker.factors && (marker.factors[0] as DangerIssueType);
 					marker.element.content = createMarkerElement({
 						type: marker.type,
-						title: key && DangerIssue[key],
+						title: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
 						hasTopContent: true,
 					});
 				} else if (marker.type === Markers.CAUTION) {
-					const key = marker.factors && (marker.factors[0] as CautionIssueType);
 					marker.element.content = createMarkerElement({
 						type: marker.type,
-						title: key && CautionIssue[key],
+						title: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
 						hasTopContent: true,
 					});
 				}
