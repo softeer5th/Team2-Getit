@@ -357,17 +357,15 @@ export default function MapPage() {
 		} else {
 			if (isSelect) {
 				if (marker.type === Markers.DANGER) {
-					const key = marker.factors && (marker.factors[0] as DangerIssueType);
 					marker.element.content = createMarkerElement({
 						type: marker.type,
-						title: key && DangerIssue[key],
+						title: (marker.factors as DangerIssueType[]).map(key => DangerIssue[key]),
 						hasTopContent: true,
 					});
 				} else if (marker.type === Markers.CAUTION) {
-					const key = marker.factors && (marker.factors[0] as CautionIssueType);
 					marker.element.content = createMarkerElement({
 						type: marker.type,
-						title: key && CautionIssue[key],
+						title: (marker.factors as CautionIssueType[]).map(key => CautionIssue[key]),
 						hasTopContent: true,
 					});
 				}

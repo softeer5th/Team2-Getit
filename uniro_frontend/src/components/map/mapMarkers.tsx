@@ -1,5 +1,6 @@
 import { Markers } from "../../constant/enum/markerEnum";
 import { MarkerTypes } from "../../data/types/enum";
+import { animate } from "framer-motion";
 
 const markerImages = import.meta.glob("/src/assets/markers/*.svg", { eager: true });
 
@@ -36,6 +37,83 @@ function createTextElement(type: MarkerTypes, title: string): HTMLElement {
 			return markerTitle;
 	}
 }
+
+
+
+
+function createAnimatedTextElement(type: MarkerTypes, title: string[]): HTMLElement {
+	const markerTitle = document.createElement("div");
+
+	const _titles = [...title, title[0]]
+
+	// 각 title을 factorTitle로 만들어서 markerTitle에 추가
+	const elements: HTMLElement[] = [];
+	for (let _title of _titles) {
+		const factorTitle = document.createElement("p");
+		factorTitle.className = 'block w-[128px] h-[22px] mb-4';
+		factorTitle.innerText = _title;
+		markerTitle.appendChild(factorTitle);
+		elements.push(factorTitle);
+	}
+
+	switch (type) {
+		case Markers.CAUTION:
+			markerTitle.className =
+				"overflow-hidden w-[160px] h-[38px] py-2 px-4 mb-2 text-kor-body3 font-semibold text-gray-100 bg-system-orange text-center rounded-200";
+			break;
+		case Markers.DANGER:
+			markerTitle.className =
+				"overflow-hidden w-[160px] h-[38px] py-2 px-4 mb-2 text-kor-body3 font-semibold text-gray-100 bg-system-red text-center rounded-200";
+			break;
+		case Markers.BUILDING:
+			markerTitle.className =
+				"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-gray-900 text-center rounded-200";
+			break;
+		case Markers.SELECTED_BUILDING:
+			markerTitle.className =
+				"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
+			break;
+		case Markers.ORIGIN:
+			markerTitle.className =
+				"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
+			break;
+		case Markers.DESTINATION:
+			markerTitle.className =
+				"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
+			break;
+		default:
+			break;
+
+	}
+
+	const len = _titles.length;
+
+	if (len > 2) {
+		for (let i = 1; i < len; i++) {
+			elements.forEach((el, index) => {
+				setTimeout(() => {
+					animate(el, {
+						y: [-38 * (i - 1), -38 * i]
+					}, {
+						duration: 0.5,
+					});
+
+					if (i === len - 1) {
+						setTimeout(() => {
+							animate(el, {
+								y: [-38 * (len - 1), 0]
+							},
+								{ duration: 0 })
+						}, 1000)
+					}
+				}, 1000 * i);
+			});
+		}
+	}
+
+	return markerTitle;
+}
+
 
 function getImage(type: MarkerTypes): string {
 	return (markerImages[`/src/assets/markers/${type}.svg`] as { default: string })?.default;
@@ -99,7 +177,7 @@ export default function createMarkerElement({
 }: {
 	type: MarkerTypes;
 	className?: string;
-	title?: string;
+	title?: string | string[];
 	hasTopContent?: boolean;
 	hasAnimation?: boolean;
 	number?: number;
@@ -113,8 +191,10 @@ export default function createMarkerElement({
 	const markerImage = createImageElement(type);
 
 	if (title) {
-		const markerTitle = createTextElement(type, title);
+		const markerTitle = createTextElement(type, title as string);
 		if (hasTopContent) {
+
+			const markerTitle = createAnimatedTextElement(type, title as string[]);
 			container.appendChild(markerTitle);
 			container.appendChild(markerImage);
 			return attachAnimation(container, hasAnimation);
