@@ -12,6 +12,7 @@ import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationExcept
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.node.repository.BuildingRepository;
 import com.softeer5.uniro_backend.node.repository.NodeRepository;
 import com.softeer5.uniro_backend.route.dto.request.CreateRouteReqDTO;
 import com.softeer5.uniro_backend.route.dto.request.CreateRoutesReqDTO;
@@ -43,12 +44,15 @@ public class RouteCalculationService {
     private final MapClient mapClient;
     private final NodeRepository nodeRepository;
     private final GeometryFactory geometryFactory;
+    private final BuildingRepository buildingRepository;
 
-    public RouteCalculationService(RouteRepository routeRepository, MapClient mapClient, NodeRepository nodeRepository) {
+    public RouteCalculationService(RouteRepository routeRepository, MapClient mapClient, NodeRepository nodeRepository,
+                                   BuildingRepository buildingRepository) {
         this.routeRepository = routeRepository;
         this.mapClient = mapClient;
         this.nodeRepository = nodeRepository;
         this.geometryFactory = GeoUtils.getInstance();
+        this.buildingRepository = buildingRepository;
     }
 
     @AllArgsConstructor
@@ -84,8 +88,16 @@ public class RouteCalculationService {
         Node startNode = nodeMap.get(startNodeId);
         Node endNode = nodeMap.get(endNodeId);
 
-        if(startNode == null || endNode == null){
+        if(startNode == null){
             throw new NodeException("Node Not Found", NODE_NOT_FOUND);
+        }
+        if(endNode == null){
+            if(buildingRepository.existsByNodeIdAndUnivId(endNodeId, univId)){
+                throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+            }
+            else{
+                throw new NodeException("Node Not Found", NODE_NOT_FOUND);
+            }
         }
 
         //길찾기 알고리즘 수행
