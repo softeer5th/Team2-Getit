@@ -46,15 +46,18 @@ public class AdminService {
         RevInfo revInfo = revInfoRepository.findById(versionId)
             .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
 
-        List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(versionId);
-        List<Node> revNodes = nodeAuditRepository.getAllNodesAtRevision(versionId);
+        List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
+        List<Node> revNodes = nodeAuditRepository.getAllNodesAtRevision(univId, versionId);
 
         // TODO: 시점 확인 필요
         routeRepository.deleteAllByCreatedAt(univId, revInfo.getRevTimeStamp());
         nodeRepository.deleteAllByCreatedAt(univId, revInfo.getRevTimeStamp());
-        // TODO : rev_info 삭제
-        // TODO : route_aud 삭제
-        // TODO : node_aud 삭제
+
+        // TODO: 삭제 시점 및 삭제 순서 확인
+        // TODO: 빌딩 노드에 대한 고민
+        routeAuditRepository.deleteAllAfterVersionId(univId, versionId);
+        nodeAuditRepository.deleteAllAfterVersionId(univId, versionId);
+        revInfoRepository.deleteAllAfterVersionId(univId, versionId);
 
         List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
@@ -80,7 +83,7 @@ public class AdminService {
             Node currentNode = nodeMap.get(revNode.getId());
 
             if (currentNode != null) {
-                currentNode.setCore(revNode.isCore());
+                currentNode.updateFromRevision(revNode.isCore());
             }
         }
 
