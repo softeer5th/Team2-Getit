@@ -13,7 +13,7 @@ import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.building.repository.BuildingRepository;
-import com.softeer5.uniro_backend.building.repository.NodeRepository;
+import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.dto.response.FastestRouteResDTO;

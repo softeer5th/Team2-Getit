@@ -9,7 +9,7 @@ import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.building.dto.request.CreateBuildingNodeReqDTO;
 import com.softeer5.uniro_backend.building.entity.Building;
 import com.softeer5.uniro_backend.map.entity.Node;
-import com.softeer5.uniro_backend.building.repository.NodeRepository;
+import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,7 @@ import static com.softeer5.uniro_backend.common.utils.GeoUtils.convertDoubleToPo
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class NodeService {
+public class BuildingService {
 	private final BuildingRepository buildingRepository;
 	private final NodeRepository nodeRepository;
 	private final MapClient mapClient;

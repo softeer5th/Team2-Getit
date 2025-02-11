@@ -18,7 +18,7 @@ import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationExcept
 import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
 import com.softeer5.uniro_backend.map.entity.Node;
-import com.softeer5.uniro_backend.building.repository.NodeRepository;
+import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "간선 및 위험&주의 요소 관련 Api")
-public interface RouteApi {
+public interface MapApi {
 
 	@Operation(summary = "모든 지도(노드,루트) 조회")
 	@ApiResponses(value = {

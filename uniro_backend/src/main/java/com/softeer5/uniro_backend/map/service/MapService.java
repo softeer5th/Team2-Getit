@@ -18,7 +18,7 @@ import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.map.entity.Node;
 
 import com.softeer5.uniro_backend.building.repository.BuildingRepository;
-import com.softeer5.uniro_backend.building.repository.NodeRepository;
+import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.dto.request.CreateBuildingRouteReqDTO;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import org.locationtech.jts.geom.Coordinate;
@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class RouteService {
+public class MapService {
 	private final RouteRepository routeRepository;
 	private final NodeRepository nodeRepository;
 	private final BuildingRepository buildingRepository;

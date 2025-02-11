@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.*;
 
 import com.softeer5.uniro_backend.building.dto.response.GetBuildingResDTO;
 import com.softeer5.uniro_backend.building.dto.response.SearchBuildingResDTO;
-import com.softeer5.uniro_backend.building.service.NodeService;
+import com.softeer5.uniro_backend.building.service.BuildingService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-public class NodeController implements NodeApi {
-	private final NodeService nodeService;
+public class BuildingController implements BuildingApi {
+	private final BuildingService buildingService;
 
 	@Override
 	@GetMapping("/{univId}/nodes/buildings")
@@ -29,7 +29,7 @@ public class NodeController implements NodeApi {
 		@RequestParam(value = "right-down-lat") double rightDownLat,
 		@RequestParam(value = "right-down-lng") double rightDownLng
 	) {
-		List<GetBuildingResDTO> buildingResDTOS = nodeService.getBuildings(univId, level, leftUpLat, leftUpLng,
+		List<GetBuildingResDTO> buildingResDTOS = buildingService.getBuildings(univId, level, leftUpLat, leftUpLng,
 			rightDownLat, rightDownLng);
 		return ResponseEntity.ok().body(buildingResDTOS);
 	}
@@ -42,7 +42,7 @@ public class NodeController implements NodeApi {
 		@RequestParam(value = "cursor-id", required = false) Long cursorId,
 		@RequestParam(value = "page-size", required = false, defaultValue = "6") Integer pageSize
 	) {
-		SearchBuildingResDTO searchBuildingResDTO = nodeService.searchBuildings(univId, name, cursorId, pageSize);
+		SearchBuildingResDTO searchBuildingResDTO = buildingService.searchBuildings(univId, name, cursorId, pageSize);
 		return ResponseEntity.ok().body(searchBuildingResDTO);
 	}
 
@@ -52,7 +52,7 @@ public class NodeController implements NodeApi {
 		@PathVariable("univId") Long univId,
 		@PathVariable("nodeId") Long nodeId) {
 
-		GetBuildingResDTO buildingResDTO = nodeService.getBuilding(nodeId);
+		GetBuildingResDTO buildingResDTO = buildingService.getBuilding(nodeId);
 		return ResponseEntity.ok().body(buildingResDTO);
 	}
 
@@ -60,7 +60,7 @@ public class NodeController implements NodeApi {
 	@PostMapping("{univId}/nodes/building")
 	public ResponseEntity<Void> createBuildingNode(@PathVariable("univId") Long univId,
 												   @RequestBody @Valid CreateBuildingNodeReqDTO createBuildingNodeReqDTO){
-		nodeService.createBuildingNode(univId, createBuildingNodeReqDTO);
+		buildingService.createBuildingNode(univId, createBuildingNodeReqDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 

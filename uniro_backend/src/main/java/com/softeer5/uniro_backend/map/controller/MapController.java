@@ -14,28 +14,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.softeer5.uniro_backend.map.service.RouteService;
+import com.softeer5.uniro_backend.map.service.MapService;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-public class RouteController implements RouteApi {
+public class MapController implements MapApi {
 
-	private final RouteService routeService;
+	private final MapService mapService;
 	private final RouteCalculationService routeCalculationService;
 
 	@Override
 	@GetMapping("/{univId}/routes")
 	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
-		GetAllRoutesResDTO allRoutes = routeService.getAllRoutes(univId);
+		GetAllRoutesResDTO allRoutes = mapService.getAllRoutes(univId);
 		return ResponseEntity.ok().body(allRoutes);
 	}
 
 	@Override
 	@GetMapping("/{univId}/routes/risks")
 	public ResponseEntity<GetRiskRoutesResDTO> getRiskRoutes(@PathVariable("univId") Long univId) {
-		GetRiskRoutesResDTO riskRoutes = routeService.getRiskRoutes(univId);
+		GetRiskRoutesResDTO riskRoutes = mapService.getRiskRoutes(univId);
 		return ResponseEntity.ok().body(riskRoutes);
 	}
 
@@ -43,7 +43,7 @@ public class RouteController implements RouteApi {
 	@GetMapping("/{univId}/routes/{routeId}/risk")
 	public ResponseEntity<GetRiskResDTO> getRisk(@PathVariable("univId") Long univId,
 												 @PathVariable(value = "routeId") Long routeId){
-		GetRiskResDTO riskResDTO = routeService.getRisk(univId, routeId);
+		GetRiskResDTO riskResDTO = mapService.getRisk(univId, routeId);
 		return ResponseEntity.ok().body(riskResDTO);
 	}
 
@@ -52,7 +52,7 @@ public class RouteController implements RouteApi {
 	public ResponseEntity<Void> updateRisk (@PathVariable("univId") Long univId,
 									   @PathVariable("routeId") Long routeId,
 									   @RequestBody @Valid PostRiskReqDTO postRiskReqDTO){
-		routeService.updateRisk(univId,routeId,postRiskReqDTO);
+		mapService.updateRisk(univId,routeId,postRiskReqDTO);
 		return ResponseEntity.ok().build();
 	}
 
@@ -77,7 +77,7 @@ public class RouteController implements RouteApi {
 	@PostMapping("/{univId}/routes/building")
 	public ResponseEntity<Void> createBuildingRoute(@PathVariable("univId") Long univId,
 													@RequestBody @Valid CreateBuildingRouteReqDTO createBuildingRouteReqDTO){
-		routeService.createBuildingRoute(univId,createBuildingRouteReqDTO);
+		mapService.createBuildingRoute(univId,createBuildingRouteReqDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 

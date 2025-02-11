@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "노드(코어노드, 서브노드, 건물노드) 관련 Api")
-public interface NodeApi {
+public interface BuildingApi {
 	@Operation(summary = "건물 노드 조회")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "건물 노드 조회 성공"),
