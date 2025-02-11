@@ -28,7 +28,7 @@ export const initializeMap = async (
 		draggable: true,
 		scrollwheel: true,
 		disableDoubleClickZoom: false,
-		gestureHandling: "auto",
+		gestureHandling: "greedy",
 		clickableIcons: false,
 		disableDefaultUI: true,
 		// restriction: {
