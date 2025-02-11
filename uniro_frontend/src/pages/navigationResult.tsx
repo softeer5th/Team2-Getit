@@ -64,11 +64,18 @@ const NavigationResultPage = () => {
 							requestOriginId,
 							requestDestinationId,
 						);
-						setOriginCoord(response.routes[0].node1.lng, response.routes[0].node1.lat);
-						setDestinationCoord(
-							response.routes[response.routes.length - 1].node1.lng,
-							response.routes[response.routes.length - 1].node1.lat,
-						);
+						// param으로 받아올 수 있는 ID들이 있으면 추가하고, 아니면 기존 Building의 좌표를 넣는다
+						if (originId) {
+							setOriginCoord(response.routes[0].node1.lng, response.routes[0].node1.lat);
+							return response;
+						}
+						if (destinationId) {
+							setDestinationCoord(
+								response.routes[response.routes.length - 1].node2.lng,
+								response.routes[response.routes.length - 1].node2.lat,
+							);
+							return response;
+						}
 						return response;
 					} catch (e) {
 						alert(`경로를 찾을 수 없습니다. (${e})`);
