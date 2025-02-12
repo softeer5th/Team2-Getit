@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
 import createMarkerElement from "../components/map/mapMarkers";
-import { BottomSheet, BottomSheetRef } from "react-spring-bottom-sheet";
 import { Building, NodeId } from "../data/types/node";
-import "react-spring-bottom-sheet/dist/style.css";
-import { MapBottomSheetFromList, MapBottomSheetFromMarker } from "../components/map/mapBottomSheet";
+import MapBottomSheet from "../components/map/mapBottomSheet";
 import TopSheet from "../components/map/TopSheet";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 import ReportButton from "../components/map/reportButton";
@@ -51,7 +49,6 @@ export default function MapPage() {
 	const prevZoom = useRef<number>(16);
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
-	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const buildingBoundary = useRef<google.maps.LatLngBounds | null>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
@@ -66,12 +63,14 @@ export default function MapPage() {
 	const [universityMarker, setUniversityMarker] = useState<AdvancedMarker>();
 
 	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
-	const { mode, building: selectedBuilding } = useSearchBuilding();
+	const { building: selectedBuilding } = useSearchBuilding();
 
 	const [_, isOpen, open, close] = useModal();
 
 	const { university } = useUniversityInfo();
 	useRedirectUndefined<University | undefined>([university]);
+
+
 
 	const navigate = useNavigate();
 	if (!university) return;
@@ -344,12 +343,10 @@ export default function MapPage() {
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
+		console.log(marker)
+
 		if (marker.property && (marker.id === origin?.nodeId || marker.id === destination?.nodeId)) {
 			if (isSelect) {
-				// map.setOptions({
-				// 	center: { lat: marker.property.lat, lng: marker.property.lng },
-				// 	zoom: 19,
-				// });
 				setSheetOpen(true);
 			}
 
@@ -363,10 +360,6 @@ export default function MapPage() {
 					title: marker.property.buildingName,
 					className: "translate-marker",
 				});
-				// map.setOptions({
-				// 	center: { lat: marker.property.lat, lng: marker.property.lng },
-				// 	zoom: 19,
-				// });
 				setSheetOpen(true);
 
 				return;
@@ -459,6 +452,7 @@ export default function MapPage() {
 		const originMarker = findBuildingMarker(origin.nodeId);
 		if (!originMarker) return;
 
+
 		originMarker.content = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin.buildingName,
@@ -472,7 +466,7 @@ export default function MapPage() {
 				className: "translate-marker",
 			});
 		};
-	}, [origin]);
+	}, [origin, buildingMarkers]);
 
 	/** 도착지 결정 시, Marker Content 변경 */
 	useEffect(() => {
@@ -494,7 +488,7 @@ export default function MapPage() {
 				className: "translate-marker",
 			});
 		};
-	}, [destination]);
+	}, [destination, buildingMarkers]);
 
 	useEffect(() => {
 		if (selectedMarker && selectedMarker.type === Markers.BUILDING) {
@@ -550,29 +544,7 @@ export default function MapPage() {
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
 			<TopSheet open={!sheetOpen} />
 			<div ref={mapRef} className="w-full h-full" />
-			<BottomSheet
-				ref={bottomSheetRef}
-				blocking={false}
-				open={sheetOpen}
-				snapPoints={({ minHeight }) => minHeight}
-			>
-				{selectedMarker &&
-					(selectedMarker.from === "Marker" ? (
-						/** 선택된 마커가 Marker 클릭에서 온 경우 */
-						<MapBottomSheetFromMarker
-							building={selectedMarker}
-							onClickLeft={() => selectRoutePoint(RoutePoint.ORIGIN)}
-							onClickRight={() => selectRoutePoint(RoutePoint.DESTINATION)}
-						/>
-					) : (
-						/** 선택된 마커가 리스트에서 온 경우 */
-						<MapBottomSheetFromList
-							building={selectedMarker}
-							onClick={selectRoutePoint}
-							buttonText={mode === RoutePoint.ORIGIN ? "출발지 설정" : "도착지 설정"}
-						/>
-					))}
-			</BottomSheet>
+			<MapBottomSheet selectRoutePoint={selectRoutePoint} selectedMarker={selectedMarker} isVisible={selectedMarker ? true : false} />
 			{origin && destination && origin.nodeId !== destination.nodeId ? (
 				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */
 				<div onClick={() => findFastRoute()} className="absolute bottom-6 space-y-2 w-full px-4">
@@ -592,6 +564,6 @@ export default function MapPage() {
 			)}
 			{isOpen && <ReportModal close={close} />}
 			<FailModal />
-		</div>
+		</div >
 	);
 }
