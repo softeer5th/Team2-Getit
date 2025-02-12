@@ -85,7 +85,7 @@ public class RouteCalculator {
             .map(Map.Entry::getKey)
             .toList();
 
-        if (endNodes.size() == CORE_NODE_CONDITION - 1) {
+        if (endNodes.size() == IS_SINGLE_ROUTE) {
             return nodeMap.get(endNodes.get(0));
         } else if (endNodes.isEmpty()) {
             return routes.get(0).getNode1();
