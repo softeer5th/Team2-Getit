@@ -54,10 +54,9 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 		const bounds = new google.maps.LatLngBounds();
 
 		const dashSymbol = {
-			// 'M 0,-1 0,1' 은 0, -1에서 시작해 0, 1까지의 선분(세로 선분)을 의미합니다.
 			path: "M 0,-1 0,1",
 			strokeOpacity: 1,
-			scale: 3, // scale 값에 따라 대시의 길이(두께)를 조정합니다.
+			scale: 3,
 		};
 
 		// 시작 building과 첫번째 점을 이어주는 polyline
@@ -75,7 +74,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 			geodesic: true,
 		});
 
-		// 마지막 building과 첫번째 점을 이어주는 polyline
+		// 마지막 building과 마지막 점을 이어주는 polyline
 		new Polyline({
 			path: endingBuildingPath,
 			map,
@@ -91,7 +90,6 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 
 		new Polyline({
 			path: paths,
-			geodesic: true,
 			map,
 			strokeColor: "#000000",
 			strokeWeight: 2.0,
