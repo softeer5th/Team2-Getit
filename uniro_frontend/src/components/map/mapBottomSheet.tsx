@@ -25,15 +25,13 @@ export default function MapBottomSheet({ isVisible, selectedMarker, selectRouteP
 			className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto z-20"
 			positionDelta={500}
 			transition={{
-				type: "tween", duration: 0.3
+				duration: 0.3,
+				type: "spring",
+				damping: 20,
 			}}
 		>
 			<BottomSheetHandle dragControls={dragControls} />
-			<div
-				ref={scrollRef}
-				className="w-full overflow-y-auto h-fit"
-				onScroll={preventScroll}
-			>
+			<div ref={scrollRef} className="w-full overflow-y-auto h-fit" onScroll={preventScroll}>
 				{selectedMarker &&
 					(selectedMarker.from === "Marker" ? (
 						<MapBottomSheetFromMarker
@@ -50,7 +48,7 @@ export default function MapBottomSheet({ isVisible, selectedMarker, selectRouteP
 					))}
 			</div>
 		</AnimatedContainer>
-	)
+	);
 }
 
 interface MapBottomSheetFromListProps {
@@ -58,7 +56,6 @@ interface MapBottomSheetFromListProps {
 	buttonText: string;
 	onClick: () => void;
 }
-
 
 function MapBottomSheetFromList({ building, buttonText, onClick }: MapBottomSheetFromListProps) {
 	if (building.property === undefined) return;
