@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.admin.controller;
 
-import com.softeer5.uniro_backend.admin.dto.RevInfoDTO;
+import com.softeer5.uniro_backend.admin.dto.response.RevInfoDTO;
 import com.softeer5.uniro_backend.admin.service.AdminService;
 import lombok.RequiredArgsConstructor;
 
