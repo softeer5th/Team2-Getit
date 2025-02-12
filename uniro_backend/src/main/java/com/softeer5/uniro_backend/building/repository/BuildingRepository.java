@@ -13,7 +13,7 @@ public interface BuildingRepository extends JpaRepository<Building, Long>, Build
 
 	// 추후에 인덱싱 작업 필요.
 	@Query("""
-        SELECT new com.softeer5.uniro_backend.building.dto.BuildingNode(b, n)
+        SELECT new com.softeer5.uniro_backend.building.service.vo.BuildingNode(b, n)
         FROM Building b 
         JOIN FETCH Node n ON b.nodeId = n.id
         WHERE b.univId = :univId 
@@ -23,7 +23,7 @@ public interface BuildingRepository extends JpaRepository<Building, Long>, Build
 	List<BuildingNode> findByUnivIdAndLevelWithNode(Long univId, int level, String polygon);
 
 	@Query("""
-        SELECT new com.softeer5.uniro_backend.building.dto.BuildingNode(b, n)
+        SELECT new com.softeer5.uniro_backend.building.service.vo.BuildingNode(b, n)
         FROM Building b 
         JOIN FETCH Node n ON b.nodeId = n.id
         WHERE b.nodeId = :nodeId
