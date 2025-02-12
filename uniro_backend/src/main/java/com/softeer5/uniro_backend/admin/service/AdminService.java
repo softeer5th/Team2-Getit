@@ -9,11 +9,10 @@ import com.softeer5.uniro_backend.admin.repository.NodeAuditRepository;
 import com.softeer5.uniro_backend.admin.repository.RevInfoRepository;
 import com.softeer5.uniro_backend.admin.repository.RouteAuditRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
-import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.node.repository.NodeRepository;
-import com.softeer5.uniro_backend.route.entity.Route;
-import com.softeer5.uniro_backend.route.repository.RouteRepository;
-
+import com.softeer5.uniro_backend.map.entity.Node;
+import com.softeer5.uniro_backend.map.entity.Route;
+import com.softeer5.uniro_backend.map.repository.NodeRepository;
+import com.softeer5.uniro_backend.map.repository.RouteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

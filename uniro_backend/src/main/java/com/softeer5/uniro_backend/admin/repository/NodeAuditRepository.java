@@ -8,7 +8,7 @@ import org.hibernate.envers.query.AuditEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.map.entity.Node;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
