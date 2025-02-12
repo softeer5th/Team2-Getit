@@ -4,10 +4,8 @@ import static com.softeer5.uniro_backend.common.constant.UniroConst.BUILDING_ROU
 import static com.softeer5.uniro_backend.common.constant.UniroConst.CORE_NODE_CONDITION;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 import static com.softeer5.uniro_backend.common.utils.GeoUtils.getInstance;
-import static com.softeer5.uniro_backend.common.utils.RouteUtils.isBuildingRoute;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
@@ -41,6 +39,7 @@ public class MapService {
 	private final RouteRepository routeRepository;
 	private final NodeRepository nodeRepository;
 	private final BuildingRepository buildingRepository;
+
 	private final RouteCalculator routeCalculator;
 
 	private final MapClient mapClient;
@@ -53,61 +52,7 @@ public class MapService {
 			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
 		}
 
-		//인접 리스트
-		Map<Long, List<Route>> adjMap = new HashMap<>();
-		Map<Long, Node> nodeMap = new HashMap<>();
-		List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
-		//BFS를 시작할 노드
-		Node startNode = null;
-		for(Route route : routes) {
-			nodeMap.put(route.getNode1().getId(), route.getNode1());
-			nodeMap.put(route.getNode2().getId(), route.getNode2());
-			if(isBuildingRoute(route)) {
-				List<RouteCoordinatesInfoResDTO> routeCoordinates = new ArrayList<>();
-				routeCoordinates.add(RouteCoordinatesInfoResDTO.of(route.getId(), route.getNode1().getId(),route.getNode2().getId()));
-				buildingRoutes.add(BuildingRouteResDTO.of(route.getNode1().getId(), route.getNode2().getId(), routeCoordinates));
-				continue;
-			}
-			adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
-			adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
-
-			if(startNode != null) continue;
-			if(route.getNode1().isCore()) startNode = route.getNode1();
-			else if(route.getNode2().isCore()) startNode = route.getNode2();
-		}
-
-		List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
-				.map(entry -> {
-					Node node = entry.getValue();
-					return NodeInfoResDTO.of(entry.getKey(), node.getX(), node.getY());
-				})
-				.collect(Collectors.toList());
-
-		// 맵에 코어노드가 없는 경우 서브노드끼리 순서 매겨서 리턴
-		if(startNode==null){
-			List<Long> endNodes = adjMap.entrySet()
-					.stream()
-					.filter(entry -> entry.getValue().size() == 1)  // 리스트 크기가 1인 항목 필터링
-					.map(Map.Entry::getKey)
-					.collect(Collectors.toList());
-
-			//끝 노드가 2개인 경우 둘 중 하나에서 출발
-			if(endNodes.size()==2){
-				startNode = nodeMap.get(endNodes.get(0));
-			}
-			else if(endNodes.isEmpty()){
-				//사이클인 경우 아무 노드나 코어노드로 설정
-				startNode = routes.get(0).getNode1();
-			}
-			else{
-				// 그 외의 경우의 수는 모두 사이클만 존재하거나, 규칙에 어긋난 맵
-				throw new RouteException("Invalid Map", ErrorCode.INVALID_MAP);
-			}
-
-
-		}
-
-		return GetAllRoutesResDTO.of(nodeInfos, routeCalculator.getCoreRoutes(adjMap, startNode), buildingRoutes);
+		return routeCalculator.assembleRoutes(routes);
 	}
 
 	public GetRiskRoutesResDTO getRiskRoutes(Long univId) {
@@ -188,7 +133,7 @@ public class MapService {
 				.orElseThrow(()-> new NodeException("Node not found", NODE_NOT_FOUND));
 
 		int connectedRouteCount = routeRepository.countByUnivIdAndNodeId(univId, nodeId);
-		if(connectedRouteCount>=2){
+		if(connectedRouteCount>= CORE_NODE_CONDITION - 1){
 			connectedNode.setCore(true);
 		}
 

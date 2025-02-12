@@ -7,6 +7,7 @@ import static com.softeer5.uniro_backend.common.utils.RouteUtils.isBuildingRoute
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
+import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.Node;
@@ -28,6 +29,7 @@ import org.locationtech.jts.index.strtree.STRtree;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RouteCalculator {
@@ -51,6 +53,59 @@ public class RouteCalculator {
             return Double.compare(this.cost, o.cost);
         }
     }
+
+    public GetAllRoutesResDTO assembleRoutes(List<Route> routes) {
+        Map<Long, List<Route>> adjMap = new HashMap<>();
+        Map<Long, Node> nodeMap = new HashMap<>();
+        List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
+        Node startNode = null;
+
+        for (Route route : routes) {
+            nodeMap.put(route.getNode1().getId(), route.getNode1());
+            nodeMap.put(route.getNode2().getId(), route.getNode2());
+
+            if (isBuildingRoute(route)) {
+                List<RouteCoordinatesInfoResDTO> routeCoordinates = new ArrayList<>();
+                routeCoordinates.add(RouteCoordinatesInfoResDTO.of(route.getId(), route.getNode1().getId(), route.getNode2().getId()));
+                buildingRoutes.add(BuildingRouteResDTO.of(route.getNode1().getId(), route.getNode2().getId(), routeCoordinates));
+                continue;
+            }
+
+            adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
+            adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
+
+            if (startNode == null) {
+                if (route.getNode1().isCore()) startNode = route.getNode1();
+                else if (route.getNode2().isCore()) startNode = route.getNode2();
+            }
+        }
+
+        List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
+            .map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getX(), entry.getValue().getY()))
+            .toList();
+
+        startNode = determineStartNode(startNode, adjMap, nodeMap, routes);
+
+        return GetAllRoutesResDTO.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
+    }
+
+    private Node determineStartNode(Node startNode, Map<Long, List<Route>> adjMap, Map<Long, Node> nodeMap, List<Route> routes) {
+        if (startNode != null) return startNode;
+
+        List<Long> endNodes = adjMap.entrySet().stream()
+            .filter(entry -> entry.getValue().size() == 1)
+            .map(Map.Entry::getKey)
+            .toList();
+
+        if (endNodes.size() == CORE_NODE_CONDITION - 1) {
+            return nodeMap.get(endNodes.get(0));
+        } else if (endNodes.isEmpty()) {
+            return routes.get(0).getNode1();
+        } else {
+            throw new RouteException("Invalid Map", ErrorCode.INVALID_MAP);
+        }
+    }
+
 
     public FastestRouteResDTO calculateFastestRoute(Long univId, Long startNodeId, Long endNodeId){
 
@@ -318,7 +373,7 @@ public class RouteCalculator {
     }
 
     // coreRoute를 만들어주는 메서드
-    public List<CoreRouteResDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
+    private List<CoreRouteResDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
         List<CoreRouteResDTO> result = new ArrayList<>();
         // core node간의 BFS 할 때 방문여부를 체크하는 set
         Set<Long> visitedCoreNodes = new HashSet<>();
