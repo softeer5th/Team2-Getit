@@ -254,11 +254,6 @@ export default function ReportRoutePage() {
 			endNodeId: "nodeId" in lastPoint ? lastPoint.nodeId : null,
 			coordinates: subNodes,
 		});
-		mutate({
-			startNodeId: originPoint.current.point.nodeId,
-			endNodeId: "nodeId" in lastPoint ? lastPoint.nodeId : null,
-			coordinates: subNodes,
-		});
 	};
 
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
