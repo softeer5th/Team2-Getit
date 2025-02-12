@@ -1,5 +1,6 @@
 import { Markers } from "../../constant/enum/markerEnum";
 import { MarkerTypes } from "../../data/types/enum";
+import { animate } from "framer-motion";
 
 const markerImages = import.meta.glob("/src/assets/markers/*.svg", { eager: true });
 
@@ -35,6 +36,70 @@ function createTextElement(type: MarkerTypes, title: string): HTMLElement {
 		default:
 			return markerTitle;
 	}
+}
+
+function createAnimatedTextElement(type: MarkerTypes, titles: string[]): HTMLElement {
+	const titleContainer = document.createElement("div");
+
+	const elements = [];
+
+	const _title = [...titles, titles[0]];
+
+	for (const title of _title) {
+		const factorTitle = document.createElement("p");
+		factorTitle.innerText = title;
+		factorTitle.className = "block w-[128px] h-[22px] mb-4";
+
+		titleContainer.appendChild(factorTitle);
+		elements.push(factorTitle);
+	}
+
+	switch (type) {
+		case Markers.CAUTION:
+			titleContainer.className =
+				"overflow-hidden w-[160px] h-[38px] py-2 px-4 mb-2 text-kor-body3 font-semibold text-gray-100 bg-system-orange text-center rounded-200";
+			break;
+		case Markers.DANGER:
+			titleContainer.className =
+				"overflow-hidden w-[160px] h-[38px] py-2 px-4 mb-2 text-kor-body3 font-semibold text-gray-100 bg-system-red text-center rounded-200";
+			break;
+		default:
+			break;
+	}
+
+	const len = _title.length;
+
+	if (len >= 3) {
+		for (let i = 1; i < len; i++) {
+			elements.forEach((el, index) => {
+				setTimeout(() => {
+					animate(
+						el,
+						{
+							y: [-38 * (i - 1), -38 * i],
+						},
+						{
+							duration: 0.5,
+						},
+					);
+
+					if (i === len - 1) {
+						setTimeout(() => {
+							animate(
+								el,
+								{
+									y: [-38 * (len - 1), 0],
+								},
+								{ duration: 0 },
+							);
+						}, 1000);
+					}
+				}, 1000 * i);
+			});
+		}
+	}
+
+	return titleContainer;
 }
 
 function getImage(type: MarkerTypes): string {
@@ -99,7 +164,7 @@ export default function createMarkerElement({
 }: {
 	type: MarkerTypes;
 	className?: string;
-	title?: string;
+	title?: string | string[];
 	hasTopContent?: boolean;
 	hasAnimation?: boolean;
 	number?: number;
@@ -113,13 +178,14 @@ export default function createMarkerElement({
 	const markerImage = createImageElement(type);
 
 	if (title) {
-		const markerTitle = createTextElement(type, title);
 		if (hasTopContent) {
+			const markerTitle = createAnimatedTextElement(type, title as string[]);
 			container.appendChild(markerTitle);
 			container.appendChild(markerImage);
 			return attachAnimation(container, hasAnimation);
 		}
 
+		const markerTitle = createTextElement(type, title as string);
 		container.appendChild(markerImage);
 		container.appendChild(markerTitle);
 		return attachAnimation(container, hasAnimation);
