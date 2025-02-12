@@ -79,41 +79,9 @@ public class MapService {
 
 	public GetRiskRoutesResDTO getRiskRoutes(Long univId) {
 		List<Route> riskRoutes = routeRepository.findRiskRouteByUnivId(univId);
-
-		List<GetDangerResDTO> dangerRoutes = mapRoutesToDangerDTO(riskRoutes);
-		List<GetCautionResDTO> cautionRoutes = mapRoutesToCautionDTO(riskRoutes);
-
-		return GetRiskRoutesResDTO.of(dangerRoutes, cautionRoutes);
+		return routeCalculator.mapRisks(riskRoutes);
 	}
 
-	private List<GetDangerResDTO> mapRoutesToDangerDTO(List<Route> routes) {
-		return routes.stream()
-			.filter(route -> !route.getDangerFactors().isEmpty() && route.getCautionFactors().isEmpty()) // 위험 요소가 있는 경로만 필터링
-			.map(route -> GetDangerResDTO.of(
-				getPoint(route.getPath().getCoordinates()[0]),
-				getPoint(route.getPath().getCoordinates()[1]),
-				route.getId(),
-				route.getDangerFactorsByList()
-			)).toList();
-	}
-
-	private List<GetCautionResDTO> mapRoutesToCautionDTO(List<Route> routes) {
-		return routes.stream()
-			.filter(route -> route.getDangerFactors().isEmpty() && !route.getCautionFactors().isEmpty())
-			.map(route -> GetCautionResDTO.of(
-				getPoint(route.getPath().getCoordinates()[0]),
-				getPoint(route.getPath().getCoordinates()[1]),
-				route.getId(),
-				route.getCautionFactorsByList()
-			)).toList();
-	}
-
-	private Map<String, Double> getPoint(Coordinate c) {
-		Map<String, Double> point = new HashMap<>();
-		point.put("lat", c.getY());
-		point.put("lng", c.getX());
-		return point;
-	}
 
 
 	public GetRiskResDTO getRisk(Long univId, Long routeId) {

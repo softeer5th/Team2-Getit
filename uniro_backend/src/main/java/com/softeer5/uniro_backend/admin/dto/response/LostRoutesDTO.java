@@ -1,7 +1,7 @@
 package com.softeer5.uniro_backend.admin.dto.response;
 
-import com.softeer5.uniro_backend.route.dto.response.CoreRouteResDTO;
-import com.softeer5.uniro_backend.route.dto.response.NodeInfoResDTO;
+import com.softeer5.uniro_backend.map.dto.response.CoreRouteResDTO;
+import com.softeer5.uniro_backend.map.dto.response.NodeInfoResDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;

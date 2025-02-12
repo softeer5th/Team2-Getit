@@ -1,8 +1,8 @@
 package com.softeer5.uniro_backend.admin.dto.response;
 
-import com.softeer5.uniro_backend.route.entity.CautionFactor;
-import com.softeer5.uniro_backend.route.entity.DangerFactor;
-import com.softeer5.uniro_backend.route.entity.Route;
+import com.softeer5.uniro_backend.map.entity.CautionFactor;
+import com.softeer5.uniro_backend.map.entity.DangerFactor;
+import com.softeer5.uniro_backend.map.entity.Route;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;

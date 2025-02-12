@@ -13,15 +13,10 @@ import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
-import com.softeer5.uniro_backend.map.entity.Node;
-import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
 import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.map.dto.response.NodeInfoResDTO;
-import com.softeer5.uniro_backend.map.entity.Route;
-import com.softeer5.uniro_backend.map.repository.RouteRepository;
-
-import com.softeer5.uniro_backend.map.service.MapService;
+import com.softeer5.uniro_backend.map.service.RouteCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +37,8 @@ public class AdminService {
 
     private final RouteAuditRepository routeAuditRepository;
     private final NodeAuditRepository nodeAuditRepository;
+
+    private final RouteCalculator routeCalculator;
 
     public List<RevInfoDTO> getAllRevInfo(Long univId){
         return revInfoRepository.findAllByUnivId(univId).stream().map(r -> RevInfoDTO.of(r.getRev(),
@@ -105,7 +102,8 @@ public class AdminService {
                 .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
 
         List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
-        GetAllRoutesResDTO routesInfo = routeService.getAllRoutes(revRoutes); // UNI-209 pull 받은 후 해결
+        //TODO getAllRoutes 호출전에 revRoutes size 조사
+        GetAllRoutesResDTO routesInfo = routeCalculator.assembleRoutes(revRoutes); // UNI-209 pull 받은 후 해결
 
         Map<Long, Route> revRouteMap = new HashMap<>();
         for(Route revRoute : revRoutes){
@@ -141,7 +139,7 @@ public class AdminService {
             }
         }
 
-        GetRiskRoutesResDTO getRiskRoutesResDTO = routeService.getRiskRoutes(riskRoutes); // UNI-209 pull 받은 후 해결
+        GetRiskRoutesResDTO getRiskRoutesResDTO = routeCalculator.mapRisks(riskRoutes); // UNI-209 pull 받은 후 해결
 
         //시작점이 1개인 nodeList 생성
         List<Node> endNodes = lostAdjMap.entrySet()
@@ -158,7 +156,7 @@ public class AdminService {
                 })
                 .toList();
 
-        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeService.getCoreRoutes(lostAdjMap, endNodes)); // UNI-209 pull 받은 후 해결
+        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeCalculator.getCoreRoutes(lostAdjMap, endNodes)); // UNI-209 pull 받은 후 해결
 
         return GetAllRoutesByRevisionResDTO.of(routesInfo, getRiskRoutesResDTO, lostRouteDTO, changedRoutes);
     }
