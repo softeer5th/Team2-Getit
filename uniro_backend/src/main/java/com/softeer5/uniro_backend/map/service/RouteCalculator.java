@@ -445,7 +445,7 @@ public class RouteCalculator {
 
     // TODO: 모든 점이 아니라 request 값의 MBR 영역만 불러오면 좋을 것 같다.  <- 추가 검증 필요
     // TODO: 캐시 사용 검토
-    public List<Node> checkRouteCross(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteReqDTO> requests, List<Route> routes) {
+    public List<Node> createValidRouteNodes(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteReqDTO> requests, List<Route> routes) {
         LinkedList<Node> createdNodes = new LinkedList<>();
 
         Map<String, Node> nodeMap = new HashMap<>();
@@ -519,15 +519,15 @@ public class RouteCalculator {
 
         // 2. 두번째 노드 ~ N-1번째 노드
         // 현재 노드와 다음 노드가 기존 route와 겹치는지 확인
-        List<Node> crossCheckedNodes = checkForRouteIntersections(createdNodes, strTree, nodeMap);
+        List<Node> crossCheckedNodes = insertMidNodesForIntersectingRoutes(createdNodes, strTree, nodeMap);
 
         // 3. 자가 크로스 or 중복점 (첫점과 끝점 동일) 확인
-        List<Node> selfCrossCheckedNodes = checkSelfRouteCross(crossCheckedNodes);
+        List<Node> selfCrossCheckedNodes = handleSelfIntersectionsAndDuplicates(crossCheckedNodes);
 
         return selfCrossCheckedNodes;
     }
 
-    private List<Node> checkForRouteIntersections(List<Node> nodes, STRtree strTree, Map<String, Node> nodeMap) {
+    private List<Node> insertMidNodesForIntersectingRoutes(List<Node> nodes, STRtree strTree, Map<String, Node> nodeMap) {
         ListIterator<Node> iterator = nodes.listIterator();
         if (!iterator.hasNext()) return Collections.emptyList();
         Node prev = iterator.next();
@@ -550,7 +550,7 @@ public class RouteCalculator {
     }
 
 
-    private List<Node> checkSelfRouteCross(List<Node> nodes) {
+    private List<Node> handleSelfIntersectionsAndDuplicates(List<Node> nodes) {
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
             throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
