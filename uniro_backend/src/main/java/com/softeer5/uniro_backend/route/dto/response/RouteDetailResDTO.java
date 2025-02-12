@@ -20,7 +20,7 @@ public class RouteDetailResDTO {
     private final DirectionType directionType;
     @Schema(description = "상세 경로의 좌표", example = "{\"lng\": 127.123456, \"lat\": 37.123456}")
     private final Map<String, Double> coordinates;
-    @Schema(description = "위험 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
+    @Schema(description = "주의 요소 타입 리스트", example = "[\"SLOPE\", \"STAIRS\"]")
     private final List<CautionFactor> cautionFactors;
 
     public static RouteDetailResDTO of(double dist, DirectionType directionType,
