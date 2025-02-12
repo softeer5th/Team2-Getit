@@ -40,13 +40,58 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 
 		const { routes, routeDetails } = routeResult;
 
+		if (!origin || !destination) {
+			return;
+		}
+
+		const startingBuildingPath = [{ lat: origin?.lat, lng: origin?.lng }, routes[0].node1];
+
+		const endingBuildingPath = [routes[routes.length - 1].node2, { lat: destination?.lat, lng: destination?.lng }];
+
 		// 하나의 길 완성
 		const paths = [routes[0].node1, ...routes.map((el) => el.node2)];
 
 		const bounds = new google.maps.LatLngBounds();
 
+		const dashSymbol = {
+			// 'M 0,-1 0,1' 은 0, -1에서 시작해 0, 1까지의 선분(세로 선분)을 의미합니다.
+			path: "M 0,-1 0,1",
+			strokeOpacity: 1,
+			scale: 3, // scale 값에 따라 대시의 길이(두께)를 조정합니다.
+		};
+
+		// 시작 building과 첫번째 점을 이어주는 polyline
+		new Polyline({
+			path: startingBuildingPath,
+			map,
+			strokeOpacity: 0,
+			icons: [
+				{
+					icon: dashSymbol,
+					offset: "0",
+					repeat: "20px",
+				},
+			],
+			geodesic: true,
+		});
+
+		// 마지막 building과 첫번째 점을 이어주는 polyline
+		new Polyline({
+			path: endingBuildingPath,
+			map,
+			strokeOpacity: 0,
+			icons: [
+				{
+					icon: dashSymbol,
+					offset: "0",
+					repeat: "20px",
+				},
+			],
+		});
+
 		new Polyline({
 			path: paths,
+			geodesic: true,
 			map,
 			strokeColor: "#000000",
 			strokeWeight: 2.0,
