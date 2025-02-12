@@ -7,14 +7,13 @@ interface MapWithOverlay {
 	overlay: google.maps.OverlayView | null;
 	AdvancedMarkerElement: typeof google.maps.marker.AdvancedMarkerElement;
 	Polyline: typeof google.maps.Polyline;
-	spherical: typeof google.maps.geometry.spherical;
 }
 
 export const initializeMap = async (
 	mapElement: HTMLElement | null,
 	mapOptions?: google.maps.MapOptions,
 ): Promise<MapWithOverlay> => {
-	const { Map, OverlayView, AdvancedMarkerElement, Polyline, spherical } = await loadGoogleMapsLibraries();
+	const { Map, OverlayView, AdvancedMarkerElement, Polyline } = await loadGoogleMapsLibraries();
 
 	if (!mapElement) {
 		throw new Error("Map Element is not provided");
@@ -45,5 +44,5 @@ export const initializeMap = async (
 	overlay.onRemove = function () {};
 	overlay.setMap(map);
 
-	return { map, overlay, AdvancedMarkerElement, Polyline, spherical };
+	return { map, overlay, AdvancedMarkerElement, Polyline };
 };
