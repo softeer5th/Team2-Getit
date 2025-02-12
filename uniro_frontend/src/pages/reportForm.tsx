@@ -110,7 +110,7 @@ const ReportForm = () => {
 		}
 	};
 
-	const [ErrorModal, { mutate }] = useMutationError(
+	const [ErrorModal, { mutate, status }] = useMutationError(
 		{
 			mutationFn: () =>
 				postReport(university?.id ?? 1001, routeId, {
@@ -148,7 +148,10 @@ const ReportForm = () => {
 			<div className="flex-1 overflow-y-auto overflow-x-hidden">
 				<PrimaryForm
 					reportMode={reportMode!}
-					passableStatus={formData.passableStatus}
+					passable
+          
+          
+          ={formData.passableStatus}
 					handlePrimarySelect={handlePrimarySelect}
 				/>
 				<SecondaryForm
@@ -158,8 +161,11 @@ const ReportForm = () => {
 				/>
 			</div>
 			<div className="mb-4 w-full px-4">
-				<Button onClick={mutate} variant={disabled ? "disabled" : "primary"}>
-					제보하기
+				<Button
+					onClick={mutate}
+					variant={status === "pending" || status === "success" || disabled ? "disabled" : "primary"}
+				>
+					{status === "pending" ? "제보하는 중.." : "제보하기"}
 				</Button>
 			</div>
 			<SuccessModal>

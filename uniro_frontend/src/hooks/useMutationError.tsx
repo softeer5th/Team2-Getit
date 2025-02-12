@@ -1,6 +1,7 @@
 import { QueryClient, useMutation, UseMutationOptions, UseMutationResult } from "@tanstack/react-query";
 import { NotFoundError, BadRequestError, ERROR_STATUS } from "../constant/error";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useDebounceMutation } from "./useDebounceMutation";
 
 type Fallback = {
 	[K in Exclude<ERROR_STATUS, ERROR_STATUS.INTERNAL_ERROR>]?: {
@@ -25,7 +26,7 @@ export default function useMutationError<TData, TError, TVariables, TContext>(
 	handleError?: HandleError,
 ): UseMutationErrorReturn<TData, TError, TVariables, TContext> {
 	const [isOpen, setOpen] = useState<boolean>(false);
-	const result = useMutation<TData, TError, TVariables, TContext>(options, queryClient);
+	const result = useDebounceMutation<TData, TError, TVariables, TContext>(options, 1000, true, queryClient);
 
 	const { isError, error } = result;
 

@@ -43,6 +43,8 @@ export type SelectedMarkerTypes = {
 	from: "Marker" | "List";
 };
 
+const BOTTOM_SHEET_HEIGHT = 377;
+
 export default function MapPage() {
 	const { mapRef, map, AdvancedMarker } = useMap();
 	const [zoom, setZoom] = useState<number>(16);
@@ -50,6 +52,7 @@ export default function MapPage() {
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const bottomSheetRef = useRef<BottomSheetRef>(null);
+	const buildingBoundary = useRef<google.maps.LatLngBounds | null>(null);
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
 	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; nodeId: NodeId }[]>([]);
@@ -125,10 +128,30 @@ export default function MapPage() {
 
 	const [risks, buildings] = results;
 
+	const moveToBound = () => {
+		if (selectedMarker?.type === Markers.BUILDING) {
+
+			buildingBoundary.current = new google.maps.LatLngBounds();
+			buildingBoundary.current.extend(new google.maps.LatLng(selectedMarker?.property?.lat as number, selectedMarker?.property?.lng as number));
+			// 라이브러리를 다양한 화면을 관찰해보았을 때, h-가 377인것을 확인했습니다.
+			map?.fitBounds(buildingBoundary.current, {
+				top: 0,
+				right: 0,
+				bottom: BOTTOM_SHEET_HEIGHT,
+				left: 0,
+			});
+		}
+	};
+
+	const exitBound = () => {
+		buildingBoundary.current = null;
+	}
+
 	const initMap = () => {
 		if (map === null || !AdvancedMarker) return;
 		map.addListener("click", (e: unknown) => {
 			setSheetOpen(false);
+			exitBound();
 			setSelectedMarker(undefined);
 		});
 		map.addListener("zoom_changed", () => {
@@ -311,8 +334,11 @@ export default function MapPage() {
 		}
 
 		setSheetOpen(false);
+		exitBound();
 		setSelectedMarker(undefined);
 	};
+
+
 
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
@@ -320,10 +346,10 @@ export default function MapPage() {
 
 		if (marker.property && (marker.id === origin?.nodeId || marker.id === destination?.nodeId)) {
 			if (isSelect) {
-				map.setOptions({
-					center: { lat: marker.property.lat, lng: marker.property.lng },
-					zoom: 19,
-				});
+				// map.setOptions({
+				// 	center: { lat: marker.property.lat, lng: marker.property.lng },
+				// 	zoom: 19,
+				// });
 				setSheetOpen(true);
 			}
 
@@ -337,10 +363,10 @@ export default function MapPage() {
 					title: marker.property.buildingName,
 					className: "translate-marker",
 				});
-				map.setOptions({
-					center: { lat: marker.property.lat, lng: marker.property.lng },
-					zoom: 19,
-				});
+				// map.setOptions({
+				// 	center: { lat: marker.property.lat, lng: marker.property.lng },
+				// 	zoom: 19,
+				// });
 				setSheetOpen(true);
 
 				return;
@@ -368,17 +394,15 @@ export default function MapPage() {
 		} else {
 			if (isSelect) {
 				if (marker.type === Markers.DANGER) {
-					const key = marker.factors && (marker.factors[0] as DangerIssueType);
 					marker.element.content = createMarkerElement({
 						type: marker.type,
-						title: key && DangerIssue[key],
+						title: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
 						hasTopContent: true,
 					});
 				} else if (marker.type === Markers.CAUTION) {
-					const key = marker.factors && (marker.factors[0] as CautionIssueType);
 					marker.element.content = createMarkerElement({
 						type: marker.type,
-						title: key && CautionIssue[key],
+						title: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
 						hasTopContent: true,
 					});
 				}
@@ -471,6 +495,12 @@ export default function MapPage() {
 			});
 		};
 	}, [destination]);
+
+	useEffect(() => {
+		if (selectedMarker && selectedMarker.type === Markers.BUILDING) {
+			moveToBound();
+		}
+	}, [selectedMarker])
 
 	useEffect(() => {
 		if (!map) return;
