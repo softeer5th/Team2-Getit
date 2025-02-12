@@ -113,33 +113,36 @@ const ReportForm = () => {
 		}
 	};
 
-	const [ErrorModal, { mutate }] = useMutationError({
-		mutationFn: () =>
-			postReport(university?.id ?? 1001, routeId, {
-				dangerFactors: formData.dangerIssues,
-				cautionFactors: formData.cautionIssues,
-			}),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
-			openSuccess();
-		},
-		onError: () => {
-			setErrorTitle("제보에 실패하였습니다");
-		},
-	}, undefined, {
-		fallback: {
-			400: {
-				mainTitle: '불편한 길 제보 실패',
-				subTitle: ['잘못된 요청입니다.', '잠시 후 다시 시도 부탁드립니다.'],
+	const [ErrorModal, { mutate, status }] = useMutationError(
+		{
+			mutationFn: () =>
+				postReport(university?.id ?? 1001, routeId, {
+					dangerFactors: formData.dangerIssues,
+					cautionFactors: formData.cautionIssues,
+				}),
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
+				openSuccess();
 			},
-			404: {
-				mainTitle: '불편한 길 제보 실패',
-				subTitle: ['해당 경로는 다른 사용자에 의해 삭제되어,', '지도 화면에서 바로 확인할 수 있어요.']
-			}
+			onError: () => {
+				setErrorTitle("제보에 실패하였습니다");
+			},
 		},
-		onClose: redirectToMap
-
-	});
+		undefined,
+		{
+			fallback: {
+				400: {
+					mainTitle: "불편한 길 제보 실패",
+					subTitle: ["잘못된 요청입니다.", "잠시 후 다시 시도 부탁드립니다."],
+				},
+				404: {
+					mainTitle: "불편한 길 제보 실패",
+					subTitle: ["해당 경로는 다른 사용자에 의해 삭제되어,", "지도 화면에서 바로 확인할 수 있어요."],
+				},
+			},
+			onClose: redirectToMap,
+		},
+	);
 
 	return (
 		<div className="flex flex-col h-dvh w-full max-w-[450px] mx-auto relative">
@@ -158,8 +161,11 @@ const ReportForm = () => {
 				/>
 			</div>
 			<div className="mb-4 w-full px-4">
-				<Button onClick={mutate} variant={disabled ? "disabled" : "primary"}>
-					제보하기
+				<Button
+					onClick={mutate}
+					variant={status === "pending" || status === "success" || disabled ? "disabled" : "primary"}
+				>
+					{status === "pending" ? "제보하는 중.." : "제보하기"}
 				</Button>
 			</div>
 			<SuccessModal>
