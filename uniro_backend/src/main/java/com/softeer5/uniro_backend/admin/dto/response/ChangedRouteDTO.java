@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChangedRouteDTO {
     @Schema(description = "route ID", example = "17")
-    private final Long id;
+    private final Long routeId;
     @Schema(description = "현재", example = "")
     private final RouteDifferInfo current;
     @Schema(description = "해당 버전 (과거)", example = "")

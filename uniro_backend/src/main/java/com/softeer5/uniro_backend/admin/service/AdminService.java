@@ -96,6 +96,7 @@ public class AdminService {
 
     }
 
+    //TODO 변수명 확인
     public GetAllRoutesByRevisionResDTO getAllRoutesByRevision(Long univId, Long versionId){
         RevInfo revInfo = revInfoRepository.findById(versionId)
                 .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
@@ -154,7 +155,7 @@ public class AdminService {
                 })
                 .toList();
 
-        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, getCoreRoutes(lostAdjMap, endNodes)); // UNI-209 pull 받은 후 해결
+        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeService.getCoreRoutes(lostAdjMap, endNodes)); // UNI-209 pull 받은 후 해결
 
         return GetAllRoutesByRevisionResDTO.of(routesInfo, getRiskRoutesResDTO, lostRouteDTO, changedRoutes);
     }
