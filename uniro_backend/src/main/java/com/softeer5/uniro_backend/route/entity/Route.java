@@ -99,6 +99,15 @@ public class Route {
 		this.cost = revRoute.cost;
 	}
 
+	public boolean isEqualRoute(Route route) {
+		if(!route.getId().equals(this.getId())) return false;
+		if(route.getCost() != this.getCost())return false;
+		if(!route.getCautionFactors().equals(this.getCautionFactors())) return false;
+		if(!route.getDangerFactors().equals(this.getDangerFactors())) return false;
+
+		return true;
+	}
+
 	@Builder
 	private Route(double cost, LineString path, Node node1, Node node2, Long univId,
 		Set<CautionFactor> cautionFactors, Set<DangerFactor> dangerFactors) {
