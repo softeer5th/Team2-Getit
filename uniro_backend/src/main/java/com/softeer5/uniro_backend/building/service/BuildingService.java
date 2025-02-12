@@ -17,7 +17,7 @@ import com.softeer5.uniro_backend.common.CursorPage;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
-import com.softeer5.uniro_backend.building.dto.BuildingNode;
+import com.softeer5.uniro_backend.building.service.vo.BuildingNode;
 import com.softeer5.uniro_backend.building.dto.response.GetBuildingResDTO;
 import com.softeer5.uniro_backend.building.dto.response.SearchBuildingResDTO;
 import com.softeer5.uniro_backend.building.repository.BuildingRepository;

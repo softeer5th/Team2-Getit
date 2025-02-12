@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.softeer5.uniro_backend.common.CursorPage;
-import com.softeer5.uniro_backend.building.dto.BuildingNode;
+import com.softeer5.uniro_backend.building.service.vo.BuildingNode;
 import com.softeer5.uniro_backend.building.dto.QBuildingNode;
 
 import lombok.RequiredArgsConstructor;

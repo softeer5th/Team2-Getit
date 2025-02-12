@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.softeer5.uniro_backend.building.dto.BuildingNode;
+import com.softeer5.uniro_backend.building.service.vo.BuildingNode;
 import com.softeer5.uniro_backend.building.entity.Building;
 
 public interface BuildingRepository extends JpaRepository<Building, Long>, BuildingCustomRepository {

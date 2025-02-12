@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.building.dto;
+package com.softeer5.uniro_backend.building.service.vo;
 
 import com.querydsl.core.annotations.QueryProjection;
 import com.softeer5.uniro_backend.building.entity.Building;
