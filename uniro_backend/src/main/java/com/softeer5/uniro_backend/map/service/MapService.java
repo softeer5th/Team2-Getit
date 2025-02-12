@@ -15,6 +15,8 @@ import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
+import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.entity.Node;
 
 import com.softeer5.uniro_backend.building.repository.BuildingRepository;
@@ -39,8 +41,9 @@ public class MapService {
 	private final RouteRepository routeRepository;
 	private final NodeRepository nodeRepository;
 	private final BuildingRepository buildingRepository;
-	private final RouteCalculationService routeCalculationService;
+	private final RouteCalculator routeCalculator;
 
+	private final MapClient mapClient;
 
 	public GetAllRoutesResDTO getAllRoutes(Long univId) {
 		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
@@ -104,7 +107,7 @@ public class MapService {
 
 		}
 
-		return GetAllRoutesResDTO.of(nodeInfos, routeCalculationService.getCoreRoutes(adjMap, startNode), buildingRoutes);
+		return GetAllRoutesResDTO.of(nodeInfos, routeCalculator.getCoreRoutes(adjMap, startNode), buildingRoutes);
 	}
 
 	public GetRiskRoutesResDTO getRiskRoutes(Long univId) {
@@ -206,5 +209,23 @@ public class MapService {
 				.univId(univId).build();
 
 		routeRepository.save(route);
+	}
+
+	@Transactional
+	@RevisionOperation(RevisionOperationType.CREATE_ROUTE)
+	public void createRoute(Long univId, CreateRoutesReqDTO requests){
+
+		List<Route> savedRoutes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+
+		List<Node> nodesForSave = routeCalculator.checkRouteCross(univId, requests.getStartNodeId(),
+			requests.getEndNodeId(),
+			requests.getCoordinates(), savedRoutes);
+
+		mapClient.fetchHeights(nodesForSave);
+
+		List<Route> routes = routeCalculator.createLinkedRouteAndSave(univId, nodesForSave);
+
+		nodeRepository.saveAll(nodesForSave);
+		routeRepository.saveAll(routes);
 	}
 }

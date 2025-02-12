@@ -7,7 +7,7 @@ import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
 import com.softeer5.uniro_backend.map.dto.response.GetRiskResDTO;
 import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.map.dto.request.PostRiskReqDTO;
-import com.softeer5.uniro_backend.map.service.RouteCalculationService;
+import com.softeer5.uniro_backend.map.service.RouteCalculator;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class MapController implements MapApi {
 
 	private final MapService mapService;
-	private final RouteCalculationService routeCalculationService;
+	private final RouteCalculator routeCalculator;
 
 	@Override
 	@GetMapping("/{univId}/routes")
@@ -60,7 +60,7 @@ public class MapController implements MapApi {
 	@PostMapping("/{univId}/route")
 	public ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
 											 @RequestBody @Valid CreateRoutesReqDTO routes){
-		routeCalculationService.createRoute(univId, routes);
+		mapService.createRoute(univId, routes);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
@@ -69,7 +69,7 @@ public class MapController implements MapApi {
 	public ResponseEntity<FastestRouteResDTO> calculateFastestRoute(@PathVariable("univId") Long univId,
 																	@RequestParam(value = "start-node-id") Long startNodeId,
 																	@RequestParam(value = "end-node-id") Long endNodeId) {
-		FastestRouteResDTO fastestRouteResDTO = routeCalculationService.calculateFastestRoute(univId, startNodeId, endNodeId);
+		FastestRouteResDTO fastestRouteResDTO = routeCalculator.calculateFastestRoute(univId, startNodeId, endNodeId);
 		return ResponseEntity.ok(fastestRouteResDTO);
 	}
 

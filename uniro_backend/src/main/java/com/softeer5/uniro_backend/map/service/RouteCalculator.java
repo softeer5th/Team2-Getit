@@ -4,19 +4,14 @@ import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 import static com.softeer5.uniro_backend.common.utils.RouteUtils.isBuildingRoute;
 
-import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
-import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
-import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.building.repository.BuildingRepository;
-import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
-import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.entity.CautionFactor;
 import com.softeer5.uniro_backend.map.entity.DirectionType;
 import com.softeer5.uniro_backend.map.entity.Route;
@@ -31,24 +26,17 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.index.strtree.STRtree;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
-@Transactional(readOnly = true)
-public class RouteCalculationService {
+public class RouteCalculator {
     private final RouteRepository routeRepository;
-    private final MapClient mapClient;
-    private final NodeRepository nodeRepository;
     private final GeometryFactory geometryFactory;
     private final BuildingRepository buildingRepository;
 
-    public RouteCalculationService(RouteRepository routeRepository, MapClient mapClient, NodeRepository nodeRepository,
-                                   BuildingRepository buildingRepository) {
+    public RouteCalculator(RouteRepository routeRepository, BuildingRepository buildingRepository) {
         this.routeRepository = routeRepository;
-        this.mapClient = mapClient;
-        this.nodeRepository = nodeRepository;
         this.geometryFactory = GeoUtils.getInstance();
         this.buildingRepository = buildingRepository;
     }
@@ -386,22 +374,23 @@ public class RouteCalculationService {
         return result;
     }
 
-    @Transactional
-    @RevisionOperation(RevisionOperationType.CREATE_ROUTE)
-    public void createRoute(Long univId, CreateRoutesReqDTO requests){
-        List<Node> nodes = checkRouteCross(univId, requests.getStartNodeId(), requests.getEndNodeId(), requests.getCoordinates());
-        mapClient.fetchHeights(nodes);
-        createLinkedRouteAndSave(univId,nodes);
-    }
+    /**
+     * @param univId : 경로를 생성할 대학교 id
+     * @param nodes : 경로를 생성할 노드들
+     *
+     * @apiNote : 두 노드 간의 경로의 cost를 계산하여 Route 객체 생성
+     *
+     * @implNote : 첫번째 노드는 항상 코어노드여야 함
+     * @implNote : 노드들은 순서대로 연결되어 있어야 함
+     * @implNote : 중복된 노드들은 메모리 주소가 같기 때문에 하나의 객체로 인식됨
+     * */
+    public List<Route> createLinkedRouteAndSave(Long univId, List<Node> nodes) {
 
-    private void createLinkedRouteAndSave(Long univId, List<Node> nodes) {
-        Set<String> nodeSet = new HashSet<>();
-        List<Node> nodeForSave = new ArrayList<>();
-        List<Route> routeForSave = new ArrayList<>();
+        List<Route> routesForSave = new ArrayList<>();
         for(int i=1;i<nodes.size();i++){
             Node now = nodes.get(i);
             Node prev = nodes.get(i-1);
-            routeForSave.add(
+            routesForSave.add(
                 Route.builder()
                     .cost(calculateCost(prev,now))
                     .path(geometryFactory.createLineString(
@@ -411,13 +400,9 @@ public class RouteCalculationService {
                     .cautionFactors(Collections.EMPTY_SET)
                     .dangerFactors(Collections.EMPTY_SET)
                     .univId(univId).build());
-            if(!nodeSet.contains(getNodeKey(new Coordinate(now.getCoordinates().getX(), now.getCoordinates().getY())))){
-                nodeForSave.add(now);
-                nodeSet.add(getNodeKey(new Coordinate(now.getCoordinates().getX(), now.getCoordinates().getY())));
-            }
         }
-        nodeRepository.saveAll(nodeForSave);
-        routeRepository.saveAll(routeForSave);
+
+        return routesForSave;
     }
 
     private double calculateCost(Node prev, Node now) {
@@ -438,7 +423,7 @@ public class RouteCalculationService {
 
     // TODO: 모든 점이 아니라 request 값의 MBR 영역만 불러오면 좋을 것 같다.  <- 추가 검증 필요
     // TODO: 캐시 사용 검토
-    public List<Node> checkRouteCross(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteReqDTO> requests) {
+    public List<Node> checkRouteCross(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteReqDTO> requests, List<Route> routes) {
         LinkedList<Node> createdNodes = new LinkedList<>();
 
         Map<String, Node> nodeMap = new HashMap<>();
@@ -447,7 +432,6 @@ public class RouteCalculationService {
         int startNodeCount = 0;
         int endNodeCount = 0;
 
-        List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
         for (Route route : routes) {
             Node node1 = route.getNode1();
             Node node2 = route.getNode2();

@@ -17,12 +17,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
+import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
-import com.softeer5.uniro_backend.map.service.RouteCalculationService;
+import com.softeer5.uniro_backend.map.service.MapService;
+import com.softeer5.uniro_backend.map.service.RouteCalculator;
 
 @SpringBootTest
 @Testcontainers
@@ -32,7 +34,9 @@ import com.softeer5.uniro_backend.map.service.RouteCalculationService;
 class RouteCalculationServiceTest {
 
 	@Autowired
-	private RouteCalculationService routeCalculationService;
+	private RouteCalculator routeCalculator;
+	@Autowired
+	private MapService mapService;
 	@Autowired
 	private RouteRepository routeRepository;
 	@Autowired
@@ -61,11 +65,12 @@ class RouteCalculationServiceTest {
 			routeRepository.saveAll(List.of(route0, route));
 
 			// When
-			List<Node> result = routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests);
+			mapService.createRoute(univId, new CreateRoutesReqDTO(node1.getId(), null, requests));
 
 			// Then
-			assertThat(result).hasSize(3);
-			assertThat(result.get(0).isCore()).isTrue();
+			List<Node> results = nodeRepository.findAll();
+			assertThat(results).hasSize(5);
+			assertThat(results.get(1).isCore()).isTrue();
 		}
 
 		@Test
@@ -87,7 +92,7 @@ class RouteCalculationServiceTest {
 			routeRepository.save(route);
 
 			// when, then
-			assertThatThrownBy(() -> routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests))
+			assertThatThrownBy(() -> mapService.createRoute(univId, new CreateRoutesReqDTO(node1.getId(), null, requests)))
 				.isInstanceOf(RouteCalculationException.class)
 				.hasMessageContaining("intersection is only allowed by point");
 		}
@@ -117,11 +122,12 @@ class RouteCalculationServiceTest {
 			routeRepository.saveAll(List.of(route0, route1, route2, route3));
 
 			// When
-			List<Node> result = routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests);
+			mapService.createRoute(univId, new CreateRoutesReqDTO(node1.getId(), null, requests));
 
 			// Then
-			assertThat(result).hasSize(3);
-			assertThat(result.get(0).isCore()).isTrue();
+			List<Node> results = nodeRepository.findAll();
+			assertThat(results).hasSize(7);
+			assertThat(results.get(1).isCore()).isTrue();
 		}
 
 		@Test
@@ -142,7 +148,7 @@ class RouteCalculationServiceTest {
 			routeRepository.save(route);
 
 			// when, Then
-			assertThatThrownBy(() -> routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests))
+			assertThatThrownBy(() -> mapService.createRoute(univId, new CreateRoutesReqDTO(node1.getId(), null, requests)))
 				.isInstanceOf(RouteCalculationException.class);
 
 		}
@@ -174,12 +180,13 @@ class RouteCalculationServiceTest {
 			routeRepository.saveAll(List.of(route1, route2, route2_1));
 
 			// When
-			List<Node> result = routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests);
+			mapService.createRoute(univId, new CreateRoutesReqDTO(node1.getId(), null, requests) );
 
 			// Then
-			assertThat(result).hasSize(5);
-			assertThat(result.get(0).isCore()).isFalse();
-			assertThat(result.get(3).isCore()).isTrue();
+			List<Node> results = nodeRepository.findAll();
+			assertThat(results).hasSize(7);
+			assertThat(results.get(0).isCore()).isFalse();
+			assertThat(results.get(2).isCore()).isTrue();
 		}
 
 		@Test
@@ -202,7 +209,7 @@ class RouteCalculationServiceTest {
 			routeRepository.saveAll(List.of(route, route2));
 
 			// when, then
-			assertThatThrownBy(() -> routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests))
+			assertThatThrownBy(() -> mapService.createRoute(univId, new CreateRoutesReqDTO(node1.getId(), null, requests)))
 				.isInstanceOf(RouteCalculationException.class)
 				.hasMessageContaining("intersection is only allowed by point");
 		}
@@ -230,13 +237,14 @@ class RouteCalculationServiceTest {
 			routeRepository.saveAll(List.of(route1));
 
 			// When
-			List<Node> result = routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests);
+			mapService.createRoute(univId, new CreateRoutesReqDTO(node1.getId(), null, requests));
 
 			// Then
-			assertThat(result).hasSize(7);
-			assertThat(result.get(0).isCore()).isFalse();
-			assertThat(result.get(2).isCore()).isTrue();
-			System.out.println(result);
+			List<Node> results = nodeRepository.findAll();
+			assertThat(results).hasSize(7);
+			assertThat(results.get(0).isCore()).isFalse();
+			assertThat(results.get(3).isCore()).isTrue();
+			System.out.println(results);
 		}
 
 		@Test
@@ -259,22 +267,24 @@ class RouteCalculationServiceTest {
 
 			Route route1 = RouteFixture.createRoute(node1, node2);
 
-			nodeRepository.saveAll(List.of(node1, node2));
+			List<Node> savedNodes = nodeRepository.saveAll(List.of(node1, node2));
 			routeRepository.saveAll(List.of(route1));
 
 			// When
-			List<Node> result = routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests);
+			mapService.createRoute(univId, new CreateRoutesReqDTO(savedNodes.get(0).getId(), null, requests));
 
 			// Then
-			assertThat(result).hasSize(7);
-			assertThat(result.get(0).isCore()).isFalse();
-			System.out.println(result);
-			assertThat(result.get(2).isCore()).isTrue();
+			List<Node> results = nodeRepository.findAll();
+
+			assertThat(results).hasSize(7);
+			assertThat(results.get(0).isCore()).isFalse();
+			System.out.println(results);
+			assertThat(results.get(3).isCore()).isTrue();
 		}
 
 		@Test
 		@DisplayName("wiki 페이지 TC.6")
-		void 첫번째_노드에_연결연결되면서_셀프_크로스_되는_경우_새로_추가될_노드와_연결된다_() {
+		void 첫번째_노드에_연결되면서_셀프_크로스_되는_경우_새로_추가될_노드와_연결된다_() {
 			// Given
 			Long univId = 1001L;
 			List<CreateRouteReqDTO> requests = List.of(
@@ -291,16 +301,17 @@ class RouteCalculationServiceTest {
 
 			Route route1 = RouteFixture.createRoute(node0, node1);
 
-			nodeRepository.saveAll(List.of(node1, node0));
+			nodeRepository.saveAll(List.of(node0, node1));
 			routeRepository.saveAll(List.of(route1));
 
 			// When
-			List<Node> result = routeCalculationService.checkRouteCross(univId, node1.getId(), null, requests);
+			mapService.createRoute(univId, new CreateRoutesReqDTO(node1.getId(), null, requests) );
 
 			// Then
-			assertThat(result).hasSize(6);
-			assertThat(result.get(0).isCore()).isTrue();
-			System.out.println(result);
+			List<Node> results = nodeRepository.findAll();
+			System.out.println(results);
+			assertThat(results).hasSize(6);
+			assertThat(results.get(1).isCore()).isTrue();
 		}
 
 	}
