@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.route.repository;
+package com.softeer5.uniro_backend.map.test_repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

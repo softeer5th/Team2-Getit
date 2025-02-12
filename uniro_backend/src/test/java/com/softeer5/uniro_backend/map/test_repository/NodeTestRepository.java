@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.node.repository;
+package com.softeer5.uniro_backend.map.test_repository;
 
 import java.time.LocalDateTime;
 import java.util.List;

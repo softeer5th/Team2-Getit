@@ -5,15 +5,12 @@ package com.softeer5.uniro_backend.admin;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.envers.query.AuditQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +23,7 @@ import org.springframework.test.context.jdbc.SqlGroup;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.softeer5.uniro_backend.admin.entity.RevInfo;
-import com.softeer5.uniro_backend.admin.repository.RevInfoTestRepository;
+import com.softeer5.uniro_backend.admin.test_repository.RevInfoTestRepository;
 import com.softeer5.uniro_backend.admin.service.AdminService;
 import com.softeer5.uniro_backend.admin.setting.RevisionContext;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
@@ -36,8 +33,8 @@ import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
-import com.softeer5.uniro_backend.node.repository.NodeTestRepository;
-import com.softeer5.uniro_backend.route.repository.RouteTestRepository;
+import com.softeer5.uniro_backend.map.test_repository.NodeTestRepository;
+import com.softeer5.uniro_backend.map.test_repository.RouteTestRepository;
 
 import jakarta.persistence.EntityManager;
 

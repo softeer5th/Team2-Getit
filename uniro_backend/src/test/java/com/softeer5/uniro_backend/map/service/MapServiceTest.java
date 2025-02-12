@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.map;
+package com.softeer5.uniro_backend.map.service;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -23,15 +23,13 @@ import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
-import com.softeer5.uniro_backend.map.service.MapService;
-import com.softeer5.uniro_backend.map.service.RouteCalculator;
 
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
-class RouteCalculationServiceTest {
+class MapServiceTest {
 
 	@Autowired
 	private RouteCalculator routeCalculator;

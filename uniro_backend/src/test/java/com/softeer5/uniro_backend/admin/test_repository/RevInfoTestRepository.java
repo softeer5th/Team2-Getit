@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.admin.repository;
+package com.softeer5.uniro_backend.admin.test_repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
