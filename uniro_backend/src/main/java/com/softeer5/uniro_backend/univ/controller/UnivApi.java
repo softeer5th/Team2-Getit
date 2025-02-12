@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "대학교 관련 Api")
-public interface UnivAPI {
+public interface UnivApi {
 
     @Operation(summary = "대학 이름 검색")
     @ApiResponses(value = {
