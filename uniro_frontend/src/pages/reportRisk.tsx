@@ -33,7 +33,7 @@ interface reportMarkerTypes extends MarkerTypesWithElement {
 }
 
 export default function ReportRiskPage() {
-	const { map, mapRef, AdvancedMarker, Polyline, spherical } = useMap({ zoom: 18, minZoom: 17 });
+	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
 
 	const [reportMarker, setReportMarker] = useState<reportMarkerTypes>();
 
@@ -166,12 +166,12 @@ export default function ReportRiskPage() {
 				});
 
 				const point = LatLngToLiteral(e.latLng);
-				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(spherical, edges, point);
+				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
 
 				const newReportMarker = createAdvancedMarker(
 					AdvancedMarker,
 					map,
-					centerCoordinate(spherical, nearestEdge.node1, nearestEdge.node2),
+					centerCoordinate(nearestEdge.node1, nearestEdge.node2),
 					createMarkerElement({
 						type: Markers.REPORT,
 						className: "translate-routemarker",

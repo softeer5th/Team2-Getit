@@ -38,7 +38,7 @@ type SelectedMarkerTypes = {
 export default function ReportRoutePage() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { map, mapRef, AdvancedMarker, Polyline, spherical } = useMap({ zoom: 18, minZoom: 17 });
+	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
 	const originPoint = useRef<{ point: Node; element: AdvancedMarker } | undefined>();
 	const [newPoints, setNewPoints] = useState<{ element: AdvancedMarker | null; coords: (Coord | Node)[] }>({
 		element: null,
@@ -241,7 +241,7 @@ export default function ReportRoutePage() {
 		const lastPoint = newPoints.coords[newPoints.coords.length - 1] as Node | Coord;
 
 		for (const edge of edges) {
-			const subNode = createSubNodes(spherical, new Polyline({ path: edge })).slice(0, -1);
+			const subNode = createSubNodes(new Polyline({ path: edge })).slice(0, -1);
 			subNodes.push(...subNode);
 		}
 
@@ -288,7 +288,7 @@ export default function ReportRoutePage() {
 				});
 
 				const point = LatLngToLiteral(e.latLng);
-				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(spherical, edges, point);
+				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
 
 				const tempWaypointMarker = createAdvancedMarker(
 					AdvancedMarker,
