@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 import com.softeer5.uniro_backend.admin.dto.response.ChangedRouteDTO;
 import com.softeer5.uniro_backend.admin.dto.response.GetAllRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.admin.dto.response.LostRoutesDTO;
-import com.softeer5.uniro_backend.route.dto.response.*;
-import com.softeer5.uniro_backend.route.entity.CautionFactor;
+import com.softeer5.uniro_backend.map.dto.response.*;
+import com.softeer5.uniro_backend.map.entity.CautionFactor;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
@@ -29,18 +29,18 @@ import org.springframework.test.context.jdbc.SqlGroup;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.softeer5.uniro_backend.admin.entity.RevInfo;
-import com.softeer5.uniro_backend.admin.repository.RevInfoTestRepository;
+import com.softeer5.uniro_backend.admin.test_repository.RevInfoTestRepository;
 import com.softeer5.uniro_backend.admin.service.AdminService;
 import com.softeer5.uniro_backend.admin.setting.RevisionContext;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
-import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.node.repository.NodeRepository;
-import com.softeer5.uniro_backend.node.repository.NodeTestRepository;
-import com.softeer5.uniro_backend.route.entity.DangerFactor;
-import com.softeer5.uniro_backend.route.entity.Route;
-import com.softeer5.uniro_backend.route.repository.RouteRepository;
-import com.softeer5.uniro_backend.route.repository.RouteTestRepository;
+import com.softeer5.uniro_backend.map.entity.DangerFactor;
+import com.softeer5.uniro_backend.map.entity.Node;
+import com.softeer5.uniro_backend.map.entity.Route;
+import com.softeer5.uniro_backend.map.repository.NodeRepository;
+import com.softeer5.uniro_backend.map.repository.RouteRepository;
+import com.softeer5.uniro_backend.map.test_repository.NodeTestRepository;
+import com.softeer5.uniro_backend.map.test_repository.RouteTestRepository;
 
 import jakarta.persistence.EntityManager;
 

@@ -9,15 +9,19 @@ import com.softeer5.uniro_backend.admin.repository.NodeAuditRepository;
 import com.softeer5.uniro_backend.admin.repository.RevInfoRepository;
 import com.softeer5.uniro_backend.admin.repository.RouteAuditRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
-import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.node.repository.NodeRepository;
-import com.softeer5.uniro_backend.route.dto.response.GetAllRoutesResDTO;
-import com.softeer5.uniro_backend.route.dto.response.GetRiskRoutesResDTO;
-import com.softeer5.uniro_backend.route.dto.response.NodeInfoResDTO;
-import com.softeer5.uniro_backend.route.entity.Route;
-import com.softeer5.uniro_backend.route.repository.RouteRepository;
+import com.softeer5.uniro_backend.map.entity.Node;
+import com.softeer5.uniro_backend.map.entity.Route;
+import com.softeer5.uniro_backend.map.repository.NodeRepository;
+import com.softeer5.uniro_backend.map.repository.RouteRepository;
+import com.softeer5.uniro_backend.map.entity.Node;
+import com.softeer5.uniro_backend.map.repository.NodeRepository;
+import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
+import com.softeer5.uniro_backend.map.dto.response.NodeInfoResDTO;
+import com.softeer5.uniro_backend.map.entity.Route;
+import com.softeer5.uniro_backend.map.repository.RouteRepository;
 
-import com.softeer5.uniro_backend.route.service.RouteService;
+import com.softeer5.uniro_backend.map.service.MapService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +42,6 @@ public class AdminService {
 
     private final RouteAuditRepository routeAuditRepository;
     private final NodeAuditRepository nodeAuditRepository;
-    private final RouteService routeService;
 
     public List<RevInfoDTO> getAllRevInfo(Long univId){
         return revInfoRepository.findAllByUnivId(univId).stream().map(r -> RevInfoDTO.of(r.getRev(),

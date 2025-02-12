@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class UnivController implements UnivAPI{
+public class UnivController implements UnivApi {
     private final UnivService univService;
 
     @Override
