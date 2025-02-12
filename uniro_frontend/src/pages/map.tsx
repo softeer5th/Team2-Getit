@@ -509,7 +509,6 @@ export default function MapPage() {
 
 		if (prevZoom.current >= 17 && zoom <= 16) {
 			if (isCautionAcitve) {
-				setIsCautionActive(false);
 				toggleMarkers(
 					false,
 					cautionMarkers.map((marker) => marker.element),
@@ -517,7 +516,6 @@ export default function MapPage() {
 				);
 			}
 			if (isDangerAcitve) {
-				setIsDangerActive(false);
 				toggleMarkers(
 					false,
 					dangerMarkers.map((marker) => marker.element),
@@ -528,6 +526,21 @@ export default function MapPage() {
 			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
 			toggleMarkers(false, _buildingMarkers, map);
 		} else if (prevZoom.current <= 16 && zoom >= 17) {
+			if (isCautionAcitve) {
+				toggleMarkers(
+					true,
+					cautionMarkers.map((marker) => marker.element),
+					map,
+				);
+			}
+			if (isDangerAcitve) {
+				toggleMarkers(
+					true,
+					dangerMarkers.map((marker) => marker.element),
+					map,
+				);
+			}
+
 			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
 			toggleMarkers(true, _buildingMarkers, map);
 		}
