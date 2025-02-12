@@ -9,9 +9,11 @@ import java.util.*;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
+import com.softeer5.uniro_backend.building.entity.Building;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
+import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
@@ -53,6 +55,26 @@ public class MapService {
 		}
 
 		return routeCalculator.assembleRoutes(routes);
+	}
+
+	public FastestRouteResDTO findFastestRoute(Long univId, Long startNodeId, Long endNodeId){
+
+		if(startNodeId.equals(endNodeId)){
+			throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
+		}
+
+		List<Building> buildings = buildingRepository.findAllByNodeIdIn(List.of(startNodeId, endNodeId));
+
+		if(buildings.size() != 2
+			|| buildings.get(0).getNodeId().equals(buildings.get(1).getNodeId())
+			|| buildings.stream().anyMatch(building -> !Objects.equals(building.getUnivId(), univId))){
+
+			throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+		}
+
+		List<Route> routesWithNode = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+
+		return routeCalculator.calculateFastestRoute(startNodeId, endNodeId, routesWithNode);
 	}
 
 	public GetRiskRoutesResDTO getRiskRoutes(Long univId) {

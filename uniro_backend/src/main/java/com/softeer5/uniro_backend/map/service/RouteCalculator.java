@@ -2,7 +2,6 @@ package com.softeer5.uniro_backend.map.service;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
-import static com.softeer5.uniro_backend.common.utils.RouteUtils.isBuildingRoute;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
@@ -11,12 +10,10 @@ import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.Node;
-import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
 import com.softeer5.uniro_backend.map.entity.CautionFactor;
 import com.softeer5.uniro_backend.map.entity.DirectionType;
 import com.softeer5.uniro_backend.map.entity.Route;
-import com.softeer5.uniro_backend.map.repository.RouteRepository;
 import lombok.AllArgsConstructor;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -26,22 +23,13 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.index.strtree.STRtree;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-@Service
+@Component
 public class RouteCalculator {
-    private final RouteRepository routeRepository;
-    private final GeometryFactory geometryFactory;
-    private final BuildingRepository buildingRepository;
-
-    public RouteCalculator(RouteRepository routeRepository, BuildingRepository buildingRepository) {
-        this.routeRepository = routeRepository;
-        this.geometryFactory = GeoUtils.getInstance();
-        this.buildingRepository = buildingRepository;
-    }
+    private final GeometryFactory geometryFactory = GeoUtils.getInstance();
 
     @AllArgsConstructor
     private class CostToNextNode implements Comparable<CostToNextNode> {
@@ -107,17 +95,13 @@ public class RouteCalculator {
     }
 
 
-    public FastestRouteResDTO calculateFastestRoute(Long univId, Long startNodeId, Long endNodeId){
-
-        if(startNodeId.equals(endNodeId)){
-            throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
-        }
+    public FastestRouteResDTO calculateFastestRoute(Long startNodeId, Long endNodeId, List<Route> routes){
 
         //인접 리스트
         Map<Long, List<Route>> adjMap = new HashMap<>();
         Map<Long, Node> nodeMap = new HashMap<>();
 
-        routeRepository.findAllRouteByUnivIdWithNodes(univId).forEach(route -> {
+        routes.forEach(route -> {
             adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
             adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
 
@@ -125,31 +109,14 @@ public class RouteCalculator {
             nodeMap.putIfAbsent(route.getNode2().getId(), route.getNode2());
         });
 
-
         Node startNode = nodeMap.get(startNodeId);
         Node endNode = nodeMap.get(endNodeId);
-
-        if(startNode == null){
-            if(buildingRepository.existsByNodeIdAndUnivId(startNodeId, univId)){
-                throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
-            }
-            throw new NodeException("Node Not Found", NODE_NOT_FOUND);
-        }
-        if(endNode == null){
-            if(buildingRepository.existsByNodeIdAndUnivId(endNodeId, univId)){
-                throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
-            }
-            else{
-                throw new NodeException("Node Not Found", NODE_NOT_FOUND);
-            }
-        }
 
         //길찾기 알고리즘 수행
         Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap);
 
         //길찾기 경로 결과 정리
         List<Route> shortestRoutes = reorderRoute(startNode, endNode, prevRoute);
-
 
         Route startRoute = shortestRoutes.get(0);
         Route endRoute = shortestRoutes.get(shortestRoutes.size() - 1);
@@ -166,10 +133,6 @@ public class RouteCalculator {
         if(isBuildingRoute(endRoute)){
             endNode = endNode.getId().equals(endRoute.getNode1().getId()) ? endRoute.getNode2() : endRoute.getNode1();
             shortestRoutes.remove(shortestRoutes.size() - 1);
-        }
-
-        if(startNodeId.equals(endNodeId)){
-            throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
 
         boolean hasCaution = false;
@@ -200,7 +163,7 @@ public class RouteCalculator {
         }
 
         //처음과 마지막을 제외한 구간에서 빌딩노드를 거쳐왔다면, 이는 유효한 길이 없는 것이므로 예외처리
-        if(totalCost > BUILDING_ROUTE_COST-1){
+        if(totalCost > BUILDING_ROUTE_COST - 1){
             throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
         }
 
@@ -262,6 +225,10 @@ public class RouteCalculator {
         Collections.reverse(shortestRoutes);
 
         return shortestRoutes;
+    }
+
+    private boolean isBuildingRoute(Route route){
+        return route.getCost() > BUILDING_ROUTE_COST - 1;
     }
 
     // 두 route 간의 각도를 통한 계산으로 방향성을 정하는 메서드

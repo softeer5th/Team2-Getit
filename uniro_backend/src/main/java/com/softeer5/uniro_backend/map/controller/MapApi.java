@@ -68,7 +68,7 @@ public interface MapApi {
 			@ApiResponse(responseCode = "200", description = "빠른 길 계산 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
-	ResponseEntity<FastestRouteResDTO> calculateFastestRoute(@PathVariable("univId") Long univId,
+	ResponseEntity<FastestRouteResDTO> findFastestRoute(@PathVariable("univId") Long univId,
 																	@RequestParam Long startNodeId,
 																	@RequestParam Long endNodeId);
 

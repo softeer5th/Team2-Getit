@@ -66,10 +66,10 @@ public class MapController implements MapApi {
 
 	@Override
 	@GetMapping("/{univId}/routes/fastest")
-	public ResponseEntity<FastestRouteResDTO> calculateFastestRoute(@PathVariable("univId") Long univId,
+	public ResponseEntity<FastestRouteResDTO> findFastestRoute(@PathVariable("univId") Long univId,
 																	@RequestParam(value = "start-node-id") Long startNodeId,
 																	@RequestParam(value = "end-node-id") Long endNodeId) {
-		FastestRouteResDTO fastestRouteResDTO = routeCalculator.calculateFastestRoute(univId, startNodeId, endNodeId);
+		FastestRouteResDTO fastestRouteResDTO = mapService.findFastestRoute(univId, startNodeId, endNodeId);
 		return ResponseEntity.ok(fastestRouteResDTO);
 	}
 
