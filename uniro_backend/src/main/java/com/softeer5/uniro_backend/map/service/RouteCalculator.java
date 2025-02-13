@@ -112,6 +112,10 @@ public class RouteCalculator {
         Node startNode = nodeMap.get(startNodeId);
         Node endNode = nodeMap.get(endNodeId);
 
+        if(startNode==null || endNode==null){
+            throw new RouteCalculationException("node exist but it's unreachable", FASTEST_ROUTE_NOT_FOUND);
+        }
+
         //길찾기 알고리즘 수행
         Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap);
 
