@@ -19,6 +19,7 @@ import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -271,6 +272,7 @@ class AdminServiceTest {
 	}
 
 	@Test
+	@DisplayName("wiki 페이지 TC.1")
 	void 특정_버전_조회_테스트_with_길추가(){
 		Node node1 = NodeFixture.createNode(1, 1);
 		Node node2 = NodeFixture.createNode(1, 2);
@@ -339,6 +341,7 @@ class AdminServiceTest {
 	}
 
 	@Test
+	@DisplayName("wiki 페이지 TC.2")
 	void 특정_버전_조회_테스트_with_서로다른_길_추가(){
 		Node node1 = NodeFixture.createNode(1, 1);
 		Node node2 = NodeFixture.createNode(1, 2);
@@ -390,9 +393,9 @@ class AdminServiceTest {
 
 		//b. version2에 존재하지 않는 맵 정보 확인
 
-		//b-1. ver 2에 존재하지 않는 노드가 2개인지? (node1, node2, node3, node4, node5, node6)
+		//b-1. ver 2에 존재하지 않는 노드가 6개인지? (node1, node2, node3, node4, node5, node6)
 		List<NodeInfoResDTO> lostNodes = lostRoutes.getNodeInfos();
-		//assertThat(lostNodes).hasSize(6);
+		assertThat(lostNodes).hasSize(6);
 
 		//b-2. ver 2에 존재하지 않는 코어route가 2개인지?
 		List<CoreRouteResDTO> lostCoreRoutes = lostRoutes.getCoreRoutes();
@@ -420,6 +423,268 @@ class AdminServiceTest {
 	}
 
 	@Test
+	@DisplayName("wiki 페이지 TC.3")
+	void 특정_버전_조회_테스트_with_서로다른_길_여러개_추가(){
+		Node node1 = NodeFixture.createNode(1, 1);
+		Node node2 = NodeFixture.createNode(1, 2);
+		Node node3 = NodeFixture.createNode(1, 3);
+		Node node4 = NodeFixture.createNode(2,2);
+		Node node5 = NodeFixture.createNode(0, 0);
+		Node node6 = NodeFixture.createNode(-1, -1);
+		Node node7 = NodeFixture.createNode(3, 3);
+		Node node8 = NodeFixture.createNode(2, 3);
+
+		Route route1 = RouteFixture.createRoute(node1, node2);
+		Route route2 = RouteFixture.createRoute(node2, node3);
+		Route route3 = RouteFixture.createRoute(node3, node4);
+		Route route4 = RouteFixture.createRoute(node1, node5);
+		Route route5 = RouteFixture.createRoute(node5, node6);
+		Route route6 = RouteFixture.createRoute(node4, node7);
+		Route route7 = RouteFixture.createRoute(node4, node8);
+
+		node4.setCore(true);
+
+		nodeRepository.saveAll(List.of(node1, node2));  // ver 1
+		routeRepository.saveAll(List.of(route1)); // ver 2
+
+		nodeRepository.saveAll(List.of(node3,node4, node7, node8));  // ver 3
+		routeRepository.saveAll(List.of(route2, route3, route6, route7)); // ver 4
+
+		nodeRepository.saveAll(List.of(node5,node6));  // ver 5
+		routeRepository.saveAll(List.of(route4, route5)); // ver 6
+
+		//when
+		GetAllRoutesByRevisionResDTO allRoutesByRevision = adminService.getAllRoutesByRevision(1001L, 2L);
+
+		//then
+		GetAllRoutesResDTO routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
+		LostRoutesDTO lostRoutes = allRoutesByRevision.getLostRoutes();  // 버전 3,4,5,6에 생성하여 버전2엔 존재하지 않는 routes
+
+		//a. version2에 존재하는 맵 정보 확인
+
+		//a-1. ver 2의 노드의 개수가 2개인지? (node1, node2)
+		List<NodeInfoResDTO> nodeInfos = routesInfo.getNodeInfos(); // node 정보
+		assertThat(nodeInfos).hasSize(2);
+
+		//a-2. ver 2의 코어route 의 개수가 1개인지? (route1)
+		List<CoreRouteResDTO> coreRoutes = routesInfo.getCoreRoutes();
+		assertThat(coreRoutes).hasSize(1);
+
+		//a-3. ver 2의 route의 개수가 1개인지? (route1)
+		List<RouteCoordinatesInfoResDTO> routes = routesInfo.getCoreRoutes().get(0).getRoutes(); // core_route 정보
+		assertThat(routes).hasSize(1);
+
+		//a-4. ver2에 존재하는 route의 id가 route1과 같은지?
+		Long routeId = routes.get(0).getRouteId(); // ver2의 route의 id
+		assertThat(routeId).isEqualTo(route1.getId());
+
+
+		//b. version2에 존재하지 않는 맵 정보 확인
+
+		//b-1. ver 2에 존재하지 않는 노드가 8개인지? (node1, node2, node3, node4, node5, node6, node7, node8)
+		List<NodeInfoResDTO> lostNodes = lostRoutes.getNodeInfos();
+		assertThat(lostNodes).hasSize(8);
+
+		//b-2. ver 2에 존재하지 않는 코어route가 4개인지?
+		List<CoreRouteResDTO> lostCoreRoutes = lostRoutes.getCoreRoutes();
+		assertThat(lostCoreRoutes).hasSize(4);
+
+		//b-2. ver 2에 존재하지 않는 루트가 6개인지? (route2, route3, route4, route5, route6, route7)
+		int cnt = 0;
+		for(CoreRouteResDTO coreRoute : lostCoreRoutes) {
+			cnt += coreRoute.getRoutes().size();
+		}
+		assertThat(cnt).isEqualTo(6);
+
+		//b-2. ver 2에 존재하지 않는 route가 route2, route3, route4, route5, route6, route7 인지?
+		List<Long> lostRouteIds = new ArrayList<>();
+		for(CoreRouteResDTO coreRoute : lostCoreRoutes) {
+			for(RouteCoordinatesInfoResDTO route : coreRoute.getRoutes()) {
+				lostRouteIds.add(route.getRouteId());
+			}
+		}
+
+		assertThat(lostRouteIds)
+				.containsExactlyInAnyOrder(route2.getId(), route3.getId(), route4.getId(), route5.getId()
+				, route6.getId(), route7.getId());
+
+
+	}
+
+	@Test
+	@DisplayName("wiki 페이지 TC.4")
+	void 특정_버전_조회_테스트_with_사이클이_있는_서로다른_길_여러개_추가(){
+		Node node1 = NodeFixture.createNode(1, 1);
+		Node node2 = NodeFixture.createNode(1, 2);
+		Node node3 = NodeFixture.createNode(1, 3);
+		Node node4 = NodeFixture.createNode(2,2);
+		Node node5 = NodeFixture.createNode(0, 0);
+		Node node6 = NodeFixture.createNode(-1, -1);
+		Node node7 = NodeFixture.createNode(3, 3);
+		Node node8 = NodeFixture.createNode(2, 3);
+
+		Route route1 = RouteFixture.createRoute(node1, node2);
+		Route route2 = RouteFixture.createRoute(node2, node3);
+		Route route3 = RouteFixture.createRoute(node3, node4);
+		Route route4 = RouteFixture.createRoute(node1, node5);
+		Route route5 = RouteFixture.createRoute(node5, node6);
+		Route route6 = RouteFixture.createRoute(node4, node7);
+		Route route7 = RouteFixture.createRoute(node4, node8);
+		Route route8 = RouteFixture.createRoute(node7, node8);
+
+		node4.setCore(true);
+
+		nodeRepository.saveAll(List.of(node1, node2, node3));  // ver 1
+		routeRepository.saveAll(List.of(route1, route2)); // ver 2
+
+		nodeRepository.saveAll(List.of(node4, node7, node8));  // ver 3
+		routeRepository.saveAll(List.of(route3, route6, route7, route8)); // ver 4
+
+		nodeRepository.saveAll(List.of(node5,node6));  // ver 5
+		routeRepository.saveAll(List.of(route4, route5)); // ver 6
+
+		//when
+		GetAllRoutesByRevisionResDTO allRoutesByRevision = adminService.getAllRoutesByRevision(1001L, 2L);
+
+		//then
+		GetAllRoutesResDTO routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
+		LostRoutesDTO lostRoutes = allRoutesByRevision.getLostRoutes();  // 버전 3,4,5,6에 생성하여 버전2엔 존재하지 않는 routes
+
+		//a. version2에 존재하는 맵 정보 확인
+
+		//a-1. ver 2의 노드의 개수가 3개인지? (node1, node2, node3)
+		List<NodeInfoResDTO> nodeInfos = routesInfo.getNodeInfos(); // node 정보
+		assertThat(nodeInfos).hasSize(3);
+
+		//a-2. ver 2의 코어route 의 개수가 1개인지? (route1, route2)
+		List<CoreRouteResDTO> coreRoutes = routesInfo.getCoreRoutes();
+		assertThat(coreRoutes).hasSize(1);
+
+		//a-3. ver 2의 route의 개수가 2개인지? (route1, route2)
+		List<RouteCoordinatesInfoResDTO> routes = routesInfo.getCoreRoutes().get(0).getRoutes(); // core_route 정보
+		assertThat(routes).hasSize(2);
+
+
+		//b. version2에 존재하지 않는 맵 정보 확인
+
+		//b-1. ver 2에 존재하지 않는 노드가 7개인지? (node1, node3, node4, node5, node6, node7, node8)
+		List<NodeInfoResDTO> lostNodes = lostRoutes.getNodeInfos();
+		assertThat(lostNodes).hasSize(7);
+
+		//b-2. ver 2에 존재하지 않는 코어route가 3개인지?
+		List<CoreRouteResDTO> lostCoreRoutes = lostRoutes.getCoreRoutes();
+		assertThat(lostCoreRoutes).hasSize(3);
+
+		//b-2. ver 2에 존재하지 않는 루트가 6개인지? (route3, route4, route5, route6, route7, route8)
+		int cnt = 0;
+		for(CoreRouteResDTO coreRoute : lostCoreRoutes) {
+			cnt += coreRoute.getRoutes().size();
+		}
+		assertThat(cnt).isEqualTo(6);
+
+		//b-2. ver 2에 존재하지 않는 route가 route3, route4, route5, route6, route7, route8 인지?
+		List<Long> lostRouteIds = new ArrayList<>();
+		for(CoreRouteResDTO coreRoute : lostCoreRoutes) {
+			for(RouteCoordinatesInfoResDTO route : coreRoute.getRoutes()) {
+				lostRouteIds.add(route.getRouteId());
+			}
+		}
+
+		assertThat(lostRouteIds)
+				.containsExactlyInAnyOrder(route3.getId(), route4.getId(), route5.getId()
+						, route6.getId(), route7.getId(), route8.getId());
+
+
+	}
+
+
+	@Test
+	@DisplayName("wiki 페이지 TC.5")
+	void 특정_버전_조회_테스트_with_사이클이_있으며_완전그래프인_서로다른_길_여러개_추가(){
+		Node node1 = NodeFixture.createNode(1, 1);
+		Node node2 = NodeFixture.createNode(1, 2);
+		Node node3 = NodeFixture.createNode(1, 3);
+		Node node4 = NodeFixture.createNode(2,2);
+		Node node5 = NodeFixture.createNode(0, 0);
+		Node node6 = NodeFixture.createNode(-1, -1);
+		Node node7 = NodeFixture.createNode(3, 3);
+		Node node8 = NodeFixture.createNode(2, 3);
+
+		Route route1 = RouteFixture.createRoute(node1, node2);
+		Route route2 = RouteFixture.createRoute(node2, node3);
+		Route route3 = RouteFixture.createRoute(node3, node4);
+		Route route4 = RouteFixture.createRoute(node1, node5);
+		Route route5 = RouteFixture.createRoute(node5, node6);
+		Route route6 = RouteFixture.createRoute(node4, node7);
+		Route route7 = RouteFixture.createRoute(node4, node8);
+		Route route8 = RouteFixture.createRoute(node7, node8);
+
+		nodeRepository.saveAll(List.of(node1, node2, node3, node4));  // ver 1
+		routeRepository.saveAll(List.of(route1, route2, route3)); // ver 2
+
+		nodeRepository.saveAll(List.of(node5,node6));  // ver 3
+		routeRepository.saveAll(List.of(route4, route5)); // ver 4
+
+		node4.setCore(true);
+		nodeRepository.saveAll(List.of(node4, node7, node8));  // ver 5
+		routeRepository.saveAll(List.of(route6, route7, route8)); // ver 6
+
+		//when
+		GetAllRoutesByRevisionResDTO allRoutesByRevision = adminService.getAllRoutesByRevision(1001L, 2L);
+
+		//then
+		GetAllRoutesResDTO routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
+		LostRoutesDTO lostRoutes = allRoutesByRevision.getLostRoutes();  // 버전 3,4,5,6에 생성하여 버전2엔 존재하지 않는 routes
+
+		//a. version2에 존재하는 맵 정보 확인
+
+		//a-1. ver 2의 노드의 개수가 4개인지? (node1, node2, node3, node4)
+		List<NodeInfoResDTO> nodeInfos = routesInfo.getNodeInfos(); // node 정보
+		assertThat(nodeInfos).hasSize(4);
+
+		//a-2. ver 2의 코어route 의 개수가 1개인지? (route1, route2, route3)
+		List<CoreRouteResDTO> coreRoutes = routesInfo.getCoreRoutes();
+		assertThat(coreRoutes).hasSize(1);
+
+		//a-3. ver 2의 route의 개수가 3개인지? (route1, route2, route3)
+		List<RouteCoordinatesInfoResDTO> routes = routesInfo.getCoreRoutes().get(0).getRoutes(); // core_route 정보
+		assertThat(routes).hasSize(3);
+
+
+		//b. version2에 존재하지 않는 맵 정보 확인
+
+		//b-1. ver 2에 존재하지 않는 노드가 6개인지? (node1, node4, node5, node6, node7, node8)
+		List<NodeInfoResDTO> lostNodes = lostRoutes.getNodeInfos();
+		assertThat(lostNodes).hasSize(6);
+
+		//b-2. ver 2에 존재하지 않는 코어route가 2개인지?
+		List<CoreRouteResDTO> lostCoreRoutes = lostRoutes.getCoreRoutes();
+		assertThat(lostCoreRoutes).hasSize(2);
+
+		//b-2. ver 2에 존재하지 않는 루트가 5개인지? (route4, route5, route6, route7, route8)
+		int cnt = 0;
+		for(CoreRouteResDTO coreRoute : lostCoreRoutes) {
+			cnt += coreRoute.getRoutes().size();
+		}
+		assertThat(cnt).isEqualTo(5);
+
+		//b-2. ver 2에 존재하지 않는 route가 route4, route5, route6, route7, route8 인지?
+		List<Long> lostRouteIds = new ArrayList<>();
+		for(CoreRouteResDTO coreRoute : lostCoreRoutes) {
+			for(RouteCoordinatesInfoResDTO route : coreRoute.getRoutes()) {
+				lostRouteIds.add(route.getRouteId());
+			}
+		}
+
+		assertThat(lostRouteIds)
+				.containsExactlyInAnyOrder(route4.getId(), route5.getId()
+						, route6.getId(), route7.getId(), route8.getId());
+
+
+	}
+
+	@Test
+	@DisplayName("wiki 페이지 TC.6")
 	void 특정_버전_조회_테스트_with_위험_주의요소_변경(){
 		Node node1 = NodeFixture.createNode(1, 1);
 		Node node2 = NodeFixture.createNode(1, 2);
