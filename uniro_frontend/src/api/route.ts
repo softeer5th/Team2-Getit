@@ -5,18 +5,18 @@ import { NodeId } from "../data/types/node";
 
 import { CoreRoutesList, NavigationRouteList, RouteId } from "../data/types/route";
 import { getFetch, postFetch } from "../utils/fetch/fetch";
-import { transformAllRoutes } from "./transformer/route";
+import { transformAllRoutes, transformFastRoute } from "./transformer/route";
 import { GetAllRouteRepsonse } from "./type/response/route";
 
 export const getNavigationResult = (
 	univId: number,
 	startNodeId: NodeId,
 	endNodeId: NodeId,
-): Promise<NavigationRouteList> => {
+): Promise<NavigationRouteList[]> => {
 	return getFetch<NavigationRouteList>(`/${univId}/routes/fastest`, {
 		"start-node-id": startNodeId,
 		"end-node-id": endNodeId,
-	});
+	}).then((data) => transformFastRoute(data));
 };
 
 export const getAllRoutes = (univId: number): Promise<CoreRoutesList> => {

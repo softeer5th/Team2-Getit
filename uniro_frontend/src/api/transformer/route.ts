@@ -1,4 +1,4 @@
-import { CoreRoutesList } from "../../data/types/route";
+import { CoreRoutesList, NavigationRouteList } from "../../data/types/route";
 import { GetAllRouteRepsonse } from "../type/response/route";
 
 export const transformAllRoutes = (data: GetAllRouteRepsonse): CoreRoutesList => {
@@ -27,4 +27,26 @@ export const transformAllRoutes = (data: GetAllRouteRepsonse): CoreRoutesList =>
 			}),
 		};
 	});
+};
+
+export const transformFastRoute = (data: NavigationRouteList): NavigationRouteList[] => {
+	return [
+		{
+			...data,
+			routeType: "PEDES",
+			pedestrianTotalCost: Math.floor(data.totalCost ?? 2) > 1 ? (data.totalCost ?? 2 - 1) : data.totalCost,
+		},
+		{
+			...data,
+			routeType: "WHEEL_FAST",
+			manualTotalCost: (data.totalCost ?? 2) + 2,
+			electricTotalCost: data.totalCost ?? 2,
+		},
+		{
+			...data,
+			routeType: "WHEEL_SAFE",
+			manualTotalCost: (data.totalCost ?? 2) + 4,
+			electricTotalCost: (data.totalCost ?? 2) + 2,
+		},
+	];
 };
