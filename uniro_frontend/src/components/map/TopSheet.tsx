@@ -14,7 +14,6 @@ interface MapTopSheetProps {
 }
 
 export function MapTopBuildingSheet({ isVisible }: MapTopSheetProps) {
-	const { origin, setOrigin, destination, setDestination, switchBuilding } = useRoutePoint();
 	const { searchMode, setSearchMode } = useSearchBuilding();
 
 	return (
@@ -34,8 +33,6 @@ export function MapTopBuildingSheet({ isVisible }: MapTopSheetProps) {
 				<BuildingInput
 					onClick={() => { }}
 					placeholder={`한양대학교 건물을 검색해보세요`}
-					value={origin ? origin.buildingName : ""}
-					onCancel={() => setOrigin(undefined)}
 				>
 					<SearchIcon />
 				</BuildingInput>
@@ -55,6 +52,12 @@ export function MapTopRouteSheet({ isVisible }: MapTopSheetProps) {
 	const { origin, setOrigin, destination, setDestination, switchBuilding } = useRoutePoint();
 	const { searchMode, setSearchMode } = useSearchBuilding();
 
+	const resetRoutePoint = () => {
+		setOrigin(undefined);
+		setDestination(undefined);
+		setSearchMode("BUILDING");
+	}
+
 	return (
 		<AnimatedContainer
 			isVisible={isVisible}
@@ -69,7 +72,7 @@ export function MapTopRouteSheet({ isVisible }: MapTopSheetProps) {
 		>
 			<div className="flex flex-row space-x-1">
 				<div className="flex items-center">
-					<button onClick={() => { setSearchMode("BUILDING") }} className="cursor-pointer p-1 rounded-[8px] active:bg-gray-200">
+					<button onClick={resetRoutePoint} className="cursor-pointer p-1 rounded-[8px] active:bg-gray-200">
 						<ChevronLeft />
 					</button>
 				</div>
