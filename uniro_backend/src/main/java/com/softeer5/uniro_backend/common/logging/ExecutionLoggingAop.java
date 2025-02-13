@@ -50,7 +50,9 @@ public class ExecutionLoggingAop {
 		log.info("✅ [ userId = {} Start] [Call Method] {}: {}", userId, request.getMethod(), task);
 
 		try{
-			logParameters(pjp.getArgs());
+			if (isController) {
+				logParameters(pjp.getArgs());
+			}
 		}
 		catch (Exception e){
 			// 로깅 중에 발생한 에러는 무시하고 로깅을 계속 진행
