@@ -14,6 +14,7 @@ interface BottomCardProps {
 	};
 	type: RouteType;
 	selected: boolean;
+	onClick: () => void;
 }
 
 const themes: Record<
@@ -29,8 +30,9 @@ const themes: Record<
 > = {
 	caution: {
 		color: {
-			unselected: "border-system-orange bg-white hover:bg-system-orange text-system-orange",
-			selected: "border-system-orange bg-system-orange text-white",
+			unselected:
+				"border-system-orange bg-white hover:bg-system-orange text-system-orange active:border-system-orange active:bg-system-orange active:text-white",
+			selected: "border-system-orange bg-system-orange text-white active:border-[#B85C00] active:bg-[#B85C00] ",
 		},
 		label: "주의 경로",
 		icon: {
@@ -40,8 +42,9 @@ const themes: Record<
 	},
 	safe: {
 		color: {
-			unselected: "border-mint-500 bg-white hover:bg-mint-500 text-mint-500",
-			selected: "border-mint-500 bg-mint-500 text-white",
+			unselected:
+				"border-mint-500 bg-white hover:bg-mint-500 text-mint-500 active:bg-mint-500 active:border-mint-500 active:text-white",
+			selected: "border-mint-500 bg-mint-500 text-white active:bg-[#004F49] active:border-[#004F49]",
 		},
 		label: "안전 경로",
 		icon: {
@@ -51,26 +54,27 @@ const themes: Record<
 	},
 	normal: {
 		color: {
-			unselected: "border-primary-600 bg-white hover:bg-primary-600 text-primary-600",
-			selected: "border-primary-600 bg-primary-600 text-white",
+			unselected: "border-primary-500 bg-white hover:bg-primary-500 text-primary-500",
+			selected: "border-primary-500 bg-primary-500 text-white active:bg-primary-700 active:border-primary-700",
 		},
 		label: "일반 경로",
 		icon: {
 			// 일반 Icon으로 바꿀 예정
-			selected: <SafeIconWhite />,
-			unselected: <SafeIcon />,
+			selected: <></>,
+			unselected: <></>,
 		},
 	},
 };
 
-const BottomCard: React.FC<BottomCardProps> = ({ routeInfo, type, selected }) => {
+const BottomCard: React.FC<BottomCardProps> = ({ routeInfo, type, selected, onClick }) => {
 	const theme = themes[type];
 
 	return (
 		<div
-			className={`flex-1 flex flex-row h-24 border-2 rounded-xl p-3 hover:text-white transition-all ${
+			className={`flex-1 flex flex-row h-24 border-2 rounded-xl p-3 hover:text-white transition-all duration-100 ${
 				theme.color[selected ? "selected" : "unselected"]
 			}`}
+			onClick={onClick}
 		>
 			<div className="flex-1 flex-col items-start justify-start">
 				<div className="flex-1 flex flex-row items-center justify-start text-left">
