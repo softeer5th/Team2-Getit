@@ -144,7 +144,7 @@ public class AdminService {
         //시작점이 1개인 nodeList 생성
         List<Node> endNodes = lostAdjMap.entrySet()
                 .stream()
-                .filter(entry -> entry.getValue().size() == 1)
+                .filter(entry -> (entry.getValue().size() == 1) || lostNodeMap.get(entry.getKey()).isCore())
                 .map(Map.Entry::getKey)
                 .map(lostNodeMap::get)
                 .collect(Collectors.toList());
