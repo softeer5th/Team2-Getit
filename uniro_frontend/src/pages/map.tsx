@@ -32,6 +32,7 @@ import { getAllBuildings } from "../api/nodes";
 import { getNavigationResult } from "../api/route";
 import useQueryError from "../hooks/useQueryError";
 import { Coord } from "../data/types/coord";
+import AnimatedContainer from "../container/animatedContainer";
 
 
 export type SelectedMarkerTypes = {
@@ -575,23 +576,42 @@ export default function MapPage() {
 				selectedMarker={selectedMarker}
 				isVisible={selectedMarker?.type === Markers.BUILDING ? true : false}
 			/>
-			{origin && destination && origin.nodeId !== destination.nodeId ? (
-				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */
+			{/* 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */}
+			<AnimatedContainer
+				isVisible={origin !== undefined && destination !== undefined && origin.nodeId !== destination.nodeId}
+				positionDelta={200}
+				transition={{
+					duration: 0.3,
+					type: 'spring',
+					damping: 20,
+				}}
+				className=""
+			>
 				<div onClick={() => findFastRoute()} className="absolute bottom-6 space-y-2 w-full px-4">
 					<Button variant="primary">길찾기</Button>
 				</div>
-			) : (
-				/** 출발지랑 도착지가 존재하지 않거나, 같은 경우 기존 Button UI 보이기 */
-				<>
-					<div className="absolute right-4 bottom-6 space-y-2">
-						<ReportButton onClick={open} />
-					</div>
-					<div className="absolute right-4 bottom-[90px] space-y-2">
-						<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
-						<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
-					</div>
-				</>
-			)}
+			</AnimatedContainer>
+
+			{/* 출발지랑 도착지가 존재하지 않거나, 같은 경우 기존 Button UI 보이기 */}
+			<AnimatedContainer
+				isVisible={!(origin !== undefined && destination !== undefined && origin.nodeId !== destination.nodeId)}
+				positionDelta={200}
+				transition={{
+					duration: 0.3,
+					type: 'spring',
+					damping: 20,
+				}}
+				className=""
+			>
+				<div className="absolute right-4 bottom-6 space-y-2">
+					<ReportButton onClick={open} />
+				</div>
+				<div className="absolute right-4 bottom-[90px] space-y-2">
+					<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
+					<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
+				</div>
+			</AnimatedContainer>
+
 			{isOpen && <ReportModal close={close} />}
 			<FailModal />
 		</div>
