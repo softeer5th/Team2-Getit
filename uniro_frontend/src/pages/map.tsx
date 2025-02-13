@@ -79,12 +79,12 @@ export default function MapPage() {
 	const [FailModal, { status, data, refetch: findFastRoute }] = useQueryError(
 		{
 			queryKey: ["fastRoute", university.id, origin?.nodeId, destination?.nodeId],
-			queryFn: () =>
-				getNavigationResult(
-					university.id,
-					origin ? origin?.nodeId : -1,
-					destination ? destination?.nodeId : -1,
-				),
+			queryFn: () => {},
+			// getNavigationResult(
+			// 	university.id,
+			// 	origin ? origin?.nodeId : -1,
+			// 	destination ? destination?.nodeId : -1,
+			// ),
 			enabled: false,
 			retry: 0,
 		},
@@ -130,9 +130,13 @@ export default function MapPage() {
 
 	const moveToBound = () => {
 		if (selectedMarker?.type === Markers.BUILDING) {
-
 			buildingBoundary.current = new google.maps.LatLngBounds();
-			buildingBoundary.current.extend(new google.maps.LatLng(selectedMarker?.property?.lat as number, selectedMarker?.property?.lng as number));
+			buildingBoundary.current.extend(
+				new google.maps.LatLng(
+					selectedMarker?.property?.lat as number,
+					selectedMarker?.property?.lng as number,
+				),
+			);
 			// 라이브러리를 다양한 화면을 관찰해보았을 때, h-가 377인것을 확인했습니다.
 			map?.fitBounds(buildingBoundary.current, {
 				top: 0,
@@ -145,7 +149,7 @@ export default function MapPage() {
 
 	const exitBound = () => {
 		buildingBoundary.current = null;
-	}
+	};
 
 	const initMap = () => {
 		if (map === null || !AdvancedMarker) return;
@@ -338,8 +342,6 @@ export default function MapPage() {
 		setSelectedMarker(undefined);
 	};
 
-
-
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
@@ -500,7 +502,7 @@ export default function MapPage() {
 		if (selectedMarker && selectedMarker.type === Markers.BUILDING) {
 			moveToBound();
 		}
-	}, [selectedMarker])
+	}, [selectedMarker]);
 
 	useEffect(() => {
 		if (!map) return;

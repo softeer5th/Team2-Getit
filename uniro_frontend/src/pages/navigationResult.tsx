@@ -22,6 +22,9 @@ import BottomCardList from "../components/navigation/card/bottomCardList";
 import { NavigationButtonRouteType } from "../data/types/route";
 import NavigationNavBar from "../components/navigation/navBar/navigationNavBar";
 
+import mock from "../api/mock.json";
+import { transformFastRoute } from "../api/transformer/route";
+
 const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
 const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
 const CLOSED_SHEET_HEIGHT = 0;
@@ -29,6 +32,14 @@ const CLOSED_SHEET_HEIGHT = 0;
 const INITIAL_TOP_BAR_HEIGHT = 143;
 const BOTTOM_SHEET_HANDLE_HEIGHT = 40;
 const PADDING_FOR_MAP_BOUNDARY = 50;
+
+export async function fetchMockJson() {
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve(mock);
+		}, 0);
+	});
+}
 
 const NavigationResultPage = () => {
 	const [isDetailView, setIsDetailView] = useState(false);
@@ -41,7 +52,7 @@ const NavigationResultPage = () => {
 
 	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>("PEDES & SAFE");
 
-	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
+	//useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
 
 	useScrollControl();
 
@@ -50,17 +61,21 @@ const NavigationResultPage = () => {
 			{
 				queryKey: ["fastRoute", university?.id, origin?.nodeId ?? 1, destination?.nodeId ?? 2],
 				queryFn: async () => {
-					try {
-						const response = await getNavigationResult(
-							university?.id ?? 1001,
-							origin?.nodeId ?? 1,
-							destination?.nodeId ?? 2,
-						);
+					// try {
+					// 	const response = await getNavigationResult(
+					// 		university?.id ?? 1001,
+					// 		origin?.nodeId ?? 1,
+					// 		destination?.nodeId ?? 2,
+					// 	);
+					// 	return response;
+					// } catch (e) {
+					// 	alert(`경로를 찾을 수 없습니다. (${e})`);
+					// 	return null;
+					// }
+					return await fetchMockJson().then((data) => {
+						const response = transformFastRoute(data);
 						return response;
-					} catch (e) {
-						alert(`경로를 찾을 수 없습니다. (${e})`);
-						return null;
-					}
+					});
 				},
 				retry: 1,
 				staleTime: 0,
@@ -88,9 +103,9 @@ const NavigationResultPage = () => {
 		setIsDetailView(false);
 	};
 
-	// PEDS & SAFE의 경우 result에 PEDS&SAFE만 넘겨줌
+	// PEDS & SAFE의 경우 result에 PEDS & SAFE만 넘겨줌
 	// ELECTRIC & CAUTION or ELECTRIC & SAFE 일 경우 result에 ELECTRIC&CAUTION, ELECTRIC&SAFE 넘겨줌
-	// WHEELCHAIR & CAUTION or WHEELCHAIR & SAFE 일 경우 result에 WHEELCHAIR&CAUTION, WHEELCHAIR&SAFE 넘겨줌
+	// MANUAL & CAUTION or MANUAL & SAFE 일 경우 result에 MANUA & CAUTION, MANUAL&SAFE 넘겨줌
 
 	const filteredData = () => {
 		switch (buttonState) {
@@ -99,9 +114,9 @@ const NavigationResultPage = () => {
 			case "ELECTRIC & CAUTION":
 			case "ELECTRIC & SAFE":
 				return [routeList.data!["ELECTRIC & CAUTION"], routeList.data!["ELECTRIC & SAFE"]].filter(Boolean);
-			case "WHEELCHAIR & CAUTION":
-			case "WHEELCHAIR & SAFE":
-				return [routeList.data!["WHEELCHAIR & CAUTION"], routeList.data!["WHEELCHAIR & SAFE"]].filter(Boolean);
+			case "MANUAL & CAUTION":
+			case "MANUAL & SAFE":
+				return [routeList.data!["MANUAL & CAUTION"], routeList.data!["MANUAL & SAFE"]].filter(Boolean);
 			default:
 				return [];
 		}
@@ -116,7 +131,8 @@ const NavigationResultPage = () => {
 			{/* 지도 영역 */}
 			<NavigationMap
 				style={{ width: "100%", height: "100%" }}
-				routeResult={routeList.data![buttonState]}
+				routeResult={routeList.data!}
+				buttonState={buttonState}
 				isDetailView={isDetailView}
 				risks={risks.data}
 				topPadding={topBarHeight}
@@ -134,7 +150,7 @@ const NavigationResultPage = () => {
 					<NavigationDescription isDetailView={false} navigationRoute={routeList.data![buttonState]} />
 				</div>
 				<NavigationNavBar
-					route={routeList.data![buttonState]}
+					route={routeList.data!}
 					dataLength={routeList.data!.dataLength}
 					buttonType={buttonState}
 					setButtonState={handleButtonStateChange}
@@ -150,6 +166,8 @@ const NavigationResultPage = () => {
 					routeList={filteredData()}
 					dataLength={routeList.data!.dataLength}
 					buttonType={buttonState}
+					showDetailView={showDetailView}
+					setButtonState={setButtonState}
 				></BottomCardList>
 			</AnimatedContainer>
 
@@ -189,7 +207,13 @@ const NavigationResultPage = () => {
 					onScroll={preventScroll}
 				>
 					<NavigationDescription isDetailView={true} navigationRoute={routeList.data![buttonState]} />
-					<RouteList routes={routeList.data![buttonState].routeDetails} />
+					<RouteList
+						routes={
+							routeList.data![buttonState]?.routeDetails
+								? routeList.data![buttonState]?.routeDetails
+								: null
+						}
+					/>
 				</div>
 			</AnimatedContainer>
 		</div>
