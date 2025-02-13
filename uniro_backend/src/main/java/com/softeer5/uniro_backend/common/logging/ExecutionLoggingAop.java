@@ -11,7 +11,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -90,12 +89,12 @@ public class ExecutionLoggingAop {
 		StringBuilder parametersLogMessage = new StringBuilder();
 
 		Arrays.stream(args)
-			.forEach(arg -> logCommonTest(arg, "[Parameter]", parametersLogMessage, 0));
+			.forEach(arg -> logDetail(arg, "[Parameter]", parametersLogMessage, 0));
 
 		log.info("\n{}", parametersLogMessage.toString());
 	}
 
-	private void logCommonTest(Object arg, String requestType, StringBuilder logMessage, int depth) {
+	private void logDetail(Object arg, String requestType, StringBuilder logMessage, int depth) {
 		String indent = "  ".repeat(depth); // depth 수준에 따른 들여쓰기
 
 		if (arg == null) {
@@ -107,7 +106,7 @@ public class ExecutionLoggingAop {
 			logMessage.append(indent).append(requestType).append(" ").append(arg.getClass().getSimpleName()).append("\n");
 			List<?> list = (List<?>) arg;
 			for (int i = 0; i < list.size(); i++) {
-				logCommonTest(list.get(i), "[List Element " + i + "] ", logMessage, depth + 1);
+				logDetail(list.get(i), "[List Element " + i + "] ", logMessage, depth + 1);
 			}
 		} else if (isCustomDto(arg)) {
 			logMessage.append(indent).append(requestType).append("DTO: ").append(arg.getClass().getSimpleName()).append("\n");
@@ -127,7 +126,7 @@ public class ExecutionLoggingAop {
 			try {
 				field.setAccessible(true);
 				Object value = field.get(object);
-				logCommonTest(value, "[Field] " + field.getName(), logMessage, depth + 1);
+				logDetail(value, "[Field] " + field.getName(), logMessage, depth + 1);
 			} catch (IllegalAccessException e) {
 				logMessage.append(indent).append("[Field Access Error] Cannot access field: ").append(field.getName()).append("\n");
 			}
