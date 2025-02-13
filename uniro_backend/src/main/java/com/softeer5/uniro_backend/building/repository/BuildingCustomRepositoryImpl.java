@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.building.repository;
 
+import static com.softeer5.uniro_backend.map.entity.QNode.node;
 
 import java.util.List;
 
@@ -15,7 +16,6 @@ import com.softeer5.uniro_backend.building.service.vo.BuildingNode;
 import lombok.RequiredArgsConstructor;
 
 import static com.softeer5.uniro_backend.building.entity.QBuilding.building;
-import static com.softeer5.uniro_backend.map.entity.QNode.node;
 
 @Repository
 @RequiredArgsConstructor
