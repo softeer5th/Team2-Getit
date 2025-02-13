@@ -158,7 +158,7 @@ public class RouteCalculator {
             }
 
             //처음과 마지막을 제외한 구간에서 빌딩노드를 거쳐왔다면, 이는 유효한 길이 없는 것이므로 예외처리
-            if (totalDistance > BUILDING_ROUTE_COST - 1) continue;
+            if (totalDistance > BUILDING_ROUTE_DISTANCE - 1) continue;
 
             List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
@@ -252,7 +252,7 @@ public class RouteCalculator {
     }
 
     private boolean isBuildingRoute(Route route){
-        return route.getDistance() > BUILDING_ROUTE_COST - 1;
+        return route.getDistance() > BUILDING_ROUTE_DISTANCE - 1;
     }
 
     // 두 route 간의 각도를 통한 계산으로 방향성을 정하는 메서드

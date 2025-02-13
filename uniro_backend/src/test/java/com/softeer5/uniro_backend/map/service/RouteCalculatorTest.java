@@ -23,7 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.softeer5.uniro_backend.common.constant.UniroConst.BUILDING_ROUTE_COST;
+import static com.softeer5.uniro_backend.common.constant.UniroConst.BUILDING_ROUTE_DISTANCE;
 
 @SpringBootTest
 @Testcontainers
@@ -54,15 +54,15 @@ class RouteCalculatorTest {
             Node n7 = NodeFixture.createNode(0, 0);
             Node n8 = NodeFixture.createNode(0, 0);
 
-            Route r1 = RouteFixture.createRouteWithDistance(n1, n2, BUILDING_ROUTE_COST);
+            Route r1 = RouteFixture.createRouteWithDistance(n1, n2, BUILDING_ROUTE_DISTANCE);
             Route r2 = RouteFixture.createRouteWithDistance(n2, n3, 15);
             Route r3 = RouteFixture.createRouteWithDistance(n3, n7, 1);
             Route r4 = RouteFixture.createRouteWithDistance(n3, n4, 6);
-            Route r5 = RouteFixture.createRouteWithDistance(n4, n5, BUILDING_ROUTE_COST);
-            Route r6 = RouteFixture.createRouteWithDistance(n5, n6, BUILDING_ROUTE_COST);
+            Route r5 = RouteFixture.createRouteWithDistance(n4, n5, BUILDING_ROUTE_DISTANCE);
+            Route r6 = RouteFixture.createRouteWithDistance(n5, n6, BUILDING_ROUTE_DISTANCE);
             Route r7 = RouteFixture.createRouteWithDistance(n6, n7, 18);
             Route r8 = RouteFixture.createRouteWithDistance(n7, n8, 3);
-            Route r9 = RouteFixture.createRouteWithDistance(n8, n1, BUILDING_ROUTE_COST);
+            Route r9 = RouteFixture.createRouteWithDistance(n8, n1, BUILDING_ROUTE_DISTANCE);
 
             Building b1 = Building.builder().nodeId(1L).univId(1001L).build();
             Building b5 = Building.builder().nodeId(5L).univId(1001L).build();

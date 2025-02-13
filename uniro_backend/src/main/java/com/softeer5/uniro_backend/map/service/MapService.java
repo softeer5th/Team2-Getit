@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.map.service;
 
-import static com.softeer5.uniro_backend.common.constant.UniroConst.BUILDING_ROUTE_COST;
+import static com.softeer5.uniro_backend.common.constant.UniroConst.BUILDING_ROUTE_DISTANCE;
 import static com.softeer5.uniro_backend.common.constant.UniroConst.CORE_NODE_CONDITION;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 import static com.softeer5.uniro_backend.common.utils.GeoUtils.getInstance;
@@ -133,7 +133,7 @@ public class MapService {
 		}
 
 		Route route = Route.builder()
-				.distance(BUILDING_ROUTE_COST)
+				.distance(BUILDING_ROUTE_DISTANCE)
 				.path(geometryFactory.createLineString(
 						new Coordinate[] {buildingNode.getCoordinates().getCoordinate(),
 								connectedNode.getCoordinates().getCoordinate()}))

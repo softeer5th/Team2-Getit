@@ -11,7 +11,7 @@ VALUES
 
 -- 목 데이터 삽입
 INSERT INTO
-    route (id, cost, path, node1_id, node2_id, univ_id, core_route_id, caution_factors, danger_factors)
+    route (id, distance, path, node1_id, node2_id, univ_id, core_route_id, caution_factors, danger_factors)
 VALUES
     (1, 10.5, ST_GeomFromText('LINESTRING(30.001 37.001, 30.002 37.002)', 4326), 1, 2, 1001, NULL, '["SLOPE", "CURB"]', '["STAIRS"]'),
     (2, 20.0, ST_GeomFromText('LINESTRING(30.002 37.002, 30.003 37.003)', 4326), 2, 3, 1001, NULL, '["CRACK"]', '["SLOPE", "STAIRS"]'),
