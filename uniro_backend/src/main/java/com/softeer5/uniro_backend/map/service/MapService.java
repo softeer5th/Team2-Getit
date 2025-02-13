@@ -57,7 +57,7 @@ public class MapService {
 		return routeCalculator.assembleRoutes(routes);
 	}
 
-	public FastestRouteResDTO findFastestRoute(Long univId, Long startNodeId, Long endNodeId){
+	public List<FastestRouteResDTO> findFastestRoute(Long univId, Long startNodeId, Long endNodeId){
 
 		if(startNodeId.equals(endNodeId)){
 			throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
@@ -69,7 +69,7 @@ public class MapService {
 			|| buildings.get(0).getNodeId().equals(buildings.get(1).getNodeId())
 			|| buildings.stream().anyMatch(building -> !Objects.equals(building.getUnivId(), univId))){
 
-			throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+			throw new BuildingException("Building not found", BUILDING_NOT_FOUND);
 		}
 
 		List<Route> routesWithNode = routeRepository.findAllRouteByUnivIdWithNodes(univId);
@@ -133,7 +133,7 @@ public class MapService {
 		}
 
 		Route route = Route.builder()
-				.cost(BUILDING_ROUTE_COST)
+				.distance(BUILDING_ROUTE_COST)
 				.path(geometryFactory.createLineString(
 						new Coordinate[] {buildingNode.getCoordinates().getCoordinate(),
 								connectedNode.getCoordinates().getCoordinate()}))
