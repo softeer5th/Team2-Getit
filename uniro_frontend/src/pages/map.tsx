@@ -178,7 +178,7 @@ export default function MapPage() {
 
 			const buildingMarker = createAdvancedMarker(
 				AdvancedMarker,
-				null,
+				(nodeId === origin?.nodeId || nodeId === destination?.nodeId) ? map : null,
 				new google.maps.LatLng(lat, lng),
 				createMarkerElement({ type: Markers.BUILDING, title: buildingName, className: "translate-marker" }),
 				() => {
@@ -450,6 +450,8 @@ export default function MapPage() {
 		const originMarker = findBuildingMarker(origin.nodeId);
 		if (!originMarker) return;
 
+		originMarker.map = map;
+
 		originMarker.content = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin.buildingName,
@@ -473,6 +475,8 @@ export default function MapPage() {
 
 		const destinationMarker = findBuildingMarker(destination.nodeId);
 		if (!destinationMarker) return;
+
+		destinationMarker.map = map;
 
 		destinationMarker.content = createMarkerElement({
 			type: Markers.DESTINATION,
