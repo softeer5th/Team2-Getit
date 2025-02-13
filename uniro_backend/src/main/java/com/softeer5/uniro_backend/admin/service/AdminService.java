@@ -103,7 +103,7 @@ public class AdminService {
 
         List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
         //TODO getAllRoutes 호출전에 revRoutes size 조사
-        GetAllRoutesResDTO routesInfo = routeCalculator.assembleRoutes(revRoutes); // UNI-209 pull 받은 후 해결
+        GetAllRoutesResDTO routesInfo = routeCalculator.assembleRoutes(revRoutes);
 
         Map<Long, Route> revRouteMap = new HashMap<>();
         for(Route revRoute : revRoutes){
@@ -120,7 +120,7 @@ public class AdminService {
             if(revRouteMap.containsKey(route.getId())){
                 Route revRoute = revRouteMap.get(route.getId());
                 //변경사항이 있는 경우
-                if(route.isEqualRoute(revRoute)){
+                if(!route.isEqualRoute(revRoute)){
                     changedRoutes.add(ChangedRouteDTO.of(route.getId(), RouteDifferInfo.of(route), RouteDifferInfo.of(revRoute)));
                 }
                 else{
@@ -139,7 +139,7 @@ public class AdminService {
             }
         }
 
-        GetRiskRoutesResDTO getRiskRoutesResDTO = routeCalculator.mapRisks(riskRoutes); // UNI-209 pull 받은 후 해결
+        GetRiskRoutesResDTO getRiskRoutesResDTO = routeCalculator.mapRisks(riskRoutes);
 
         //시작점이 1개인 nodeList 생성
         List<Node> endNodes = lostAdjMap.entrySet()
@@ -156,7 +156,7 @@ public class AdminService {
                 })
                 .toList();
 
-        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeCalculator.getCoreRoutes(lostAdjMap, endNodes)); // UNI-209 pull 받은 후 해결
+        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
 
         return GetAllRoutesByRevisionResDTO.of(routesInfo, getRiskRoutesResDTO, lostRouteDTO, changedRoutes);
     }
