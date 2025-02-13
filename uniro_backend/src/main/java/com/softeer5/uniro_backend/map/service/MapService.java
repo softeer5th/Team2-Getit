@@ -101,8 +101,8 @@ public class MapService {
 					ErrorCode.CAUTION_DANGER_CANT_EXIST_SIMULTANEOUSLY);
 		}
 
-		route.setCautionFactors(postRiskReqDTO.getCautionFactors());
-		route.setDangerFactors(postRiskReqDTO.getDangerFactors());
+		route.setCautionFactorsByList(postRiskReqDTO.getCautionFactors());
+		route.setDangerFactorsByList(postRiskReqDTO.getDangerFactors());
 	}
 
 	@RevisionOperation(RevisionOperationType.CREATE_BUILDING_ROUTE)

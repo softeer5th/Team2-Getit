@@ -82,12 +82,12 @@ public class Route {
 		return dangerFactors.stream().toList();
 	}
 
-	public void setCautionFactors(List<CautionFactor> cautionFactors) {
+	public void setCautionFactorsByList(List<CautionFactor> cautionFactors) {
 		this.cautionFactors.clear();
 		this.cautionFactors.addAll(cautionFactors);
 	}
 
-	public void setDangerFactors(List<DangerFactor> dangerFactors) {
+	public void setDangerFactorsByList(List<DangerFactor> dangerFactors) {
 		this.dangerFactors.clear();
 		this.dangerFactors.addAll(dangerFactors);
 	}
