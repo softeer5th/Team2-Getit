@@ -337,6 +337,25 @@ export default function MapPage() {
 		if (!map || !marker) return;
 
 		if (marker.type === Markers.BUILDING && marker.property) {
+			if (marker.id === origin?.nodeId) {
+				marker.element.content = createMarkerElement({
+					type: Markers.ORIGIN,
+					title: marker.property.buildingName,
+					className: "translate-routemarker",
+				});
+				return;
+			}
+
+			if (marker.id === destination?.nodeId) {
+				marker.element.content = createMarkerElement({
+					type: Markers.DESTINATION,
+					title: destination.buildingName,
+					className: "translate-routemarker",
+				});
+				return;
+			}
+
+
 			if (isSelect) {
 				marker.element.content = createMarkerElement({
 					type: Markers.SELECTED_BUILDING,
@@ -345,20 +364,6 @@ export default function MapPage() {
 				});
 
 				return;
-			}
-
-			if (marker.id === origin?.nodeId) {
-				marker.element.content = createMarkerElement({
-					type: Markers.ORIGIN,
-					title: marker.property.buildingName,
-					className: "translate-routemarker",
-				});
-			} else if (marker.id === destination?.nodeId) {
-				marker.element.content = createMarkerElement({
-					type: Markers.DESTINATION,
-					title: destination.buildingName,
-					className: "translate-routemarker",
-				});
 			}
 
 			marker.element.content = createMarkerElement({
