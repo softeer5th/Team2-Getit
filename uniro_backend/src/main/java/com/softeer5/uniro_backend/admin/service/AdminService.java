@@ -9,6 +9,7 @@ import com.softeer5.uniro_backend.admin.repository.NodeAuditRepository;
 import com.softeer5.uniro_backend.admin.repository.RevInfoRepository;
 import com.softeer5.uniro_backend.admin.repository.RouteAuditRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
+import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
 import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.map.dto.response.NodeInfoResDTO;
@@ -96,13 +97,15 @@ public class AdminService {
 
     }
 
-    //TODO 변수명 확인
     public GetAllRoutesByRevisionResDTO getAllRoutesByRevision(Long univId, Long versionId){
-        RevInfo revInfo = revInfoRepository.findById(versionId)
+        revInfoRepository.findById(versionId)
                 .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
 
         List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
-        //TODO getAllRoutes 호출전에 revRoutes size 조사
+
+        if(revRoutes.isEmpty()) {
+            throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
+        }
         GetAllRoutesResDTO routesInfo = routeCalculator.assembleRoutes(revRoutes);
 
         Map<Long, Route> revRouteMap = new HashMap<>();
@@ -111,6 +114,7 @@ public class AdminService {
         }
 
         List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+
         Map<Long, List<Route>> lostAdjMap = new HashMap<>();
         Map<Long, Node> lostNodeMap = new HashMap<>();
         List<ChangedRouteDTO> changedRoutes = new ArrayList<>();
@@ -119,35 +123,17 @@ public class AdminService {
         for(Route route : routes){
             if(revRouteMap.containsKey(route.getId())){
                 Route revRoute = revRouteMap.get(route.getId());
-                //변경사항이 있는 경우
-                if(!route.isEqualRoute(revRoute)){
-                    changedRoutes.add(ChangedRouteDTO.of(route.getId(), RouteDifferInfo.of(route), RouteDifferInfo.of(revRoute)));
-                }
-                else{
-                    //변경사항이 없으면서 risk가 존재하는 route의 경우 riskRoutes에 추가
-                    if(!route.getCautionFactors().isEmpty() || !route.getDangerFactors().isEmpty()){
-                        riskRoutes.add(route);
-                    }
-                }
+                handleRevisionRoute(revRoute, route, changedRoutes, riskRoutes);
+                continue;
             }
-            else{
-                //해당 시점 이후에 생성된 루트들 (과거 시점엔 보이지 않는 루트)
-                lostAdjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
-                lostAdjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
-                lostNodeMap.put(route.getNode1().getId(), route.getNode1());
-                lostNodeMap.put(route.getNode2().getId(), route.getNode2());
-            }
+            //해당 시점 이후에 생성된 루트들 (과거 시점엔 보이지 않는 루트)
+            handleLostRoute(route, lostAdjMap, lostNodeMap);
         }
 
         GetRiskRoutesResDTO getRiskRoutesResDTO = routeCalculator.mapRisks(riskRoutes);
 
         //시작점이 1개인 nodeList 생성
-        List<Node> endNodes = lostAdjMap.entrySet()
-                .stream()
-                .filter(entry -> (entry.getValue().size() == 1) || lostNodeMap.get(entry.getKey()).isCore())
-                .map(Map.Entry::getKey)
-                .map(lostNodeMap::get)
-                .collect(Collectors.toList());
+        List<Node> endNodes = determineEndNodes(lostAdjMap, lostNodeMap);
 
         List<NodeInfoResDTO> lostNodeInfos = lostNodeMap.entrySet().stream()
                 .map(entry -> {
@@ -161,5 +147,31 @@ public class AdminService {
         return GetAllRoutesByRevisionResDTO.of(routesInfo, getRiskRoutesResDTO, lostRouteDTO, changedRoutes);
     }
 
+    private void handleRevisionRoute(Route revRoute, Route route, List<ChangedRouteDTO> changedRoutes, List<Route> riskRoutes) {
+        //변경사항이 있는 경우
+        if(!route.isEqualRoute(revRoute)){
+            changedRoutes.add(ChangedRouteDTO.of(route.getId(), RouteDifferInfo.of(route), RouteDifferInfo.of(revRoute)));
+        }
+        //변경사항이 없으면서 risk가 존재하는 route의 경우 riskRoutes에 추가
+        else if(!route.getCautionFactors().isEmpty() || !route.getDangerFactors().isEmpty()){
+            riskRoutes.add(route);
+        }
+    }
+
+    private void handleLostRoute(Route route, Map<Long, List<Route>> lostAdjMap, Map<Long, Node> lostNodeMap) {
+        lostAdjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
+        lostAdjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
+        lostNodeMap.put(route.getNode1().getId(), route.getNode1());
+        lostNodeMap.put(route.getNode2().getId(), route.getNode2());
+    }
+
+    private List<Node> determineEndNodes(Map<Long, List<Route>> lostAdjMap, Map<Long, Node> lostNodeMap) {
+        return lostAdjMap.entrySet()
+                .stream()
+                .filter(entry -> (entry.getValue().size() == 1) || lostNodeMap.get(entry.getKey()).isCore())
+                .map(Map.Entry::getKey)
+                .map(lostNodeMap::get)
+                .collect(Collectors.toList());
+    }
 
 }
