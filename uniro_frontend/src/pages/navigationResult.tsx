@@ -20,6 +20,11 @@ import { Building } from "../data/types/node";
 import { useLocation } from "react-router";
 import { useNavigationBottomSheet } from "../hooks/useNavigationBottomSheet";
 
+import ElectricIcon from "../assets/route/detail/electric.svg?react";
+import WheelChairIcon from "../assets/route/detail/wheelchair.svg?react";
+import BottomCardList from "../components/navigation/card/bottomCardList";
+import BottomCard from "../components/navigation/card/bottomCard";
+
 const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
 const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
 const CLOSED_SHEET_HEIGHT = 0;
@@ -64,18 +69,6 @@ const NavigationResultPage = () => {
 							requestOriginId,
 							requestDestinationId,
 						);
-						// param으로 받아올 수 있는 ID들이 있으면 추가하고, 아니면 기존 Building의 좌표를 넣는다
-						if (originId) {
-							setOriginCoord(response.routes[0].node1.lng, response.routes[0].node1.lat);
-							return response;
-						}
-						if (destinationId) {
-							setDestinationCoord(
-								response.routes[response.routes.length - 1].node2.lng,
-								response.routes[response.routes.length - 1].node2.lat,
-							);
-							return response;
-						}
 						return response;
 					} catch (e) {
 						alert(`경로를 찾을 수 없습니다. (${e})`);
@@ -123,11 +116,27 @@ const NavigationResultPage = () => {
 			<AnimatedContainer
 				isVisible={!isDetailView}
 				positionDelta={286}
-				className="absolute top-0 z-10 max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg"
+				className="absolute top-0 left-0 w-full flex flex-col space-y-2"
 				isTop={true}
 				transition={{ type: "spring", damping: 20, duration: 0.3 }}
 			>
-				<NavigationDescription isDetailView={false} navigationRoute={result[0].data!} />
+				<div className="max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
+					<NavigationDescription isDetailView={false} navigationRoute={result[0].data!} />
+				</div>
+				<div className="z-10 w-full flex flex-row items-center justify-start space-x-2 mt-2 px-2 overflow-x-scroll overflow-y-hidden whitespace-nowrap">
+					<div className="scroll-snap-x mandatory flex flex-row min-w-max items-center justify-center bg-blue-600 rounded-xl py-2 px-4 text-gray-100 text-kor-body3 font-light">
+						<ElectricIcon className="w-5 h-5 mr-1" />
+						도보 3분
+					</div>
+					<div className="flex flex-row min-w-max items-center justify-center bg-blue-300 rounded-xl py-2 px-4 text-gray-100 text-kor-body3 font-light">
+						<ElectricIcon className="w-5 h-5 mr-1" />
+						전동휠체어 3분
+					</div>
+					<div className="flex flex-row min-w-max items-center justify-center bg-blue-300 rounded-xl py-2 px-4 text-gray-100 text-kor-body3 font-light">
+						<WheelChairIcon className="w-5 h-5 mr-1" />
+						휠체어 3분
+					</div>
+				</div>
 			</AnimatedContainer>
 
 			<AnimatedContainer
@@ -135,7 +144,7 @@ const NavigationResultPage = () => {
 				className="absolute bottom-0 left-0 w-full mb-[30px] px-4"
 				positionDelta={88}
 			>
-				<Button onClick={showDetailView}>상세경로 보기</Button>
+				<BottomCardList></BottomCardList>
 			</AnimatedContainer>
 
 			<AnimatedContainer
