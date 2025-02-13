@@ -22,6 +22,6 @@ public class RouteDifferInfo {
     private final double cost;
 
     public static RouteDifferInfo of(Route route) {
-        return new RouteDifferInfo(route.getCautionFactorsByList(), route.getDangerFactorsByList(), route.getCost());
+        return new RouteDifferInfo(route.getCautionFactorsByList(), route.getDangerFactorsByList(), route.getDistance());
     }
 }

@@ -11,6 +11,6 @@ public final class RouteUtils {
     }
 
     public static boolean isBuildingRoute(Route route){
-        return route.getCost() > BUILDING_ROUTE_COST - 1;
+        return route.getDistance() > BUILDING_ROUTE_COST - 1;
     }
 }
