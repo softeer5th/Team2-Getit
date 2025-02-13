@@ -1,4 +1,3 @@
-import { Navigation } from "react-router";
 import {
 	CoreRoutesList,
 	NavigationRouteListRecord,
@@ -56,7 +55,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 	data.forEach((route) => {
 		switch (route.routeType) {
 			case "PEDES":
-				// PEDES-SAFE는 항상 존재, PEDES-CAUTION은 존재하지 않음
+				// PEDES-SAFE는 항상 존재, PEDES-CAUTION은 존재하지 않
 				record[`PEDES & SAFE`] = {
 					hasCaution: route.hasCaution,
 					totalDistance: route.totalDistance,
@@ -70,7 +69,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 					record[`MANUAL & CAUTION`] = {
 						hasCaution: route.hasCaution,
 						totalDistance: route.totalDistance,
-						totalCost: route.pedestrianTotalCost ?? 0,
+						totalCost: route.manualTotalCost ?? 0,
 						routes: route.routes,
 						routeDetails: route.routeDetails,
 					};
@@ -87,16 +86,16 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				break;
 			case "WHEEL_SAFE":
 				if (route.manualTotalCost) {
-					record[`MANUAL & CAUTION`] = {
+					record[`MANUAL & SAFE`] = {
 						hasCaution: route.hasCaution,
 						totalDistance: route.totalDistance,
-						totalCost: route.pedestrianTotalCost ?? 0,
+						totalCost: route.manualTotalCost ?? 0,
 						routes: route.routes,
 						routeDetails: route.routeDetails,
 					};
 				}
 				if (route.electricTotalCost) {
-					record[`ELECTRIC & CAUTION`] = {
+					record[`ELECTRIC & SAFE`] = {
 						hasCaution: route.hasCaution,
 						totalDistance: route.totalDistance,
 						totalCost: route.electricTotalCost ?? 0,
