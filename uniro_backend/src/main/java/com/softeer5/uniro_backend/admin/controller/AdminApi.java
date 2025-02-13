@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.admin.controller;
 
+import com.softeer5.uniro_backend.admin.dto.response.GetAllRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.admin.dto.response.RevInfoDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +28,15 @@ public interface AdminApi {
         @ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
     })
     ResponseEntity<Void> rollbackRev(
+		@PathVariable("univId") Long univId,
+		@PathVariable("versionId") Long versionId);
+
+	@Operation(summary = "특정 버전 지도 조회")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "특정 버전 지도 조회 성공"),
+		@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	ResponseEntity<GetAllRoutesByRevisionResDTO> getAllRoutesByRevision(
 		@PathVariable("univId") Long univId,
 		@PathVariable("versionId") Long versionId);
 }

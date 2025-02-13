@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.admin.controller;
 
+import com.softeer5.uniro_backend.admin.dto.response.GetAllRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.admin.dto.response.RevInfoDTO;
 import com.softeer5.uniro_backend.admin.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,15 @@ public class AdminController implements AdminApi {
         adminService.rollbackRev(univId, versionId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @GetMapping("/admin/{univId}/revisions/{versionId}")
+    public ResponseEntity<GetAllRoutesByRevisionResDTO> getAllRoutesByRevision(
+        @PathVariable("univId") Long univId,
+        @PathVariable("versionId") Long versionId) {
+
+        GetAllRoutesByRevisionResDTO resDTO = adminService.getAllRoutesByRevision(univId, versionId);
+        return ResponseEntity.ok().body(resDTO);
     }
 }
