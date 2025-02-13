@@ -3,7 +3,6 @@ import { RouteCard } from "./routeCard";
 import useRoutePoint from "../../../hooks/useRoutePoint";
 import { RouteDetail } from "../../../data/types/route";
 import { Direction } from "../../../data/types/route";
-import { CautionIssue } from "../../../constant/enum/reportEnum";
 
 type RouteListProps = {
 	routes: RouteDetail[];

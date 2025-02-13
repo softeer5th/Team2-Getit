@@ -1,5 +1,10 @@
-import { CoreRoutesList, NavigationRouteList } from "../../data/types/route";
-import { GetAllRouteRepsonse } from "../type/response/route";
+import { Navigation } from "react-router";
+import {
+	CoreRoutesList,
+	NavigationRouteListRecord,
+	NavigationRouteListRecordWithMetaData,
+} from "../../data/types/route";
+import { GetAllRouteRepsonse, GetFastestRouteResponse } from "../type/response/route";
 
 export const transformAllRoutes = (data: GetAllRouteRepsonse): CoreRoutesList => {
 	const { nodeInfos, coreRoutes } = data;
@@ -29,24 +34,82 @@ export const transformAllRoutes = (data: GetAllRouteRepsonse): CoreRoutesList =>
 	});
 };
 
-export const transformFastRoute = (data: NavigationRouteList): NavigationRouteList[] => {
-	return [
-		{
-			...data,
-			routeType: "PEDES",
-			pedestrianTotalCost: Math.floor(data.totalCost ?? 2) > 1 ? (data.totalCost ?? 2 - 1) : data.totalCost,
-		},
-		{
-			...data,
-			routeType: "WHEEL_FAST",
-			manualTotalCost: (data.totalCost ?? 2) + 2,
-			electricTotalCost: data.totalCost ?? 2,
-		},
-		{
-			...data,
-			routeType: "WHEEL_SAFE",
-			manualTotalCost: (data.totalCost ?? 2) + 4,
-			electricTotalCost: (data.totalCost ?? 2) + 2,
-		},
-	];
+export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRouteListRecordWithMetaData => {
+	// data의 routeType "PEDES" | "WHEEL_FAST" | "WHEEL_SAFE"
+	// export type NavigtionButtonType = "PEDES" | "MANUAL" | "ELECTRIC";
+	// export type RouteType = "safe" | "caution";
+	// export type NavigationButtonRouteType = `${NavigationButtonType} & ${Uppercase<RouteType>}`;
+
+	// PEDES-SAFE , PEDES-CAUTION, MANUAL-SAFE, MANUAL-CAUTION, ELECTRIC-SAFE, ELECTRIC-CAUTION
+	// PEDES-SAFE pedestrianDistance -> totalDistance PEDES-CAUTION pedestrianDistance -> totalDistance
+	// MANUAL-SAFE WHEEL_SAFE 일 때, manualDistance를 넣음
+	// MANUAL-CAUTION WHEEL_FAST 일 때, manualDistance를 넣음
+	// ELECTRIC-SAFE WHEEL_SAFE 일 때, electricDistance를 넣음
+	// ELECTRIC-CAUTION WHEEL_FAST 일 때, electricDistance를 넣음
+
+	// data의 길이가 1 : PED & SAFE (위험 & 주의를 포함한 길이 없기 때문)
+	// data의 길이가 2 : PED & SAFE, PED & CAUTION, ELECTRIC & CAUTION, MANUAL & CAUTION  (위험을 포함한 길이 없기 때문)
+	// data의 길이가 3 : 모두 온 거
+
+	const record: NavigationRouteListRecord = {};
+
+	data.forEach((route) => {
+		switch (route.routeType) {
+			case "PEDES":
+				// PEDES-SAFE는 항상 존재, PEDES-CAUTION은 존재하지 않음
+				record[`PEDES & SAFE`] = {
+					hasCaution: route.hasCaution,
+					totalDistance: route.totalDistance,
+					totalCost: route.pedestrianTotalCost ?? 0,
+					routes: route.routes,
+					routeDetails: route.routeDetails,
+				};
+				break;
+			case "WHEEL_FAST":
+				if (route.manualTotalCost) {
+					record[`MANUAL & CAUTION`] = {
+						hasCaution: route.hasCaution,
+						totalDistance: route.totalDistance,
+						totalCost: route.pedestrianTotalCost ?? 0,
+						routes: route.routes,
+						routeDetails: route.routeDetails,
+					};
+				}
+				if (route.electricTotalCost) {
+					record[`ELECTRIC & CAUTION`] = {
+						hasCaution: route.hasCaution,
+						totalDistance: route.totalDistance,
+						totalCost: route.electricTotalCost ?? 0,
+						routes: route.routes,
+						routeDetails: route.routeDetails,
+					};
+				}
+				break;
+			case "WHEEL_SAFE":
+				if (route.manualTotalCost) {
+					record[`MANUAL & CAUTION`] = {
+						hasCaution: route.hasCaution,
+						totalDistance: route.totalDistance,
+						totalCost: route.pedestrianTotalCost ?? 0,
+						routes: route.routes,
+						routeDetails: route.routeDetails,
+					};
+				}
+				if (route.electricTotalCost) {
+					record[`ELECTRIC & CAUTION`] = {
+						hasCaution: route.hasCaution,
+						totalDistance: route.totalDistance,
+						totalCost: route.electricTotalCost ?? 0,
+						routes: route.routes,
+						routeDetails: route.routeDetails,
+					};
+				}
+				break;
+		}
+	});
+
+	return {
+		...record,
+		dataLength: data.length,
+	};
 };

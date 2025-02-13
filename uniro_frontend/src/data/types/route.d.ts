@@ -14,8 +14,12 @@ export type Route = {
 };
 
 export type Direction = "origin" | "right" | "straight" | "left" | "uturn" | "destination" | "caution";
+
+export type NavigtionButtonType = "PEDES" | "MANUAL" | "ELECTRIC";
+// API 응답용 Type
 export type NavigationRouteType = "PEDES" | "WHEEL_FAST" | "WHEEL_SAFE";
-export type RouteType = "safe" | "caution";
+export type RouteType = "safe" | "caution" | "normal";
+export type NavigationButtonRouteType = `${NavigationButtonType} & ${Uppercase<RouteType>}`;
 
 export interface CautionRoute extends Route {
 	cautionFactors: CautionIssueType[];
@@ -49,13 +53,12 @@ export type RouteDetail = {
 };
 
 export type NavigationRouteList = {
-	routeType?: NavigationRouteType;
 	hasCaution: boolean;
 	totalDistance: number;
-	totalCost?: number;
-	pedestrianTotalCost?: number;
-	manualTotalCost?: number;
-	electricTotalCost?: number;
+	totalCost: number;
 	routes: Route[];
 	routeDetails: RouteDetail[];
 };
+
+export type NavigationRouteListRecord = Record<NavigationButtonRouteType, NavigationRouteList>;
+export type NavigationRouteListRecordWithMetaData = NavigationRouteListRecord & { dataLength: number };

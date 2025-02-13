@@ -3,17 +3,17 @@ import { Coord } from "../data/types/coord";
 import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { NodeId } from "../data/types/node";
 
-import { CoreRoutesList, NavigationRouteList, RouteId } from "../data/types/route";
+import { CoreRoutesList, NavigationRouteListRecordWithMetaData, RouteId } from "../data/types/route";
 import { getFetch, postFetch } from "../utils/fetch/fetch";
 import { transformAllRoutes, transformFastRoute } from "./transformer/route";
-import { GetAllRouteRepsonse } from "./type/response/route";
+import { GetAllRouteRepsonse, GetFastestRouteResponse } from "./type/response/route";
 
 export const getNavigationResult = (
 	univId: number,
 	startNodeId: NodeId,
 	endNodeId: NodeId,
-): Promise<NavigationRouteList[]> => {
-	return getFetch<NavigationRouteList>(`/${univId}/routes/fastest`, {
+): Promise<NavigationRouteListRecordWithMetaData> => {
+	return getFetch<GetFastestRouteResponse>(`/${univId}/routes/fastest`, {
 		"start-node-id": startNodeId,
 		"end-node-id": endNodeId,
 	}).then((data) => transformFastRoute(data));

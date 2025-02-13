@@ -1,6 +1,11 @@
 import { useEffect, useRef } from "react";
 import useMap from "../hooks/useMap";
-import { CautionRoute, DangerRoute, NavigationRouteList } from "../data/types/route";
+import {
+	CautionRoute,
+	DangerRoute,
+	NavigationRouteList,
+	NavigationRouteListRecordWithMetaData,
+} from "../data/types/route";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enum/markerEnum";
@@ -9,7 +14,7 @@ import { AdvancedMarker } from "../data/types/marker";
 
 type MapProps = {
 	style?: React.CSSProperties;
-	routeResult: NavigationRouteList;
+	routeResult: NavigationRouteListRecordWithMetaData;
 	risks: {
 		dangerRoutes: DangerRoute[];
 		cautionRoutes: CautionRoute[];

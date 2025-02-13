@@ -1,5 +1,6 @@
 import { IssueTypeKey } from "../../../constant/enum/reportEnum";
 import { Node, NodeId } from "../../../data/types/node";
+import { NavigationRouteType } from "../../../data/types/route";
 
 type CoreRoutesResponse = {
 	coreNode1Id: NodeId;
@@ -21,3 +22,14 @@ export type GetSingleRouteRiskResponse = {
 	dangerFactors?: IssueTypeKey[];
 	cautionFactors?: IssueTypeKey[];
 };
+
+export type GetFastestRouteResponse = {
+	routeType?: NavigationRouteType;
+	hasCaution: boolean;
+	totalDistance: number;
+	pedestrianTotalCost?: number | null;
+	manualTotalCost?: number | null;
+	electricTotalCost?: number | null;
+	routes: Route[];
+	routeDetails: RouteDetail[];
+}[];
