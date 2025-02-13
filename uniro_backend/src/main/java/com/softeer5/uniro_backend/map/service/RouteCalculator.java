@@ -500,6 +500,15 @@ public class RouteCalculator {
         for (int i = 1; i < requests.size(); i++) {
             CreateRouteReqDTO cur = requests.get(i);
 
+            for(int j = i+1; j < Math.min(i+3, requests.size()) ; j++){
+                CreateRouteReqDTO next = requests.get(j);
+				Coordinate curCoordinate = new Coordinate(cur.getLng(), cur.getLat());
+				Coordinate nextCoordinate = new Coordinate(next.getLng(), next.getLat());
+				if(getNodeKey(curCoordinate).equals(getNodeKey(nextCoordinate))){
+                    throw new RouteCalculationException("has duplicate nearest node", DUPLICATE_NEAREST_NODE);
+                }
+            }
+
             // 정확히 그 점과 일치하는 노드가 있는지 확인
             Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getLng(), cur.getLat())));
             if(curNode != null){
