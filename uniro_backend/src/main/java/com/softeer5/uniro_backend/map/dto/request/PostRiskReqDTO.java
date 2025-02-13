@@ -1,7 +1,7 @@
 package com.softeer5.uniro_backend.map.dto.request;
 
-import com.softeer5.uniro_backend.map.entity.CautionFactor;
-import com.softeer5.uniro_backend.map.entity.DangerFactor;
+import com.softeer5.uniro_backend.map.enums.CautionFactor;
+import com.softeer5.uniro_backend.map.enums.DangerFactor;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

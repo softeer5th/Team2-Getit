@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.admin.entity;
+package com.softeer5.uniro_backend.admin.enums;
 
 public enum RevisionOperationType {
     UPDATE_RISK,

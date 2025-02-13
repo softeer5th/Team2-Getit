@@ -9,6 +9,8 @@ import java.util.Set;
 
 import com.softeer5.uniro_backend.common.resolver.CautionListConverter;
 import com.softeer5.uniro_backend.common.resolver.DangerListConverter;
+import com.softeer5.uniro_backend.map.enums.CautionFactor;
+import com.softeer5.uniro_backend.map.enums.DangerFactor;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.locationtech.jts.geom.LineString;
@@ -109,7 +111,7 @@ public class Route {
 
 	@Builder
 	private Route(double cost, LineString path, Node node1, Node node2, Long univId,
-		Set<CautionFactor> cautionFactors, Set<DangerFactor> dangerFactors) {
+				  Set<CautionFactor> cautionFactors, Set<DangerFactor> dangerFactors) {
 		this.cost = cost;
 		this.path = path;
 		this.node1 = node1;

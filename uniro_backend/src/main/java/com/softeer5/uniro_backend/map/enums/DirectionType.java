@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.map.entity;
+package com.softeer5.uniro_backend.map.enums;
 
 public enum DirectionType {
     STRAIGHT, // 직진

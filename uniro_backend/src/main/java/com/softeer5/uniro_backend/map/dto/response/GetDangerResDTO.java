@@ -3,7 +3,7 @@ package com.softeer5.uniro_backend.map.dto.response;
 import java.util.List;
 import java.util.Map;
 
-import com.softeer5.uniro_backend.map.entity.DangerFactor;
+import com.softeer5.uniro_backend.map.enums.DangerFactor;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;

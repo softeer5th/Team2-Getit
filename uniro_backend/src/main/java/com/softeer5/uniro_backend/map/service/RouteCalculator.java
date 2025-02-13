@@ -11,8 +11,8 @@ import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
-import com.softeer5.uniro_backend.map.entity.CautionFactor;
-import com.softeer5.uniro_backend.map.entity.DirectionType;
+import com.softeer5.uniro_backend.map.enums.CautionFactor;
+import com.softeer5.uniro_backend.map.enums.DirectionType;
 import com.softeer5.uniro_backend.map.entity.Route;
 import lombok.AllArgsConstructor;
 
