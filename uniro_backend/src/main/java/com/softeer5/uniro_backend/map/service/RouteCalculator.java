@@ -2,6 +2,8 @@ package com.softeer5.uniro_backend.map.service;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
+import static com.softeer5.uniro_backend.map.entity.RoadExclusionPolicy.calculateCost;
+import static com.softeer5.uniro_backend.map.entity.RoadExclusionPolicy.isAvailableRoute;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
@@ -9,11 +11,8 @@ import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationExcept
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.map.dto.response.*;
-import com.softeer5.uniro_backend.map.entity.Node;
+import com.softeer5.uniro_backend.map.entity.*;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
-import com.softeer5.uniro_backend.map.entity.CautionFactor;
-import com.softeer5.uniro_backend.map.entity.DirectionType;
-import com.softeer5.uniro_backend.map.entity.Route;
 import lombok.AllArgsConstructor;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -30,6 +29,11 @@ import java.util.*;
 @Component
 public class RouteCalculator {
     private final GeometryFactory geometryFactory = GeoUtils.getInstance();
+    private final List<RoadExclusionPolicy> policies = List.of(
+            RoadExclusionPolicy.PEDES,
+            RoadExclusionPolicy.WHEEL_FAST,
+            RoadExclusionPolicy.WHEEL_SAFE
+    );
 
     @AllArgsConstructor
     private class CostToNextNode implements Comparable<CostToNextNode> {
@@ -95,81 +99,81 @@ public class RouteCalculator {
     }
 
 
-    public FastestRouteResDTO calculateFastestRoute(Long startNodeId, Long endNodeId, List<Route> routes){
+    public List<FastestRouteResDTO> calculateFastestRoute(Long startNodeId, Long endNodeId, List<Route> routes){
+        List<FastestRouteResDTO> result = new ArrayList<>();
 
-        //인접 리스트
-        Map<Long, List<Route>> adjMap = new HashMap<>();
-        Map<Long, Node> nodeMap = new HashMap<>();
+        for (RoadExclusionPolicy policy : policies) {
+            //인접 리스트
+            Map<Long, List<Route>> adjMap = new HashMap<>();
+            Map<Long, Node> nodeMap = new HashMap<>();
 
-        routes.forEach(route -> {
-            adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
-            adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
+            for (Route route : routes) {
+                if (!isAvailableRoute(policy, route)) continue;
 
-            nodeMap.putIfAbsent(route.getNode1().getId(), route.getNode1());
-            nodeMap.putIfAbsent(route.getNode2().getId(), route.getNode2());
-        });
+                adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
+                adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
 
-        Node startNode = nodeMap.get(startNodeId);
-        Node endNode = nodeMap.get(endNodeId);
-
-        //길찾기 알고리즘 수행
-        Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap);
-
-        //길찾기 경로 결과 정리
-        List<Route> shortestRoutes = reorderRoute(startNode, endNode, prevRoute);
-
-        Route startRoute = shortestRoutes.get(0);
-        Route endRoute = shortestRoutes.get(shortestRoutes.size() - 1);
-
-        //만약 시작 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외
-        if(isBuildingRoute(startRoute)){
-            if(startRoute.getId().equals(endRoute.getId())){
-                throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
-            }
-            startNode = startNode.getId().equals(startRoute.getNode1().getId()) ? startRoute.getNode2() : startRoute.getNode1();
-            shortestRoutes.remove(0);
-        }
-        //만약 종료 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외
-        if(isBuildingRoute(endRoute)){
-            endNode = endNode.getId().equals(endRoute.getNode1().getId()) ? endRoute.getNode2() : endRoute.getNode1();
-            shortestRoutes.remove(shortestRoutes.size() - 1);
-        }
-
-        boolean hasCaution = false;
-        double totalCost = 0.0;
-        double totalDistance = 0.0;
-
-        List<RouteInfoResDTO> routeInfoDTOS = new ArrayList<>();
-        Node currentNode = startNode;
-        // 외부 변수를 수정해야하기 때문에 for-loop문 사용
-        for (Route route : shortestRoutes) {
-            totalCost += route.getCost();
-            totalDistance += calculateDistance(route);
-
-            if (!route.getCautionFactors().isEmpty()) {
-                hasCaution = true;
+                nodeMap.putIfAbsent(route.getNode1().getId(), route.getNode1());
+                nodeMap.putIfAbsent(route.getNode2().getId(), route.getNode2());
             }
 
-            Node firstNode = route.getNode1();
-            Node secondNode = route.getNode2();
-            if(currentNode.getId().equals(secondNode.getId())){
-                Node temp = firstNode;
-                firstNode = secondNode;
-                secondNode = temp;
-            }
-            currentNode = secondNode;
+            Node startNode = nodeMap.get(startNodeId);
+            Node endNode = nodeMap.get(endNodeId);
 
-            routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
+            //길찾기 알고리즘 수행
+            Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap);
+
+            //길찾기 결과가 null인 경우 continue
+            if(prevRoute == null) continue;
+
+            //길찾기 경로 결과 정리
+            List<Route> shortestRoutes = reorderRoute(startNode, endNode, prevRoute);
+
+            //만약 시작 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외, 루트가 너무 적어 제거할 수 없다면 continue
+            if(!terminateBoundaryRoutes(shortestRoutes, startNode, endNode)) continue;
+
+            boolean hasCaution = false;
+            double totalDistance = 0.0;
+
+            // 결과를 DTO로 정리
+            List<RouteInfoResDTO> routeInfoDTOS = new ArrayList<>();
+            Node currentNode = startNode;
+            // 외부 변수를 수정해야하기 때문에 for-loop문 사용
+            for (Route route : shortestRoutes) {
+                totalDistance += route.getDistance();
+                if (!route.getCautionFactors().isEmpty()) {
+                    hasCaution = true;
+                }
+
+                Node firstNode = route.getNode1();
+                Node secondNode = route.getNode2();
+                if (currentNode.getId().equals(secondNode.getId())) {
+                    Node temp = firstNode;
+                    firstNode = secondNode;
+                    secondNode = temp;
+                }
+                currentNode = secondNode;
+
+                routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
+            }
+
+            //처음과 마지막을 제외한 구간에서 빌딩노드를 거쳐왔다면, 이는 유효한 길이 없는 것이므로 예외처리
+            if (totalDistance > BUILDING_ROUTE_COST - 1) continue;
+
+            List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
+
+            result.add(FastestRouteResDTO.of(policy, hasCaution, totalDistance,
+                    calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER, totalDistance),
+                    calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER,totalDistance),
+                    calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER,totalDistance),
+                    routeInfoDTOS, details));
         }
 
-        //처음과 마지막을 제외한 구간에서 빌딩노드를 거쳐왔다면, 이는 유효한 길이 없는 것이므로 예외처리
-        if(totalCost > BUILDING_ROUTE_COST - 1){
+        if(result.isEmpty()) {
             throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
         }
 
-        List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
-
-        return FastestRouteResDTO.of(hasCaution, totalDistance, totalCost, routeInfoDTOS, details);
+        return result;
     }
 
     private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap){
@@ -192,7 +196,7 @@ public class RouteCalculator {
 
             for(Route route : adjMap.getOrDefault(currentNode.getId(), Collections.emptyList())){
                 if(!route.getDangerFactors().isEmpty()) continue;
-                double newDistance = currentDistance + route.getCost();
+                double newDistance = currentDistance + route.getDistance();
                 Node nextNode = route.getNode1().getId().equals(currentNode.getId())?route.getNode2():route.getNode1();
                 if(!costMap.containsKey(nextNode.getId()) || costMap.get(nextNode.getId()) > newDistance){
                     costMap.put(nextNode.getId(), newDistance);
@@ -203,7 +207,7 @@ public class RouteCalculator {
         }
         //길 없는 경우
         if(!costMap.containsKey(endNode.getId())){
-            throw new RouteCalculationException("Unable to find a valid route", ErrorCode.FASTEST_ROUTE_NOT_FOUND);
+            return null;
         }
 
         return prevRoute;
@@ -227,8 +231,28 @@ public class RouteCalculator {
         return shortestRoutes;
     }
 
+    private boolean terminateBoundaryRoutes(List<Route> shortestRoutes, Node startNode, Node endNode){
+        Route startRoute = shortestRoutes.get(0);
+        Route endRoute = shortestRoutes.get(shortestRoutes.size() - 1);
+
+        if (isBuildingRoute(startRoute)) {
+            if (startRoute.getId().equals(endRoute.getId())) {
+                //출발점과 도착점이 같은 경우
+                return false;
+            }
+            startNode = startNode.getId().equals(startRoute.getNode1().getId()) ? startRoute.getNode2() : startRoute.getNode1();
+            shortestRoutes.remove(0);
+        }
+        //만약 종료 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외
+        if (isBuildingRoute(endRoute)) {
+            endNode = endNode.getId().equals(endRoute.getNode1().getId()) ? endRoute.getNode2() : endRoute.getNode1();
+            shortestRoutes.remove(shortestRoutes.size() - 1);
+        }
+        return true;
+    }
+
     private boolean isBuildingRoute(Route route){
-        return route.getCost() > BUILDING_ROUTE_COST - 1;
+        return route.getDistance() > BUILDING_ROUTE_COST - 1;
     }
 
     // 두 route 간의 각도를 통한 계산으로 방향성을 정하는 메서드
@@ -266,21 +290,21 @@ public class RouteCalculator {
         }
     }
 
-    // 길의 길이를 리턴하는 메서드
-    private double calculateDistance(Route route) {
-        double lng1 = route.getNode1().getCoordinates().getX();
-        double lat1 = route.getNode1().getCoordinates().getY();
-        double lng2 = route.getNode2().getCoordinates().getX();
-        double lat2 = route.getNode2().getCoordinates().getY();
+    private double calculateRouteDistance(Route route){
+        return calculateDistance(route.getNode1().getCoordinates().getX(),
+                route.getNode1().getCoordinates().getY(),
+                route.getNode2().getCoordinates().getX(),
+                route.getNode2().getCoordinates().getY());
+    }
 
+    // 길의 길이를 리턴하는 메서드
+    private double calculateDistance(double lng1, double lat1, double lng2, double lat2) {
         double dLat = (lat2 - lat1) * METERS_PER_DEGREE;
 
         double avgLat = (lat1 + lat2) / 2.0;
         double dLng = (lng2 - lng1) * METERS_PER_DEGREE * Math.cos(Math.toRadians(avgLat));
 
-        double distance = Math.sqrt(dLat * dLat + dLng * dLng);
-
-        return distance;
+        return Math.sqrt(dLat * dLat + dLng * dLng);
     }
 
     // 길 상세정보를 추출하는 메서드
@@ -296,10 +320,10 @@ public class RouteCalculator {
         for(int i=0;i<shortestRoutes.size();i++){
             Route nowRoute = shortestRoutes.get(i);
             Node nxt = nowRoute.getNode1().equals(now) ? nowRoute.getNode2() : nowRoute.getNode1();
-            accumulatedDistance += calculateDistance(nowRoute);
+            accumulatedDistance += calculateRouteDistance(nowRoute);
 
             if(!nowRoute.getCautionFactors().isEmpty()){
-                double halfOfRouteDistance = calculateDistance(nowRoute)/2;
+                double halfOfRouteDistance = calculateRouteDistance(nowRoute)/2;
                 details.add(RouteDetailResDTO.of(accumulatedDistance - halfOfRouteDistance,
                         checkPointType, checkPointNodeCoordinates, checkPointCautionFactors));
                 accumulatedDistance = halfOfRouteDistance;
@@ -416,7 +440,10 @@ public class RouteCalculator {
             Node prev = nodes.get(i-1);
             routesForSave.add(
                 Route.builder()
-                    .cost(calculateCost(prev,now))
+                    .distance(calculateDistance(prev.getCoordinates().getX(),
+                                                prev.getCoordinates().getY(),
+                                                now.getCoordinates().getX(),
+                                                now.getCoordinates().getY()))
                     .path(geometryFactory.createLineString(
                             new Coordinate[] {prev.getCoordinates().getCoordinate(), now.getCoordinates().getCoordinate()}))
                     .node1(prev)
@@ -429,21 +456,6 @@ public class RouteCalculator {
         return routesForSave;
     }
 
-    private double calculateCost(Node prev, Node now) {
-        double lng1 = prev.getCoordinates().getX();
-        double lat1 = prev.getCoordinates().getY();
-        double lng2 = now.getCoordinates().getX();
-        double lat2 = now.getCoordinates().getY();
-
-        double dLat = (lat2 - lat1) * METERS_PER_DEGREE;
-
-        double avgLat = (lat1 + lat2) / 2.0;
-        double dLng = (lng2 - lng1) * METERS_PER_DEGREE * Math.cos(Math.toRadians(avgLat));
-
-        double distance = Math.sqrt(dLat * dLat + dLng * dLng);
-
-        return distance * SECONDS_PER_MITER;
-    }
 
     // TODO: 모든 점이 아니라 request 값의 MBR 영역만 불러오면 좋을 것 같다.  <- 추가 검증 필요
     // TODO: 캐시 사용 검토
