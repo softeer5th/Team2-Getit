@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.softeer5.uniro_backend.route.entity.DangerFactor;
+import com.softeer5.uniro_backend.map.entity.DangerFactor;
 
 import jakarta.persistence.AttributeConverter;
 

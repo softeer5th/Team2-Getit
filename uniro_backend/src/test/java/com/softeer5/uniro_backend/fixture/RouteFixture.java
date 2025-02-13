@@ -5,8 +5,8 @@ import java.util.HashSet;
 import org.locationtech.jts.geom.GeometryFactory;
 
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
-import com.softeer5.uniro_backend.node.entity.Node;
-import com.softeer5.uniro_backend.route.entity.Route;
+import com.softeer5.uniro_backend.map.entity.Node;
+import com.softeer5.uniro_backend.map.entity.Route;
 
 public class RouteFixture {
 	static GeometryFactory geometryFactory = GeoUtils.getInstance();

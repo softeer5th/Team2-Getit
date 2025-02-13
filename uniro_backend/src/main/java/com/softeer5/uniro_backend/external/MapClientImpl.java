@@ -2,7 +2,7 @@ package com.softeer5.uniro_backend.external;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.ElevationApiException;
-import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.map.entity.Node;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
