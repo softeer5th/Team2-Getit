@@ -1,7 +1,7 @@
 package com.softeer5.uniro_backend.admin.aspect;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
-import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
+import com.softeer5.uniro_backend.admin.enums.RevisionOperationType;
 import com.softeer5.uniro_backend.admin.setting.RevisionContext;
 import com.softeer5.uniro_backend.map.dto.request.PostRiskReqDTO;
 

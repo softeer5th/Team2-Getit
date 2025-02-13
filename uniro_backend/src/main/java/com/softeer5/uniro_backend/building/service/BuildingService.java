@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
-import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
+import com.softeer5.uniro_backend.admin.enums.RevisionOperationType;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.building.dto.request.CreateBuildingNodeReqDTO;
 import com.softeer5.uniro_backend.building.entity.Building;
