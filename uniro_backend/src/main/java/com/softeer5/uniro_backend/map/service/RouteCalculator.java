@@ -74,7 +74,7 @@ public class RouteCalculator {
 
         startNode = determineStartNode(startNode, adjMap, nodeMap, routes);
 
-        return GetAllRoutesResDTO.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
+        return GetAllRoutesResDTO.of(nodeInfos, getCoreRoutes(adjMap, List.of(startNode)), buildingRoutes);
     }
 
     private Node determineStartNode(Node startNode, Map<Long, List<Route>> adjMap, Map<Long, Node> nodeMap, List<Route> routes) {
@@ -340,7 +340,7 @@ public class RouteCalculator {
     }
 
     // coreRoute를 만들어주는 메서드
-    private List<CoreRouteResDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, Node startNode) {
+    public List<CoreRouteResDTO> getCoreRoutes(Map<Long, List<Route>> adjMap, List<Node> startNode) {
         List<CoreRouteResDTO> result = new ArrayList<>();
         // core node간의 BFS 할 때 방문여부를 체크하는 set
         Set<Long> visitedCoreNodes = new HashSet<>();
@@ -349,8 +349,10 @@ public class RouteCalculator {
 
         // BFS 전처리
         Queue<Node> nodeQueue = new LinkedList<>();
-        nodeQueue.add(startNode);
-        visitedCoreNodes.add(startNode.getId());
+        startNode.forEach(n-> {
+            nodeQueue.add(n);
+            visitedCoreNodes.add(n.getId());
+        });
 
         // BFS
         while(!nodeQueue.isEmpty()) {
@@ -666,5 +668,41 @@ public class RouteCalculator {
 
     private String getNodeKey(Coordinate coordinate) {
         return coordinate.getX() + NODE_KEY_DELIMITER + coordinate.getY();
+    }
+
+    public GetRiskRoutesResDTO mapRisks(List<Route> riskRoutes) {
+        List<GetDangerResDTO> dangerRoutes = mapRoutesToDangerDTO(riskRoutes);
+        List<GetCautionResDTO> cautionRoutes = mapRoutesToCautionDTO(riskRoutes);
+
+        return GetRiskRoutesResDTO.of(dangerRoutes, cautionRoutes);
+    }
+
+    private List<GetDangerResDTO> mapRoutesToDangerDTO(List<Route> routes) {
+        return routes.stream()
+                .filter(route -> !route.getDangerFactors().isEmpty() && route.getCautionFactors().isEmpty()) // 위험 요소가 있는 경로만 필터링
+                .map(route -> GetDangerResDTO.of(
+                        getPoint(route.getPath().getCoordinates()[0]),
+                        getPoint(route.getPath().getCoordinates()[1]),
+                        route.getId(),
+                        route.getDangerFactorsByList()
+                )).toList();
+    }
+
+    private List<GetCautionResDTO> mapRoutesToCautionDTO(List<Route> routes) {
+        return routes.stream()
+                .filter(route -> route.getDangerFactors().isEmpty() && !route.getCautionFactors().isEmpty())
+                .map(route -> GetCautionResDTO.of(
+                        getPoint(route.getPath().getCoordinates()[0]),
+                        getPoint(route.getPath().getCoordinates()[1]),
+                        route.getId(),
+                        route.getCautionFactorsByList()
+                )).toList();
+    }
+
+    private Map<String, Double> getPoint(Coordinate c) {
+        Map<String, Double> point = new HashMap<>();
+        point.put("lat", c.getY());
+        point.put("lng", c.getX());
+        return point;
     }
 }

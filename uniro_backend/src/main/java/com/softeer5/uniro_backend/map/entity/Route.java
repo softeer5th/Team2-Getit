@@ -82,12 +82,12 @@ public class Route {
 		return dangerFactors.stream().toList();
 	}
 
-	public void setCautionFactors(List<CautionFactor> cautionFactors) {
+	public void setCautionFactorsByList(List<CautionFactor> cautionFactors) {
 		this.cautionFactors.clear();
 		this.cautionFactors.addAll(cautionFactors);
 	}
 
-	public void setDangerFactors(List<DangerFactor> dangerFactors) {
+	public void setDangerFactorsByList(List<DangerFactor> dangerFactors) {
 		this.dangerFactors.clear();
 		this.dangerFactors.addAll(dangerFactors);
 	}
@@ -96,6 +96,15 @@ public class Route {
 		this.cautionFactors = revRoute.getCautionFactors();
 		this.dangerFactors = revRoute.getDangerFactors();
 		this.cost = revRoute.cost;
+	}
+
+	public boolean isEqualRoute(Route route) {
+		if(!route.getId().equals(this.getId())) return false;
+		if(route.getCost() != this.getCost())return false;
+		if(!route.getCautionFactors().equals(this.getCautionFactors())) return false;
+		if(!route.getDangerFactors().equals(this.getDangerFactors())) return false;
+
+		return true;
 	}
 
 	@Builder

@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.admin.controller;
 
-import com.softeer5.uniro_backend.admin.dto.RevInfoDTO;
+import com.softeer5.uniro_backend.admin.dto.response.RevInfoDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

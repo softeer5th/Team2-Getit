@@ -3,23 +3,30 @@ package com.softeer5.uniro_backend.admin.service;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 
 import com.softeer5.uniro_backend.admin.annotation.DisableAudit;
-import com.softeer5.uniro_backend.admin.dto.RevInfoDTO;
+import com.softeer5.uniro_backend.admin.dto.response.*;
 import com.softeer5.uniro_backend.admin.entity.RevInfo;
 import com.softeer5.uniro_backend.admin.repository.NodeAuditRepository;
 import com.softeer5.uniro_backend.admin.repository.RevInfoRepository;
 import com.softeer5.uniro_backend.admin.repository.RouteAuditRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
+import com.softeer5.uniro_backend.common.exception.custom.RouteException;
+import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
+import com.softeer5.uniro_backend.map.dto.response.NodeInfoResDTO;
 import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
+import com.softeer5.uniro_backend.map.service.RouteCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +38,8 @@ public class AdminService {
 
     private final RouteAuditRepository routeAuditRepository;
     private final NodeAuditRepository nodeAuditRepository;
+
+    private final RouteCalculator routeCalculator;
 
     public List<RevInfoDTO> getAllRevInfo(Long univId){
         return revInfoRepository.findAllByUnivId(univId).stream().map(r -> RevInfoDTO.of(r.getRev(),
@@ -87,4 +96,82 @@ public class AdminService {
         }
 
     }
+
+    public GetAllRoutesByRevisionResDTO getAllRoutesByRevision(Long univId, Long versionId){
+        revInfoRepository.findById(versionId)
+                .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
+
+        List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
+
+        if(revRoutes.isEmpty()) {
+            throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
+        }
+        GetAllRoutesResDTO routesInfo = routeCalculator.assembleRoutes(revRoutes);
+
+        Map<Long, Route> revRouteMap = new HashMap<>();
+        for(Route revRoute : revRoutes){
+            revRouteMap.put(revRoute.getId(), revRoute);
+        }
+
+        List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+
+        Map<Long, List<Route>> lostAdjMap = new HashMap<>();
+        Map<Long, Node> lostNodeMap = new HashMap<>();
+        List<ChangedRouteDTO> changedRoutes = new ArrayList<>();
+        List<Route> riskRoutes = new ArrayList<>();
+
+        for(Route route : routes){
+            if(revRouteMap.containsKey(route.getId())){
+                Route revRoute = revRouteMap.get(route.getId());
+                handleRevisionRoute(revRoute, route, changedRoutes, riskRoutes);
+                continue;
+            }
+            //해당 시점 이후에 생성된 루트들 (과거 시점엔 보이지 않는 루트)
+            handleLostRoute(route, lostAdjMap, lostNodeMap);
+        }
+
+        GetRiskRoutesResDTO getRiskRoutesResDTO = routeCalculator.mapRisks(riskRoutes);
+
+        //시작점이 1개인 nodeList 생성
+        List<Node> endNodes = determineEndNodes(lostAdjMap, lostNodeMap);
+
+        List<NodeInfoResDTO> lostNodeInfos = lostNodeMap.entrySet().stream()
+                .map(entry -> {
+                    Node node = entry.getValue();
+                    return NodeInfoResDTO.of(entry.getKey(), node.getX(), node.getY());
+                })
+                .toList();
+
+        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
+
+        return GetAllRoutesByRevisionResDTO.of(routesInfo, getRiskRoutesResDTO, lostRouteDTO, changedRoutes);
+    }
+
+    private void handleRevisionRoute(Route revRoute, Route route, List<ChangedRouteDTO> changedRoutes, List<Route> riskRoutes) {
+        //변경사항이 있는 경우
+        if(!route.isEqualRoute(revRoute)){
+            changedRoutes.add(ChangedRouteDTO.of(route.getId(), RouteDifferInfo.of(route), RouteDifferInfo.of(revRoute)));
+        }
+        //변경사항이 없으면서 risk가 존재하는 route의 경우 riskRoutes에 추가
+        else if(!route.getCautionFactors().isEmpty() || !route.getDangerFactors().isEmpty()){
+            riskRoutes.add(route);
+        }
+    }
+
+    private void handleLostRoute(Route route, Map<Long, List<Route>> lostAdjMap, Map<Long, Node> lostNodeMap) {
+        lostAdjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
+        lostAdjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
+        lostNodeMap.put(route.getNode1().getId(), route.getNode1());
+        lostNodeMap.put(route.getNode2().getId(), route.getNode2());
+    }
+
+    private List<Node> determineEndNodes(Map<Long, List<Route>> lostAdjMap, Map<Long, Node> lostNodeMap) {
+        return lostAdjMap.entrySet()
+                .stream()
+                .filter(entry -> (entry.getValue().size() == 1) || lostNodeMap.get(entry.getKey()).isCore())
+                .map(Map.Entry::getKey)
+                .map(lostNodeMap::get)
+                .collect(Collectors.toList());
+    }
+
 }

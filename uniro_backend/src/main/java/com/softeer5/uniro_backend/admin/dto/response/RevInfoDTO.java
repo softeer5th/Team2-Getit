@@ -1,6 +1,5 @@
-package com.softeer5.uniro_backend.admin.dto;
+package com.softeer5.uniro_backend.admin.dto.response;
 
-import com.softeer5.uniro_backend.admin.entity.RevInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
