@@ -522,7 +522,7 @@ public class RouteCalculator {
         List<Node> crossCheckedNodes = insertMidNodesForIntersectingRoutes(createdNodes, strTree, nodeMap);
 
         // 3. 자가 크로스 or 중복점 (첫점과 끝점 동일) 확인
-        List<Node> selfCrossCheckedNodes = handleSelfIntersectionsAndDuplicates(crossCheckedNodes);
+        List<Node> selfCrossCheckedNodes = insertMidNodesForSelfIntersectingRoutes(crossCheckedNodes);
 
         return selfCrossCheckedNodes;
     }
@@ -550,7 +550,7 @@ public class RouteCalculator {
     }
 
 
-    private List<Node> handleSelfIntersectionsAndDuplicates(List<Node> nodes) {
+    private List<Node> insertMidNodesForSelfIntersectingRoutes(List<Node> nodes) {
         if(nodes.get(0).getCoordinates().equals(nodes.get(nodes.size()-1).getCoordinates())){
             throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);
         }
