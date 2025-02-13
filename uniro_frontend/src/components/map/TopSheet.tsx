@@ -8,18 +8,27 @@ import { motion } from "framer-motion";
 import useRoutePoint from "../../hooks/useRoutePoint";
 import useSearchBuilding from "../../hooks/useSearchBuilding";
 import { RoutePoint } from "../../constant/enum/routeEnum";
+import AnimatedContainer from "../../container/animatedContainer";
 
-export default function TopSheet({ open }: { open: boolean }) {
+interface MapTopSheetProps {
+	isVisible: boolean;
+}
+
+export default function MapTopSheet({ isVisible }: MapTopSheetProps) {
 	const { origin, setOrigin, destination, setDestination, switchBuilding } = useRoutePoint();
 	const { setMode } = useSearchBuilding();
 
 	return (
-		<motion.div
-			animate={{ y: open ? 0 : -200 }}
-			initial={{ y: -200 }}
-			exit={{ y: -200 }}
-			transition={{ type: "tween", duration: 0.3 }}
-			className="absolute top-0 w-full bg-gray-100 py-[18px] px-5 z-10 rounded-b-[24px]"
+		<AnimatedContainer
+			isVisible={isVisible}
+			className="absolute top-0 w-full left-0  py-[18px] px-5  bg-white rounded-b-2xl shadow-xl overflow-auto z-20"
+			positionDelta={300}
+			transition={{
+				type: "spring",
+				damping: 20,
+				duration: 0.3,
+			}}
+			isTop={true}
 		>
 			<p className="flex flex-row items-center mb-[10px] text-kor-body2 font-medium text-gray-800 underline underline-offset-4">
 				<LocationIcon stroke="#4D4D4D" className="mr-1" />
@@ -50,6 +59,6 @@ export default function TopSheet({ open }: { open: boolean }) {
 					</button>
 				</div>
 			</div>
-		</motion.div>
+		</AnimatedContainer>
 	);
 }

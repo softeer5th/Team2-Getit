@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
 import createMarkerElement from "../components/map/mapMarkers";
-import { BottomSheet, BottomSheetRef } from "react-spring-bottom-sheet";
 import { Building, NodeId } from "../data/types/node";
-import "react-spring-bottom-sheet/dist/style.css";
-import { MapBottomSheetFromList, MapBottomSheetFromMarker } from "../components/map/mapBottomSheet";
-import TopSheet from "../components/map/TopSheet";
+import MapBottomSheet from "../components/map/mapBottomSheet";
+import MapTopSheet from "../components/map/TopSheet";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 import ReportButton from "../components/map/reportButton";
 import useRoutePoint from "../hooks/useRoutePoint";
@@ -51,10 +49,7 @@ export default function MapPage() {
 	const prevZoom = useRef<number>(16);
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
-	const bottomSheetRef = useRef<BottomSheetRef>(null);
 	const buildingBoundary = useRef<google.maps.LatLngBounds | null>(null);
-	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
-
 	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; nodeId: NodeId }[]>([]);
 
 	const [dangerMarkers, setDangerMarkers] = useState<{ element: AdvancedMarker; routeId: RouteId }[]>([]);
@@ -66,7 +61,7 @@ export default function MapPage() {
 	const [universityMarker, setUniversityMarker] = useState<AdvancedMarker>();
 
 	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
-	const { mode, building: selectedBuilding } = useSearchBuilding();
+	const { building: selectedBuilding } = useSearchBuilding();
 
 	const [_, isOpen, open, close] = useModal();
 
@@ -130,9 +125,13 @@ export default function MapPage() {
 
 	const moveToBound = () => {
 		if (selectedMarker?.type === Markers.BUILDING) {
-
 			buildingBoundary.current = new google.maps.LatLngBounds();
-			buildingBoundary.current.extend(new google.maps.LatLng(selectedMarker?.property?.lat as number, selectedMarker?.property?.lng as number));
+			buildingBoundary.current.extend(
+				new google.maps.LatLng(
+					selectedMarker?.property?.lat as number,
+					selectedMarker?.property?.lng as number,
+				),
+			);
 			// 라이브러리를 다양한 화면을 관찰해보았을 때, h-가 377인것을 확인했습니다.
 			map?.fitBounds(buildingBoundary.current, {
 				top: 0,
@@ -145,12 +144,11 @@ export default function MapPage() {
 
 	const exitBound = () => {
 		buildingBoundary.current = null;
-	}
+	};
 
 	const initMap = () => {
 		if (map === null || !AdvancedMarker) return;
 		map.addListener("click", (e: unknown) => {
-			setSheetOpen(false);
 			exitBound();
 			setSelectedMarker(undefined);
 		});
@@ -333,28 +331,13 @@ export default function MapPage() {
 			else setDestination(selectedMarker.property);
 		}
 
-		setSheetOpen(false);
 		exitBound();
 		setSelectedMarker(undefined);
 	};
 
-
-
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
-
-		if (marker.property && (marker.id === origin?.nodeId || marker.id === destination?.nodeId)) {
-			if (isSelect) {
-				// map.setOptions({
-				// 	center: { lat: marker.property.lat, lng: marker.property.lng },
-				// 	zoom: 19,
-				// });
-				setSheetOpen(true);
-			}
-
-			return;
-		}
 
 		if (marker.type === Markers.BUILDING && marker.property) {
 			if (isSelect) {
@@ -363,11 +346,6 @@ export default function MapPage() {
 					title: marker.property.buildingName,
 					className: "translate-marker",
 				});
-				// map.setOptions({
-				// 	center: { lat: marker.property.lat, lng: marker.property.lng },
-				// 	zoom: 19,
-				// });
-				setSheetOpen(true);
 
 				return;
 			}
@@ -472,7 +450,7 @@ export default function MapPage() {
 				className: "translate-marker",
 			});
 		};
-	}, [origin]);
+	}, [origin, buildingMarkers]);
 
 	/** 도착지 결정 시, Marker Content 변경 */
 	useEffect(() => {
@@ -494,13 +472,13 @@ export default function MapPage() {
 				className: "translate-marker",
 			});
 		};
-	}, [destination]);
+	}, [destination, buildingMarkers]);
 
 	useEffect(() => {
 		if (selectedMarker && selectedMarker.type === Markers.BUILDING) {
 			moveToBound();
 		}
-	}, [selectedMarker])
+	}, [selectedMarker]);
 
 	useEffect(() => {
 		if (!map) return;
@@ -548,31 +526,13 @@ export default function MapPage() {
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
-			<TopSheet open={!sheetOpen} />
+			<MapTopSheet isVisible={selectedMarker ? false : true} />
 			<div ref={mapRef} className="w-full h-full" />
-			<BottomSheet
-				ref={bottomSheetRef}
-				blocking={false}
-				open={sheetOpen}
-				snapPoints={({ minHeight }) => minHeight}
-			>
-				{selectedMarker &&
-					(selectedMarker.from === "Marker" ? (
-						/** 선택된 마커가 Marker 클릭에서 온 경우 */
-						<MapBottomSheetFromMarker
-							building={selectedMarker}
-							onClickLeft={() => selectRoutePoint(RoutePoint.ORIGIN)}
-							onClickRight={() => selectRoutePoint(RoutePoint.DESTINATION)}
-						/>
-					) : (
-						/** 선택된 마커가 리스트에서 온 경우 */
-						<MapBottomSheetFromList
-							building={selectedMarker}
-							onClick={selectRoutePoint}
-							buttonText={mode === RoutePoint.ORIGIN ? "출발지 설정" : "도착지 설정"}
-						/>
-					))}
-			</BottomSheet>
+			<MapBottomSheet
+				selectRoutePoint={selectRoutePoint}
+				selectedMarker={selectedMarker}
+				isVisible={selectedMarker ? true : false}
+			/>
 			{origin && destination && origin.nodeId !== destination.nodeId ? (
 				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */
 				<div onClick={() => findFastRoute()} className="absolute bottom-6 space-y-2 w-full px-4">
