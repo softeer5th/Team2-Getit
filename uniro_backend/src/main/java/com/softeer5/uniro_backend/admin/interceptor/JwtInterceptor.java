@@ -19,17 +19,7 @@ public class JwtInterceptor implements HandlerInterceptor {
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-		String uri = request.getRequestURI();
-
-		// ✅ 로그인 API는 인터셉터 우회
-		if (uri.startsWith("/admin/auth/")) {
-			return true;
-		}
-
-		// ✅ "/admin/{univId}/*" 패턴만 인증 적용
-		if (!uri.matches("^/admin/\\d+/.*$")) {
-			return true;
-		}
+		// Authorization 헤더에서 JWT 토큰 추출
 
 		String authHeader = request.getHeader("Authorization");
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {

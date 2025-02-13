@@ -1,5 +1,7 @@
 package com.softeer5.uniro_backend.admin.interceptor;
 
+import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.softeer5.uniro_backend.admin.jwt.SecurityContext;
+import com.softeer5.uniro_backend.common.exception.custom.AdminException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,8 +29,7 @@ public class AdminInterceptor implements HandlerInterceptor {
 			Long adminUnivId = SecurityContext.getUnivId(); // JWT에서 가져온 univId
 
 			if (!univId.equals(adminUnivId)) {
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized university access");
-				return false;
+				throw new AdminException("Unauthorized university access", UNAUTHORIZED_UNIV);
 			}
 		}
 		return true;

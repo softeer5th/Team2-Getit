@@ -22,6 +22,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		// JWT 인터셉터는 더 먼저 실행되도록 우선순위 낮춤
 		registry.addInterceptor(jwtInterceptor)
 			.addPathPatterns("/admin/{univId}/**") // "/admin/{univId}/" 패턴만 적용
+			.excludePathPatterns("/admin/auth/login")
 			.order(0); // 가장 먼저 실행되도록 설정
 
 		// AdminInterceptor는 그 다음에 실행

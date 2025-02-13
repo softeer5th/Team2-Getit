@@ -37,7 +37,7 @@ public enum ErrorCode {
     INVALID_ADMIN_CODE(403, "유효하지 않은 어드민 코드 입니다."),
     INVALID_TOKEN(401, "유효하지 않은 토큰입니다."),
     UNAUTHORIZED_UNIV(401, "해당 대학교의 권한이 없습니다."),
-    INVALID_UNIV_ID(500, "유효하지 않은 대학교 id 입니다."),
+    INVALID_UNIV_ID(400, "유효하지 않은 대학교 id 입니다."),
     ;
 
     private final int httpStatus;
