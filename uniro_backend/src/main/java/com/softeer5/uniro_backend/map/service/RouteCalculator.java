@@ -297,14 +297,22 @@ public class RouteCalculator {
                 route.getNode2().getCoordinates().getY());
     }
 
-    // 길의 길이를 리턴하는 메서드
+    // 하버사인 공식으로 길의 길이를 리턴하는 메서드
     private double calculateDistance(double lng1, double lat1, double lng2, double lat2) {
-        double dLat = (lat2 - lat1) * METERS_PER_DEGREE;
+        double radLat1 = Math.toRadians(lat1);
+        double radLat2 = Math.toRadians(lat2);
+        double radLng1 = Math.toRadians(lng1);
+        double radLng2 = Math.toRadians(lng2);
 
-        double avgLat = (lat1 + lat2) / 2.0;
-        double dLng = (lng2 - lng1) * METERS_PER_DEGREE * Math.cos(Math.toRadians(avgLat));
+        double deltaLat = radLat2 - radLat1;
+        double deltaLng = radLng2 - radLng1;
 
-        return Math.sqrt(dLat * dLat + dLng * dLng);
+        double a = Math.pow(Math.sin(deltaLat / 2), 2)
+                + Math.cos(radLat1) * Math.cos(radLat2)
+                * Math.pow(Math.sin(deltaLng / 2), 2);
+        double c = 2 * Math.asin(Math.sqrt(a));
+
+        return EARTH_RADIUS * c;
     }
 
     // 길 상세정보를 추출하는 메서드
