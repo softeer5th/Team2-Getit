@@ -12,16 +12,16 @@ public enum RoadExclusionPolicy {
         boolean isCaution = !route.getCautionFactors().isEmpty();
         boolean isDanger = !route.getDangerFactors().isEmpty();
         return switch(policy){
-            case PEDES -> !isCaution && !isDanger;
+            case PEDES -> true;
             case WHEEL_FAST -> !isDanger;
-            case WHEEL_SAFE -> true;
+            case WHEEL_SAFE -> !isCaution && !isDanger;
             default -> false;
         };
     }
 
-    public static Double calculateCost(RoadExclusionPolicy policy, double type, double cost){
-        boolean isWheel = (type==PEDESTRIAN_SECONDS_PER_MITER);
-        double totalCost = type * cost;
+    public static Double calculateCost(RoadExclusionPolicy policy, double type, double distance){
+        boolean isWheel = (type!=PEDESTRIAN_SECONDS_PER_MITER);
+        double totalCost = type * distance;
         if(isWheel && policy == PEDES) return null;
         if(!isWheel && policy != PEDES) return null;
         return totalCost;
