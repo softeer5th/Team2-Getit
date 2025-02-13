@@ -7,4 +7,5 @@ public final class UniroConst {
 	public static final double SECONDS_PER_MITER = 1.666;
 	public static final double METERS_PER_DEGREE = 113000.0;
 	public static final double BUILDING_ROUTE_COST = 1e8;
+	public static final int IS_SINGLE_ROUTE = 2;
 }

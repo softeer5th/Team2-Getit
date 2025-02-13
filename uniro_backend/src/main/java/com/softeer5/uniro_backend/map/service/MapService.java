@@ -152,7 +152,7 @@ public class MapService {
 
 		List<Route> savedRoutes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
-		List<Node> nodesForSave = routeCalculator.checkRouteCross(univId, requests.getStartNodeId(),
+		List<Node> nodesForSave = routeCalculator.createValidRouteNodes(univId, requests.getStartNodeId(),
 			requests.getEndNodeId(),
 			requests.getCoordinates(), savedRoutes);
 
