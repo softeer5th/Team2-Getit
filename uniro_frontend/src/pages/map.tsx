@@ -3,7 +3,7 @@ import useMap from "../hooks/useMap";
 import createMarkerElement from "../components/map/mapMarkers";
 import { Building, NodeId } from "../data/types/node";
 import MapBottomSheet from "../components/map/mapBottomSheet";
-import MapTopSheet from "../components/map/TopSheet";
+import { MapTopBuildingSheet, MapTopRouteSheet } from "../components/map/TopSheet";
 import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
 import ReportButton from "../components/map/reportButton";
 import useRoutePoint from "../hooks/useRoutePoint";
@@ -31,6 +31,7 @@ import { getAllRisks } from "../api/routes";
 import { getAllBuildings } from "../api/nodes";
 import { getNavigationResult } from "../api/route";
 import useQueryError from "../hooks/useQueryError";
+
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -61,7 +62,7 @@ export default function MapPage() {
 	const [universityMarker, setUniversityMarker] = useState<AdvancedMarker>();
 
 	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
-	const { building: selectedBuilding } = useSearchBuilding();
+	const { building: selectedBuilding, setBuilding, searchMode } = useSearchBuilding();
 
 	const [_, isOpen, open, close] = useModal();
 
@@ -477,6 +478,11 @@ export default function MapPage() {
 	useEffect(() => {
 		if (selectedMarker && selectedMarker.type === Markers.BUILDING) {
 			moveToBound();
+			setBuilding(selectedMarker.property as Building);
+		}
+
+		return () => {
+			setBuilding(undefined)
 		}
 	}, [selectedMarker]);
 
@@ -526,12 +532,13 @@ export default function MapPage() {
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
-			<MapTopSheet isVisible={selectedMarker ? false : true} />
+			<MapTopBuildingSheet isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode === "BUILDING"} />
+			<MapTopRouteSheet isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode != "BUILDING"} />
 			<div ref={mapRef} className="w-full h-full" />
 			<MapBottomSheet
 				selectRoutePoint={selectRoutePoint}
 				selectedMarker={selectedMarker}
-				isVisible={selectedMarker ? true : false}
+				isVisible={selectedMarker?.type === Markers.BUILDING ? true : false}
 			/>
 			{origin && destination && origin.nodeId !== destination.nodeId ? (
 				/** 출발지랑 도착지가 존재하는 경우 길찾기 버튼 보이기 */

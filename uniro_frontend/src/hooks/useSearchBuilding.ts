@@ -3,19 +3,21 @@ import { Building } from "../data/types/node";
 import { RoutePointType } from "../data/types/route";
 import { RoutePoint } from "../constant/enum/routeEnum";
 
+export type SearchMode = "BUILDING" | "ORIGIN" | "DESTINATION";
+
 interface SearchModeStore {
-	mode: RoutePointType;
-	setMode: (mode: RoutePointType) => void;
+	searchMode: SearchMode;
+	setSearchMode: (mode: SearchMode) => void;
 	building: Building | undefined;
-	setBuilding: (newBuilding: Building) => void;
+	setBuilding: (newBuilding: Building | undefined) => void;
 }
 
 /** 건물 리스트에서 건물을 출발지, 도착지로 결정하는 경우 */
 const useSearchBuilding = create<SearchModeStore>((set) => ({
-	mode: RoutePoint.ORIGIN,
-	setMode: (newMode: RoutePointType) => set(() => ({ mode: newMode })),
+	searchMode: "BUILDING",
+	setSearchMode: (newMode: SearchMode) => set(() => ({ searchMode: newMode })),
 	building: undefined,
-	setBuilding: (newBuilding: Building) => set(() => ({ building: newBuilding })),
+	setBuilding: (newBuilding: Building | undefined) => set(() => ({ building: newBuilding })),
 }));
 
 export default useSearchBuilding;
