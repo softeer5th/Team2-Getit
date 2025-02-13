@@ -24,3 +24,6 @@ map:
 
 cors:
   allowed-origins: ${allowed-origins}
+
+jwt:
+  secret: ${JWT_SECRET}

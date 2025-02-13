@@ -78,6 +78,12 @@ dependencies {
 	testImplementation 'org.testcontainers:jdbc:1.19.5'
 	testImplementation 'org.testcontainers:mysql:1.19.5'
 
+	// jwt
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+	implementation 'com.auth0:java-jwt:4.4.0'
+
 }
 
 tasks.named('test') {
