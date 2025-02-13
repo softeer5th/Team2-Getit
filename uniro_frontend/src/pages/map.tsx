@@ -31,6 +31,7 @@ import { getAllRisks } from "../api/routes";
 import { getAllBuildings } from "../api/nodes";
 import { getNavigationResult } from "../api/route";
 import useQueryError from "../hooks/useQueryError";
+import { Coord } from "../data/types/coord";
 
 
 export type SelectedMarkerTypes = {
@@ -45,7 +46,7 @@ export type SelectedMarkerTypes = {
 const BOTTOM_SHEET_HEIGHT = 377;
 
 export default function MapPage() {
-	const { mapRef, map, AdvancedMarker } = useMap();
+	const { mapRef, map, AdvancedMarker } = useMap({ zoom: 16 });
 	const [zoom, setZoom] = useState<number>(16);
 	const prevZoom = useRef<number>(16);
 
@@ -124,23 +125,18 @@ export default function MapPage() {
 
 	const [risks, buildings] = results;
 
-	const moveToBound = () => {
-		if (selectedMarker?.type === Markers.BUILDING) {
-			buildingBoundary.current = new google.maps.LatLngBounds();
-			buildingBoundary.current.extend(
-				new google.maps.LatLng(
-					selectedMarker?.property?.lat as number,
-					selectedMarker?.property?.lng as number,
-				),
-			);
-			// 라이브러리를 다양한 화면을 관찰해보았을 때, h-가 377인것을 확인했습니다.
-			map?.fitBounds(buildingBoundary.current, {
-				top: 0,
-				right: 0,
-				bottom: BOTTOM_SHEET_HEIGHT,
-				left: 0,
-			});
-		}
+	const moveToBound = (coord: Coord) => {
+		buildingBoundary.current = new google.maps.LatLngBounds();
+		buildingBoundary.current.extend(
+			coord
+		);
+		// 라이브러리를 다양한 화면을 관찰해보았을 때, h-가 377인것을 확인했습니다.
+		map?.fitBounds(buildingBoundary.current, {
+			top: 0,
+			right: 0,
+			bottom: BOTTOM_SHEET_HEIGHT,
+			left: 0,
+		});
 	};
 
 	const exitBound = () => {
@@ -417,18 +413,34 @@ export default function MapPage() {
 
 	/** 빌딩 리스트에서 넘어온 경우, 일치하는 BuildingMarkerElement를 탐색 */
 	useEffect(() => {
+
 		if (buildingMarkers.length === 0 || !selectedBuilding || !selectedBuilding.nodeId) return;
 
-		const matchedMarker = findBuildingMarker(selectedBuilding.nodeId);
+		if (!selectedMarker) {
+			const matchedMarker = findBuildingMarker(selectedBuilding.nodeId);
 
-		if (matchedMarker)
-			setSelectedMarker({
-				id: selectedBuilding.nodeId,
-				type: Markers.BUILDING,
-				element: matchedMarker,
-				from: "List",
-				property: selectedBuilding,
-			});
+			if (!matchedMarker) return;
+			if (searchMode === "BUILDING") {
+
+				setSelectedMarker({
+					id: selectedBuilding.nodeId,
+					type: Markers.BUILDING,
+					element: matchedMarker,
+					from: "List",
+					property: selectedBuilding,
+				});
+				return
+			}
+			if (searchMode === "ORIGIN") {
+				setOrigin(selectedBuilding);
+				moveToBound(selectedBuilding);
+				return;
+			}
+			if (searchMode === "DESTINATION") {
+				setDestination(selectedBuilding);
+				moveToBound(selectedBuilding);
+			}
+		}
 	}, [selectedBuilding, buildingMarkers]);
 
 	/** 출발지 결정 시, Marker Content 변경 */
@@ -445,11 +457,13 @@ export default function MapPage() {
 		});
 
 		return () => {
+			const curZoom = map?.getZoom() as number;
 			originMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
 				title: origin.buildingName,
 				className: "translate-marker",
 			});
+			if (curZoom <= 16) originMarker.map = null;
 		};
 	}, [origin, buildingMarkers]);
 
@@ -467,17 +481,31 @@ export default function MapPage() {
 		});
 
 		return () => {
+			const curZoom = map?.getZoom() as number;
+
 			destinationMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
 				title: destination.buildingName,
 				className: "translate-marker",
 			});
+			if (curZoom <= 16) destinationMarker.map = null;
 		};
 	}, [destination, buildingMarkers]);
 
+	/** 출발 도착 설정시, 출발 도착지가 한 눈에 보이도록 지도 조정 */
 	useEffect(() => {
-		if (selectedMarker && selectedMarker.type === Markers.BUILDING) {
-			moveToBound();
+		if (origin && destination) {
+			const newBound = new google.maps.LatLngBounds();
+			newBound.extend(origin);
+			newBound.extend(destination)
+			map?.fitBounds(newBound)
+		}
+
+	}, [origin, destination]);
+
+	useEffect(() => {
+		if (selectedMarker && selectedMarker.type === Markers.BUILDING && selectedMarker.property) {
+			moveToBound({ lat: selectedMarker.property.lat, lng: selectedMarker.property.lng });
 			setBuilding(selectedMarker.property as Building);
 		}
 
@@ -488,8 +516,6 @@ export default function MapPage() {
 
 	useEffect(() => {
 		if (!map) return;
-
-		const _buildingMarkers = buildingMarkers.map((buildingMarker) => buildingMarker.element);
 
 		if (prevZoom.current >= 17 && zoom <= 16) {
 			if (isCautionAcitve) {
@@ -508,7 +534,7 @@ export default function MapPage() {
 			}
 
 			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
-			toggleMarkers(false, _buildingMarkers, map);
+			toggleMarkers(false, buildingMarkers.filter(el => el.nodeId !== origin?.nodeId && el.nodeId !== destination?.nodeId).map(el => el.element), map);
 		} else if (prevZoom.current <= 16 && zoom >= 17) {
 			if (isCautionAcitve) {
 				toggleMarkers(
@@ -526,7 +552,7 @@ export default function MapPage() {
 			}
 
 			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
-			toggleMarkers(true, _buildingMarkers, map);
+			toggleMarkers(true, buildingMarkers.map(el => el.element), map);
 		}
 	}, [map, zoom]);
 

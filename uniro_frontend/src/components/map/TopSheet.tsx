@@ -6,7 +6,6 @@ import LocationIcon from "../../assets/location-thin.svg?react";
 import ChevronLeft from "../../../public/icons/chevron-left.svg?react";
 import useRoutePoint from "../../hooks/useRoutePoint";
 import useSearchBuilding from "../../hooks/useSearchBuilding";
-import { RoutePoint } from "../../constant/enum/routeEnum";
 import AnimatedContainer from "../../container/animatedContainer";
 import { BuildingInput, RouteInput } from "./mapSearchInput";
 
@@ -76,7 +75,7 @@ export function MapTopRouteSheet({ isVisible }: MapTopSheetProps) {
 				</div>
 				<div className="flex-1 flex flex-col space-y-[10px]">
 					<RouteInput
-						onClick={() => { }}
+						onClick={() => { setSearchMode("ORIGIN") }}
 						placeholder="출발지를 입력하세요"
 						value={origin ? origin.buildingName : ""}
 						onCancel={() => setOrigin(undefined)}
@@ -84,7 +83,7 @@ export function MapTopRouteSheet({ isVisible }: MapTopSheetProps) {
 						<OriginIcon />
 					</RouteInput>
 					<RouteInput
-						onClick={() => { }}
+						onClick={() => { setSearchMode("DESTINATION") }}
 						placeholder="도착지를 입력하세요"
 						value={destination ? destination.buildingName : ""}
 						onCancel={() => setDestination(undefined)}
