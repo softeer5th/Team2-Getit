@@ -96,27 +96,44 @@ public class ExecutionLoggingAop {
 
 	private void logDetail(Object arg, String requestType, StringBuilder logMessage, int depth) {
 		String indent = "  ".repeat(depth); // depth 수준에 따른 들여쓰기
+		ArgType argType = ArgType.getArgType(arg);
 
-		if (arg == null) {
-			logMessage.append(indent).append(requestType).append(" null\n");
-			return;
-		}
-
-		if (arg instanceof List<?>) {
-			logMessage.append(indent).append(requestType).append(" ").append(arg.getClass().getSimpleName()).append("\n");
-			List<?> list = (List<?>) arg;
-			for (int i = 0; i < list.size(); i++) {
-				logDetail(list.get(i), "[List Element " + i + "] ", logMessage, depth + 1);
+		switch (argType) {
+			case NULL -> logMessage.append(indent).append(requestType).append(" null\n");
+			case LIST -> {
+				logMessage.append(indent)
+					.append(requestType)
+					.append(" ")
+					.append(arg.getClass().getSimpleName())
+					.append("\n");
+				List<?> list = (List<?>)arg;
+				for (int i = 0; i < list.size(); i++) {
+					logDetail(list.get(i), "[List Element " + i + "] ", logMessage, depth + 1);
+				}
 			}
-		} else if (isCustomDto(arg)) {
-			logMessage.append(indent).append(requestType).append("DTO: ").append(arg.getClass().getSimpleName()).append("\n");
-			logObjectFields(arg, logMessage, depth + 1);
-		} else if (isEntity(arg)) {
-			logMessage.append(indent).append(requestType).append(arg.getClass().getSimpleName()).append(" : ").append("\n");
-			logObjectFields(arg, logMessage, depth + 1);
-		}
-		else {
-			logMessage.append(indent).append(requestType).append(" ").append(arg.getClass().getSimpleName()).append(": ").append(arg).append("\n");
+			case CUSTOM_DTO -> {
+				logMessage.append(indent)
+					.append(requestType)
+					.append("DTO: ")
+					.append(arg.getClass().getSimpleName())
+					.append("\n");
+				logObjectFields(arg, logMessage, depth + 1);
+			}
+			case ENTITY -> {
+				logMessage.append(indent)
+					.append(requestType)
+					.append(arg.getClass().getSimpleName())
+					.append(" : ")
+					.append("\n");
+				logObjectFields(arg, logMessage, depth + 1);
+			}
+			default -> logMessage.append(indent)
+				.append(requestType)
+				.append(" ")
+				.append(arg.getClass().getSimpleName())
+				.append(": ")
+				.append(arg)
+				.append("\n");
 		}
 	}
 
@@ -131,14 +148,6 @@ public class ExecutionLoggingAop {
 				logMessage.append(indent).append("[Field Access Error] Cannot access field: ").append(field.getName()).append("\n");
 			}
 		});
-	}
-
-	private boolean isCustomDto(Object arg) {
-		return arg.getClass().getName().contains("dto"); // 패키지 명에 "dto" 포함 여부로 DTO 판단 (적절히 변경 가능)
-	}
-
-	private boolean isEntity(Object arg) {
-		return arg.getClass().getName().contains("entity"); // 패키지 명에 "dto" 포함 여부로 DTO 판단 (적절히 변경 가능)
 	}
 
 	private void logHttpRequest(String userId) {
