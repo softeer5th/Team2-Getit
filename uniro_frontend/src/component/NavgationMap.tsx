@@ -119,7 +119,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 		const startMarkerElement = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin?.buildingName,
-			className: "translate-routemarker",
+			className: "translate-pinmarker",
 			hasAnimation: true,
 		});
 		const { lat: originLat, lng: originLng }: google.maps.LatLngLiteral = origin!;
@@ -131,7 +131,7 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 		const endMarkerElement = createMarkerElement({
 			type: Markers.DESTINATION,
 			title: destination?.buildingName,
-			className: "translate-routemarker",
+			className: "translate-pinmarker",
 			hasAnimation: true,
 		});
 

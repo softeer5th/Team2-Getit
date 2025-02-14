@@ -342,7 +342,7 @@ export default function MapPage() {
 				marker.element.content = createMarkerElement({
 					type: Markers.ORIGIN,
 					title: marker.property.buildingName,
-					className: "translate-routemarker",
+					className: "translate-pinmarker",
 				});
 				return;
 			}
@@ -351,7 +351,7 @@ export default function MapPage() {
 				marker.element.content = createMarkerElement({
 					type: Markers.DESTINATION,
 					title: destination.buildingName,
-					className: "translate-routemarker",
+					className: "translate-pinmarker",
 				});
 				return;
 			}
@@ -361,7 +361,7 @@ export default function MapPage() {
 				marker.element.content = createMarkerElement({
 					type: Markers.SELECTED_BUILDING,
 					title: marker.property.buildingName,
-					className: "translate-marker",
+					className: "translate-pinmarker",
 				});
 
 				return;
@@ -461,7 +461,7 @@ export default function MapPage() {
 		originMarker.content = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin.buildingName,
-			className: "translate-routemarker",
+			className: "translate-pinmarker",
 		});
 
 		return () => {
@@ -487,7 +487,7 @@ export default function MapPage() {
 		destinationMarker.content = createMarkerElement({
 			type: Markers.DESTINATION,
 			title: destination.buildingName,
-			className: "translate-routemarker",
+			className: "translate-pinmarker",
 		});
 
 		return () => {
