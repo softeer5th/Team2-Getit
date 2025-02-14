@@ -73,72 +73,75 @@ const NavigationMap = ({
 	}
 
 	// 길을 그리는 Method
-	const createCompositeRoute = (routeData: NavigationRouteList): PolylineSet | null => {
-		if (!Polyline) return null;
-		if (!origin || !destination) return null;
-		if (routeData.routes.length === 0) return null;
-		const { routes } = routeData;
+	const createCompositeRoute = useCallback(
+		(routeData: NavigationRouteList): PolylineSet | null => {
+			if (!Polyline) return null;
+			if (!origin || !destination) return null;
+			if (routeData.routes.length === 0) return null;
+			const { routes } = routeData;
 
-		const bounds = new google.maps.LatLngBounds();
+			const bounds = new google.maps.LatLngBounds();
 
-		bounds.extend({ lat: origin!.lat, lng: origin!.lng });
-		bounds.extend({ lat: destination!.lat, lng: destination!.lng });
+			bounds.extend({ lat: origin!.lat, lng: origin!.lng });
+			bounds.extend({ lat: destination!.lat, lng: destination!.lng });
 
-		// // 시작 건물과 첫번째 노드를 잇는 경로
-		const startingBuildingPath: google.maps.LatLngLiteral[] = [origin, routes[0].node1];
-		// 마지막 노드와 도착 건물을 잇는 경로
-		const endingBuildingPath: google.maps.LatLngLiteral[] = [routes[routes.length - 1].node2, destination];
-		// 본 경로 (첫번째 노드와 그 이후 노드들을 잇는 경로)
-		const mainPath: google.maps.LatLngLiteral[] = [routes[0].node1, ...routes.map((el) => el.node2)];
+			// // 시작 건물과 첫번째 노드를 잇는 경로
+			const startingBuildingPath: google.maps.LatLngLiteral[] = [origin, routes[0].node1];
+			// 마지막 노드와 도착 건물을 잇는 경로
+			const endingBuildingPath: google.maps.LatLngLiteral[] = [routes[routes.length - 1].node2, destination];
+			// 본 경로 (첫번째 노드와 그 이후 노드들을 잇는 경로)
+			const mainPath: google.maps.LatLngLiteral[] = [routes[0].node1, ...routes.map((el) => el.node2)];
 
-		// 경로의 bounds 업데이트
-		mainPath.forEach((coord) => bounds.extend(coord));
+			// 경로의 bounds 업데이트
+			mainPath.forEach((coord) => bounds.extend(coord));
 
-		// // 시작 Polyline (점선)
-		const startPolyline = new Polyline({
-			path: startingBuildingPath,
-			strokeOpacity: 0,
-			strokeColor: "#000000",
-			icons: [
-				{
-					icon: dashSymbol,
-					offset: "0",
-					repeat: "20px",
-				},
-			],
-			geodesic: true,
-		});
-		// 종료 Polyline (점선)
-		const endPolyline = new Polyline({
-			path: endingBuildingPath,
-			strokeOpacity: 0,
-			strokeColor: "#000000",
-			icons: [
-				{
-					icon: dashSymbol,
-					offset: "2",
-					repeat: "20px",
-				},
-			],
-			geodesic: true,
-		});
+			// // 시작 Polyline (점선)
+			const startPolyline = new Polyline({
+				path: startingBuildingPath,
+				strokeOpacity: 0,
+				strokeColor: "#000000",
+				icons: [
+					{
+						icon: dashSymbol,
+						offset: "0",
+						repeat: "20px",
+					},
+				],
+				geodesic: true,
+			});
+			// 종료 Polyline (점선)
+			const endPolyline = new Polyline({
+				path: endingBuildingPath,
+				strokeOpacity: 0,
+				strokeColor: "#000000",
+				icons: [
+					{
+						icon: dashSymbol,
+						offset: "2",
+						repeat: "20px",
+					},
+				],
+				geodesic: true,
+			});
 
-		// 본 경로 Polyline (실제 경로 선)
-		const mainPolyline = new Polyline({
-			path: mainPath,
-			strokeOpacity: 1,
-			strokeColor: "#000000",
-			strokeWeight: 5.0,
-			geodesic: true,
-		});
+			// 본 경로 Polyline (실제 경로 선)
+			const mainPolyline = new Polyline({
+				path: mainPath,
+				strokeOpacity: 1,
+				strokeColor: "#000000",
+				strokeWeight: 5.0,
+				geodesic: true,
+			});
 
-		return {
-			startBuildingPath: startPolyline,
-			endingBuildingPath: endPolyline,
-			paths: mainPolyline,
-			bounds,
-		};
-	};
+			return {
+				startBuildingPath: startPolyline,
+				endingBuildingPath: endPolyline,
+				paths: mainPolyline,
+				bounds,
+			};
+		},
+		[Polyline, origin, destination],
+	);
 
 	const compositeRoutes: CompositeRoutesRecord = useMemo(() => {
 		if (!routeResult || !Polyline) return {};
