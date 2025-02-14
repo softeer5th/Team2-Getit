@@ -1,10 +1,13 @@
 package com.softeer5.uniro_backend.building.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.softeer5.uniro_backend.building.service.vo.BuildingNode;
 import com.softeer5.uniro_backend.building.entity.Building;
@@ -33,4 +36,9 @@ public interface BuildingRepository extends JpaRepository<Building, Long>, Build
 	List<Building> findAllByNodeIdIn(List<Long> nodeIds);
 
 	boolean existsByNodeIdAndUnivId(Long nodeId, Long univId);
+
+	@Modifying(clearAutomatically = true)
+	@Transactional
+	@Query("DELETE FROM Building b WHERE b.univId = :univId AND b.createdAt > :versionTimeStamp")
+	void deleteAllByCreatedAt(Long univId, LocalDateTime versionTimeStamp);
 }
