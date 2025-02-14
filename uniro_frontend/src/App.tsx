@@ -26,8 +26,8 @@ function App() {
 	useNetworkStatus();
 	return (
 		<QueryClientProvider client={queryClient}>
-			<ErrorBoundary fallback={<ErrorPage />}>
-				<Suspense key={location.key} fallback={fallback}>
+			<ErrorBoundary key={location.key} fallback={<ErrorPage />}>
+				<Suspense fallback={fallback}>
 					<Routes>
 						<Route path="/demo" element={<Demo />} />
 						<Route path="/" element={<LandingPage />} />
