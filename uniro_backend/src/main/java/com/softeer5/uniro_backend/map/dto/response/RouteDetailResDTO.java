@@ -1,7 +1,7 @@
 package com.softeer5.uniro_backend.map.dto.response;
 
-import com.softeer5.uniro_backend.map.entity.CautionFactor;
-import com.softeer5.uniro_backend.map.entity.DirectionType;
+import com.softeer5.uniro_backend.map.enums.CautionFactor;
+import com.softeer5.uniro_backend.map.enums.DirectionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;

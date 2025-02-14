@@ -8,7 +8,7 @@ import static com.softeer5.uniro_backend.common.utils.GeoUtils.getInstance;
 import java.util.*;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
-import com.softeer5.uniro_backend.admin.entity.RevisionOperationType;
+import com.softeer5.uniro_backend.admin.enums.RevisionOperationType;
 import com.softeer5.uniro_backend.building.entity.Building;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.BuildingException;

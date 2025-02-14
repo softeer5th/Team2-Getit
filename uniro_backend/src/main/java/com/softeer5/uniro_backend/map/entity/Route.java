@@ -9,6 +9,8 @@ import java.util.Set;
 
 import com.softeer5.uniro_backend.common.resolver.CautionListConverter;
 import com.softeer5.uniro_backend.common.resolver.DangerListConverter;
+import com.softeer5.uniro_backend.map.enums.CautionFactor;
+import com.softeer5.uniro_backend.map.enums.DangerFactor;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.locationtech.jts.geom.LineString;

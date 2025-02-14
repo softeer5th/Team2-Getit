@@ -13,6 +13,9 @@ import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.*;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
+import com.softeer5.uniro_backend.map.enums.CautionFactor;
+import com.softeer5.uniro_backend.map.enums.DirectionType;
+import com.softeer5.uniro_backend.map.entity.Route;
 import lombok.AllArgsConstructor;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -114,6 +117,10 @@ public class RouteCalculator {
 
             Node startNode = nodeMap.get(startNodeId);
             Node endNode = nodeMap.get(endNodeId);
+
+            if(startNode==null || endNode==null){
+                continue;
+            }
 
             //길찾기 알고리즘 수행
             Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap);

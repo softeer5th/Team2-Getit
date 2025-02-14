@@ -1,7 +1,5 @@
 package com.softeer5.uniro_backend.common.error;
 
-import org.springframework.http.HttpStatus;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -35,7 +33,11 @@ public enum ErrorCode {
     INTERSECTION_ONLY_ALLOWED_POINT(400, "기존 경로와 겹칠 수 없습니다."),
 
     // 어드민
-    INVALID_VERSION_ID(400, "유효하지 않은 버전 id 입니다.")
+    INVALID_VERSION_ID(400, "유효하지 않은 버전 id 입니다."),
+    INVALID_ADMIN_CODE(403, "유효하지 않은 어드민 코드 입니다."),
+    INVALID_TOKEN(401, "유효하지 않은 토큰입니다."),
+    UNAUTHORIZED_UNIV(401, "해당 대학교의 권한이 없습니다."),
+    INVALID_UNIV_ID(400, "유효하지 않은 대학교 id 입니다."),
     ;
 
     private final int httpStatus;
