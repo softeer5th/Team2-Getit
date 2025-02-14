@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "../components/customInput";
 import UniversityButton from "../components/universityButton";
 import Button from "../components/customButton";
@@ -9,18 +9,21 @@ import { getUniversityList } from "../api/search";
 import { University } from "../data/types/university";
 
 export default function UniversitySearchPage() {
-	const { data: universityList, status } = useQuery({
-		queryKey: ["university"],
-		queryFn: getUniversityList,
-	});
 
 	const [selectedUniv, setSelectedUniv] = useState<University>();
 	const { setUniversity } = useUniversityInfo();
+	const [input, setInput] = useState<string>('');
+
+	const { data: universityList, status } = useQuery({
+		queryKey: ["university", input],
+		queryFn: () => getUniversityList(input),
+	});
+
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto py-5">
 			<div className="w-full px-[14px] pb-[17px] border-b-[1px] border-gray-400">
-				<Input onLengthChange={() => {}} placeholder="우리 학교를 검색해보세요" handleVoiceInput={() => {}} />
+				<Input onChangeDebounce={(e) => setInput(e)} placeholder="우리 학교를 검색해보세요" handleVoiceInput={() => { }} />
 			</div>
 			<div className="overflow-y-scroll flex-1">
 				<ul
