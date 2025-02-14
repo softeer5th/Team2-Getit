@@ -1,6 +1,5 @@
 import { Route, Routes } from "react-router";
 import "./App.css";
-import Demo from "./pages/demo";
 import LandingPage from "./pages/landing";
 import UniversitySearchPage from "./pages/universitySearch";
 import MapPage from "./pages/map";
@@ -29,7 +28,6 @@ function App() {
 			<ErrorBoundary key={location.key} fallback={<ErrorPage />}>
 				<Suspense fallback={fallback}>
 					<Routes>
-						<Route path="/demo" element={<Demo />} />
 						<Route path="/" element={<LandingPage />} />
 						<Route path="/university" element={<UniversitySearchPage />} />
 						<Route path="/building" element={<BuildingSearchPage />} />

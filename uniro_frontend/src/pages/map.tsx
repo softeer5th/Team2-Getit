@@ -4,8 +4,7 @@ import createMarkerElement from "../components/map/mapMarkers";
 import { Building, NodeId } from "../data/types/node";
 import MapBottomSheet from "../components/map/mapBottomSheet";
 import { MapTopBuildingSheet, MapTopRouteSheet } from "../components/map/TopSheet";
-import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
-import ReportButton from "../components/map/reportButton";
+import { CautionToggleButton, DangerToggleButton, ReportButton } from "../components/map/floatingButtons";
 import useRoutePoint from "../hooks/useRoutePoint";
 import useSearchBuilding from "../hooks/useSearchBuilding";
 import Button from "../components/customButton";
@@ -342,7 +341,7 @@ export default function MapPage() {
 				marker.element.content = createMarkerElement({
 					type: Markers.ORIGIN,
 					title: marker.property.buildingName,
-					className: "translate-routemarker",
+					className: "translate-pinmarker",
 				});
 				return;
 			}
@@ -351,7 +350,7 @@ export default function MapPage() {
 				marker.element.content = createMarkerElement({
 					type: Markers.DESTINATION,
 					title: destination.buildingName,
-					className: "translate-routemarker",
+					className: "translate-pinmarker",
 				});
 				return;
 			}
@@ -361,7 +360,7 @@ export default function MapPage() {
 				marker.element.content = createMarkerElement({
 					type: Markers.SELECTED_BUILDING,
 					title: marker.property.buildingName,
-					className: "translate-marker",
+					className: "translate-pinmarker",
 				});
 
 				return;
@@ -461,7 +460,7 @@ export default function MapPage() {
 		originMarker.content = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin.buildingName,
-			className: "translate-routemarker",
+			className: "translate-pinmarker",
 		});
 
 		return () => {
@@ -487,7 +486,7 @@ export default function MapPage() {
 		destinationMarker.content = createMarkerElement({
 			type: Markers.DESTINATION,
 			title: destination.buildingName,
-			className: "translate-routemarker",
+			className: "translate-pinmarker",
 		});
 
 		return () => {
