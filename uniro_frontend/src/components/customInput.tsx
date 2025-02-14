@@ -1,35 +1,41 @@
-import { ChangeEvent, InputHTMLAttributes, useCallback, useState } from "react";
+import { ChangeEvent, InputHTMLAttributes, useCallback, useEffect, useRef, useState } from "react";
 import Search from "../../public/icons/search.svg?react";
 import ChevronLeft from "../../public/icons/chevron-left.svg?react";
 import Mic from "../../public/icons/mic.svg?react";
 import Close from "../../public/icons/close-circle.svg?react";
 
 interface CustomInputProps extends InputHTMLAttributes<HTMLInputElement> {
-	onLengthChange: (e: string) => void;
+	onChangeDebounce: (e: string) => void;
 	placeholder: string;
 	handleVoiceInput: () => void;
 }
 
-export default function Input({ onLengthChange, placeholder, handleVoiceInput, ...rest }: CustomInputProps) {
+export default function Input({ onChangeDebounce, placeholder, handleVoiceInput, ...rest }: CustomInputProps) {
 	const [isFocus, setIsFocus] = useState<boolean>(false);
-	const [tempValue, setTempValue] = useState<string>("");
-	const [currentValue, setCurrentValue] = useState<string>("");
+	const [value, setValue] = useState<string>("");
+	const timeOutRef = useRef<number>();
 
 	const onFoucs = () => setIsFocus(true);
 	const onBlur = () => setIsFocus(false);
 
-	const resetInput = () => {
-		setCurrentValue("");
-		setTempValue("");
+	const resetInput = () => { };
+
+	const handleDebounce = (input: string) => {
+		if (timeOutRef.current) {
+			clearTimeout(timeOutRef.current);
+		}
+
+		timeOutRef.current = setTimeout(() => {
+			onChangeDebounce(input);
+			timeOutRef.current = undefined;
+		}, 300);
 	};
 
 	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
 		const currentInput: string = e.target.value;
-		setTempValue(currentInput);
-		if (currentValue.length !== currentInput.length) {
-			setCurrentValue(currentInput);
-			onLengthChange(currentInput);
-		}
+
+		setValue(currentInput);
+		handleDebounce(currentInput);
 	};
 
 	return (
@@ -39,14 +45,14 @@ export default function Input({ onLengthChange, placeholder, handleVoiceInput, .
 			{isFocus ? <ChevronLeft stroke="#161616" /> : <Search stroke="#161616" />}
 			<input
 				placeholder={placeholder}
-				value={tempValue}
+				value={value}
 				className="h-full flex-1 mx-[14px] leading-[160%] font-medium text-gray-900 text-kor-body2 placeholder:text-gray-700 placeholder:font-medium caret-primary-500"
 				{...rest}
 				onChange={handleChange}
 				onFocus={onFoucs}
 				onBlur={onBlur}
 			/>
-			{currentValue.length === 0 ? (
+			{value.length === 0 ? (
 				<button onClick={handleVoiceInput} className="cursor-pointer">
 					<Mic stroke="#161616" />
 				</button>
