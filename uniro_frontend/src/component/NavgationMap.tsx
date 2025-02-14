@@ -74,14 +74,14 @@ const NavigationMap = ({
 	const createCompositeRoute = useCallback(
 		(routeData: NavigationRouteList): PolylineSet | null => {
 			if (!Polyline) return null;
-			//if (!origin || !destination) return null;
+			if (!origin || !destination) return null;
 			if (routeData.routes.length === 0) return null;
 			const { routes } = routeData;
 
 			const bounds = new google.maps.LatLngBounds();
 
-			// bounds.extend({ lat: origin!.lat, lng: origin!.lng });
-			// bounds.extend({ lat: destination!.lat, lng: destination!.lng });
+			bounds.extend({ lat: origin!.lat, lng: origin!.lng });
+			bounds.extend({ lat: destination!.lat, lng: destination!.lng });
 
 			// // 시작 건물과 첫번째 노드를 잇는 경로
 			const startingBuildingPath: google.maps.LatLngLiteral[] = [routes[0].node1, routes[0].node1];
@@ -147,7 +147,7 @@ const NavigationMap = ({
 
 	const compositeRoutes: CompositeRoutesRecord = useMemo(() => {
 		if (!routeResult || !Polyline) return {};
-		// if( !origin || !destination) return {};
+		if (!origin || !destination) return {};
 		const record: CompositeRoutesRecord = {};
 		Object.entries(routeResult).forEach(([key, routeData]) => {
 			// key는 NavigationButtonRouteType 형식으로 가정
@@ -215,27 +215,27 @@ const NavigationMap = ({
 			markers.push(marker);
 		});
 
-		// // 출발지 마커
-		// const originMarkerElement = createMarkerElement({
-		// 	type: Markers.ORIGIN,
-		// 	title: origin?.buildingName ?? "출발지",
-		// 	className: "translate-routemarker",
-		// 	hasAnimation: true,
-		// });
-		// const originMarker = createAdvancedMarker(AdvancedMarker, map, origin, originMarkerElement);
-		// markers.push(originMarker);
-		// bounds.extend(origin);
+		// 출발지 마커
+		const originMarkerElement = createMarkerElement({
+			type: Markers.ORIGIN,
+			title: origin?.buildingName ?? "출발지",
+			className: "translate-routemarker",
+			hasAnimation: true,
+		});
+		const originMarker = createAdvancedMarker(AdvancedMarker, map, origin, originMarkerElement);
+		markers.push(originMarker);
+		bounds.extend(origin);
 
-		// // 도착지 마커
-		// const destinationMarkerElement = createMarkerElement({
-		// 	type: Markers.DESTINATION,
-		// 	title: destination?.buildingName ?? "도착지",
-		// 	className: "translate-routemarker",
-		// 	hasAnimation: true,
-		// });
-		// const destinationMarker = createAdvancedMarker(AdvancedMarker, map, destination, destinationMarkerElement);
-		// markers.push(destinationMarker);
-		// bounds.extend(destination);
+		// 도착지 마커
+		const destinationMarkerElement = createMarkerElement({
+			type: Markers.DESTINATION,
+			title: destination?.buildingName ?? "도착지",
+			className: "translate-routemarker",
+			hasAnimation: true,
+		});
+		const destinationMarker = createAdvancedMarker(AdvancedMarker, map, destination, destinationMarkerElement);
+		markers.push(destinationMarker);
+		bounds.extend(destination);
 
 		// 위험 마커 – 위험 경로의 중간 지점
 		risks.dangerRoutes.forEach((route) => {
@@ -266,7 +266,7 @@ const NavigationMap = ({
 
 	const staticMarkers = useMemo(() => {
 		if (!map) return [];
-		//if(!origin || !destination) return [];
+		if (!origin || !destination) return [];
 		const currentRoute = routeResult[buttonState];
 		if (!currentRoute || !AdvancedMarker) return [];
 		return createStaticMarkers(currentRoute, map, AdvancedMarker, origin, destination, risks);

@@ -52,7 +52,7 @@ const NavigationResultPage = () => {
 
 	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>("PEDES & SAFE");
 
-	//useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
+	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
 
 	useScrollControl();
 
@@ -61,21 +61,21 @@ const NavigationResultPage = () => {
 			{
 				queryKey: ["fastRoute", university?.id, origin?.nodeId ?? 1, destination?.nodeId ?? 2],
 				queryFn: async () => {
-					// try {
-					// 	const response = await getNavigationResult(
-					// 		university?.id ?? 1001,
-					// 		origin?.nodeId ?? 1,
-					// 		destination?.nodeId ?? 2,
-					// 	);
-					// 	return response;
-					// } catch (e) {
-					// 	alert(`경로를 찾을 수 없습니다. (${e})`);
-					// 	return null;
-					// }
-					return await fetchMockJson().then((data) => {
-						const response = transformFastRoute(data);
+					try {
+						const response = await getNavigationResult(
+							university?.id ?? 1001,
+							origin?.nodeId ?? 1,
+							destination?.nodeId ?? 2,
+						);
 						return response;
-					});
+					} catch (e) {
+						alert(`경로를 찾을 수 없습니다. (${e})`);
+						return null;
+					}
+					// return await fetchMockJson().then((data) => {
+					// 	const response = transformFastRoute(data);
+					// 	return response;
+					// });
 				},
 				retry: 1,
 				staleTime: 0,

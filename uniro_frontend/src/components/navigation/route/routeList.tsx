@@ -17,19 +17,19 @@ const RouteList = ({ routes }: RouteListProps) => {
 
 	const addOriginAndDestination = (routes: RouteDetail[]) => {
 		return [
-			// {
-			// 	dist: 0,
-			// 	directionType: "origin" as Direction,
-			// 	coordinates: { lat: origin!.lat, lng: origin!.lng },
-			// 	cautionFactors: [],
-			// },
+			{
+				dist: 0,
+				directionType: "origin" as Direction,
+				coordinates: { lat: origin!.lat, lng: origin!.lng },
+				cautionFactors: [],
+			},
 			...routes.slice(0, -1),
-			// {
-			// 	dist: 0,
-			// 	directionType: "finish" as Direction,
-			// 	coordinates: { lat: destination!.lat, lng: destination!.lng },
-			// 	cautionFactors: [],
-			// },
+			{
+				dist: 0,
+				directionType: "finish" as Direction,
+				coordinates: { lat: destination!.lat, lng: destination!.lng },
+				cautionFactors: [],
+			},
 		];
 	};
 
