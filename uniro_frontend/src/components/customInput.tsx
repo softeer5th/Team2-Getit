@@ -18,7 +18,10 @@ export default function Input({ onChangeDebounce, placeholder, handleVoiceInput,
 	const onFoucs = () => setIsFocus(true);
 	const onBlur = () => setIsFocus(false);
 
-	const resetInput = () => { };
+	const resetInput = () => {
+		setValue('');
+		handleDebounce('');
+	};
 
 	const handleDebounce = (input: string) => {
 		if (timeOutRef.current) {
