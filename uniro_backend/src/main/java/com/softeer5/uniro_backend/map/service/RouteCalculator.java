@@ -109,12 +109,7 @@ public class RouteCalculator {
 
             for (Route route : routes) {
                 if (!isAvailableRoute(policy, route)) continue;
-
-                adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
-                adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
-
-                nodeMap.putIfAbsent(route.getNode1().getId(), route.getNode1());
-                nodeMap.putIfAbsent(route.getNode2().getId(), route.getNode2());
+                addRouteToGraph(route, adjMap, nodeMap);
             }
 
             Node startNode = nodeMap.get(startNodeId);
@@ -128,9 +123,22 @@ public class RouteCalculator {
 
             //길찾기 경로 결과 정리
             List<Route> shortestRoutes = reorderRoute(startNode, endNode, prevRoute);
+            Route startRoute = shortestRoutes.get(0);
+            Route endRoute = shortestRoutes.get(shortestRoutes.size() - 1);
 
-            //만약 시작 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외, 루트가 너무 적어 제거할 수 없다면 continue
-            if(!terminateBoundaryRoutes(shortestRoutes, startNode, endNode)) continue;
+            if (isBuildingRoute(startRoute)) {
+                if (startRoute.getId().equals(endRoute.getId())) {
+                    //출발점과 도착점이 같은 경우
+                    continue;
+                }
+                startNode = startNode.getId().equals(startRoute.getNode1().getId()) ? startRoute.getNode2() : startRoute.getNode1();
+                shortestRoutes.remove(0);
+            }
+            //만약 종료 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외
+            if (isBuildingRoute(endRoute)) {
+                endNode = endNode.getId().equals(endRoute.getNode1().getId()) ? endRoute.getNode2() : endRoute.getNode1();
+                shortestRoutes.remove(shortestRoutes.size() - 1);
+            }
 
             boolean hasCaution = false;
             double totalDistance = 0.0;
@@ -174,6 +182,13 @@ public class RouteCalculator {
         }
 
         return result;
+    }
+
+    private void addRouteToGraph(Route route, Map<Long, List<Route>> adjMap, Map<Long, Node> nodeMap) {
+        adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
+        adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
+        nodeMap.putIfAbsent(route.getNode1().getId(), route.getNode1());
+        nodeMap.putIfAbsent(route.getNode2().getId(), route.getNode2());
     }
 
     private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap){
@@ -228,26 +243,6 @@ public class RouteCalculator {
         Collections.reverse(shortestRoutes);
 
         return shortestRoutes;
-    }
-
-    private boolean terminateBoundaryRoutes(List<Route> shortestRoutes, Node startNode, Node endNode){
-        Route startRoute = shortestRoutes.get(0);
-        Route endRoute = shortestRoutes.get(shortestRoutes.size() - 1);
-
-        if (isBuildingRoute(startRoute)) {
-            if (startRoute.getId().equals(endRoute.getId())) {
-                //출발점과 도착점이 같은 경우
-                return false;
-            }
-            startNode = startNode.getId().equals(startRoute.getNode1().getId()) ? startRoute.getNode2() : startRoute.getNode1();
-            shortestRoutes.remove(0);
-        }
-        //만약 종료 route가 건물과 이어진 노드라면 해당 route는 결과에서 제외
-        if (isBuildingRoute(endRoute)) {
-            endNode = endNode.getId().equals(endRoute.getNode1().getId()) ? endRoute.getNode2() : endRoute.getNode1();
-            shortestRoutes.remove(shortestRoutes.size() - 1);
-        }
-        return true;
     }
 
     private boolean isBuildingRoute(Route route){
