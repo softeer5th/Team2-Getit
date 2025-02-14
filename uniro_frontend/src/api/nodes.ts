@@ -1,5 +1,7 @@
 import { Building } from "../data/types/node";
 import { getFetch } from "../utils/fetch/fetch";
+import { transformGetBuildings } from "./transformer/nodes";
+import { GetBuildingListResponse } from "./type/response/nodes";
 
 export const getAllBuildings = (
 	univId: number,
@@ -16,4 +18,8 @@ export const getAllBuildings = (
 		"right-down-lng": params.rightDownLng,
 		"right-down-lat": params.rightDownLat,
 	});
+};
+
+export const getSearchBuildings = (univId: number, params: { name: string }): Promise<Building[]> => {
+	return getFetch<GetBuildingListResponse>(`/${univId}/nodes/buildings/search`, params).then(transformGetBuildings);
 };
