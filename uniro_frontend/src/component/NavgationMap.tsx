@@ -210,8 +210,8 @@ const NavigationMap = ({
 		// 출발지 마커
 		const originMarkerElement = createMarkerElement({
 			type: Markers.ORIGIN,
-			title: origin?.buildingName ?? "출발지",
-			className: "translate-routemarker",
+			title: origin?.buildingName,
+			className: "translate-pinmarker",
 			hasAnimation: true,
 		});
 		const originMarker = createAdvancedMarker(AdvancedMarker, map, origin, originMarkerElement);
@@ -219,8 +219,8 @@ const NavigationMap = ({
 		// 도착지 마커
 		const destinationMarkerElement = createMarkerElement({
 			type: Markers.DESTINATION,
-			title: destination?.buildingName ?? "도착지",
-			className: "translate-routemarker",
+			title: destination?.buildingName,
+			className: "translate-pinmarker",
 			hasAnimation: true,
 		});
 		const destinationMarker = createAdvancedMarker(AdvancedMarker, map, destination, destinationMarkerElement);

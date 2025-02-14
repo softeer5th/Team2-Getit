@@ -128,11 +128,11 @@
 }
 
 @utility translate-marker {
-	transform: translateY(calc(100% - 10px));
+	transform: translateY(40px);
 }
 
-@utility translate-routemarker {
-	transform: translateY(calc(100% - 40px));
+@utility translate-pinmarker {
+	transform: translateY(40px);
 }
 
 @utility translate-waypoint {

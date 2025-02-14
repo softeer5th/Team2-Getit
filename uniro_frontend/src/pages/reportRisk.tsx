@@ -174,7 +174,7 @@ export default function ReportRiskPage() {
 					centerCoordinate(nearestEdge.node1, nearestEdge.node2),
 					createMarkerElement({
 						type: Markers.REPORT,
-						className: "translate-routemarker",
+						className: "translate-pinmarker",
 						hasAnimation: true,
 					}),
 				);
