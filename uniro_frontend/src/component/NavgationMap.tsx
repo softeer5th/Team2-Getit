@@ -232,71 +232,55 @@ const NavigationMap = ({
 		return [originMarker, destinationMarker];
 	};
 
-	// 정적 마커 그리는 부분
+	const areCoordinatesEqual = (coord1: google.maps.LatLngLiteral, coord2: google.maps.LatLngLiteral) => {
+		return coord1.lat === coord2.lat && coord1.lng === coord2.lng;
+	};
+
+	const areMarkersEqual = (
+		prevMarker: AdvancedMarker,
+		newMarkerData: { coordinates: google.maps.LatLngLiteral; type: Markers; hasAnimation: boolean },
+	) => {
+		const prevPosition = prevMarker.position!;
+		return areCoordinatesEqual(prevPosition, newMarkerData.coordinates);
+	};
+
 	const createStaticMarkers = (
 		routeData: NavigationRouteList,
 		map: google.maps.Map,
 		AdvancedMarker: typeof google.maps.marker.AdvancedMarkerElement,
-		prevMarkers?: AdvancedMarker[],
+		prevMarkers: AdvancedMarker[] = [],
 	): AdvancedMarker[] => {
 		const markers: AdvancedMarker[] = [];
 		const bounds = new google.maps.LatLngBounds();
 
-		// 경로 간선 – 각 routeDetail에 대해 waypoint 마커 (주의 정보가 있으면 caution 마커)
-		// 이전 마커와 현재 마커의 개수가 다르면 다른 길로 간주하고 마커를 다시 생성
-		if (prevMarkers?.length !== routeData.routeDetails.length) {
-			routeData.routeDetails.forEach((routeDetail) => {
-				const { coordinates } = routeDetail;
-				bounds.extend(coordinates);
-				let markerElement = createMarkerElement({
-					type: Markers.WAYPOINT,
-					className: "translate-waypoint",
-					hasAnimation: true,
-				});
-				if (routeDetail.cautionFactors && routeDetail.cautionFactors.length > 0) {
-					markerElement = createMarkerElement({
-						type: Markers.CAUTION,
-						className: "translate-routemarker",
-						hasAnimation: true,
-					});
-				}
-				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
-				markers.push(marker);
-			});
-			return markers;
-		}
-
-		// 마커 재사용 로직
 		routeData.routeDetails.forEach((routeDetail, index) => {
 			const { coordinates } = routeDetail;
 			bounds.extend(coordinates);
+			const markerType =
+				routeDetail.cautionFactors && routeDetail.cautionFactors.length > 0
+					? Markers.CAUTION
+					: Markers.WAYPOINT;
+			const hasAnimation = true;
+			const newMarkerData = { coordinates, type: markerType, hasAnimation };
 
-			// 이전 좌표와 동일한 좌표이면 이전 마커를 그대로 사용
-			if (prevMarkers && prevMarkers[index]) {
-				const { position } = prevMarkers[index];
-				const { lat, lng } = position!;
-				if (Number(lat) === Number(coordinates.lat) && Number(lng) === Number(coordinates.lng)) {
-					const markerElement = prevMarkers[index];
-					markers.push(markerElement);
-				}
-				return;
-			}
-			let markerElement = createMarkerElement({
-				type: Markers.WAYPOINT,
-				className: "translate-waypoint",
-				hasAnimation: true,
-			});
-
-			if (routeDetail.cautionFactors && routeDetail.cautionFactors.length > 0) {
-				markerElement = createMarkerElement({
-					type: Markers.CAUTION,
-					className: "translate-routemarker",
-					hasAnimation: true,
+			// 2. 기존 마커가 있고, 좌표와 타입이 동일하면 재사용
+			if (prevMarkers[index] && areMarkersEqual(prevMarkers[index], newMarkerData)) {
+				const existingMarker = prevMarkers[index];
+				existingMarker.position = coordinates;
+				markers.push(existingMarker);
+			} else {
+				// 3. 기존 마커가 없거나 일치하지 않으면 새로 생성
+				const markerElement = createMarkerElement({
+					type: markerType,
+					className: markerType === Markers.CAUTION ? "translate-routemarker" : "translate-waypoint",
+					hasAnimation,
 				});
+
+				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
+				markers.push(marker);
 			}
-			const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
-			markers.push(marker);
 		});
+
 		return markers;
 	};
 

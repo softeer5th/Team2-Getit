@@ -22,9 +22,6 @@ import BottomCardList from "../components/navigation/card/bottomCardList";
 import { NavigationButtonRouteType } from "../data/types/route";
 import NavigationNavBar from "../components/navigation/navBar/navigationNavBar";
 
-import mock from "../api/mock.json";
-import { transformFastRoute } from "../api/transformer/route";
-
 const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
 const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
 const CLOSED_SHEET_HEIGHT = 0;
@@ -32,14 +29,6 @@ const CLOSED_SHEET_HEIGHT = 0;
 const INITIAL_TOP_BAR_HEIGHT = 143;
 const BOTTOM_SHEET_HANDLE_HEIGHT = 40;
 const PADDING_FOR_MAP_BOUNDARY = 50;
-
-export async function fetchMockJson() {
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve(mock);
-		}, 0);
-	});
-}
 
 const NavigationResultPage = () => {
 	const [isDetailView, setIsDetailView] = useState(false);
