@@ -72,80 +72,73 @@ const NavigationMap = ({
 		style = { height: "100%", width: "100%" };
 	}
 
-	// 길을 그리는 부분
-	const createCompositeRoute = useCallback(
-		(routeData: NavigationRouteList): PolylineSet | null => {
-			if (!Polyline) return null;
-			if (!origin || !destination) return null;
-			if (routeData.routes.length === 0) return null;
-			const { routes } = routeData;
+	// 길을 그리는 Method
+	const createCompositeRoute = (routeData: NavigationRouteList): PolylineSet | null => {
+		if (!Polyline) return null;
+		if (!origin || !destination) return null;
+		if (routeData.routes.length === 0) return null;
+		const { routes } = routeData;
 
-			const bounds = new google.maps.LatLngBounds();
+		const bounds = new google.maps.LatLngBounds();
 
-			bounds.extend({ lat: origin!.lat, lng: origin!.lng });
-			bounds.extend({ lat: destination!.lat, lng: destination!.lng });
+		bounds.extend({ lat: origin!.lat, lng: origin!.lng });
+		bounds.extend({ lat: destination!.lat, lng: destination!.lng });
 
-			// // 시작 건물과 첫번째 노드를 잇는 경로
-			const startingBuildingPath: google.maps.LatLngLiteral[] = [routes[0].node1, routes[0].node1];
-			// 마지막 노드와 도착 건물을 잇는 경로
-			const endingBuildingPath: google.maps.LatLngLiteral[] = [
-				routes[routes.length - 1].node2,
-				routes[routes.length - 1].node2,
-			];
-			// 본 경로 (첫번째 노드와 그 이후 노드들을 잇는 경로)
-			const mainPath: google.maps.LatLngLiteral[] = [routes[0].node1, ...routes.map((el) => el.node2)];
+		// // 시작 건물과 첫번째 노드를 잇는 경로
+		const startingBuildingPath: google.maps.LatLngLiteral[] = [origin, routes[0].node1];
+		// 마지막 노드와 도착 건물을 잇는 경로
+		const endingBuildingPath: google.maps.LatLngLiteral[] = [routes[routes.length - 1].node2, destination];
+		// 본 경로 (첫번째 노드와 그 이후 노드들을 잇는 경로)
+		const mainPath: google.maps.LatLngLiteral[] = [routes[0].node1, ...routes.map((el) => el.node2)];
 
-			// 경로의 bounds 업데이트
-			mainPath.forEach((coord) => bounds.extend(coord));
+		// 경로의 bounds 업데이트
+		mainPath.forEach((coord) => bounds.extend(coord));
 
-			// // 시작 Polyline (점선)
-			const startPolyline = new Polyline({
-				path: startingBuildingPath,
-				strokeOpacity: 1,
-				strokeColor: "#000000",
-				icons: [
-					{
-						icon: dashSymbol,
-						offset: "0",
-						repeat: "20px",
-					},
-				],
-				geodesic: true,
-			});
+		// // 시작 Polyline (점선)
+		const startPolyline = new Polyline({
+			path: startingBuildingPath,
+			strokeOpacity: 0,
+			strokeColor: "#000000",
+			icons: [
+				{
+					icon: dashSymbol,
+					offset: "0",
+					repeat: "20px",
+				},
+			],
+			geodesic: true,
+		});
+		// 종료 Polyline (점선)
+		const endPolyline = new Polyline({
+			path: endingBuildingPath,
+			strokeOpacity: 0,
+			strokeColor: "#000000",
+			icons: [
+				{
+					icon: dashSymbol,
+					offset: "2",
+					repeat: "20px",
+				},
+			],
+			geodesic: true,
+		});
 
-			// 본 경로 Polyline (실제 경로 선)
-			const mainPolyline = new Polyline({
-				path: mainPath,
-				strokeOpacity: 1,
-				strokeColor: "#000000",
-				strokeWeight: 5.0,
-				geodesic: true,
-			});
+		// 본 경로 Polyline (실제 경로 선)
+		const mainPolyline = new Polyline({
+			path: mainPath,
+			strokeOpacity: 1,
+			strokeColor: "#000000",
+			strokeWeight: 5.0,
+			geodesic: true,
+		});
 
-			// // 종료 Polyline (점선)
-			const endPolyline = new Polyline({
-				path: endingBuildingPath,
-				strokeOpacity: 1,
-				strokeColor: "#000000",
-				icons: [
-					{
-						icon: dashSymbol,
-						offset: "0",
-						repeat: "20px",
-					},
-				],
-				geodesic: true,
-			});
-
-			return {
-				startBuildingPath: startPolyline,
-				endingBuildingPath: endPolyline,
-				paths: mainPolyline,
-				bounds,
-			};
-		},
-		[Polyline],
-	);
+		return {
+			startBuildingPath: startPolyline,
+			endingBuildingPath: endPolyline,
+			paths: mainPolyline,
+			bounds,
+		};
+	};
 
 	const compositeRoutes: CompositeRoutesRecord = useMemo(() => {
 		if (!routeResult || !Polyline) return {};
@@ -170,7 +163,7 @@ const NavigationMap = ({
 			activeComposite.startBuildingPath.setMap(map);
 			activeComposite.endingBuildingPath.setMap(map);
 			activeComposite.paths.setMap(map);
-			activeComposite.paths.setOptions(polylineConfig[buttonState]);
+			activeComposite.paths.setOptions(polylineConfig[buttonState as keyof typeof polylineConfig]);
 			map.fitBounds(activeComposite.bounds, {
 				top: topPadding,
 				right: 30,
@@ -228,14 +221,13 @@ const NavigationMap = ({
 			hasAnimation: true,
 		});
 		const destinationMarker = createAdvancedMarker(AdvancedMarker, map, destination, destinationMarkerElement);
+
+		// bounds 업데이트
+		boundsRef.current?.extend(origin);
+		boundsRef.current?.extend(destination);
+
 		return [originMarker, destinationMarker];
 	};
-
-	useEffect(() => {
-		if (!map || !risks || !AdvancedMarker) return;
-		createRiskMarkers(risks.dangerRoutes, map, AdvancedMarker);
-		createStartEndMarkers();
-	}, [map, risks, origin, destination, AdvancedMarker]);
 
 	// 정적 마커 그리는 부분
 	const createStaticMarkers = (
@@ -312,7 +304,7 @@ const NavigationMap = ({
 
 		const newMarkers = createStaticMarkers(routeResult[buttonState], map, AdvancedMarker, staticMarkersRef.current);
 		// 기존 마커 제거, includes로 새로운 마커가 기존 마커에 포함되어 있는지 확인
-		// 단점 : 마커가 길어지면 복잡해질 수 있지만, 깜빡임 현상을 방지할 수 있음
+		// 단점 : 마커가 길어지면 복잡해질 수 있지만, 깜박임 현상을 방지하고 repaint를 줄일 수 있는 장점이 있음.
 		staticMarkersRef.current.forEach((oldMarker) => {
 			if (!newMarkers.includes(oldMarker)) {
 				oldMarker.map = null; // 지도에서 제거
@@ -325,6 +317,13 @@ const NavigationMap = ({
 		const currentRoute = routeResult[buttonState];
 		if (!currentRoute) return;
 	}, [map, buttonState, routeResult]);
+
+	useEffect(() => {
+		if (!map || !risks || !AdvancedMarker) return;
+		createRiskMarkers(risks.dangerRoutes, map, AdvancedMarker);
+		createStartEndMarkers();
+	}, [map, risks, origin, destination, AdvancedMarker]);
+
 	// 동적 마커 그리는 부분
 	const drawDynamicMarker = (routeResult: NavigationRouteList) => {
 		if (!AdvancedMarker || !map) return;
@@ -366,9 +365,9 @@ const NavigationMap = ({
 		if (!map || !boundsRef.current) return;
 		map.fitBounds(boundsRef.current, {
 			top: topPadding,
-			right: 30,
+			right: 50,
 			bottom: bottomPadding,
-			left: 30,
+			left: 50,
 		});
 	}, [map, bottomPadding, topPadding]);
 

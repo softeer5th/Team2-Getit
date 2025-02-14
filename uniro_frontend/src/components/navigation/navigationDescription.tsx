@@ -81,9 +81,9 @@ const NavigationDescription = ({ isDetailView, navigationRoute }: TopBarProps) =
 				</div>
 				<div className="h-[11px] border-[0.5px] border-gray-600" />
 				<div className="flex flex-1 flex-row items-center justify-start ">
-					{navigationRoute?.hasCaution ? navigationRoute.hasCaution ? <CautionIcon /> : <SafeIcon /> : null}
+					{navigationRoute ? navigationRoute.hasCaution ? <CautionIcon /> : <SafeIcon /> : null}
 					<span className="ml-1 text-kor-body3 text-gray-700">
-						{navigationRoute?.hasCaution
+						{navigationRoute
 							? `가는 길에 주의 요소가 ${navigationRoute?.hasCaution ? "있어요" : "없어요"}`
 							: "  배리어프리 경로가 존재하지 않습니다.  "}
 					</span>
