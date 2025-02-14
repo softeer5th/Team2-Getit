@@ -2,7 +2,7 @@ package com.softeer5.uniro_backend.external;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.ElevationApiException;
-import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.map.entity.Node;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class MapClientImpl implements MapClient{
     @Value("${map.api.key}")
     private String apiKey;
     private final String baseUrl = "https://maps.googleapis.com/maps/api/elevation/json";
-    private final Integer MAX_BATCH_SIZE = 512;
+    private final Integer MAX_BATCH_SIZE = 100;
     private final String SUCCESS_STATUS = "OK";
     private final WebClient webClient;
 

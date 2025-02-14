@@ -1,24 +1,47 @@
 import Input from "../components/customInput";
-import { hanyangBuildings } from "../data/mock/hanyangBuildings";
 import BuildingCard from "../components/building/buildingCard";
 import useSearchBuilding from "../hooks/useSearchBuilding";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
+import { useQuery } from "@tanstack/react-query";
+import { getAllBuildings, getSearchBuildings } from "../api/nodes";
+import { University } from "../data/types/university";
+import { useState } from "react";
+import CloseIcon from "../assets/icon/close.svg?react";
+import { useNavigate } from "react-router";
 
 export default function BuildingSearchPage() {
-	const { setBuilding } = useSearchBuilding();
-
 	const { university } = useUniversityInfo();
-	useRedirectUndefined<string | undefined>([university]);
+	const { setBuilding } = useSearchBuilding();
+	const navigate = useNavigate();
+
+	if (!university) return;
+
+	const [input, setInput] = useState<string>('');
+
+	const { data: buildings } = useQuery({
+		queryKey: [university.id, "buildings", input],
+		queryFn: () =>
+			getSearchBuildings(university.id, { name: input })
+	},)
+
+	const handleBack = () => {
+		navigate(-1);
+	}
+
+	useRedirectUndefined<University | undefined>([university]);
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
-			<div className="px-[14px] py-4 border-b-[1px] border-gray-400">
-				<Input onLengthChange={() => {}} handleVoiceInput={() => {}} placeholder="" />
+			<div className="flex flex-row px-[14px] py-4 border-b-[1px] border-gray-400">
+				<Input onChangeDebounce={(e) => setInput(e)} handleVoiceInput={() => { }} placeholder="" />
+				<button onClick={handleBack} className="cursor-pointer p-1 rounded-[8px] active:bg-gray-200">
+					<CloseIcon />
+				</button>
 			</div>
 			<div className="flex-1 overflow-y-scroll">
 				<ul className="px-4 pt-1 space-y-1">
-					{hanyangBuildings.map((building) => (
+					{(buildings ?? []).map((building) => (
 						<BuildingCard
 							onClick={() => setBuilding(building)}
 							key={`building-${building.buildingName}`}
@@ -27,6 +50,7 @@ export default function BuildingSearchPage() {
 					))}
 				</ul>
 			</div>
+
 		</div>
 	);
-}
+}	

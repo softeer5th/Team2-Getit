@@ -39,4 +39,4 @@ jobs:
       - name: Build and analyze (SpringBoot)
         run: |
           cd uniro_backend
-          ./gradlew clean build -x test
+          ./gradlew clean build

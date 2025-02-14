@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.external;
 
-import com.softeer5.uniro_backend.node.entity.Node;
+import com.softeer5.uniro_backend.map.entity.Node;
 
 import java.util.List;
 

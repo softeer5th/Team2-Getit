@@ -16,6 +16,8 @@ import useNetworkStatus from "./hooks/useNetworkStatus";
 import ErrorPage from "./pages/error";
 import { Suspense } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import ErrorBoundary from "./components/error/ErrorBoundary";
+import Errortest from "./pages/errorTest";
 
 const queryClient = new QueryClient();
 
@@ -24,22 +26,25 @@ function App() {
 	useNetworkStatus();
 	return (
 		<QueryClientProvider client={queryClient}>
-			<Suspense key={location.key} fallback={fallback}>
-				<Routes>
-					<Route path="/demo" element={<Demo />} />
-					<Route path="/" element={<LandingPage />} />
-					<Route path="/university" element={<UniversitySearchPage />} />
-					<Route path="/building" element={<BuildingSearchPage />} />
-					<Route path="/map" element={<MapPage />} />
-					<Route path="/form" element={<ReportForm />} />
-					<Route path="/result" element={<NavigationResultPage />} />
-					<Route path="/report/route" element={<ReportRoutePage />} />
-					<Route path="/report/risk" element={<ReportRiskPage />} />
-					/** 에러 페이지 */
-					<Route path="/error" element={<ErrorPage />} />
-					<Route path="/error/offline" element={<OfflinePage />} />
-				</Routes>
-			</Suspense>
+			<ErrorBoundary key={location.key} fallback={<ErrorPage />}>
+				<Suspense fallback={fallback}>
+					<Routes>
+						<Route path="/demo" element={<Demo />} />
+						<Route path="/" element={<LandingPage />} />
+						<Route path="/university" element={<UniversitySearchPage />} />
+						<Route path="/building" element={<BuildingSearchPage />} />
+						<Route path="/map" element={<MapPage />} />
+						<Route path="/form" element={<ReportForm />} />
+						<Route path="/result" element={<NavigationResultPage />} />
+						<Route path="/report/route" element={<ReportRoutePage />} />
+						<Route path="/report/risk" element={<ReportRiskPage />} />
+						/** 에러 페이지 */
+						<Route path="/error" element={<ErrorPage />} />
+						<Route path="/error/offline" element={<OfflinePage />} />
+						<Route path="/error/test" element={<Errortest />} />
+					</Routes>
+				</Suspense>
+			</ErrorBoundary>
 			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	);

@@ -13,12 +13,13 @@ import useScrollControl from "../hooks/useScrollControl";
 import useModal from "../hooks/useModal";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getSingleRouteRisk, postReport } from "../api/route";
 import { University } from "../data/types/university";
 import { useNavigate } from "react-router";
 import useReportRisk from "../hooks/useReportRisk";
 import { RouteId } from "../data/types/route";
+import useMutationError from "../hooks/useMutationError";
 
 const ReportForm = () => {
 	useScrollControl();
@@ -29,7 +30,6 @@ const ReportForm = () => {
 
 	const [disabled, setDisabled] = useState<boolean>(true);
 
-	const [FailModal, isFailOpen, openFail, closeFail] = useModal(redirectToMap);
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(redirectToMap);
 
 	const [errorTitle, setErrorTitle] = useState<string>("");
@@ -38,9 +38,6 @@ const ReportForm = () => {
 	const { reportRouteId: routeId } = useReportRisk();
 
 	useRedirectUndefined<University | RouteId | undefined>([university, routeId]);
-
-	console.log(routeId)
-
 	if (!routeId) return;
 
 	const { data } = useSuspenseQuery({
@@ -52,36 +49,27 @@ const ReportForm = () => {
 			} catch (e) {
 				return {
 					routeId: -1,
-					dangerTypes: [],
-					cautionTypes: [],
+					dangerFactors: [],
+					cautionFactors: [],
 				};
 			}
 		},
 		retry: 1,
 	});
 
-	// 임시 Error 처리
-	useEffect(() => {
-		if (data.routeId === -1) {
-			queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
-			setErrorTitle("존재하지 않은 경로예요");
-			openFail();
-		}
-	}, [data]);
-
 	const [reportMode, setReportMode] = useState<ReportModeType | null>(
-		data.cautionTypes.length > 0 || data.dangerTypes.length > 0 ? "update" : "create",
+		data.cautionFactors.length > 0 || data.dangerFactors.length > 0 ? "update" : "create",
 	);
 
 	const [formData, setFormData] = useState<ReportFormData>({
 		passableStatus:
 			reportMode === "create"
 				? PassableStatus.INITIAL
-				: data.cautionTypes.length > 0
+				: data.cautionFactors.length > 0
 					? PassableStatus.CAUTION
 					: PassableStatus.DANGER,
-		dangerIssues: data.dangerTypes,
-		cautionIssues: data.cautionTypes,
+		dangerIssues: data.dangerFactors,
+		cautionIssues: data.cautionFactors,
 	});
 
 	useEffect(() => {
@@ -122,27 +110,42 @@ const ReportForm = () => {
 		}
 	};
 
-	const { mutate } = useMutation({
-		mutationFn: () =>
-			postReport(university?.id ?? 1001, routeId, {
-				dangerTypes: formData.dangerIssues,
-				cautionTypes: formData.cautionIssues,
-			}),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["report", university?.id ?? 1001, routeId] });
-			openSuccess();
+	const [ErrorModal, { mutate, status }] = useMutationError(
+		{
+			mutationFn: () =>
+				postReport(university?.id ?? 1001, routeId, {
+					dangerFactors: formData.dangerIssues,
+					cautionFactors: formData.cautionIssues,
+				}),
+			onSuccess: () => {
+				queryClient.removeQueries({ queryKey: [university?.id ?? 1001, "risks"] });
+				openSuccess();
+			},
+			onError: () => {
+				setErrorTitle("제보에 실패하였습니다");
+			},
 		},
-		onError: () => {
-			setErrorTitle("제보에 실패하였습니다");
-			openFail();
+		undefined,
+		{
+			fallback: {
+				400: {
+					mainTitle: "불편한 길 제보 실패",
+					subTitle: ["잘못된 요청입니다.", "잠시 후 다시 시도 부탁드립니다."],
+				},
+				404: {
+					mainTitle: "불편한 길 제보 실패",
+					subTitle: ["해당 경로는 다른 사용자에 의해 삭제되어,", "지도 화면에서 바로 확인할 수 있어요."],
+				},
+			},
+			onClose: redirectToMap,
 		},
-	});
+	);
 
 	return (
 		<div className="flex flex-col h-dvh w-full max-w-[450px] mx-auto relative">
 			<ReportTitle reportMode={reportMode!} />
 			<ReportDivider />
-			<div className="flex-1 overflow-y-auto">
+			<div className="flex-1 overflow-y-auto overflow-x-hidden">
 				<PrimaryForm
 					reportMode={reportMode!}
 					passableStatus={formData.passableStatus}
@@ -155,8 +158,11 @@ const ReportForm = () => {
 				/>
 			</div>
 			<div className="mb-4 w-full px-4">
-				<Button onClick={() => mutate()} variant={disabled ? "disabled" : "primary"}>
-					제보하기
+				<Button
+					onClick={mutate}
+					variant={status === "pending" || status === "success" || disabled ? "disabled" : "primary"}
+				>
+					{status === "pending" ? "제보하는 중.." : "제보하기"}
 				</Button>
 			</div>
 			<SuccessModal>
@@ -168,15 +174,7 @@ const ReportForm = () => {
 					</p>
 				</div>
 			</SuccessModal>
-			<FailModal>
-				<p className="text-kor-body1 font-bold text-system-red">{errorTitle}</p>
-				<div className="space-y-0">
-					<p className="text-kor-body3 font-regular text-gray-700">
-						해당 경로는 다른 사용자에 의해 삭제되어,
-					</p>
-					<p className="text-kor-body3 font-regular text-gray-700">지도 화면에서 바로 확인할 수 있어요.</p>
-				</div>
-			</FailModal>
+			<ErrorModal />
 		</div>
 	);
 };
