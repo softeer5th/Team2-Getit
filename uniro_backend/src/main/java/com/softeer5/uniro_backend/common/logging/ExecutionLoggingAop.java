@@ -1,9 +1,8 @@
 package com.softeer5.uniro_backend.common.logging;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Objects;
+import java.util.List;
 import java.util.UUID;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -12,7 +11,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -30,10 +28,8 @@ public class ExecutionLoggingAop {
 
 	@Around("execution(* com.softeer5.uniro_backend..*(..)) "
 		+ "&& !within(com.softeer5.uniro_backend.common..*) "
-		+ "&& !within(com.softeer5.uniro_backend.resolver..*) "
 	)
 	public Object logExecutionTrace(ProceedingJoinPoint pjp) throws Throwable {
-		// 요청에서 userId 가져오기 (ThreadLocal 사용)
 		String userId = userIdThreadLocal.get();
 		if (userId == null) {
 			userId = UUID.randomUUID().toString().substring(0, 12);
@@ -41,76 +37,120 @@ public class ExecutionLoggingAop {
 		}
 
 		Object target = pjp.getTarget();
-		Annotation[] declaredAnnotations = target.getClass().getDeclaredAnnotations();
+		boolean isController = isRestController(target);
 
 		String className = pjp.getSignature().getDeclaringType().getSimpleName();
 		String methodName = pjp.getSignature().getName();
 		String task = className + "." + methodName;
 
-		for(Annotation annotation : declaredAnnotations){
-			if(annotation instanceof RestController){
-				logHttpRequest(userId);
+		if (isController) {
+			logHttpRequest(userId);
+		}
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		log.info("✅ [ userId = {} Start] [Call Method] {}: {}", userId, request.getMethod(), task);
 
-				HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
-				RequestMethod httpMethod = RequestMethod.valueOf(request.getMethod());
-
-				log.info("");
-				log.info("🚨 [ userId = {} ] {} Start", userId, className);
-				log.info("[ userId = {} ] [Call Method] {}: {}", userId, httpMethod, task);
+		try{
+			if (isController) {
+				logParameters(pjp.getArgs());
 			}
 		}
-
-		Object[] paramArgs = pjp.getArgs();
-		for (Object object : paramArgs) {
-			if (Objects.nonNull(object)) {
-				log.info("[Parameter] {} {}", object.getClass().getSimpleName(), object);
-
-				String packageName = object.getClass().getPackage().getName();
-				if (packageName.contains("java")) {
-					break;
-				}
-
-				Field[] fields = object.getClass().getDeclaredFields();
-				for (Field field : fields) {
-					field.setAccessible(true);
-					try {
-						Object value = field.get(object);
-						log.info("[Field] {} = {}", field.getName(), value);
-					} catch (IllegalAccessException e) {
-						log.warn("[Field Access Error] Cannot access field: {}", field.getName());
-					}
-				}
-			}
+		catch (Exception e){
+			// 로깅 중에 발생한 에러는 무시하고 로깅을 계속 진행
+			log.error("🚨🚨🚨 [ userId = {} ] {} 메서드 파라미터 로깅 중 에러 발생 : {} 🚨🚨🚨", userId, task, e.getMessage());
 		}
+		log.info("");
 
 		StopWatch sw = new StopWatch();
 		sw.start();
 
-		Object result = null;
+		Object result;
 		try {
 			result = pjp.proceed();
 		} catch (Exception e) {
 			log.warn("[ERROR] [ userId = {} ] {} 메서드 예외 발생 : {}", userId, task, e.getMessage());
 			throw e;
 		} finally {
-			// Controller 클래스일 때만 ThreadLocal 값 삭제
-			for(Annotation annotation : declaredAnnotations){
-				if(annotation instanceof RestController){
-					userIdThreadLocal.remove();
-				}
+			if (isController) {
+				userIdThreadLocal.remove();
 			}
 		}
 
 		sw.stop();
-		long executionTime = sw.getTotalTimeMillis();
-
-		log.info("[ExecutionTime] {} --> {} (ms)", task, executionTime);
-		log.info("🚨 [ userId = {} ] {} End", userId, className);
-		log.info("");
+		log.info("[ExecutionTime] {} --> {} (ms)", task, sw.getTotalTimeMillis());
+		log.info("🚨 [ userId = {} ] {} End\n", userId, className);
 
 		return result;
 	}
 
+	private boolean isRestController(Object target) {
+		return Arrays.stream(target.getClass().getDeclaredAnnotations())
+			.anyMatch(RestController.class::isInstance);
+	}
+
+	private void logParameters(Object[] args) {
+		StringBuilder parametersLogMessage = new StringBuilder();
+
+		Arrays.stream(args)
+			.forEach(arg -> logDetail(arg, "[Parameter]", parametersLogMessage, 0));
+
+		log.info("\n{}", parametersLogMessage.toString());
+	}
+
+	private void logDetail(Object arg, String requestType, StringBuilder logMessage, int depth) {
+		String indent = "  ".repeat(depth); // depth 수준에 따른 들여쓰기
+		ArgType argType = ArgType.getArgType(arg);
+
+		switch (argType) {
+			case NULL -> logMessage.append(indent).append(requestType).append(" null\n");
+			case LIST -> {
+				logMessage.append(indent)
+					.append(requestType)
+					.append(" ")
+					.append(arg.getClass().getSimpleName())
+					.append("\n");
+				List<?> list = (List<?>)arg;
+				for (int i = 0; i < list.size(); i++) {
+					logDetail(list.get(i), "[List Element " + i + "] ", logMessage, depth + 1);
+				}
+			}
+			case CUSTOM_DTO -> {
+				logMessage.append(indent)
+					.append(requestType)
+					.append("DTO: ")
+					.append(arg.getClass().getSimpleName())
+					.append("\n");
+				logObjectFields(arg, logMessage, depth + 1);
+			}
+			case ENTITY -> {
+				logMessage.append(indent)
+					.append(requestType)
+					.append(arg.getClass().getSimpleName())
+					.append(" : ")
+					.append("\n");
+				logObjectFields(arg, logMessage, depth + 1);
+			}
+			default -> logMessage.append(indent)
+				.append(requestType)
+				.append(" ")
+				.append(arg.getClass().getSimpleName())
+				.append(": ")
+				.append(arg)
+				.append("\n");
+		}
+	}
+
+	private void logObjectFields(Object object, StringBuilder logMessage, int depth) {
+		String indent = "  ".repeat(depth); // depth 기반 들여쓰기
+		Arrays.stream(object.getClass().getDeclaredFields()).forEach(field -> {
+			try {
+				field.setAccessible(true);
+				Object value = field.get(object);
+				logDetail(value, "[Field] " + field.getName(), logMessage, depth + 1);
+			} catch (IllegalAccessException e) {
+				logMessage.append(indent).append("[Field Access Error] Cannot access field: ").append(field.getName()).append("\n");
+			}
+		});
+	}
 
 	private void logHttpRequest(String userId) {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();

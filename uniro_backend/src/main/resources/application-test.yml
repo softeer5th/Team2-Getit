@@ -4,30 +4,26 @@ spring:
       on-profile: test
 
   datasource:
-    url: jdbc:h2:mem:uniro-local-db;DATABASE_TO_UPPER=FALSE;mode=mysql
-    driverClassName: org.h2.Driver
-    username: sa
+    url: jdbc:tc:mysql://localhost:3306/uniro-test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: root
     password:
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.spatial.dialect.mysql.MySQLSpatialDialect
         show_sql: true
     open-in-view: false
     defer-datasource-initialization: true
-  sql:
-    init:
-      schema-locations: classpath:h2gis-setting.sql
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
 map:
   api:
     key: ${google.api.key}
 
 cors:
   allowed-origins: ${allowed-origins}
+
+jwt:
+  secret: ${JWT_SECRET}

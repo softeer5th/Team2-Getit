@@ -3,6 +3,7 @@ package com.softeer5.uniro_backend.admin.setting;
 public class RevisionContext {
     private static final ThreadLocal<Long> univIdHolder = new ThreadLocal<>();
     private static final ThreadLocal<String> actionHolder = new ThreadLocal<>();
+    private static final ThreadLocal<RevisionType> REVISION_TYPE_THREAD_LOCAL = ThreadLocal.withInitial(() -> RevisionType.DEFAULT);
 
     public static void setAction(String action) {
         actionHolder.set(action);
@@ -18,6 +19,14 @@ public class RevisionContext {
 
     public static Long getUnivId() {
         return univIdHolder.get();
+    }
+
+    public static void setRevisionType(RevisionType revisionType) {
+        REVISION_TYPE_THREAD_LOCAL.set(revisionType);
+    }
+
+    public static RevisionType getRevisionType() {
+        return REVISION_TYPE_THREAD_LOCAL.get();
     }
 
     public static void clear() {
