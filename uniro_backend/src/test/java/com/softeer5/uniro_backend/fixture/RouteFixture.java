@@ -34,4 +34,16 @@ public class RouteFixture {
 				.path(convertDoubleToLineString(List.of(new double[]{1.0, 2.0}, new double[]{3.0, 4.0})))
 				.build();
 	}
+
+	public static Route createRouteWithDistance(Node node1, Node node2, double distance){
+		return Route.builder()
+				.distance(distance)
+				.node1(node1)
+				.node2(node2)
+				.univId(1001L)
+				.cautionFactors(new HashSet<>())
+				.dangerFactors(new HashSet<>())
+				.build();
+	}
+
 }

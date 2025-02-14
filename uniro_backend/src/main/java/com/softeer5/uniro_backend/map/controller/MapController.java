@@ -18,6 +18,8 @@ import com.softeer5.uniro_backend.map.service.MapService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 public class MapController implements MapApi {
@@ -66,10 +68,10 @@ public class MapController implements MapApi {
 
 	@Override
 	@GetMapping("/{univId}/routes/fastest")
-	public ResponseEntity<FastestRouteResDTO> findFastestRoute(@PathVariable("univId") Long univId,
-																	@RequestParam(value = "start-node-id") Long startNodeId,
-																	@RequestParam(value = "end-node-id") Long endNodeId) {
-		FastestRouteResDTO fastestRouteResDTO = mapService.findFastestRoute(univId, startNodeId, endNodeId);
+	public ResponseEntity<List<FastestRouteResDTO>> findFastestRoute(@PathVariable("univId") Long univId,
+																	 @RequestParam(value = "start-node-id") Long startNodeId,
+																	 @RequestParam(value = "end-node-id") Long endNodeId) {
+		List<FastestRouteResDTO> fastestRouteResDTO = mapService.findFastestRoute(univId, startNodeId, endNodeId);
 		return ResponseEntity.ok(fastestRouteResDTO);
 	}
 

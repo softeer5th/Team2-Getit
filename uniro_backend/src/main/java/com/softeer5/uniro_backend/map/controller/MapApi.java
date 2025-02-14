@@ -20,6 +20,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Tag(name = "간선 및 위험&주의 요소 관련 Api")
 public interface MapApi {
 
@@ -68,9 +70,9 @@ public interface MapApi {
 			@ApiResponse(responseCode = "200", description = "빠른 길 계산 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
-	ResponseEntity<FastestRouteResDTO> findFastestRoute(@PathVariable("univId") Long univId,
-																	@RequestParam Long startNodeId,
-																	@RequestParam Long endNodeId);
+	ResponseEntity<List<FastestRouteResDTO>> findFastestRoute(@PathVariable("univId") Long univId,
+															  @RequestParam Long startNodeId,
+															  @RequestParam Long endNodeId);
 
 
 	@Operation(summary = "빌딩 노드와 연결된 길 생성")

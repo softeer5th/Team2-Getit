@@ -43,7 +43,7 @@ public class Route {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private double cost;
+	private double distance;
 
 	private LineString path;
 
@@ -97,12 +97,12 @@ public class Route {
 	public void updateFromRevision(Route revRoute){
 		this.cautionFactors = revRoute.getCautionFactors();
 		this.dangerFactors = revRoute.getDangerFactors();
-		this.cost = revRoute.cost;
+		this.distance = revRoute.distance;
 	}
 
 	public boolean isEqualRoute(Route route) {
 		if(!route.getId().equals(this.getId())) return false;
-		if(route.getCost() != this.getCost())return false;
+		if(route.getDistance() != this.getDistance())return false;
 		if(!route.getCautionFactors().equals(this.getCautionFactors())) return false;
 		if(!route.getDangerFactors().equals(this.getDangerFactors())) return false;
 
@@ -110,9 +110,9 @@ public class Route {
 	}
 
 	@Builder
-	private Route(double cost, LineString path, Node node1, Node node2, Long univId,
+	private Route(double distance, LineString path, Node node1, Node node2, Long univId,
 				  Set<CautionFactor> cautionFactors, Set<DangerFactor> dangerFactors) {
-		this.cost = cost;
+		this.distance = distance;
 		this.path = path;
 		this.node1 = node1;
 		this.node2 = node2;
