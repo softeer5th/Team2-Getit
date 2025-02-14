@@ -5,8 +5,9 @@ import useSearchBuilding from "../hooks/useSearchBuilding";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 import { useQuery } from "@tanstack/react-query";
-import { getAllBuildings } from "../api/nodes";
+import { getAllBuildings, getSearchBuildings } from "../api/nodes";
 import { University } from "../data/types/university";
+import { useState } from "react";
 
 export default function BuildingSearchPage() {
 	const { university } = useUniversityInfo();
@@ -14,23 +15,21 @@ export default function BuildingSearchPage() {
 
 	if (!university) return;
 
+	const [input, setInput] = useState<string>('');
+
 	const { data: buildings } = useQuery({
-		queryKey: [university.id, "buildings"],
+		queryKey: [university.id, "buildings", input],
 		queryFn: () =>
-			getAllBuildings(university.id, {
-				leftUpLat: 38,
-				leftUpLng: 127,
-				rightDownLat: 37,
-				rightDownLng: 128,
-			}),
+			getSearchBuildings(university.id, { name: input })
 	},)
+
 
 	useRedirectUndefined<University | undefined>([university]);
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
 			<div className="px-[14px] py-4 border-b-[1px] border-gray-400">
-				<Input onLengthChange={() => { }} handleVoiceInput={() => { }} placeholder="" />
+				<Input onChangeDebounce={(e) => setInput(e)} handleVoiceInput={() => { }} placeholder="" />
 			</div>
 			<div className="flex-1 overflow-y-scroll">
 				<ul className="px-4 pt-1 space-y-1">
