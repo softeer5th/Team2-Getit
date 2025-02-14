@@ -3,9 +3,7 @@ import UNIROLOGO from "../assets/navbar/UNIRO_ADMIN.svg?react";
 import DropDownArrow from "../assets/navbar/dropDownArrow.svg?react";
 import useSearchBuilding from "../hooks/useUniversityRecord";
 
-interface Props {}
-
-const NavBar: React.FC<Props> = () => {
+const NavBar: React.FC = () => {
   const { currentUniversity, getUniversityNameList, setCurrentUniversity } =
     useSearchBuilding();
   const [selectedUniversity, setSelectedUniversity] =

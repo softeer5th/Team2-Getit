@@ -1,8 +1,6 @@
 import { Coord } from "../../data/types/coord";
+import { interpolate } from "../interpolate";
 
 export default function centerCoordinate(point1: Coord, point2: Coord): Coord {
-	return {
-		lat: (point1.lat + point2.lat) / 2,
-		lng: (point1.lng + point2.lng) / 2,
-	};
+	return interpolate(point1, point2, 0.5);
 }

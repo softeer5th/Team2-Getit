@@ -9,13 +9,13 @@ import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import { AdvancedMarker } from "../data/types/marker";
 import Button from "../components/customButton";
-import { CautionToggleButton, DangerToggleButton } from "../components/map/floatingButtons";
+import { CautionToggleButton, DangerToggleButton, UndoButton } from "../components/map/floatingButtons";
 import toggleMarkers from "../utils/markers/toggleMarkers";
 import BackButton from "../components/map/backButton";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 import { University } from "../data/types/university";
-import { useMutation, useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import { getAllRoutes, postReportRoute } from "../api/route";
 import { CoreRoute, CoreRoutesList, Route, RouteId } from "../data/types/route";
 import { Node, NodeId } from "../data/types/node";
@@ -25,6 +25,8 @@ import { useNavigate } from "react-router";
 import { getAllRisks } from "../api/routes";
 import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
+import removeMarkers from "../utils/markers/removeMarkers";
+import useMutationError from "../hooks/useMutationError";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -45,18 +47,20 @@ export default function ReportRoutePage() {
 	const newPolyLine = useRef<google.maps.Polyline>();
 	const [isActive, setIsActive] = useState<boolean>(false);
 
-	const [dangerMarkers, setDangerMarkers] = useState<{ element: AdvancedMarker, routeId: RouteId }[]>([]);
+	const [dangerMarkers, setDangerMarkers] = useState<{ element: AdvancedMarker; routeId: RouteId }[]>([]);
 	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(false);
 
-	const [cautionMarkers, setCautionMarkers] = useState<{ element: AdvancedMarker, routeId: RouteId }[]>([]);
+	const [cautionMarkers, setCautionMarkers] = useState<{ element: AdvancedMarker; routeId: RouteId }[]>([]);
 	const [isCautionAcitve, setIsCautionActive] = useState<boolean>(false);
 
 	const { university } = useUniversityInfo();
 	useRedirectUndefined<University | undefined>([university]);
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
-	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(() => { navigate('/map') });
-	const [FailModal, isFailOpen, openFail, closeFail] = useModal();
+	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(() => {
+		navigate("/map");
+	});
+	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
 
 	if (!university) return;
 
@@ -66,51 +70,75 @@ export default function ReportRoutePage() {
 				queryKey: ["routes", university.id],
 				queryFn: () => getAllRoutes(university.id),
 			},
-			{ queryKey: [university.id, 'risks'], queryFn: () => getAllRisks(university.id) },
-		]
+			{ queryKey: [university.id, "risks"], queryFn: () => getAllRisks(university.id) },
+		],
 	});
 
 	const [routes, risks] = result;
 
-
-	const { mutate } = useMutation({
-		mutationFn: ({
-			startNodeId,
-			coordinates,
-			endNodeId,
-		}: {
-			startNodeId: NodeId;
-			endNodeId: NodeId | null;
-			coordinates: Coord[];
-		}) => postReportRoute(university.id, { startNodeId, endNodeId, coordinates }),
-		onSuccess: () => {
-			openSuccess();
-			if (newPoints.element) newPoints.element.map = null;
-			if (originPoint.current) {
-				originPoint.current.element.map = null;
-				originPoint.current = undefined;
-			}
-			setNewPoints({
-				element: null,
-				coords: [],
-			});
-			if (newPolyLine.current) newPolyLine.current.setPath([]);
-			queryClient.invalidateQueries({ queryKey: ["routes", university.id], });
+	const [ErrorModal, { mutate, status }] = useMutationError(
+		{
+			mutationFn: ({
+				startNodeId,
+				coordinates,
+				endNodeId,
+			}: {
+				startNodeId: NodeId;
+				endNodeId: NodeId | null;
+				coordinates: Coord[];
+			}) => postReportRoute(university.id, { startNodeId, endNodeId, coordinates }),
+			onSuccess: () => {
+				openSuccess();
+				if (newPoints.element) newPoints.element.map = null;
+				if (originPoint.current) {
+					originPoint.current.element.map = null;
+					originPoint.current = undefined;
+				}
+				setNewPoints({
+					element: null,
+					coords: [],
+				});
+				setTempWayPoints((prevMarkers) => {
+					removeMarkers(prevMarkers);
+					return [];
+				});
+				if (newPolyLine.current) newPolyLine.current.setPath([]);
+				queryClient.invalidateQueries({ queryKey: ["routes", university.id] });
+			},
+			onError: () => {
+				if (newPoints.element) newPoints.element.map = null;
+				if (originPoint.current) {
+					originPoint.current.element.map = null;
+					originPoint.current = undefined;
+				}
+				setNewPoints({
+					element: null,
+					coords: [],
+				});
+				setTempWayPoints((prevMarkers) => {
+					removeMarkers(prevMarkers);
+					return [];
+				});
+				if (newPolyLine.current) newPolyLine.current.setPath([]);
+			},
 		},
-		onError: () => {
-			openFail();
-			if (newPoints.element) newPoints.element.map = null;
-			if (originPoint.current) {
-				originPoint.current.element.map = null;
-				originPoint.current = undefined;
-			}
-			setNewPoints({
-				element: null,
-				coords: [],
-			});
-			if (newPolyLine.current) newPolyLine.current.setPath([]);
+		undefined,
+		{
+			fallback: {
+				400: {
+					mainTitle: "경로를 생성하는데 실패하였습니다!",
+					subTitle: [
+						"선택하신 경로는 생성이 불가능합니다.",
+						"선 위에서 시작하여, 빈 곳을 이어주시기 바랍니다.",
+					],
+				},
+				404: {
+					mainTitle: "경로를 생성하는데 실패하였습니다!",
+					subTitle: ["선택하신 점이 관리자에 의해 제거되었습니다.", "다른 점을 선택하여 제보 부탁드립니다."],
+				},
+			},
 		},
-	});
+	);
 
 	const addRiskMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
@@ -120,7 +148,7 @@ export default function ReportRoutePage() {
 		const dangerMarkersWithId: { routeId: RouteId; element: AdvancedMarker }[] = [];
 
 		for (const route of dangerRoutes) {
-			const { routeId, node1, node2, dangerTypes } = route;
+			const { routeId, node1, node2, dangerFactors } = route;
 			const type = Markers.DANGER;
 
 			const dangerMarker = createAdvancedMarker(
@@ -137,10 +165,10 @@ export default function ReportRoutePage() {
 						return {
 							type: Markers.DANGER,
 							element: dangerMarker,
-							factors: dangerTypes,
-							id: routeId
-						}
-					})
+							factors: dangerFactors,
+							id: routeId,
+						};
+					});
 				},
 			);
 
@@ -152,7 +180,7 @@ export default function ReportRoutePage() {
 		const cautionMarkersWithId: { routeId: RouteId; element: AdvancedMarker }[] = [];
 
 		for (const route of cautionRoutes) {
-			const { routeId, node1, node2, cautionTypes } = route;
+			const { routeId, node1, node2, cautionFactors } = route;
 			const type = Markers.CAUTION;
 
 			const cautionMarker = createAdvancedMarker(
@@ -169,10 +197,10 @@ export default function ReportRoutePage() {
 						return {
 							type: Markers.CAUTION,
 							element: cautionMarker,
-							factors: cautionTypes,
-							id: routeId
-						}
-					})
+							factors: cautionFactors,
+							id: routeId,
+						};
+					});
 				},
 			);
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
@@ -184,14 +212,22 @@ export default function ReportRoutePage() {
 	const toggleCautionButton = () => {
 		if (!map) return;
 		setIsCautionActive((isActive) => {
-			toggleMarkers(!isActive, cautionMarkers.map(marker => marker.element), map);
+			toggleMarkers(
+				!isActive,
+				cautionMarkers.map((marker) => marker.element),
+				map,
+			);
 			return !isActive;
 		});
 	};
 	const toggleDangerButton = () => {
 		if (!map) return;
 		setIsDangerActive((isActive) => {
-			toggleMarkers(!isActive, dangerMarkers.map(marker => marker.element), map);
+			toggleMarkers(
+				!isActive,
+				dangerMarkers.map((marker) => marker.element),
+				map,
+			);
 			return !isActive;
 		});
 	};
@@ -213,13 +249,11 @@ export default function ReportRoutePage() {
 
 		if (!originPoint.current) return;
 
-		if ("nodeId" in lastPoint) {
-			mutate({
-				startNodeId: originPoint.current.point.nodeId,
-				endNodeId: lastPoint.nodeId,
-				coordinates: subNodes,
-			});
-		} else mutate({ startNodeId: originPoint.current.point.nodeId, coordinates: subNodes, endNodeId: null });
+		mutate({
+			startNodeId: originPoint.current.point.nodeId,
+			endNodeId: "nodeId" in lastPoint ? lastPoint.nodeId : null,
+			coordinates: subNodes,
+		});
 	};
 
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
@@ -265,6 +299,8 @@ export default function ReportRoutePage() {
 						className: "translate-waypoint",
 					}),
 				);
+
+				setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker]);
 
 				if (originPoint.current) {
 					setNewPoints((prevPoints) => {
@@ -316,6 +352,57 @@ export default function ReportRoutePage() {
 		}
 	};
 
+	/** Undo 함수
+	 * 되돌리기 버튼을 누를 경우, 마지막에 생성된 점을 제거
+	 * 기존 점의 개수가 1개, 2개, (0개 혹은 3개 이상) 총 3개의 Case를 나눈다.
+	 * 1개 : originMarker를 제거하고
+	 * 2개 : , 도착마커를 제거한다.
+	 * 0개 혹은 3개 이상, 도착마커를 이동시킨다.
+	 */
+	const undoPoints = () => {
+		const deleteNode = [...newPoints.coords].pop();
+
+		if (deleteNode && "nodeId" in deleteNode) {
+			setTempWayPoints((prevPoints) => {
+				const lastMarker = prevPoints.slice(-1)[0];
+
+				lastMarker.map = null;
+
+				return [...prevPoints.slice(0, -1)];
+			});
+		}
+		if (newPoints.coords.length === 2) {
+			setNewPoints((prevPoints) => {
+				if (prevPoints.element) prevPoints.element.map = null;
+				return {
+					element: null,
+					coords: [prevPoints.coords[0]],
+				};
+			});
+			return;
+		} else if (newPoints.coords.length === 1) {
+			if (originPoint.current) {
+				originPoint.current.element.map = null;
+			}
+			originPoint.current = undefined;
+			setNewPoints({
+				coords: [],
+				element: null,
+			});
+			return;
+		}
+
+		setNewPoints((prevPoints) => {
+			const tempPoints = prevPoints.coords.slice(0, -1);
+			const lastPoint = tempPoints.slice(-1)[0];
+			if (prevPoints.element) prevPoints.element.position = lastPoint;
+			return {
+				element: prevPoints.element,
+				coords: tempPoints,
+			};
+		});
+	};
+
 	useEffect(() => {
 		if (newPolyLine.current) {
 			newPolyLine.current.setPath(newPoints.coords);
@@ -331,7 +418,7 @@ export default function ReportRoutePage() {
 
 		if (map && AdvancedMarker) {
 			map.addListener("click", (e: ClickEvent) => {
-				setSelectedMarker(undefined)
+				setSelectedMarker(undefined);
 				if (originPoint.current) {
 					const point = LatLngToLiteral(e.latLng);
 					setNewPoints((prevPoints) => {
@@ -364,7 +451,6 @@ export default function ReportRoutePage() {
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
-
 		if (isSelect) {
 			if (marker.type === Markers.DANGER) {
 				const key = marker.factors[0] as DangerIssueType;
@@ -373,8 +459,7 @@ export default function ReportRoutePage() {
 					title: key && DangerIssue[key],
 					hasTopContent: true,
 				});
-			}
-			else if (marker.type === Markers.CAUTION) {
+			} else if (marker.type === Markers.CAUTION) {
 				const key = marker.factors[0] as CautionIssueType;
 				marker.element.content = createMarkerElement({
 					type: marker.type,
@@ -409,10 +494,16 @@ export default function ReportRoutePage() {
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
 				<div className="absolute w-full bottom-6 px-4">
-					<Button onClick={reportNewRoute}>제보하기</Button>
+					<Button
+						onClick={reportNewRoute}
+						variant={status === "pending" || status === "success" ? "disabled" : "primary"}
+					>
+						{status === "pending" ? "제보하는 중.." : "제보하기"}
+					</Button>
 				</div>
 			)}
 			<div className="absolute right-4 bottom-[90px] space-y-2">
+				<UndoButton disabled={newPoints.coords.length === 0} onClick={undoPoints} />
 				<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
 				<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
 			</div>
@@ -427,19 +518,7 @@ export default function ReportRoutePage() {
 					</div>
 				</SuccessModal>
 			)}
-			{isFailOpen && (
-				<FailModal>
-					<p className="text-kor-body1 font-bold text-system-red">경로를 생성하는데 실패하였습니다!</p>
-					<div className="space-y-0">
-						<p className="text-kor-body3 font-regular text-gray-700">
-							선택하신 경로는 생성이 불가능합니다.
-						</p>
-						<p className="text-kor-body3 font-regular text-gray-700">
-							선 위에서 시작하여, 빈 곳을 이어주시기 바랍니다.
-						</p>
-					</div>
-				</FailModal>
-			)}
+			<ErrorModal />
 		</div>
 	);
 }
