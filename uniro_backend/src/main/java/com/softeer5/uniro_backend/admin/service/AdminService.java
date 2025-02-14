@@ -8,6 +8,7 @@ import com.softeer5.uniro_backend.admin.entity.RevInfo;
 import com.softeer5.uniro_backend.admin.repository.NodeAuditRepository;
 import com.softeer5.uniro_backend.admin.repository.RevInfoRepository;
 import com.softeer5.uniro_backend.admin.repository.RouteAuditRepository;
+import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
@@ -35,6 +36,7 @@ public class AdminService {
     private final RevInfoRepository revInfoRepository;
     private final RouteRepository routeRepository;
     private final NodeRepository nodeRepository;
+    private final BuildingRepository buildingRepository;
 
     private final RouteAuditRepository routeAuditRepository;
     private final NodeAuditRepository nodeAuditRepository;
@@ -57,12 +59,10 @@ public class AdminService {
         List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
         List<Node> revNodes = nodeAuditRepository.getAllNodesAtRevision(univId, versionId);
 
-        // TODO: 시점 확인 필요
         routeRepository.deleteAllByCreatedAt(univId, revInfo.getRevTimeStamp());
         nodeRepository.deleteAllByCreatedAt(univId, revInfo.getRevTimeStamp());
+        buildingRepository.deleteAllByCreatedAt(univId, revInfo.getRevTimeStamp());
 
-        // TODO: 삭제 시점 및 삭제 순서 확인
-        // TODO: 빌딩 노드에 대한 고민
         routeAuditRepository.deleteAllAfterVersionId(univId, versionId);
         nodeAuditRepository.deleteAllAfterVersionId(univId, versionId);
         revInfoRepository.deleteAllAfterVersionId(univId, versionId);
