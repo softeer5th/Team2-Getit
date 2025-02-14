@@ -5,10 +5,10 @@ import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
 import com.softeer5.uniro_backend.map.dto.response.FastestRouteResDTO;
-import com.softeer5.uniro_backend.map.entity.CautionFactor;
-import com.softeer5.uniro_backend.map.entity.DangerFactor;
 import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.map.entity.Route;
+import com.softeer5.uniro_backend.map.enums.CautionFactor;
+import com.softeer5.uniro_backend.map.enums.DangerFactor;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
 import org.junit.jupiter.api.Nested;
@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -44,6 +46,10 @@ class RouteCalculatorTest {
     private final double epsilon = 0.0000001;
 
     @Nested
+    @SqlGroup({
+            @Sql(value = "/sql/delete-all-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(value = "/sql/delete-all-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
     class 길찾기 {
         @Test
         void 기본_길찾기() {
@@ -103,6 +109,7 @@ class RouteCalculatorTest {
 
         }
 
+        @Test
         void 주의요소가_포함된_길찾기() {
             Node n1 = NodeFixture.createNode(0, 0);
             Node n2 = NodeFixture.createNode(0, 0);
@@ -138,7 +145,7 @@ class RouteCalculatorTest {
 
             //a. distance 확안
 
-            //a-1. 보도, 휠체어위험, 휠체어안전 모두 가능한지?
+            //a-1. 보도, 휠체어위험 모두 가능한지?
             assertThat(fastestRoute).hasSize(3);
 
             //a-2. distance가 정상적으로 제공되는지?
@@ -147,7 +154,7 @@ class RouteCalculatorTest {
             double distance1 = fastestRoute.get(1).getTotalDistance();
             assertThat(Math.abs(distance1 - 10.0)).isLessThan(epsilon);
             double distance2 = fastestRoute.get(2).getTotalDistance();
-            assertThat(Math.abs(distance1 - 20.0)).isLessThan(epsilon);
+            assertThat(Math.abs(distance2 - 20.0)).isLessThan(epsilon);
 
             //b. cost 확인
 
@@ -163,6 +170,7 @@ class RouteCalculatorTest {
 
         }
 
+        @Test
         void 위험요소가_포함된_길찾기() {
             Node n1 = NodeFixture.createNode(0, 0);
             Node n2 = NodeFixture.createNode(0, 0);
@@ -201,13 +209,15 @@ class RouteCalculatorTest {
             //a. distance 확안
 
             //a-1. 보도, 휠체어 위험으로 가능한지?
-            assertThat(fastestRoute).hasSize(2);
+            assertThat(fastestRoute).hasSize(3);
 
             //a-2. distance가 정상적으로 제공되는지?
             double distance0 = fastestRoute.get(0).getTotalDistance();
             assertThat(Math.abs(distance0 - 10.0)).isLessThan(epsilon);
             double distance1 = fastestRoute.get(1).getTotalDistance();
-            assertThat(Math.abs(distance0 - 21.0)).isLessThan(epsilon);
+            assertThat(Math.abs(distance1 - 21.0)).isLessThan(epsilon);
+            double distance2 = fastestRoute.get(2).getTotalDistance();
+            assertThat(Math.abs(distance2 - 21.0)).isLessThan(epsilon);
 
             //b. cost 확인
 
@@ -218,9 +228,12 @@ class RouteCalculatorTest {
             //b-2- WHEEL_FAST일 때 도보의 cost가 정상적으로 null이 나왔는지?
             assertThat(fastestRoute.get(1).getPedestrianTotalCost()).isNull();
             assertThat(fastestRoute.get(1).getPedestrianTotalCost()).isNull();
+            assertThat(fastestRoute.get(2).getPedestrianTotalCost()).isNull();
+            assertThat(fastestRoute.get(2).getPedestrianTotalCost()).isNull();
 
         }
 
+        @Test
         void 위험요소를_지나지_않으면_도착할_수_없는_길찾기() {
             Node n1 = NodeFixture.createNode(0, 0);
             Node n2 = NodeFixture.createNode(0, 0);
