@@ -11,7 +11,7 @@ export function DangerToggleButton({ isActive, onClick }: ToggleButtonProps) {
 	return (
 		<button
 			onClick={onClick}
-			className={`w-fit h-fit p-[14px] flex shadow-lg items-center justify-center rounded-full active:bg-gray-200  active:text-gray-700 ${isActive ? "bg-system-red border-gray-100 text-gray-100" : "bg-gray-100 border-gray-400 text-gray-700"}`}
+			className={`w-fit h-fit p-[14px] flex shadow-lg items-center justify-center rounded-full border-2 border-system-red active:bg-gray-200 active:text-gray-700 ${isActive ? "bg-system-red border-gray-100 text-gray-100" : "bg-gray-100 border-gray-400 text-system-red"}`}
 		>
 			<DangerIcon />
 		</button>
@@ -22,7 +22,7 @@ export function CautionToggleButton({ isActive, onClick }: ToggleButtonProps) {
 	return (
 		<button
 			onClick={onClick}
-			className={`w-fit h-fit p-[14px] flex shadow-lg items-center justify-center rounded-full active:bg-gray-200  active:text-gray-700 ${isActive ? "bg-system-orange border-gray-100 text-gray-100" : "bg-gray-100 border-gray-400 text-gray-700"}`}
+			className={`w-fit h-fit p-[14px] flex shadow-lg items-center justify-center rounded-full border-2 border-system-orange active:bg-gray-200  active:text-gray-700 ${isActive ? "bg-system-orange border-gray-100 text-gray-100" : "bg-gray-100 border-gray-400 text-system-orange"}`}
 		>
 			<CautionIcon />
 		</button>
