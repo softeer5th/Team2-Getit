@@ -497,6 +497,9 @@ public class RouteCalculator {
             }
         }
 
+        // 중복된 노드가 있는지 확인
+        validateDuplicateNodes(requests);
+
         // 1. 첫번째 노드:
         // 서브 -> 코어 : 처리 필요
         // 코어 -> 코어 : 처리 필요 X
@@ -548,6 +551,22 @@ public class RouteCalculator {
         List<Node> selfCrossCheckedNodes = insertMidNodesForSelfIntersectingRoutes(crossCheckedNodes);
 
         return selfCrossCheckedNodes;
+    }
+
+    private void validateDuplicateNodes(List<CreateRouteReqDTO> requests) {
+        for (int i = 0; i < requests.size(); i++) {
+            Coordinate curCoordinate = new Coordinate(requests.get(i).getLng(), requests.get(i).getLat());
+            String curNodeKey = getNodeKey(curCoordinate);
+
+            for (int j = i + 1; j < Math.min(i + 3, requests.size()); j++) {
+                Coordinate nextCoordinate = new Coordinate(requests.get(j).getLng(), requests.get(j).getLat());
+                String nextNodeKey = getNodeKey(nextCoordinate);
+
+                if (curNodeKey.equals(nextNodeKey)) {
+                    throw new RouteCalculationException("has duplicate nearest node", DUPLICATE_NEAREST_NODE);
+                }
+            }
+        }
     }
 
     private List<Node> insertMidNodesForIntersectingRoutes(List<Node> nodes, STRtree strTree, Map<String, Node> nodeMap) {

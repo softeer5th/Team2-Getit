@@ -21,6 +21,7 @@ public enum ErrorCode {
 
     //길 생성
     ELEVATION_API_ERROR(500, "구글 해발고도 API에서 오류가 발생했습니다."),
+    DUPLICATE_NEAREST_NODE(400, "중복된 인접 노드가 존재합니다."),
 
     // 건물 노드
     BUILDING_NOT_FOUND(404, "유효한 건물을 찾을 수 없습니다."),

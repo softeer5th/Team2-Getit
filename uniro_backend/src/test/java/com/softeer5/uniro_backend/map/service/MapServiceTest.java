@@ -1,20 +1,25 @@
 package com.softeer5.uniro_backend.map.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
+import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
@@ -39,6 +44,9 @@ class MapServiceTest {
 	private RouteRepository routeRepository;
 	@Autowired
 	private NodeRepository nodeRepository;
+
+	@MockBean
+	private MapClient mapClient;
 
 	@Nested
 	class 경로추가{
@@ -311,6 +319,162 @@ class MapServiceTest {
 			assertThat(results).hasSize(6);
 			assertThat(results.get(1).isCore()).isTrue();
 		}
+
+		@Test
+		@DisplayName("인접한 노드는 중복될 수 없다. a->b->b 경우 ")
+		void nearest_test1(){
+			// given
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(37.554533318727884, 127.040754103711),
+				new CreateRouteReqDTO(37.554506962309226, 127.0407538544841),
+				new CreateRouteReqDTO(37.554480605890554, 127.04075360525738),
+				new CreateRouteReqDTO(37.5544542494719, 127.04075335603085),
+				new CreateRouteReqDTO(37.554427893053244, 127.04075310680449),
+				new CreateRouteReqDTO(37.55437473334863, 127.04076651784956),
+
+				new CreateRouteReqDTO(37.55437473334863, 127.04076651784956),
+
+				new CreateRouteReqDTO(37.554367645389384, 127.0407906577353),
+				new CreateRouteReqDTO(37.55436055742524, 127.04081479761643),
+				new CreateRouteReqDTO(37.554353469456174, 127.04083893749296),
+				new CreateRouteReqDTO(37.55436126622311, 127.04086665364699),
+				new CreateRouteReqDTO(37.55436906298358, 127.04089436980678),
+				new CreateRouteReqDTO(37.55437685973755, 127.04092208597243),
+				new CreateRouteReqDTO(37.55440095878911, 127.04091538046072),
+				new CreateRouteReqDTO(37.554425057840305, 127.04090867494469),
+				new CreateRouteReqDTO(37.554449156891096, 127.04090196942433),
+				new CreateRouteReqDTO(37.55447325594152, 127.04089526389961),
+				new CreateRouteReqDTO(37.55449735499156, 127.04088855837058),
+				new CreateRouteReqDTO(37.55452145404122, 127.0408818528372),
+				new CreateRouteReqDTO(37.55453208597017, 127.04085637186247),
+				new CreateRouteReqDTO(37.554542717893675, 127.04083089088046),
+				new CreateRouteReqDTO(37.554553349811684, 127.0408054098912),
+				new CreateRouteReqDTO(37.554563981724215, 127.04077992889464)
+			);
+
+			Node node1 = NodeFixture.createNode(37.554533318727884, 127.040754103711);
+			Node node2 = NodeFixture.createNode(0, 0);
+			List<Node> savedNode = nodeRepository.saveAll(List.of(node1, node2));
+
+			routeRepository.save(RouteFixture.createRoute(savedNode.get(0), savedNode.get(1)));
+
+			doNothing().when(mapClient).fetchHeights(anyList());
+
+			// when, then
+			Assertions.assertThatThrownBy(() -> mapService.createRoute(1001L, new CreateRoutesReqDTO(savedNode.get(0).getId(), null, requests)))
+				.isInstanceOf(RouteCalculationException.class)
+				.hasMessageContaining("has duplicate nearest node");
+		}
+
+		@Test
+		@DisplayName("인접한 노드는 중복될 수 없다. a->b->a 경우 ")
+		void nearest_test2(){
+			// given
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(37.554533318727884, 127.040754103711),
+				new CreateRouteReqDTO(37.554506962309226, 127.0407538544841),
+				new CreateRouteReqDTO(37.554480605890554, 127.04075360525738),
+				new CreateRouteReqDTO(37.5544542494719, 127.04075335603085),
+				new CreateRouteReqDTO(37.554427893053244, 127.04075310680449),
+
+				new CreateRouteReqDTO(37.55437473334863, 127.04076651784956),
+
+				new CreateRouteReqDTO(37.554367645389384, 127.0407906577353),
+
+				new CreateRouteReqDTO(37.55437473334863, 127.04076651784956),
+
+				new CreateRouteReqDTO(37.55436055742524, 127.04081479761643),
+				new CreateRouteReqDTO(37.554353469456174, 127.04083893749296),
+				new CreateRouteReqDTO(37.55436126622311, 127.04086665364699),
+				new CreateRouteReqDTO(37.55436906298358, 127.04089436980678),
+				new CreateRouteReqDTO(37.55437685973755, 127.04092208597243),
+				new CreateRouteReqDTO(37.55440095878911, 127.04091538046072),
+				new CreateRouteReqDTO(37.554425057840305, 127.04090867494469),
+				new CreateRouteReqDTO(37.554449156891096, 127.04090196942433),
+				new CreateRouteReqDTO(37.55447325594152, 127.04089526389961),
+				new CreateRouteReqDTO(37.55449735499156, 127.04088855837058),
+				new CreateRouteReqDTO(37.55452145404122, 127.0408818528372),
+				new CreateRouteReqDTO(37.55453208597017, 127.04085637186247),
+				new CreateRouteReqDTO(37.554542717893675, 127.04083089088046),
+				new CreateRouteReqDTO(37.554553349811684, 127.0408054098912),
+				new CreateRouteReqDTO(37.554563981724215, 127.04077992889464)
+			);
+
+			Node node1 = NodeFixture.createNode(37.554533318727884, 127.040754103711);
+			Node node2 = NodeFixture.createNode(0, 0);
+			List<Node> savedNode = nodeRepository.saveAll(List.of(node1, node2));
+
+			routeRepository.save(RouteFixture.createRoute(savedNode.get(0), savedNode.get(1)));
+
+			doNothing().when(mapClient).fetchHeights(anyList());
+
+			// when, then
+			Assertions.assertThatThrownBy(() -> mapService.createRoute(1001L, new CreateRoutesReqDTO(savedNode.get(0).getId(), null, requests)))
+				.isInstanceOf(RouteCalculationException.class)
+				.hasMessageContaining("has duplicate nearest node");
+		}
+
+		@Test
+		@DisplayName("동일한 노드가 2노드 이후에 있을 경우 정상 입력이다. a -> b -> c -> a 경우")
+		void nearest_test3(){
+			// given
+			List<CreateRouteReqDTO> requests = List.of(
+				new CreateRouteReqDTO(37.554533318727884, 127.040754103711),
+				new CreateRouteReqDTO(37.554506962309226, 127.0407538544841),
+				new CreateRouteReqDTO(37.554480605890554, 127.04075360525738),
+				new CreateRouteReqDTO(37.5544542494719, 127.04075335603085),
+				new CreateRouteReqDTO(37.554427893053244, 127.04075310680449),
+
+				new CreateRouteReqDTO(37.55437473334863, 127.04076651784956),
+
+				new CreateRouteReqDTO(37.554367645389384, 127.0407906577353),
+				new CreateRouteReqDTO(37.55436055742524, 127.04081479761643),
+
+				new CreateRouteReqDTO(37.55437473334863, 127.04076651784956),
+
+				new CreateRouteReqDTO(37.554353469456174, 127.04083893749296),
+				new CreateRouteReqDTO(37.55436126622311, 127.04086665364699),
+				new CreateRouteReqDTO(37.55436906298358, 127.04089436980678),
+				new CreateRouteReqDTO(37.55437685973755, 127.04092208597243),
+				new CreateRouteReqDTO(37.55440095878911, 127.04091538046072),
+				new CreateRouteReqDTO(37.554425057840305, 127.04090867494469),
+				new CreateRouteReqDTO(37.554449156891096, 127.04090196942433),
+				new CreateRouteReqDTO(37.55447325594152, 127.04089526389961),
+				new CreateRouteReqDTO(37.55449735499156, 127.04088855837058),
+				new CreateRouteReqDTO(37.55452145404122, 127.0408818528372),
+				new CreateRouteReqDTO(37.55453208597017, 127.04085637186247),
+				new CreateRouteReqDTO(37.554542717893675, 127.04083089088046),
+				new CreateRouteReqDTO(37.554553349811684, 127.0408054098912),
+				new CreateRouteReqDTO(37.554563981724215, 127.04077992889464)
+			);
+
+			Node node1 = NodeFixture.createNode(37.554533318727884, 127.040754103711);
+			Node node2 = NodeFixture.createNode(0, 0);
+			List<Node> savedNode = nodeRepository.saveAll(List.of(node1, node2));
+
+			routeRepository.save(RouteFixture.createRoute(savedNode.get(0), savedNode.get(1)));
+
+			doNothing().when(mapClient).fetchHeights(anyList());
+
+			// when
+			mapService.createRoute(1001L, new CreateRoutesReqDTO(savedNode.get(0).getId(), null, requests));
+
+			// then
+			List<Node> savedNodes = nodeRepository.findAll();
+
+			assertThat(savedNodes).hasSize(23);
+
+			int coreCount = 0;
+
+			for(Node n : savedNodes){
+				if(n.isCore()){
+					coreCount++;
+				}
+			}
+
+			assertThat(coreCount).isEqualTo(1);
+		}
+
 
 	}
 
