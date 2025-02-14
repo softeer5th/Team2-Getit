@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - be
+      - feat/UNI-194
 
 jobs:
   uniro-ci:
