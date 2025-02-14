@@ -272,7 +272,7 @@ const NavigationMap = ({
 				// 3. 기존 마커가 없거나 일치하지 않으면 새로 생성
 				const markerElement = createMarkerElement({
 					type: markerType,
-					className: markerType === Markers.CAUTION ? "translate-routemarker" : "translate-waypoint",
+					className: markerType === Markers.CAUTION ? "translate-pinmarker" : "translate-waypoint",
 					hasAnimation,
 				});
 
