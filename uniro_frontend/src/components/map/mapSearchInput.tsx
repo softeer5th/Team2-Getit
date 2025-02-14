@@ -10,10 +10,27 @@ interface RouteInputProps extends InputHTMLAttributes<HTMLInputElement> {
 	onClick: () => void;
 }
 
-export default function RouteInput({ placeholder, children, value, onCancel, onClick }: RouteInputProps) {
+export function BuildingInput({ placeholder, children, onClick }: RouteInputProps) {
 	return (
 		<div
 			className={`h-[50px] shadow-lg w-full max-w-[450px] flex flex-row justify-between items-center space-x-2 p-3 rounded-200 bg-gray-200 border border-gray-200`}
+		>
+			{children}
+			<Link
+				onClick={onClick}
+				to="/building"
+				className={`text-start flex-1 text-kor-body2  text-gray-700 font-medium`}
+			>
+				{placeholder}
+			</Link>
+		</div>
+	);
+}
+
+export function RouteInput({ placeholder, children, value, onCancel, onClick }: RouteInputProps) {
+	return (
+		<div
+			className={`h-[50px] w-full max-w-[450px] flex flex-row justify-between items-center space-x-2 p-3 rounded-200 bg-gray-200 border border-gray-200`}
 		>
 			{children}
 			<Link
