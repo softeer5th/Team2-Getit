@@ -148,10 +148,7 @@ const ReportForm = () => {
 			<div className="flex-1 overflow-y-auto overflow-x-hidden">
 				<PrimaryForm
 					reportMode={reportMode!}
-					passable
-          
-          
-          ={formData.passableStatus}
+					passableStatus={formData.passableStatus}
 					handlePrimarySelect={handlePrimarySelect}
 				/>
 				<SecondaryForm
