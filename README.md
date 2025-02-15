@@ -1,24 +1,106 @@
 # UNIRO, 함께 만들어가는 휠체어 배리어프리 길찾기
 
-![Cover](https://github.com/user-attachments/assets/c100fbf1-07ce-4191-a196-245fcdae69d9)
+![Cover](https://github.com/user-attachments/assets/8e716aaf-1ded-4fd3-a5fe-c1c748586084)
 
 # 📌 목차
 1. [서비스 소개](#-서비스-소개)
 2. [팀원 소개](#-팀원-소개)
 3. [협업 방식](#-협업-방식)
-4. [백엔드](#-백엔드)
-5. [프론트엔드](#-프론트엔드)
+4. [프론트엔드](#-프론트엔드)
+5. [백엔드](#-백엔드)
 
 ---
 
 # 서비스 소개
-- 캠퍼스 내 이동이 더 이상 장애가 되지 않도록!
+- 캠퍼스 내 이동이 더 이상 불편하지 않도록!
 - 휠체어를 사용하는 대학생이 보다 안전하고 편리하게 캠퍼스를 이동할 수 있도록 돕는 길찾기 서비스입니다.
 - 정보 기술을 활용하여 이동 과정에서의 물리적·정보적 장벽을 해소하고, 모두가 함께하는 포용적인 캠퍼스 환경을 만들어갑니다.
 
 # 팀원 소개
+## FE 팀
+<div align="center">
+	<table>
+	<th><a href="https://github.com/thdgustjd1"> 박준혁 </th>
+    <th><a href="https://github.com/mikekks"> 윤동현 </th>
+    <tr>
+		<td style="text-align: center;"><img width="100" alt="박준혁" src="https://avatars.githubusercontent.com/u/45231740?v=4"></td>
+        <td style="text-align: center;"><img width="100" alt="윤동현" src="https://avatars.githubusercontent.com/u/129783824?v=4"></td>
+	</tr>
+<th> FE </th>
+<th> FE </th>
+<tr>
+    <td>
+    - 작성예정 <br>
+    - 작성예정 <br>
+    - 작성예정 <br>
+    - 작성예정 <br>
+    </td>
+    <td>
+    - 작성예정 <br>
+    - 작성예정 <br>
+    - 작성예정 <br>
+    - 작성예정 <br>
+    </td>
+</tr>
+	</table>
+</div>
+
+<br>
+
+## BE 팀
+<div align="center">
+	<table>
+	<th><a href="https://github.com/thdgustjd1"> 👑 송현성 </th>
+    <th><a href="https://github.com/mikekks"> 송민규 </th>
+    <tr>
+		<td style="text-align: center;"><img width="100" alt="송현성" src="https://avatars.githubusercontent.com/u/129783824?v=4"></td>
+        <td style="text-align: center;"><img width="100" alt="송민규" src="https://avatars.githubusercontent.com/u/100754581?v=4"></td>
+	</tr>
+<th> BE, 팀장 </th>
+<th> BE </th>
+<tr>
+    <td>
+    - 길찾기 알고리즘 개발 및 개선<br>
+    - 길 추가 로직 80% 개선 <br>
+    - 구글 Map API 연동<br>
+    - 작성예정
+    </td>
+    <td>
+    - Dockerizing 및 배포 자동화 인프라 구축 <br>
+    - 테스트 컨테이너 구축<br>
+    - 어드민 로그인 구현 <br>
+    - 작성예정<br>
+    </td>
+</tr>
+	</table>
+</div>
+
+<br>
+
 
 # 협업 방식
+
+## 스프린트 단위 개발
+- 저희 팀에서는 일주일 단위의 스프린트를 가지고 개발하고 있습니다. 해당 방식을 통해 아래와 같은 장점을 갖게 되었습니다.
+1. 빠른 피드백과 개선
+2. 유연성 있는 요구사항 변경
+3. 개발 리스크 감소
+
+### 릴리즈 노트
+- 각 스프린트의 개발 내용을 아카이빙 하기 위해 릴리즈 노트를 만들어 관리했습니다.
+
+| 릴리즈 버전 | 진행기간       | 릴리즈 노트             | 릴리즈 PR                  |
+|---------------|---------------|---------------------|----------------------------------|
+|  v1.0.0  | 1주차 스프린트 | [1주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.0.0) | [v1.0.0](https://github.com/softeer5th/Team2-Getit/pull/27) |
+|  v1.1.0  | 2주차 스프린트  | [2주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.1.0)    | [v1.1.0](https://github.com/softeer5th/Team2-Getit/pull/76) |
+|  v1.2.0  | 3주차 스프린트 | [3주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.2.0) | [v1.2.0](https://github.com/softeer5th/Team2-Getit/pull/141)   |
+|  v1.3.0 | 4주차 스프린트 | [4주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.3.0) | [v1.3.0]()    |
+
+## Jira 를 이용한 프로젝트 관리
+* TODO : 해당 내용 + 이미지 첨부
+
+## 배포 방식
+
 
 ## 🙌 그라운드 룰
 
@@ -28,6 +110,7 @@
 3. 개인 일정이 생길 경우, 가능하면 전날까지 알려주세요. 카톡으로 간단히 공유해도 괜찮아요.
     1. 윤동현: 매주 목요일 19:00 퇴근
     2. 박준혁: 매주 화요일 19:00 퇴근
+    3. 송민규: 매주 목요일 19:00 퇴근
 4. 카톡이나 슬랙으로 먼저 연락하고, 응답이 없을 경우 대면으로 이야기해요. (센터에서 진행)
 5. 상대방이 에어팟을 끼고 있어도 괜찮아요 :)
 
@@ -41,54 +124,11 @@
 1. 모든 머지는 반드시 1명의 승인을 받아야 가능해요.
 2. 피드백은 건전하고 건강하게 주고받아요. 근데 이제 따뜻함을 잊지 말아주세요.
 
-# 백엔드
-
-# 프론트엔드
-
-
-## 🚀 서비스 소개
-서비스에 대한 간략한 소개를 작성합니다. 주요 기능과 목적을 설명하고, 서비스 이미지와 함께 제공하면 더욱 좋습니다.
 
 ---
 
-## 👥 팀원 소개
 
-### 프론트엔드 팀
-| 이름 | 역할 | 깃허브 |
-|------|------|--------|
-| ![깃허브 프로필](깃허브_이미지_URL) | 프론트엔드 개발 | [GitHub](깃허브_URL) |
-| ![깃허브 프로필](깃허브_이미지_URL) | 프론트엔드 개발 | [GitHub](깃허브_URL) |
-
-### 백엔드 팀
-| 이름 | 역할 | 깃허브 |
-|------|------|--------|
-| ![깃허브 프로필](깃허브_이미지_URL) | 백엔드 개발 | [GitHub](깃허브_URL) |
-| ![깃허브 프로필](깃허브_이미지_URL) | 백엔드 개발 | [GitHub](깃허브_URL) |
-
----
-
-## 🤝 협업 방식
-우리 팀이 협업했던 방식과 도구들에 대해 설명합니다.
-
-- **버전 관리**: Git / GitHub Flow
-- **커뮤니케이션**: Slack, Notion
-- **프로젝트 관리**: Jira / Trello
-- **코드 리뷰**: PR 리뷰 방식
-
----
-
-## 🛠 백엔드
-백엔드에서 구현한 기능과 기술 스택을 정리합니다.
-
-- **사용 기술**: Java, Spring Boot, JPA, MySQL, Redis
-- **구현한 기능**
-  - 사용자 인증 및 권한 관리
-  - API 설계 및 데이터베이스 모델링
-  - 성능 최적화 및 캐싱 적용
-
----
-
-## 🎨 프론트엔드
+# 🎨 프론트엔드
 프론트엔드에서 구현한 기능과 기술 스택을 정리합니다.
 
 - **사용 기술**: React, TypeScript, Redux, Styled-Components
@@ -97,3 +137,13 @@
   - API 연동 및 상태 관리
   - 퍼포먼스 최적화 및 코드 분할
 
+---
+
+# 🛠 백엔드
+백엔드에서 구현한 기능과 기술 스택을 정리합니다.
+
+- **사용 기술**: Java, Spring Boot, JPA, MySQL, Redis
+- **구현한 기능**
+  - 사용자 인증 및 권한 관리
+  - API 설계 및 데이터베이스 모델링
+  - 성능 최적화 및 캐싱 적용
