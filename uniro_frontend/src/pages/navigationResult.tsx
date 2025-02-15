@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useSuspenseQueries } from "@tanstack/react-query";
 
-import Button from "../components/customButton";
 import RouteList from "../components/navigation/route/routeList";
 import NavigationDescription from "../components/navigation/navigationDescription";
 import BottomSheetHandle from "../components/navigation/bottomSheet/bottomSheetHandle";
@@ -17,8 +16,11 @@ import { getNavigationResult } from "../api/route";
 import { getAllRisks } from "../api/routes";
 import useRoutePoint from "../hooks/useRoutePoint";
 import { Building } from "../data/types/node";
-import { useLocation } from "react-router";
 import { useNavigationBottomSheet } from "../hooks/useNavigationBottomSheet";
+
+import BottomCardList from "../components/navigation/card/bottomCardList";
+import { NavigationButtonRouteType } from "../data/types/route";
+import NavigationNavBar from "../components/navigation/navBar/navigationNavBar";
 
 const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
 const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
@@ -37,50 +39,32 @@ const NavigationResultPage = () => {
 	const { university } = useUniversityInfo();
 	const { origin, destination, setOriginCoord, setDestinationCoord } = useRoutePoint();
 
-	// TEST용 Link
-	const location = useLocation();
-	const { search } = location;
-	const params = new URLSearchParams(search);
-
-	const originId = params.get("node1Id");
-	const destinationId = params.get("node2Id");
+	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>("PEDES & SAFE");
 
 	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
 
 	useScrollControl();
 
-	// Cache를 위한 Key를 지정하기 위해서 추가한 코드
-	const requestOriginId = originId ? Number(originId) : origin?.nodeId;
-	const requestDestinationId = destinationId ? Number(destinationId) : destination?.nodeId;
-
-	const result = useSuspenseQueries({
+	const [routeList, risks] = useSuspenseQueries({
 		queries: [
 			{
-				queryKey: ["fastRoute", university?.id, requestOriginId, requestDestinationId],
+				queryKey: ["fastRoute", university?.id, origin?.nodeId ?? 1, destination?.nodeId ?? 2],
 				queryFn: async () => {
 					try {
 						const response = await getNavigationResult(
 							university?.id ?? 1001,
-							requestOriginId,
-							requestDestinationId,
+							origin?.nodeId ?? 1,
+							destination?.nodeId ?? 2,
 						);
-						// param으로 받아올 수 있는 ID들이 있으면 추가하고, 아니면 기존 Building의 좌표를 넣는다
-						if (originId) {
-							setOriginCoord(response.routes[0].node1.lng, response.routes[0].node1.lat);
-							return response;
-						}
-						if (destinationId) {
-							setDestinationCoord(
-								response.routes[response.routes.length - 1].node2.lng,
-								response.routes[response.routes.length - 1].node2.lat,
-							);
-							return response;
-						}
 						return response;
 					} catch (e) {
 						alert(`경로를 찾을 수 없습니다. (${e})`);
 						return null;
 					}
+					// return await fetchMockJson().then((data) => {
+					// 	const response = transformFastRoute(data);
+					// 	return response;
+					// });
 				},
 				retry: 1,
 				staleTime: 0,
@@ -108,14 +92,38 @@ const NavigationResultPage = () => {
 		setIsDetailView(false);
 	};
 
+	// PEDS & SAFE의 경우 result에 PEDS & SAFE만 넘겨줌
+	// ELECTRIC & CAUTION or ELECTRIC & SAFE 일 경우 result에 ELECTRIC&CAUTION, ELECTRIC&SAFE 넘겨줌
+	// MANUAL & CAUTION or MANUAL & SAFE 일 경우 result에 MANUA & CAUTION, MANUAL&SAFE 넘겨줌
+
+	const filteredData = () => {
+		switch (buttonState) {
+			case "PEDES & SAFE":
+				return routeList.data?.[buttonState] ? [routeList.data[buttonState]] : [];
+			case "ELECTRIC & CAUTION":
+			case "ELECTRIC & SAFE":
+				return [routeList.data!["ELECTRIC & CAUTION"], routeList.data!["ELECTRIC & SAFE"]].filter(Boolean);
+			case "MANUAL & CAUTION":
+			case "MANUAL & SAFE":
+				return [routeList.data!["MANUAL & CAUTION"], routeList.data!["MANUAL & SAFE"]].filter(Boolean);
+			default:
+				return [];
+		}
+	};
+
+	const handleButtonStateChange = (buttonType: NavigationButtonRouteType) => {
+		setButtonState(buttonType);
+	};
+
 	return (
 		<div className="relative h-dvh w-full max-w-[450px] mx-auto">
 			{/* 지도 영역 */}
 			<NavigationMap
 				style={{ width: "100%", height: "100%" }}
-				routeResult={result[0].data!}
+				routeResult={routeList.data!}
+				buttonState={buttonState}
 				isDetailView={isDetailView}
-				risks={result[1].data}
+				risks={risks.data}
 				topPadding={topBarHeight}
 				bottomPadding={sheetHeight}
 			/>
@@ -123,11 +131,19 @@ const NavigationResultPage = () => {
 			<AnimatedContainer
 				isVisible={!isDetailView}
 				positionDelta={286}
-				className="absolute top-0 z-10 max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg"
+				className="absolute top-0 left-0 w-full flex flex-col space-y-2"
 				isTop={true}
 				transition={{ type: "spring", damping: 20, duration: 0.3 }}
 			>
-				<NavigationDescription isDetailView={false} navigationRoute={result[0].data!} />
+				<div className="max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
+					<NavigationDescription isDetailView={false} navigationRoute={routeList.data![buttonState]} />
+				</div>
+				<NavigationNavBar
+					route={routeList.data!}
+					dataLength={routeList.data!.dataLength}
+					buttonType={buttonState}
+					setButtonState={handleButtonStateChange}
+				/>
 			</AnimatedContainer>
 
 			<AnimatedContainer
@@ -135,7 +151,13 @@ const NavigationResultPage = () => {
 				className="absolute bottom-0 left-0 w-full mb-[30px] px-4"
 				positionDelta={88}
 			>
-				<Button onClick={showDetailView}>상세경로 보기</Button>
+				<BottomCardList
+					routeList={filteredData()}
+					dataLength={routeList.data!.dataLength}
+					buttonType={buttonState}
+					showDetailView={showDetailView}
+					setButtonState={setButtonState}
+				></BottomCardList>
 			</AnimatedContainer>
 
 			<AnimatedContainer
@@ -173,8 +195,14 @@ const NavigationResultPage = () => {
 					}}
 					onScroll={preventScroll}
 				>
-					<NavigationDescription isDetailView={true} navigationRoute={result[0].data!} />
-					<RouteList routes={result[0].data!.routeDetails} />
+					<NavigationDescription isDetailView={true} navigationRoute={routeList.data![buttonState]} />
+					<RouteList
+						routes={
+							routeList.data![buttonState]?.routeDetails
+								? routeList.data![buttonState]?.routeDetails
+								: null
+						}
+					/>
 				</div>
 			</AnimatedContainer>
 		</div>

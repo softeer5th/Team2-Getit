@@ -76,12 +76,11 @@ export default function MapPage() {
 	const [FailModal, { status, data, refetch: findFastRoute }] = useQueryError(
 		{
 			queryKey: ["fastRoute", university.id, origin?.nodeId, destination?.nodeId],
-			queryFn: () =>
-				getNavigationResult(
-					university.id,
-					origin ? origin?.nodeId : -1,
-					destination ? destination?.nodeId : -1,
-				),
+			queryFn: () => getNavigationResult(
+				university.id,
+				origin ? origin?.nodeId : -1,
+				destination ? destination?.nodeId : -1,
+			),
 			enabled: false,
 			retry: 0,
 		},

@@ -1,19 +1,27 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
-import { CautionRoute, DangerRoute, NavigationRouteList } from "../data/types/route";
+import {
+	CautionRoute,
+	DangerRoute,
+	NavigationButtonRouteType,
+	NavigationRouteList,
+	NavigationRouteListRecordWithMetaData,
+} from "../data/types/route";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enum/markerEnum";
 import useRoutePoint from "../hooks/useRoutePoint";
 import { AdvancedMarker } from "../data/types/marker";
+import { interpolate } from "../utils/interpolate";
 
 type MapProps = {
 	style?: React.CSSProperties;
-	routeResult: NavigationRouteList;
+	routeResult: NavigationRouteListRecordWithMetaData;
 	risks: {
 		dangerRoutes: DangerRoute[];
 		cautionRoutes: CautionRoute[];
 	};
+	buttonState: NavigationButtonRouteType;
 	isDetailView: boolean;
 	topPadding?: number;
 	bottomPadding?: number;
@@ -22,165 +30,293 @@ type MapProps = {
 // TODO: useEffect로 경로가 모두 로딩된 이후에 마커가 생성되도록 수정하기
 // TODO: 경로 로딩 완료시 살짝 zoomIn 하는 부분 구현하기
 
-const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0, bottomPadding = 0 }: MapProps) => {
+const polylineConfig = {
+	"PEDES & SAFE": { strokeColor: "#0252c9" },
+	"PEDES & CAUTION": { strokeColor: "0252c9" },
+	"ELECTRIC & SAFE": { strokeColor: "#00c5b8" },
+	"ELECTRIC & CAUTION": { strokeColor: "#ff8000" },
+	"MANUAL & SAFE": { strokeColor: "#00c5b8" },
+	"MANUAL & CAUTION": { strokeColor: "#ff8000" },
+};
+const dashSymbol = {
+	path: "M 0,-1 0,1",
+	strokeOpacity: 1,
+	scale: 3,
+};
+
+interface PolylineSet {
+	startBuildingPath: google.maps.Polyline;
+	endingBuildingPath: google.maps.Polyline;
+	paths: google.maps.Polyline;
+	bounds: google.maps.LatLngBounds;
+}
+
+type CompositeRoutesRecord = Partial<Record<NavigationButtonRouteType, PolylineSet>>;
+
+const NavigationMap = ({
+	style,
+	routeResult,
+	risks,
+	isDetailView,
+	buttonState,
+	topPadding = 0,
+	bottomPadding = 0,
+}: MapProps) => {
 	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
 	const { origin, destination } = useRoutePoint();
 
 	const boundsRef = useRef<google.maps.LatLngBounds | null>(null);
-	const markersRef = useRef<AdvancedMarker[]>([]);
+	const dyamicMarkersRef = useRef<AdvancedMarker[]>([]);
 
 	if (!style) {
 		style = { height: "100%", width: "100%" };
 	}
 
+	// 길을 그리는 Method
+	const createCompositeRoute = useCallback(
+		(routeData: NavigationRouteList): PolylineSet | null => {
+			if (!Polyline) return null;
+			if (!origin || !destination) return null;
+			if (routeData.routes.length === 0) return null;
+			const { routes } = routeData;
+
+			const bounds = new google.maps.LatLngBounds();
+
+			bounds.extend({ lat: origin!.lat, lng: origin!.lng });
+			bounds.extend({ lat: destination!.lat, lng: destination!.lng });
+
+			// // 시작 건물과 첫번째 노드를 잇는 경로
+			const startingBuildingPath: google.maps.LatLngLiteral[] = [origin, routes[0].node1];
+			// 마지막 노드와 도착 건물을 잇는 경로
+			const endingBuildingPath: google.maps.LatLngLiteral[] = [routes[routes.length - 1].node2, destination];
+			// 본 경로 (첫번째 노드와 그 이후 노드들을 잇는 경로)
+			const mainPath: google.maps.LatLngLiteral[] = [routes[0].node1, ...routes.map((el) => el.node2)];
+
+			// 경로의 bounds 업데이트
+			mainPath.forEach((coord) => bounds.extend(coord));
+
+			// // 시작 Polyline (점선)
+			const startPolyline = new Polyline({
+				path: startingBuildingPath,
+				strokeOpacity: 0,
+				strokeColor: "#000000",
+				icons: [
+					{
+						icon: dashSymbol,
+						offset: "0",
+						repeat: "20px",
+					},
+				],
+				geodesic: true,
+			});
+			// 종료 Polyline (점선)
+			const endPolyline = new Polyline({
+				path: endingBuildingPath,
+				strokeOpacity: 0,
+				strokeColor: "#000000",
+				icons: [
+					{
+						icon: dashSymbol,
+						offset: "2",
+						repeat: "20px",
+					},
+				],
+				geodesic: true,
+			});
+
+			// 본 경로 Polyline (실제 경로 선)
+			const mainPolyline = new Polyline({
+				path: mainPath,
+				strokeOpacity: 1,
+				strokeColor: "#000000",
+				strokeWeight: 5.0,
+				geodesic: true,
+			});
+
+			return {
+				startBuildingPath: startPolyline,
+				endingBuildingPath: endPolyline,
+				paths: mainPolyline,
+				bounds,
+			};
+		},
+		[Polyline, origin, destination],
+	);
+
+	const compositeRoutes: CompositeRoutesRecord = useMemo(() => {
+		if (!routeResult || !Polyline) return {};
+		if (!origin || !destination) return {};
+		const record: CompositeRoutesRecord = {};
+		Object.entries(routeResult).forEach(([key, routeData]) => {
+			// key는 NavigationButtonRouteType 형식으로 가정
+			if (typeof routeData !== "number" && routeData.routes.length > 0) {
+				const composite = createCompositeRoute(routeData);
+				if (composite) record[key as NavigationButtonRouteType] = composite;
+			}
+		});
+		return record;
+	}, [routeResult, Polyline, createCompositeRoute]);
+
 	useEffect(() => {
-		if (!mapRef || !map || !AdvancedMarker || !routeResult || !Polyline) return;
+		if (!map || !compositeRoutes) return;
+		// 활성화된 버튼 타입에 해당하는 Composite Polyline만 지도에 추가
+		const activeComposite = compositeRoutes[buttonState];
 
-		if (routeResult.routes.length === 0) return;
-
-		const { routes, routeDetails } = routeResult;
-
-		if (!origin || !destination) {
-			return;
+		if (activeComposite) {
+			activeComposite.startBuildingPath.setMap(map);
+			activeComposite.endingBuildingPath.setMap(map);
+			activeComposite.paths.setMap(map);
+			activeComposite.paths.setOptions(polylineConfig[buttonState as keyof typeof polylineConfig]);
+			map.fitBounds(activeComposite.bounds, {
+				top: topPadding,
+				right: 30,
+				bottom: bottomPadding,
+			});
 		}
 
-		const startingBuildingPath = [{ lat: origin?.lat, lng: origin?.lng }, routes[0].node1];
-
-		const endingBuildingPath = [routes[routes.length - 1].node2, { lat: destination?.lat, lng: destination?.lng }];
-
-		// 하나의 길 완성
-		const paths = [routes[0].node1, ...routes.map((el) => el.node2)];
-
-		const bounds = new google.maps.LatLngBounds();
-
-		const dashSymbol = {
-			path: "M 0,-1 0,1",
-			strokeOpacity: 1,
-			scale: 3,
-		};
-
-		// 시작 building과 첫번째 점을 이어주는 polyline
-		new Polyline({
-			path: startingBuildingPath,
-			map,
-			strokeOpacity: 0,
-			icons: [
-				{
-					icon: dashSymbol,
-					offset: "0",
-					repeat: "20px",
-				},
-			],
-			geodesic: true,
-		});
-
-		// 마지막 building과 마지막 점을 이어주는 polyline
-		new Polyline({
-			path: endingBuildingPath,
-			map,
-			strokeOpacity: 0,
-			icons: [
-				{
-					icon: dashSymbol,
-					offset: "0",
-					repeat: "20px",
-				},
-			],
-		});
-
-		new Polyline({
-			path: paths,
-			map,
-			strokeColor: "#000000",
-			strokeWeight: 2.0,
-		});
-
-		// [간선] 마커 찍기
-		routeDetails.forEach((routeDetail) => {
-			const { coordinates } = routeDetail;
-			bounds.extend(coordinates);
-			const markerElement = createMarkerElement({
-				type: Markers.WAYPOINT,
-				className: "translate-waypoint",
+		return () => {
+			Object.values(compositeRoutes).forEach((composite) => {
+				composite!.startBuildingPath.setMap(null);
+				composite!.endingBuildingPath.setMap(null);
+				composite!.paths.setMap(null);
 			});
-			// routeDetail에 cautionTypes가 있다면 [주의] 마커를 넣기
-			if (routeDetail.cautionFactors && routeDetail.cautionFactors.length > 0) {
-				const markerElement = createMarkerElement({
-					type: Markers.CAUTION,
-					className: "traslate-marker",
-					hasAnimation: true,
-				});
-				createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
-			}
-			createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
-		});
+		};
+	}, [map, buttonState, compositeRoutes, topPadding, bottomPadding]);
 
-		// [시작] 마커는 출발지 (건물 기준)
-		const startMarkerElement = createMarkerElement({
+	const createRiskMarkers = (
+		riskData: DangerRoute[] | CautionRoute[],
+		map: google.maps.Map,
+		AdvancedMarker: typeof google.maps.marker.AdvancedMarkerElement,
+	): AdvancedMarker[] => {
+		const markers: AdvancedMarker[] = [];
+		riskData.forEach((route) => {
+			const marker = createAdvancedMarker(
+				AdvancedMarker,
+				map,
+				interpolate(route.node1, route.node2, 0.5),
+				createMarkerElement({
+					type: Markers.DANGER,
+					className: "translate-marker",
+					hasAnimation: true,
+				}),
+			);
+			markers.push(marker);
+		});
+		return markers;
+	};
+
+	const createStartEndMarkers = () => {
+		if (!map || !origin || !destination || !AdvancedMarker) return;
+		// 출발지 마커
+		const originMarkerElement = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin?.buildingName,
 			className: "translate-pinmarker",
 			hasAnimation: true,
 		});
-		const { lat: originLat, lng: originLng }: google.maps.LatLngLiteral = origin!;
-		const originCoord = { lat: originLat, lng: originLng };
-		createAdvancedMarker(AdvancedMarker, map, originCoord, startMarkerElement);
-		bounds.extend(originCoord);
+		const originMarker = createAdvancedMarker(AdvancedMarker, map, origin, originMarkerElement);
 
-		// [끝] 마커는 도착지 빌딩 (건물 기준)
-		const endMarkerElement = createMarkerElement({
+		// 도착지 마커
+		const destinationMarkerElement = createMarkerElement({
 			type: Markers.DESTINATION,
 			title: destination?.buildingName,
 			className: "translate-pinmarker",
 			hasAnimation: true,
 		});
+		const destinationMarker = createAdvancedMarker(AdvancedMarker, map, destination, destinationMarkerElement);
 
-		const { lat: destinationLat, lng: destinationLng }: google.maps.LatLngLiteral = destination!;
-		const destinationCoord = { lat: destinationLat, lng: destinationLng };
-		createAdvancedMarker(AdvancedMarker, map, destinationCoord, endMarkerElement);
-		bounds.extend(destinationCoord);
+		// bounds 업데이트
+		boundsRef.current?.extend(origin);
+		boundsRef.current?.extend(destination);
 
-		// React Query Cache 혹은 API에서 불러온 [위험] 마커 찍기
-		risks.dangerRoutes.forEach((route) => {
-			const { node1, node2 } = route;
-			const type = Markers.DANGER;
-			createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				createMarkerElement({ type }),
-			);
+		return [originMarker, destinationMarker];
+	};
+
+	const areCoordinatesEqual = (coord1: google.maps.LatLngLiteral, coord2: google.maps.LatLngLiteral) => {
+		return coord1.lat === coord2.lat && coord1.lng === coord2.lng;
+	};
+
+	const areMarkersEqual = (
+		prevMarker: AdvancedMarker,
+		newMarkerData: { coordinates: google.maps.LatLngLiteral; type: Markers; hasAnimation: boolean },
+	) => {
+		const prevPosition = prevMarker.position!;
+		return areCoordinatesEqual(prevPosition, newMarkerData.coordinates);
+	};
+
+	const createStaticMarkers = (
+		routeData: NavigationRouteList,
+		map: google.maps.Map,
+		AdvancedMarker: typeof google.maps.marker.AdvancedMarkerElement,
+		prevMarkers: AdvancedMarker[] = [],
+	): AdvancedMarker[] => {
+		const markers: AdvancedMarker[] = [];
+		const bounds = new google.maps.LatLngBounds();
+
+		routeData.routeDetails.forEach((routeDetail, index) => {
+			const { coordinates } = routeDetail;
+			bounds.extend(coordinates);
+			const markerType =
+				routeDetail.cautionFactors && routeDetail.cautionFactors.length > 0
+					? Markers.CAUTION
+					: Markers.WAYPOINT;
+			const hasAnimation = true;
+			const newMarkerData = { coordinates, type: markerType, hasAnimation };
+
+			// 2. 기존 마커가 있고, 좌표와 타입이 동일하면 재사용
+			if (prevMarkers[index] && areMarkersEqual(prevMarkers[index], newMarkerData)) {
+				const existingMarker = prevMarkers[index];
+				existingMarker.position = coordinates;
+				markers.push(existingMarker);
+			} else {
+				// 3. 기존 마커가 없거나 일치하지 않으면 새로 생성
+				const markerElement = createMarkerElement({
+					type: markerType,
+					className: markerType === Markers.CAUTION ? "translate-pinmarker" : "translate-waypoint",
+					hasAnimation,
+				});
+
+				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
+				markers.push(marker);
+			}
 		});
 
-		boundsRef.current = bounds;
+		return markers;
+	};
 
-		map.fitBounds(bounds, {
-			top: topPadding,
-			right: 30,
-			bottom: bottomPadding,
-			left: 30,
-		});
-	}, [mapRef, map, AdvancedMarker, Polyline, routeResult]);
+	const staticMarkersRef = useRef<AdvancedMarker[]>([]);
 
 	useEffect(() => {
-		if (!map || !boundsRef.current) return;
-		map.fitBounds(boundsRef.current, {
-			top: topPadding,
-			right: 30,
-			bottom: bottomPadding,
-			left: 30,
+		if (!map || !origin || !destination || !AdvancedMarker) return;
+
+		const newMarkers = createStaticMarkers(routeResult[buttonState], map, AdvancedMarker, staticMarkersRef.current);
+		// 기존 마커 제거, includes로 새로운 마커가 기존 마커에 포함되어 있는지 확인
+		// 단점 : 마커가 길어지면 복잡해질 수 있지만, 깜박임 현상을 방지하고 repaint를 줄일 수 있는 장점이 있음.
+		staticMarkersRef.current.forEach((oldMarker) => {
+			if (!newMarkers.includes(oldMarker)) {
+				oldMarker.map = null; // 지도에서 제거
+			}
 		});
-	}, [map, bottomPadding, topPadding]);
+
+		staticMarkersRef.current = [];
+		staticMarkersRef.current = newMarkers;
+
+		const currentRoute = routeResult[buttonState];
+		if (!currentRoute) return;
+	}, [map, buttonState, routeResult]);
 
 	useEffect(() => {
+		if (!map || !risks || !AdvancedMarker) return;
+		createRiskMarkers(risks.dangerRoutes, map, AdvancedMarker);
+		createStartEndMarkers();
+	}, [map, risks, origin, destination, AdvancedMarker]);
+
+	// 동적 마커 그리는 부분
+	const drawDynamicMarker = (routeResult: NavigationRouteList) => {
 		if (!AdvancedMarker || !map) return;
-
 		if (isDetailView) {
 			const { routeDetails } = routeResult;
-			markersRef.current = [];
+			dyamicMarkersRef.current = [];
 			// [그림] 마커 찍기
 			routeDetails.forEach((routeDetail, index) => {
 				const { coordinates } = routeDetail;
@@ -192,25 +328,41 @@ const NavigationMap = ({ style, routeResult, risks, isDetailView, topPadding = 0
 
 				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
 
-				markersRef.current.push(marker);
+				dyamicMarkersRef.current.push(marker);
 			});
 		}
+	};
 
-		return () => {
-			markersRef.current.forEach((marker) => {
-				const markerElement = marker.content as HTMLElement;
-				if (markerElement) {
-					markerElement.classList.add("fade-out");
-					setTimeout(() => {
-						marker.map = null;
-					}, 300);
-				} else {
+	const fadeOutDynamicMarker = () => {
+		dyamicMarkersRef.current.forEach((marker) => {
+			const markerElement = marker.content as HTMLElement;
+			if (markerElement) {
+				markerElement.classList.add("fade-out");
+				setTimeout(() => {
 					marker.map = null;
-				}
-			});
-			markersRef.current = [];
-		};
-	}, [isDetailView, AdvancedMarker, map, routeResult]);
+				}, 300);
+			} else {
+				marker.map = null;
+			}
+		});
+		dyamicMarkersRef.current = [];
+	};
+
+	useEffect(() => {
+		if (!map || !boundsRef.current) return;
+		map.fitBounds(boundsRef.current, {
+			top: topPadding,
+			right: 50,
+			bottom: bottomPadding,
+			left: 50,
+		});
+	}, [map, bottomPadding, topPadding]);
+
+	useEffect(() => {
+		if (!AdvancedMarker || !map) return;
+		drawDynamicMarker(routeResult[buttonState]);
+		return fadeOutDynamicMarker;
+	}, [isDetailView, AdvancedMarker, map, routeResult, buttonState]);
 
 	return <div id="map" ref={mapRef} style={style} />;
 };
