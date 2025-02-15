@@ -43,6 +43,7 @@ public class RouteAuditRepository {
 		List<Route> allRevisions = auditReader.createQuery()
 				.forRevisionsOfEntity(Route.class, true, true)
 				.add(AuditEntity.revisionNumber().gt(versionId))
+				.add(AuditEntity.property("univId").eq(univId))
 				.addOrder(AuditEntity.revisionNumber().asc())
 				.getResultList();
 
