@@ -66,17 +66,6 @@ const NavigationNavBar = ({ route, dataLength, buttonType, setButtonState }: Pro
 				<>
 					<div
 						onClick={() =>
-							keyExists("ELECTRIC & CAUTION")
-								? setButtonState("ELECTRIC & CAUTION")
-								: setButtonState("ELECTRIC & SAFE")
-						}
-						className={`flex flex-row min-w-max items-center justify-center ${buttonType === "ELECTRIC & SAFE" || buttonType === "ELECTRIC & CAUTION" ? "bg-blue-600" : "bg-blue-300"} active:bg-blue-800 transition-colors rounded-xl py-2 px-4 text-gray-100 text-kor-body3 font-light`}
-					>
-						<ElectricIcon className="w-5 h-5 mr-1" />
-						{`전동 휠체어 ${calculatedTimes.electric}분`}
-					</div>
-					<div
-						onClick={() =>
 							keyExists("MANUAL & CAUTION")
 								? setButtonState("MANUAL & CAUTION")
 								: setButtonState("MANUAL & SAFE")
@@ -85,6 +74,17 @@ const NavigationNavBar = ({ route, dataLength, buttonType, setButtonState }: Pro
 					>
 						<WheelChairIcon className="w-5 h-5 mr-1" />
 						{`휠체어 ${calculatedTimes.wheelchair}분`}
+					</div>
+					<div
+						onClick={() =>
+							keyExists("ELECTRIC & CAUTION")
+								? setButtonState("ELECTRIC & CAUTION")
+								: setButtonState("ELECTRIC & SAFE")
+						}
+						className={`flex flex-row min-w-max items-center justify-center ${buttonType === "ELECTRIC & SAFE" || buttonType === "ELECTRIC & CAUTION" ? "bg-blue-600" : "bg-blue-300"} active:bg-blue-800 transition-colors rounded-xl py-2 px-4 text-gray-100 text-kor-body3 font-light`}
+					>
+						<ElectricIcon className="w-5 h-5 mr-1" />
+						{`전동 휠체어 ${calculatedTimes.electric}분`}
 					</div>
 				</>
 			)}
