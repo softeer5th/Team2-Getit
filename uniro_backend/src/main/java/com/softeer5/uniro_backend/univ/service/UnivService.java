@@ -1,8 +1,8 @@
 package com.softeer5.uniro_backend.univ.service;
 
-import com.softeer5.uniro_backend.common.CursorPage;
 import com.softeer5.uniro_backend.univ.dto.SearchUnivResDTO;
 import com.softeer5.uniro_backend.univ.dto.UnivInfo;
+import com.softeer5.uniro_backend.univ.entity.Univ;
 import com.softeer5.uniro_backend.univ.repository.UnivRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,10 @@ public class UnivService {
     private final UnivRepository univRepository;
 
     public SearchUnivResDTO searchUniv(String name, Integer pageSize) {
-        List<UnivInfo> universities = univRepository.searchUniv(name, pageSize);
-        return SearchUnivResDTO.of(universities);
+        List<Univ> universities = univRepository.searchUniv(name, pageSize);
+
+        List<UnivInfo> univInfos = universities.stream().map(UnivInfo::of).toList();
+
+        return SearchUnivResDTO.of(univInfos);
     }
 }
