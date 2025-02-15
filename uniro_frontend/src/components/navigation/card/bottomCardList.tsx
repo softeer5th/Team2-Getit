@@ -4,7 +4,6 @@ import { NavigationButtonRouteType, NavigationRouteListRecord } from "../../../d
 
 type Props = {
 	routeList: NavigationRouteListRecord;
-	dataLength: number;
 	buttonType: NavigationButtonRouteType;
 	showDetailView: () => void;
 	setButtonState: Dispatch<NavigationButtonRouteType>;

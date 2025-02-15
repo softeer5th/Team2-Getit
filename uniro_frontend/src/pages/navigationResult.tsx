@@ -138,7 +138,6 @@ const NavigationResultPage = () => {
 			>
 				<BottomCardList
 					routeList={routeList.data!}
-					dataLength={routeList.data!.dataLength}
 					buttonType={buttonState}
 					showDetailView={showDetailView}
 					setButtonState={setButtonState}
