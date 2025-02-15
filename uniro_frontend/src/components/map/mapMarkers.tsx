@@ -38,7 +38,7 @@ function createTextElement(type: MarkerTypes, title: string): HTMLElement {
 	}
 }
 
-function createAnimatedTextElement(type: MarkerTypes, titles: string[]): HTMLElement {
+export function createAnimatedTextElement(type: MarkerTypes, titles: string[]): HTMLElement {
 	const titleContainer = document.createElement("div");
 
 	const elements = [];
