@@ -31,5 +31,7 @@ public class RevisionContext {
 
     public static void clear() {
         univIdHolder.remove();
+        actionHolder.remove();
+        REVISION_TYPE_THREAD_LOCAL.remove();
     }
 }
