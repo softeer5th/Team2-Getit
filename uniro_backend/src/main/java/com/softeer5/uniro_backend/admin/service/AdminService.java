@@ -99,14 +99,7 @@ public class AdminService {
     }
 
     public GetAllRoutesByRevisionResDTO getAllRoutesByRevision(Long univId, Long versionId){
-        revInfoRepository.findById(versionId)
-                .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
-
-        List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
-
-        if(revRoutes.isEmpty()) {
-            throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
-        }
+        List<Route> revRoutes = getRevRoutes(univId,versionId);
         GetAllRoutesResDTO routesInfo = routeCalculator.assembleRoutes(revRoutes);
 
         Map<Long, Route> revRouteMap = new HashMap<>();
@@ -135,28 +128,13 @@ public class AdminService {
 
         //시작점이 1개인 nodeList 생성
         List<Node> endNodes = determineEndNodes(lostAdjMap, lostNodeMap);
-
-        List<NodeInfoResDTO> lostNodeInfos = lostNodeMap.entrySet().stream()
-                .map(entry -> {
-                    Node node = entry.getValue();
-                    return NodeInfoResDTO.of(entry.getKey(), node.getX(), node.getY());
-                })
-                .toList();
-
-        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
+        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(mapNodeInfo(lostNodeMap), routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
 
         return GetAllRoutesByRevisionResDTO.of(routesInfo, getRiskRoutesResDTO, lostRouteDTO, changedRoutes);
     }
 
     public GetChangedRoutesByRevisionResDTO getChangedRoutesByRevision(Long univId, Long versionId) {
-        revInfoRepository.findById(versionId)
-                .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
-
-        List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
-
-        if(revRoutes.isEmpty()) {
-            throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
-        }
+        List<Route> revRoutes = getRevRoutes(univId,versionId);
 
         Map<Long, Route> revRouteMap = new HashMap<>();
         for(Route revRoute : revRoutes){
@@ -168,12 +146,11 @@ public class AdminService {
         Map<Long, List<Route>> lostAdjMap = new HashMap<>();
         Map<Long, Node> lostNodeMap = new HashMap<>();
         List<ChangedRouteDTO> changedRoutes = new ArrayList<>();
-        List<Route> riskRoutes = new ArrayList<>();
 
         for(Route route : routes){
             if(revRouteMap.containsKey(route.getId())){
                 Route revRoute = revRouteMap.get(route.getId());
-                handleRevisionRoute(revRoute, route, changedRoutes, riskRoutes);
+                handleRevisionRoute(revRoute, route, changedRoutes);
                 continue;
             }
             //해당 시점 이후에 생성된 루트들 (과거 시점엔 보이지 않는 루트)
@@ -182,17 +159,21 @@ public class AdminService {
 
         //시작점이 1개인 nodeList 생성
         List<Node> endNodes = determineEndNodes(lostAdjMap, lostNodeMap);
-
-        List<NodeInfoResDTO> lostNodeInfos = lostNodeMap.entrySet().stream()
-                .map(entry -> {
-                    Node node = entry.getValue();
-                    return NodeInfoResDTO.of(entry.getKey(), node.getX(), node.getY());
-                })
-                .toList();
-
-        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
+        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(mapNodeInfo(lostNodeMap), routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
 
         return GetChangedRoutesByRevisionResDTO.of(lostRouteDTO,changedRoutes);
+    }
+
+    private List<Route> getRevRoutes(Long univId, Long versionId) {
+        revInfoRepository.findById(versionId)
+                .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
+
+        List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
+
+        if(revRoutes.isEmpty()) {
+            throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
+        }
+        return revRoutes;
     }
 
 
@@ -204,6 +185,13 @@ public class AdminService {
         //변경사항이 없으면서 risk가 존재하는 route의 경우 riskRoutes에 추가
         else if(!route.getCautionFactors().isEmpty() || !route.getDangerFactors().isEmpty()){
             riskRoutes.add(route);
+        }
+    }
+
+    private void handleRevisionRoute(Route revRoute, Route route, List<ChangedRouteDTO> changedRoutes) {
+        //변경사항이 있는 경우
+        if(!route.isEqualRoute(revRoute)){
+            changedRoutes.add(ChangedRouteDTO.of(route.getId(), RouteDifferInfo.of(route), RouteDifferInfo.of(revRoute)));
         }
     }
 
@@ -221,6 +209,15 @@ public class AdminService {
                 .map(Map.Entry::getKey)
                 .map(lostNodeMap::get)
                 .collect(Collectors.toList());
+    }
+
+    private List<NodeInfoResDTO> mapNodeInfo(Map<Long, Node> lostNodeMap){
+        return lostNodeMap.entrySet().stream()
+                .map(entry -> {
+                    Node node = entry.getValue();
+                    return NodeInfoResDTO.of(entry.getKey(), node.getX(), node.getY());
+                })
+                .toList();
     }
 
 }
