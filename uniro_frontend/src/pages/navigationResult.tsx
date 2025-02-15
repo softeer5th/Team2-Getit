@@ -117,7 +117,11 @@ const NavigationResultPage = () => {
 				transition={{ type: "spring", damping: 20, duration: 0.3 }}
 			>
 				<div className="max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
-					<NavigationDescription isDetailView={false} navigationRoute={routeList.data![buttonState]} />
+					<NavigationDescription
+						isDetailView={false}
+						navigationRoute={routeList.data![buttonState]}
+						buttonType={buttonState}
+					/>
 				</div>
 				<NavigationNavBar
 					route={routeList.data!}
