@@ -50,6 +50,7 @@ import jakarta.persistence.EntityManager;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SqlGroup({
+	@Sql(value = "/sql/delete-all-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
 	@Sql(value = "/sql/delete-all-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 })
 class AdminServiceTest {
@@ -1057,7 +1058,6 @@ class AdminServiceTest {
 	}
 
 	@Test
-	@DisplayName("wiki 페이지 TC.6")
 	void 특정_버전_차이점_조회_테스트_with_위험_주의요소_변경(){
 		Node node1 = NodeFixture.createNode(1, 1);
 		Node node2 = NodeFixture.createNode(1, 2);
