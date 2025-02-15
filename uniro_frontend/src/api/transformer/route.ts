@@ -65,7 +65,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				};
 				break;
 			case "WHEEL_FAST":
-				if (route.manualTotalCost) {
+				if (route.manualTotalCost && route.hasCaution) {
 					record[`MANUAL & CAUTION`] = {
 						hasCaution: route.hasCaution,
 						totalDistance: route.totalDistance,
@@ -74,7 +74,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 						routeDetails: route.routeDetails,
 					};
 				}
-				if (route.electricTotalCost) {
+				if (route.electricTotalCost && route.hasCaution) {
 					record[`ELECTRIC & CAUTION`] = {
 						hasCaution: route.hasCaution,
 						totalDistance: route.totalDistance,
@@ -85,7 +85,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				}
 				break;
 			case "WHEEL_SAFE":
-				if (route.manualTotalCost) {
+				if (route.manualTotalCost && !route.hasCaution) {
 					record[`MANUAL & SAFE`] = {
 						hasCaution: route.hasCaution,
 						totalDistance: route.totalDistance,
@@ -94,7 +94,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 						routeDetails: route.routeDetails,
 					};
 				}
-				if (route.electricTotalCost) {
+				if (route.electricTotalCost && !route.hasCaution) {
 					record[`ELECTRIC & SAFE`] = {
 						hasCaution: route.hasCaution,
 						totalDistance: route.totalDistance,

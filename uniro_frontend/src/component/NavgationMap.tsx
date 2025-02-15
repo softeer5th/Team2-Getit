@@ -187,6 +187,10 @@ const NavigationMap = ({
 		};
 	}, [map, buttonState, compositeRoutes, topPadding, bottomPadding]);
 
+	const centerCoordinate = (origin: google.maps.LatLngLiteral, destination: google.maps.LatLngLiteral) => {
+		return interpolate(origin, destination, 0.5);
+	};
+
 	const createRiskMarkers = (
 		riskData: DangerRoute[] | CautionRoute[],
 		map: google.maps.Map,
@@ -197,7 +201,7 @@ const NavigationMap = ({
 			const marker = createAdvancedMarker(
 				AdvancedMarker,
 				map,
-				interpolate(route.node1, route.node2, 0.5),
+				centerCoordinate(route.node1, route.node2),
 				createMarkerElement({
 					type: Markers.DANGER,
 					className: "translate-marker",
@@ -257,6 +261,8 @@ const NavigationMap = ({
 		const markers: AdvancedMarker[] = [];
 		const bounds = new google.maps.LatLngBounds();
 
+		if (!routeData?.routeDetails) return markers;
+
 		routeData.routeDetails.forEach((routeDetail, index) => {
 			const { coordinates } = routeDetail;
 			bounds.extend(coordinates);
@@ -276,7 +282,7 @@ const NavigationMap = ({
 				// 3. 기존 마커가 없거나 일치하지 않으면 새로 생성
 				const markerElement = createMarkerElement({
 					type: markerType,
-					className: markerType === Markers.CAUTION ? "translate-pinmarker" : "translate-waypoint",
+					className: "translate-waypoint",
 					hasAnimation,
 				});
 

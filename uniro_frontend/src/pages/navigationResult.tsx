@@ -103,25 +103,6 @@ const NavigationResultPage = () => {
 		setIsDetailView(false);
 	};
 
-	// PEDS & SAFE의 경우 result에 PEDS & SAFE만 넘겨줌
-	// ELECTRIC & CAUTION or ELECTRIC & SAFE 일 경우 result에 ELECTRIC&CAUTION, ELECTRIC&SAFE 넘겨줌
-	// MANUAL & CAUTION or MANUAL & SAFE 일 경우 result에 MANUA & CAUTION, MANUAL&SAFE 넘겨줌
-
-	const filteredData = () => {
-		switch (buttonState) {
-			case "PEDES & SAFE":
-				return routeList.data?.[buttonState] ? [routeList.data[buttonState]] : [];
-			case "ELECTRIC & CAUTION":
-			case "ELECTRIC & SAFE":
-				return [routeList.data!["ELECTRIC & CAUTION"], routeList.data!["ELECTRIC & SAFE"]].filter(Boolean);
-			case "MANUAL & CAUTION":
-			case "MANUAL & SAFE":
-				return [routeList.data!["MANUAL & CAUTION"], routeList.data!["MANUAL & SAFE"]].filter(Boolean);
-			default:
-				return [];
-		}
-	};
-
 	const handleButtonStateChange = (buttonType: NavigationButtonRouteType) => {
 		setButtonState(buttonType);
 	};
@@ -148,7 +129,11 @@ const NavigationResultPage = () => {
 				transition={{ type: "spring", damping: 20, duration: 0.3 }}
 			>
 				<div className="max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
-					<NavigationDescription isDetailView={false} navigationRoute={routeList.data![buttonState]} />
+					<NavigationDescription
+						isDetailView={false}
+						navigationRoute={routeList.data![buttonState]}
+						buttonType={buttonState}
+					/>
 				</div>
 				<NavigationNavBar
 					route={routeList.data!}
@@ -164,8 +149,7 @@ const NavigationResultPage = () => {
 				positionDelta={88}
 			>
 				<BottomCardList
-					routeList={filteredData()}
-					dataLength={routeList.data!.dataLength}
+					routeList={routeList.data!}
 					buttonType={buttonState}
 					showDetailView={showDetailView}
 					setButtonState={setButtonState}
@@ -212,9 +196,10 @@ const NavigationResultPage = () => {
 					onScroll={preventScroll}
 				>
 					<NavigationDescription
-						resetCurrentRouteIdx={resetCurrentIndex}
 						isDetailView={true}
+						buttonType={buttonState}
 						navigationRoute={routeList.data![buttonState]}
+                        resetCurrentRouteIdx={resetCurrentIndex}
 					/>
 					<RouteList
 						changeCurrentRouteIdx={changeCurrentIndex}

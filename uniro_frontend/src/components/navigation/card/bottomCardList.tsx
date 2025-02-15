@@ -1,11 +1,9 @@
 import React, { Dispatch } from "react";
 import BottomCard from "./bottomCard";
-import { NavigationButtonRouteType, NavigationRouteList } from "../../../data/types/route";
-import { b } from "framer-motion/client";
+import { NavigationButtonRouteType, NavigationRouteListRecord } from "../../../data/types/route";
 
 type Props = {
-	routeList: NavigationRouteList[];
-	dataLength: number;
+	routeList: NavigationRouteListRecord;
 	buttonType: NavigationButtonRouteType;
 	showDetailView: () => void;
 	setButtonState: Dispatch<NavigationButtonRouteType>;
@@ -13,7 +11,7 @@ type Props = {
 
 const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView, setButtonState }: Props) => {
 	if (buttonType === "PEDES & SAFE") {
-		const routeInfo = routeList[0];
+		const routeInfo = routeList[buttonType];
 		const { totalCost, totalDistance } = routeInfo;
 		return (
 			<div className="w-full flex flex-row items-center justify-center gap-4">
@@ -27,8 +25,9 @@ const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView
 		);
 	}
 
-	const cautionRoute = routeList.length >= 1 ? routeList[0] : null;
-	const safeRoute = routeList.length === 2 ? routeList[1] : null;
+	const keyExists = (key: NavigationButtonRouteType) => {
+		return routeList[key] !== undefined;
+	};
 
 	return (
 		<div className="w-full flex flex-row items-center justify-center gap-4">
@@ -36,7 +35,7 @@ const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView
 				type="caution"
 				selected={buttonType.includes("CAUTION")}
 				onClick={
-					cautionRoute
+					keyExists("MANUAL & CAUTION") || keyExists("ELECTRIC & CAUTION")
 						? () => {
 								if (buttonType.includes("CAUTION")) {
 									showDetailView();
@@ -52,8 +51,15 @@ const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView
 						: () => {}
 				}
 				routeInfo={
-					cautionRoute
-						? { totalCost: cautionRoute.totalCost, totalDistance: cautionRoute.totalDistance }
+					keyExists("MANUAL & CAUTION") || keyExists("ELECTRIC & CAUTION")
+						? {
+								totalCost: buttonType.includes("MANUAL")
+									? routeList["MANUAL & CAUTION"].totalCost
+									: routeList["ELECTRIC & CAUTION"].totalCost,
+								totalDistance: buttonType.includes("MANUAL")
+									? routeList["MANUAL & CAUTION"].totalDistance
+									: routeList["ELECTRIC & CAUTION"].totalDistance,
+							}
 						: undefined
 				}
 			/>
@@ -61,7 +67,7 @@ const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView
 				type="safe"
 				selected={buttonType.includes("SAFE")}
 				onClick={
-					safeRoute
+					keyExists("MANUAL & SAFE") || keyExists("ELECTRIC & SAFE")
 						? () => {
 								if (buttonType.includes("SAFE")) {
 									showDetailView();
@@ -74,7 +80,16 @@ const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView
 						: () => {}
 				}
 				routeInfo={
-					safeRoute ? { totalCost: safeRoute.totalCost, totalDistance: safeRoute.totalDistance } : undefined
+					routeList[buttonType]
+						? {
+								totalCost: buttonType.includes("MANUAL")
+									? routeList["MANUAL & SAFE"].totalCost
+									: routeList["ELECTRIC & SAFE"].totalCost,
+								totalDistance: buttonType.includes("MANUAL")
+									? routeList["MANUAL & SAFE"].totalDistance
+									: routeList["ELECTRIC & SAFE"].totalDistance,
+							}
+						: undefined
 				}
 			/>
 		</div>
