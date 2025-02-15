@@ -183,6 +183,10 @@ const NavigationMap = ({
 		};
 	}, [map, buttonState, compositeRoutes, topPadding, bottomPadding]);
 
+	const centerCoordinate = (origin: google.maps.LatLngLiteral, destination: google.maps.LatLngLiteral) => {
+		return interpolate(origin, destination, 0.5);
+	};
+
 	const createRiskMarkers = (
 		riskData: DangerRoute[] | CautionRoute[],
 		map: google.maps.Map,
@@ -193,7 +197,7 @@ const NavigationMap = ({
 			const marker = createAdvancedMarker(
 				AdvancedMarker,
 				map,
-				interpolate(route.node1, route.node2, 0.5),
+				centerCoordinate(route.node1, route.node2),
 				createMarkerElement({
 					type: Markers.DANGER,
 					className: "translate-marker",
