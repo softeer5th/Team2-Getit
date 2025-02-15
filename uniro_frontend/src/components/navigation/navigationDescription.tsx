@@ -48,8 +48,7 @@ const AnimatedValue = ({ value, className }: AnimatedValueProps) => {
 	);
 };
 
-const NavigationDescription = ({ isDetailView, navigationRoute, buttonType }: TopBarProps) => {
-const NavigationDescription = ({ isDetailView, navigationRoute, resetCurrentRouteIdx }: TopBarProps) => {
+const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, resetCurrentRouteIdx }: TopBarProps) => {
 	const { origin, destination } = useRoutePoint();
 
 	const { university } = useUniversityInfo();

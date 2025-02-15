@@ -196,10 +196,10 @@ const NavigationResultPage = () => {
 					onScroll={preventScroll}
 				>
 					<NavigationDescription
+						resetCurrentRouteIdx={resetCurrentIndex}
 						isDetailView={true}
 						buttonType={buttonState}
 						navigationRoute={routeList.data![buttonState]}
-                        resetCurrentRouteIdx={resetCurrentIndex}
 					/>
 					<RouteList
 						changeCurrentRouteIdx={changeCurrentIndex}
