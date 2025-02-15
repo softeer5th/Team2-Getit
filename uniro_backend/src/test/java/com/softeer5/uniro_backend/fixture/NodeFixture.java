@@ -24,4 +24,13 @@ public class NodeFixture {
 			.coordinates(geometryFactory.createPoint(new Coordinate(x,y)))
 			.build();
 	}
+
+	public static Node createNodeWithHeight(double x, double y, double height){
+		return Node.builder()
+				.univId(1001L)
+				.isCore(false)
+				.coordinates(geometryFactory.createPoint(new Coordinate(x,y)))
+				.height(height)
+				.build();
+	}
 }
