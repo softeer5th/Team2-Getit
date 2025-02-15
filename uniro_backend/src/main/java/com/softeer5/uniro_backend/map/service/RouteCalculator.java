@@ -206,6 +206,9 @@ public class RouteCalculator {
         PriorityQueue<CostToNextNode> pq = new PriorityQueue<>();
         pq.add(new CostToNextNode(0.0, startNode));
         costMap.put(startNode.getId(), 0.0);
+        // A* 알고리즘 중 출발점과 도착점의 해발고도를 크게 벗어나지 않도록 하기 위한 변수 설정
+        final double minHeight = Math.min(startNode.getHeight(),endNode.getHeight());
+        final double maxHeight = Math.max(startNode.getHeight(),endNode.getHeight());
 
         // 길찾기 알고리즘
         while(!pq.isEmpty()){
@@ -217,8 +220,10 @@ public class RouteCalculator {
                     && currentDistance > costMap.get(currentNode.getId())) continue;
 
             for(Route route : adjMap.getOrDefault(currentNode.getId(), Collections.emptyList())){
-                double newDistance = currentDistance + route.getDistance();
                 Node nextNode = route.getNode1().getId().equals(currentNode.getId())?route.getNode2():route.getNode1();
+                double newDistance = currentDistance + route.getDistance()
+                                                + getHeuristicWeight(maxHeight,minHeight,nextNode);
+
                 if(!costMap.containsKey(nextNode.getId()) || costMap.get(nextNode.getId()) > newDistance){
                     costMap.put(nextNode.getId(), newDistance);
                     pq.add(new CostToNextNode(newDistance, nextNode));
@@ -232,6 +237,20 @@ public class RouteCalculator {
         }
 
         return prevRoute;
+    }
+
+    // A* 알고리즘의 휴리스틱 중 max,min 해발고도를 벗어나는 경우 가중치를 부여
+    private double getHeuristicWeight(double maxHeight, double minHeight, Node nextNode) {
+        double currentHeight = nextNode.getHeight();
+        double diff = 0.0;
+        if(currentHeight > maxHeight) diff = currentHeight - maxHeight;
+        if(currentHeight < minHeight) diff = minHeight - currentHeight;
+        return calculateWeight(diff);
+    }
+
+    // 차이에 따른 가중치를 계산하는 메서드
+    private double calculateWeight(double diff){
+        return Math.pow(diff,2);
     }
 
     // 길찾기 결과를 파싱하여 출발지 -> 도착지 형태로 재배열하는 메서드
