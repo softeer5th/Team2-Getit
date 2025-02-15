@@ -42,6 +42,7 @@ public class RouteCalculator {
     private class CostToNextNode implements Comparable<CostToNextNode> {
         private double cost;
         private Node nextNode;
+        private int cautionCount;
 
         @Override
         public int compareTo(CostToNextNode o) {
@@ -123,7 +124,7 @@ public class RouteCalculator {
             }
 
             //길찾기 알고리즘 수행
-            Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap);
+            Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap, policy);
 
             //길찾기 결과가 null인 경우 continue
             if(prevRoute == null) continue;
@@ -198,13 +199,13 @@ public class RouteCalculator {
         nodeMap.putIfAbsent(route.getNode2().getId(), route.getNode2());
     }
 
-    private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap){
+    private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap, RoadExclusionPolicy policy){
         //key : nodeId, value : 최단거리 중 해당 노드를 향한 route
         Map<Long, Route> prevRoute = new HashMap<>();
         // startNode로부터 각 노드까지 걸리는 cost를 저장하는 자료구조
         Map<Long, Double> costMap = new HashMap<>();
         PriorityQueue<CostToNextNode> pq = new PriorityQueue<>();
-        pq.add(new CostToNextNode(0.0, startNode));
+        pq.add(new CostToNextNode(0.0, startNode,0));
         costMap.put(startNode.getId(), 0.0);
         // A* 알고리즘 중 출발점과 도착점의 해발고도를 크게 벗어나지 않도록 하기 위한 변수 설정
         final double minHeight = Math.min(startNode.getHeight(),endNode.getHeight());
@@ -215,6 +216,7 @@ public class RouteCalculator {
             CostToNextNode costToNextNode = pq.poll();
             double currentDistance = costToNextNode.cost;
             Node currentNode = costToNextNode.nextNode;
+            int currentCautionCount = costToNextNode.cautionCount;
             if (currentNode.getId().equals(endNode.getId())) break;
             if(costMap.containsKey(currentNode.getId())
                     && currentDistance > costMap.get(currentNode.getId())) continue;
@@ -222,11 +224,16 @@ public class RouteCalculator {
             for(Route route : adjMap.getOrDefault(currentNode.getId(), Collections.emptyList())){
                 Node nextNode = route.getNode1().getId().equals(currentNode.getId())?route.getNode2():route.getNode1();
                 double newDistance = currentDistance + route.getDistance()
-                                                + getHeuristicWeight(maxHeight,minHeight,nextNode);
+                                                + getHeightHeuristicWeight(maxHeight,minHeight,nextNode);
+
+                if(policy==RoadExclusionPolicy.WHEEL_FAST && !route.getCautionFactors().isEmpty()){
+                    currentCautionCount++;
+                    newDistance += getRiskHeuristicWeight(currentCautionCount);
+                }
 
                 if(!costMap.containsKey(nextNode.getId()) || costMap.get(nextNode.getId()) > newDistance){
                     costMap.put(nextNode.getId(), newDistance);
-                    pq.add(new CostToNextNode(newDistance, nextNode));
+                    pq.add(new CostToNextNode(newDistance, nextNode, currentCautionCount));
                     prevRoute.put(nextNode.getId(), route);
                 }
             }
@@ -239,8 +246,13 @@ public class RouteCalculator {
         return prevRoute;
     }
 
+    // A* 알고리즘의 휴리스틱 중 지나온 위험요소의 개수에 따른 가중치 부여
+    private double getRiskHeuristicWeight(int currentCautionCount) {
+        return Math.pow(currentCautionCount,2);
+    }
+
     // A* 알고리즘의 휴리스틱 중 max,min 해발고도를 벗어나는 경우 가중치를 부여
-    private double getHeuristicWeight(double maxHeight, double minHeight, Node nextNode) {
+    private double getHeightHeuristicWeight(double maxHeight, double minHeight, Node nextNode) {
         double currentHeight = nextNode.getHeight();
         double diff = 0.0;
         if(currentHeight > maxHeight) diff = currentHeight - maxHeight;
