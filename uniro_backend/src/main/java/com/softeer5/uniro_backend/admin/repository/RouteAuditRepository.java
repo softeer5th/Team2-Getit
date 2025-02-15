@@ -43,11 +43,11 @@ public class RouteAuditRepository {
 		List<Route> allRevisions = auditReader.createQuery()
 				.forRevisionsOfEntity(Route.class, true, true)
 				.add(AuditEntity.revisionNumber().gt(versionId))
+				.addOrder(AuditEntity.revisionNumber().asc())
 				.getResultList();
 
 		Map<Long, Route> uniqueRoutesMap = new HashMap<>();
 		for (Route route : allRevisions) {
-			// 이미 해당 엔티티 ID가 존재하면, 여기서 최신 리비전을 선택하는 로직을 추가할 수 있음
 			uniqueRoutesMap.put(route.getId(), route);
 		}
 		return new ArrayList<>(uniqueRoutesMap.values());
