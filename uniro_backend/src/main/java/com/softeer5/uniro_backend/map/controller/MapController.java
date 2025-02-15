@@ -26,8 +26,8 @@ public class MapController implements MapApi {
 
 	@Override
 	@GetMapping("/{univId}/routes")
-	public ResponseEntity<AllRoutesInfo> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
-		AllRoutesInfo allRoutes = mapService.getAllRoutes(univId);
+	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
+		GetAllRoutesResDTO allRoutes = mapService.getAllRoutes(univId);
 		return ResponseEntity.ok().body(allRoutes);
 	}
 

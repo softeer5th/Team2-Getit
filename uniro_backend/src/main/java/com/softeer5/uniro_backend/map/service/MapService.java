@@ -49,7 +49,7 @@ public class MapService {
 
 	private final MapClient mapClient;
 
-	public AllRoutesInfo getAllRoutes(Long univId) {
+	public GetAllRoutesResDTO getAllRoutes(Long univId) {
 		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
 		// 맵이 존재하지 않을 경우 예외
@@ -60,7 +60,10 @@ public class MapService {
 		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
 			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
 
-		return routeCalculator.assembleRoutes(routes, revInfo.getRev());
+		AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(routes);
+
+		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
+			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
 	}
 
 	public List<FastestRouteResDTO> findFastestRoute(Long univId, Long startNodeId, Long endNodeId){

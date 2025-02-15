@@ -100,7 +100,7 @@ public class AdminService {
 
     public GetAllRoutesByRevisionResDTO getAllRoutesByRevision(Long univId, Long versionId){
         List<Route> revRoutes = getRevRoutes(univId,versionId);
-        AllRoutesInfo routesInfo = routeCalculator.assembleRoutes(revRoutes, versionId);
+        AllRoutesInfo routesInfo = routeCalculator.assembleRoutes(revRoutes);
 
         Map<Long, Route> revRouteMap = new HashMap<>();
         for(Route revRoute : revRoutes){
