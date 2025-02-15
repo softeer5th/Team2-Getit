@@ -179,7 +179,11 @@ const NavigationResultPage = () => {
 					}}
 					onScroll={preventScroll}
 				>
-					<NavigationDescription isDetailView={true} navigationRoute={routeList.data![buttonState]} />
+					<NavigationDescription
+						isDetailView={true}
+						buttonType={buttonState}
+						navigationRoute={routeList.data![buttonState]}
+					/>
 					<RouteList
 						routes={
 							routeList.data![buttonState]?.routeDetails
