@@ -27,7 +27,7 @@ public class UnivCustomRepositoryImpl implements UnivCustomRepository {
                     nameCondition(name)
                 )
                 .orderBy(univ.name.asc())
-                .limit(pageSize + 1)
+                .limit(pageSize)
                 .fetch();
     }
     private BooleanExpression nameCondition(String name) {
