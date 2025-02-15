@@ -224,7 +224,7 @@ public class RouteCalculator {
             for(Route route : adjMap.getOrDefault(currentNode.getId(), Collections.emptyList())){
                 Node nextNode = route.getNode1().getId().equals(currentNode.getId())?route.getNode2():route.getNode1();
                 double newDistance = currentDistance + route.getDistance()
-                                                + getHeightHeuristicWeight(maxHeight,minHeight,nextNode, route.getDistance());
+                                                + getHeightHeuristicWeight(maxHeight,minHeight,nextNode, route.getDistance(), policy);
 
                 if(policy==RoadExclusionPolicy.WHEEL_FAST && !route.getCautionFactors().isEmpty()){
                     currentCautionCount++;
@@ -252,7 +252,8 @@ public class RouteCalculator {
     }
 
     // A* 알고리즘의 휴리스틱 중 max,min 해발고도를 벗어나는 경우 가중치를 부여
-    private double getHeightHeuristicWeight(double maxHeight, double minHeight, Node nextNode, double routeDistance) {
+    private double getHeightHeuristicWeight(double maxHeight, double minHeight, Node nextNode, double routeDistance, RoadExclusionPolicy policy) {
+        if(policy==RoadExclusionPolicy.PEDES)return 0.0;
         double currentHeight = nextNode.getHeight();
         double diff = 0.0;
         if(currentHeight > maxHeight) diff = currentHeight - maxHeight;
