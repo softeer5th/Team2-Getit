@@ -224,7 +224,7 @@ public class RouteCalculator {
             for(Route route : adjMap.getOrDefault(currentNode.getId(), Collections.emptyList())){
                 Node nextNode = route.getNode1().getId().equals(currentNode.getId())?route.getNode2():route.getNode1();
                 double newDistance = currentDistance + route.getDistance()
-                                                + getHeightHeuristicWeight(maxHeight,minHeight,nextNode);
+                                                + getHeightHeuristicWeight(maxHeight,minHeight,nextNode, route.getDistance());
 
                 if(policy==RoadExclusionPolicy.WHEEL_FAST && !route.getCautionFactors().isEmpty()){
                     currentCautionCount++;
@@ -252,17 +252,17 @@ public class RouteCalculator {
     }
 
     // A* 알고리즘의 휴리스틱 중 max,min 해발고도를 벗어나는 경우 가중치를 부여
-    private double getHeightHeuristicWeight(double maxHeight, double minHeight, Node nextNode) {
+    private double getHeightHeuristicWeight(double maxHeight, double minHeight, Node nextNode, double routeDistance) {
         double currentHeight = nextNode.getHeight();
         double diff = 0.0;
         if(currentHeight > maxHeight) diff = currentHeight - maxHeight;
         if(currentHeight < minHeight) diff = minHeight - currentHeight;
-        return calculateWeight(diff);
+        return calculateWeight(diff, routeDistance);
     }
 
     // 차이에 따른 가중치를 계산하는 메서드
-    private double calculateWeight(double diff){
-        return Math.pow(diff,2);
+    private double calculateWeight(double diff, double routeDistance){
+        return (Math.pow(diff,2) * routeDistance) / HEURISTIC_WEIGHT_NORMALIZATION_FACTOR;
     }
 
     // 길찾기 결과를 파싱하여 출발지 -> 도착지 형태로 재배열하는 메서드
