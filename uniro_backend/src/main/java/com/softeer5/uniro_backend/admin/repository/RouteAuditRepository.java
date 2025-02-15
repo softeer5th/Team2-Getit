@@ -1,6 +1,9 @@
 package com.softeer5.uniro_backend.admin.repository;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -35,4 +38,18 @@ public class RouteAuditRepository {
 			.executeUpdate();
 	}
 
+	public List<Route> findUpdatedRouteByUnivIdWithNodes(Long univId, Long versionId) {
+		AuditReader auditReader = AuditReaderFactory.get(entityManager);
+		List<Route> allRevisions = auditReader.createQuery()
+				.forRevisionsOfEntity(Route.class, true, true)
+				.add(AuditEntity.revisionNumber().gt(versionId))
+				.getResultList();
+
+		Map<Long, Route> uniqueRoutesMap = new HashMap<>();
+		for (Route route : allRevisions) {
+			// 이미 해당 엔티티 ID가 존재하면, 여기서 최신 리비전을 선택하는 로직을 추가할 수 있음
+			uniqueRoutesMap.put(route.getId(), route);
+		}
+		return new ArrayList<>(uniqueRoutesMap.values());
+	}
 }

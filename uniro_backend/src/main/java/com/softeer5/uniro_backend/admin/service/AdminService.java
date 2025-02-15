@@ -141,7 +141,7 @@ public class AdminService {
             revRouteMap.put(revRoute.getId(), revRoute);
         }
 
-        List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+        List<Route> routes = routeAuditRepository.findUpdatedRouteByUnivIdWithNodes(univId,versionId);
 
         Map<Long, List<Route>> lostAdjMap = new HashMap<>();
         Map<Long, Node> lostNodeMap = new HashMap<>();
