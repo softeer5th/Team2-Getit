@@ -293,7 +293,7 @@ class AdminServiceTest {
 		GetAllRoutesByRevisionResDTO allRoutesByRevision = adminService.getAllRoutesByRevision(1001L, 2L);
 
 		//then
-		GetAllRoutesResDTO routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
+		AllRoutesInfo routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
 		LostRoutesDTO lostRoutes = allRoutesByRevision.getLostRoutes();  // 버전 3,4에 생성하여 버전2엔 존재하지 않는 routes
 
 		//a. version2에 존재하는 맵 정보 확인
@@ -370,7 +370,7 @@ class AdminServiceTest {
 		GetAllRoutesByRevisionResDTO allRoutesByRevision = adminService.getAllRoutesByRevision(1001L, 2L);
 
 		//then
-		GetAllRoutesResDTO routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
+		AllRoutesInfo routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
 		LostRoutesDTO lostRoutes = allRoutesByRevision.getLostRoutes();  // 버전 3,4,5,6에 생성하여 버전2엔 존재하지 않는 routes
 
 		//a. version2에 존재하는 맵 정보 확인
@@ -458,7 +458,7 @@ class AdminServiceTest {
 		GetAllRoutesByRevisionResDTO allRoutesByRevision = adminService.getAllRoutesByRevision(1001L, 2L);
 
 		//then
-		GetAllRoutesResDTO routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
+		AllRoutesInfo routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
 		LostRoutesDTO lostRoutes = allRoutesByRevision.getLostRoutes();  // 버전 3,4,5,6에 생성하여 버전2엔 존재하지 않는 routes
 
 		//a. version2에 존재하는 맵 정보 확인
@@ -548,7 +548,7 @@ class AdminServiceTest {
 		GetAllRoutesByRevisionResDTO allRoutesByRevision = adminService.getAllRoutesByRevision(1001L, 2L);
 
 		//then
-		GetAllRoutesResDTO routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
+		AllRoutesInfo routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
 		LostRoutesDTO lostRoutes = allRoutesByRevision.getLostRoutes();  // 버전 3,4,5,6에 생성하여 버전2엔 존재하지 않는 routes
 
 		//a. version2에 존재하는 맵 정보 확인
@@ -634,7 +634,7 @@ class AdminServiceTest {
 		GetAllRoutesByRevisionResDTO allRoutesByRevision = adminService.getAllRoutesByRevision(1001L, 2L);
 
 		//then
-		GetAllRoutesResDTO routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
+		AllRoutesInfo routesInfo = allRoutesByRevision.getRoutesInfo(); // 버전 2에 존재하는 map 정보
 		LostRoutesDTO lostRoutes = allRoutesByRevision.getLostRoutes();  // 버전 3,4,5,6에 생성하여 버전2엔 존재하지 않는 routes
 
 		//a. version2에 존재하는 맵 정보 확인

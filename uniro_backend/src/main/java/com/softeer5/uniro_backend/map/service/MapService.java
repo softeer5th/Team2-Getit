@@ -49,7 +49,7 @@ public class MapService {
 
 	private final MapClient mapClient;
 
-	public GetAllRoutesResDTO getAllRoutes(Long univId) {
+	public AllRoutesInfo getAllRoutes(Long univId) {
 		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
 		// 맵이 존재하지 않을 경우 예외

@@ -5,7 +5,6 @@ import com.softeer5.uniro_backend.map.dto.request.CreateBuildingRouteReqDTO;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.dto.request.PostRiskReqDTO;
-import com.softeer5.uniro_backend.map.service.RouteCalculator;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -27,8 +26,8 @@ public class MapController implements MapApi {
 
 	@Override
 	@GetMapping("/{univId}/routes")
-	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
-		GetAllRoutesResDTO allRoutes = mapService.getAllRoutes(univId);
+	public ResponseEntity<AllRoutesInfo> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
+		AllRoutesInfo allRoutes = mapService.getAllRoutes(univId);
 		return ResponseEntity.ok().body(allRoutes);
 	}
 
