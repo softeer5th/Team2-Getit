@@ -5,7 +5,7 @@ import SafeIcon from "../../assets/icon/safeText.svg?react";
 import DestinationIcon from "../../assets/icon/destination.svg?react";
 import OriginIcon from "../../assets/icon/start.svg?react";
 import ResultDivider from "../../assets/icon/resultDivider.svg?react";
-import { NavigationRouteList } from "../../data/types/route";
+import { NavigationButtonRouteType, NavigationRouteList, NavigationRouteType } from "../../data/types/route";
 import useRoutePoint from "../../hooks/useRoutePoint";
 import { formatDistance } from "../../utils/navigation/formatDistance";
 import { Link } from "react-router";
@@ -13,16 +13,21 @@ import useUniversityInfo from "../../hooks/useUniversityInfo";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 
-const TITLE = "전동휠체어 예상소요시간";
-
 type TopBarProps = {
 	isDetailView: boolean;
 	navigationRoute: NavigationRouteList;
+	buttonType: NavigationButtonRouteType;
 };
 
 type AnimatedValueProps = {
 	value: number | string;
 	className?: string;
+};
+
+const createTitle = (buttonType: NavigationButtonRouteType) => {
+	if (buttonType.includes("PEDES")) return "도보 예상소요시간";
+	if (buttonType.includes("MANUAL")) return "수동휠체어 예상소요시간";
+	if (buttonType.includes("ELECTRIC")) return "전동휠체어 예상소요시간";
 };
 
 const AnimatedValue = ({ value, className }: AnimatedValueProps) => {
@@ -42,7 +47,7 @@ const AnimatedValue = ({ value, className }: AnimatedValueProps) => {
 	);
 };
 
-const NavigationDescription = ({ isDetailView, navigationRoute }: TopBarProps) => {
+const NavigationDescription = ({ isDetailView, navigationRoute, buttonType }: TopBarProps) => {
 	const { origin, destination } = useRoutePoint();
 
 	const { university } = useUniversityInfo();
@@ -56,7 +61,10 @@ const NavigationDescription = ({ isDetailView, navigationRoute }: TopBarProps) =
 	return (
 		<div className="w-full p-5">
 			<div className={`w-full flex flex-row items-center ${isDetailView ? "justify-start" : "justify-between"}`}>
-				<span className="text-left text-kor-body3 text-primary-500 flex-1 font-semibold">{TITLE}</span>
+				<AnimatedValue
+					className="text-left text-kor-body3 text-primary-500 flex-1 font-semibold"
+					value={createTitle(buttonType) ?? "전동 휠체어 예상소요시간"}
+				/>
 				{!isDetailView && (
 					<Link to="/map" onClick={removeQuery}>
 						<Cancel />
