@@ -16,8 +16,8 @@ import java.util.List;
 public class UnivService {
     private final UnivRepository univRepository;
 
-    public SearchUnivResDTO searchUniv(String name, Long cursorId, Integer pageSize) {
-        CursorPage<List<UnivInfo>> universities = univRepository.searchUniv(name,cursorId,pageSize);
-        return SearchUnivResDTO.of(universities.getData(),universities.getNextCursor(), universities.isHasNext());
+    public SearchUnivResDTO searchUniv(String name, Integer pageSize) {
+        List<UnivInfo> universities = univRepository.searchUniv(name, pageSize);
+        return SearchUnivResDTO.of(universities);
     }
 }
