@@ -34,7 +34,7 @@ const NavigationResultPage = () => {
 	const [isDetailView, setIsDetailView] = useState(false);
 	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
 
-	const { sheetHeight, setSheetHeight, dragControls, handleDrag, preventScroll, scrollRef } =
+	const { sheetHeight, setSheetHeight, dragControls, handleDrag, preventScroll, scrollRef, handleDragEnd } =
 		useNavigationBottomSheet();
 	const { university } = useUniversityInfo();
 	const { origin, destination } = useRoutePoint();
@@ -185,18 +185,21 @@ const NavigationResultPage = () => {
 				isVisible={isDetailView}
 				className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto"
 				positionDelta={MAX_SHEET_HEIGHT}
-				transition={{ type: "tween", duration: 0.3 }}
+				transition={{ type: "spring", damping: 20, duration: 0.3 }}
 				motionProps={{
 					drag: "y",
 					dragControls,
 					dragListener: false,
-					dragElastic: false,
+					dragElastic: {
+						top: 0,
+						bottom: 0.3,
+					},
 					dragConstraints: {
 						top: 0,
 						bottom: MIN_SHEET_HEIGHT,
 					},
 					onDrag: handleDrag,
-					onDragEnd: handleDrag,
+					onDragEnd: handleDragEnd,
 				}}
 			>
 				<BottomSheetHandle resetCurrentIdx={resetCurrentIndex} dragControls={dragControls} />
