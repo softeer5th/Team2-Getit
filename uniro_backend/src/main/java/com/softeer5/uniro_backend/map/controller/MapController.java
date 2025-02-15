@@ -1,11 +1,9 @@
 package com.softeer5.uniro_backend.map.controller;
 
+import com.softeer5.uniro_backend.admin.service.AdminService;
 import com.softeer5.uniro_backend.map.dto.request.CreateBuildingRouteReqDTO;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
-import com.softeer5.uniro_backend.map.dto.response.FastestRouteResDTO;
-import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
-import com.softeer5.uniro_backend.map.dto.response.GetRiskResDTO;
-import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
+import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.dto.request.PostRiskReqDTO;
 import com.softeer5.uniro_backend.map.service.RouteCalculator;
 
@@ -25,7 +23,7 @@ import java.util.List;
 public class MapController implements MapApi {
 
 	private final MapService mapService;
-	private final RouteCalculator routeCalculator;
+	private final AdminService adminService;
 
 	@Override
 	@GetMapping("/{univId}/routes")
@@ -81,6 +79,14 @@ public class MapController implements MapApi {
 													@RequestBody @Valid CreateBuildingRouteReqDTO createBuildingRouteReqDTO){
 		mapService.createBuildingRoute(univId,createBuildingRouteReqDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
+
+	@Override
+	@GetMapping("/{univId}/routes/{versionId}")
+	public ResponseEntity<GetChangedRoutesByRevisionResDTO> getChangedRoutesByRevision(@PathVariable("univId") Long univId,
+																					   @PathVariable("versionId") Long versionId){
+		GetChangedRoutesByRevisionResDTO getChangedRoutesByRevisionResDTO = adminService.getChangedRoutesByRevision(univId,versionId);
+		return ResponseEntity.ok(getChangedRoutesByRevisionResDTO);
 	}
 
 }

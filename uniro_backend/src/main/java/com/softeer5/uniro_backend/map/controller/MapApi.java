@@ -2,10 +2,7 @@ package com.softeer5.uniro_backend.map.controller;
 
 import com.softeer5.uniro_backend.map.dto.request.CreateBuildingRouteReqDTO;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
-import com.softeer5.uniro_backend.map.dto.response.FastestRouteResDTO;
-import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
-import com.softeer5.uniro_backend.map.dto.response.GetRiskResDTO;
-import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
+import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.dto.request.PostRiskReqDTO;
 
 import jakarta.validation.Valid;
@@ -82,4 +79,12 @@ public interface MapApi {
 	})
 	ResponseEntity<Void> createBuildingRoute(@PathVariable("univId") Long univId,
 													@RequestBody @Valid CreateBuildingRouteReqDTO createBuildingRouteReqDTO);
+
+	@Operation(summary = "현재 버전과 특정 버전의 차이점 조회")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "현재 버전과 특정 버전의 차이점 조회 성공"),
+			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	ResponseEntity<GetChangedRoutesByRevisionResDTO> getChangedRoutesByRevision(@PathVariable("univId") Long univId,
+																				@PathVariable("versionId") Long versionId);
 }
