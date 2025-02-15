@@ -12,6 +12,7 @@ import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.map.dto.response.GetChangedRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.map.dto.response.NodeInfoResDTO;
 import com.softeer5.uniro_backend.map.entity.Node;
@@ -146,6 +147,54 @@ public class AdminService {
 
         return GetAllRoutesByRevisionResDTO.of(routesInfo, getRiskRoutesResDTO, lostRouteDTO, changedRoutes);
     }
+
+    public GetChangedRoutesByRevisionResDTO getChangedRoutesByRevision(Long univId, Long versionId) {
+        revInfoRepository.findById(versionId)
+                .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
+
+        List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
+
+        if(revRoutes.isEmpty()) {
+            throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
+        }
+
+        Map<Long, Route> revRouteMap = new HashMap<>();
+        for(Route revRoute : revRoutes){
+            revRouteMap.put(revRoute.getId(), revRoute);
+        }
+
+        List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+
+        Map<Long, List<Route>> lostAdjMap = new HashMap<>();
+        Map<Long, Node> lostNodeMap = new HashMap<>();
+        List<ChangedRouteDTO> changedRoutes = new ArrayList<>();
+        List<Route> riskRoutes = new ArrayList<>();
+
+        for(Route route : routes){
+            if(revRouteMap.containsKey(route.getId())){
+                Route revRoute = revRouteMap.get(route.getId());
+                handleRevisionRoute(revRoute, route, changedRoutes, riskRoutes);
+                continue;
+            }
+            //해당 시점 이후에 생성된 루트들 (과거 시점엔 보이지 않는 루트)
+            handleLostRoute(route, lostAdjMap, lostNodeMap);
+        }
+
+        //시작점이 1개인 nodeList 생성
+        List<Node> endNodes = determineEndNodes(lostAdjMap, lostNodeMap);
+
+        List<NodeInfoResDTO> lostNodeInfos = lostNodeMap.entrySet().stream()
+                .map(entry -> {
+                    Node node = entry.getValue();
+                    return NodeInfoResDTO.of(entry.getKey(), node.getX(), node.getY());
+                })
+                .toList();
+
+        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
+
+        return GetChangedRoutesByRevisionResDTO.of(lostRouteDTO,changedRoutes);
+    }
+
 
     private void handleRevisionRoute(Route revRoute, Route route, List<ChangedRouteDTO> changedRoutes, List<Route> riskRoutes) {
         //변경사항이 있는 경우
