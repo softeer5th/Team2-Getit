@@ -46,15 +46,15 @@ public class BuildingService {
 			.toList();
 	}
 
-	public SearchBuildingResDTO searchBuildings(Long univId, String name, Long cursorId, Integer pageSize){
+	public SearchBuildingResDTO searchBuildings(Long univId, String name, Integer pageSize){
 
-		CursorPage<List<BuildingNode>> buildingNodes = buildingRepository.searchBuildings(univId, name, cursorId, pageSize);
+		List<BuildingNode> buildingNodes = buildingRepository.searchBuildings(univId, name, pageSize);
 
-		List<GetBuildingResDTO> data = buildingNodes.getData().stream()
+		List<GetBuildingResDTO> data = buildingNodes.stream()
 			.map(buildingNode -> GetBuildingResDTO.of(buildingNode.getBuilding(), buildingNode.getNode()))
 			.toList();
 
-		return SearchBuildingResDTO.of(data, buildingNodes.getNextCursor(), buildingNodes.isHasNext());
+		return SearchBuildingResDTO.of(data);
 	}
 
 	public GetBuildingResDTO getBuilding(Long nodeId){

@@ -18,31 +18,17 @@ public class UnivCustomRepositoryImpl implements UnivCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public CursorPage<List<UnivInfo>> searchUniv(String name, Long cursorId, Integer pageSize) {
+    public List<UnivInfo> searchUniv(String name, Integer pageSize) {
 
-        List<UnivInfo> universities = queryFactory
+        return queryFactory
                 .select(new QUnivInfo(univ.id, univ.name, univ.imageUrl))
                 .from(univ)
                 .where(
-                        nameCondition(name),
-                        cursorIdCondition(cursorId)
+                    nameCondition(name)
                 )
-                .orderBy(univ.id.asc())
-                .limit(pageSize + 1)
+                .orderBy(univ.name.asc())
+                .limit(pageSize)
                 .fetch();
-
-        boolean hasNext = universities.size() > pageSize;
-        Long nextCursor = hasNext ? universities.get(pageSize).getId() : null;
-
-        if (hasNext) {
-            universities.remove(universities.size() - 1);
-        }
-
-        return new CursorPage<>(universities, nextCursor, hasNext);
-    }
-
-    private BooleanExpression cursorIdCondition(Long cursorId) {
-        return cursorId == null ? null : univ.id.gt(cursorId);
     }
     private BooleanExpression nameCondition(String name) {
         return name == null || name.isEmpty() ? null : univ.name.containsIgnoreCase(name);
