@@ -34,7 +34,7 @@ public class BuildingCustomRepositoryImpl implements BuildingCustomRepository {
 				cursorIdCondition(cursorId),
 				nameCondition(name)
 			)
-			.orderBy(building.nodeId.asc()) // Cursor 기반에서는 정렬이 중요
+			.orderBy(building.name.asc()) // Cursor 기반에서는 정렬이 중요
 			.limit(pageSize + 1) // 다음 페이지 여부를 판단하기 위해 +1로 조회
 			.fetch();
 

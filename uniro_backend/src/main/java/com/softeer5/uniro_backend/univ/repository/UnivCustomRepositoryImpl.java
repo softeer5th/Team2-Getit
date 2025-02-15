@@ -27,7 +27,7 @@ public class UnivCustomRepositoryImpl implements UnivCustomRepository {
                         nameCondition(name),
                         cursorIdCondition(cursorId)
                 )
-                .orderBy(univ.id.asc())
+                .orderBy(univ.name.asc())
                 .limit(pageSize + 1)
                 .fetch();
 
