@@ -34,12 +34,13 @@ const NavigationResultPage = () => {
 	const [isDetailView, setIsDetailView] = useState(false);
 	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
 
-	const { sheetHeight, setSheetHeight, dragControls, handleDrag, preventScroll, scrollRef } =
+	const { sheetHeight, setSheetHeight, dragControls, handleDrag, preventScroll, scrollRef, handleDragEnd } =
 		useNavigationBottomSheet();
 	const { university } = useUniversityInfo();
 	const { origin, destination } = useRoutePoint();
 
 	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>("PEDES & SAFE");
+	const [currentRouteIdx, setCurrentRouteIdx] = useState(-1);
 
 	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
 
@@ -80,15 +81,25 @@ const NavigationResultPage = () => {
 		],
 	});
 
+	const resetCurrentIndex = () => {
+		setCurrentRouteIdx(-1);
+	};
+
+	const changeCurrentIndex = (index: number) => {
+		setCurrentRouteIdx(index);
+	};
+
 	const showDetailView = () => {
 		setSheetHeight(MAX_SHEET_HEIGHT);
 		setTopBarHeight(PADDING_FOR_MAP_BOUNDARY);
+		resetCurrentIndex();
 		setIsDetailView(true);
 	};
 
 	const hideDetailView = () => {
 		setSheetHeight(CLOSED_SHEET_HEIGHT);
 		setTopBarHeight(INITIAL_TOP_BAR_HEIGHT);
+		resetCurrentIndex();
 		setIsDetailView(false);
 	};
 
@@ -107,6 +118,7 @@ const NavigationResultPage = () => {
 				risks={risks.data}
 				topPadding={topBarHeight}
 				bottomPadding={sheetHeight}
+				currentRouteIdx={currentRouteIdx}
 			/>
 
 			<AnimatedContainer
@@ -162,15 +174,19 @@ const NavigationResultPage = () => {
 					drag: "y",
 					dragControls,
 					dragListener: false,
+					dragElastic: {
+						top: 0,
+						bottom: 0.3,
+					},
 					dragConstraints: {
 						top: 0,
 						bottom: MIN_SHEET_HEIGHT,
 					},
 					onDrag: handleDrag,
-					onDragEnd: handleDrag,
+					onDragEnd: handleDragEnd,
 				}}
 			>
-				<BottomSheetHandle dragControls={dragControls} />
+				<BottomSheetHandle resetCurrentIdx={resetCurrentIndex} dragControls={dragControls} />
 				<div
 					ref={scrollRef}
 					className="w-full overflow-y-auto"
@@ -180,11 +196,14 @@ const NavigationResultPage = () => {
 					onScroll={preventScroll}
 				>
 					<NavigationDescription
+						resetCurrentRouteIdx={resetCurrentIndex}
 						isDetailView={true}
 						buttonType={buttonState}
 						navigationRoute={routeList.data![buttonState]}
 					/>
 					<RouteList
+						changeCurrentRouteIdx={changeCurrentIndex}
+						currentRouteIdx={currentRouteIdx}
 						routes={
 							routeList.data![buttonState]?.routeDetails
 								? routeList.data![buttonState]?.routeDetails

@@ -17,14 +17,30 @@ const NumberIcon = ({ index }: { index: number }) => {
 	);
 };
 
-export const RouteCard = ({ index, route }: { index: number; route: RouteDetail }) => {
+export const RouteCard = ({
+	changeCurrentRouteIdx,
+	currentRouteIdx,
+	index,
+	route,
+}: {
+	changeCurrentRouteIdx: (index: number) => void;
+	currentRouteIdx: number;
+	index: number;
+	route: RouteDetail;
+}) => {
 	const { dist: distance, directionType, cautionFactors } = route;
 	const formattedDistance = formatDistance(distance);
 	const { origin, destination } = useRoutePoint();
+	const onClick = () => {
+		changeCurrentRouteIdx(index);
+	};
 	switch (directionType.toLocaleLowerCase()) {
 		case "straight":
 			return (
-				<div className="flex flex-row items-center justify-start ml-8 my-5">
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors active:shadow-inner ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
 					<div className="flex flex-col items-center justify-start space-y-1">
 						<StraightIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
@@ -37,7 +53,10 @@ export const RouteCard = ({ index, route }: { index: number; route: RouteDetail 
 			);
 		case "right":
 			return (
-				<div className="flex flex-row items-center justify-start ml-8 my-5">
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
 					<div className="flex flex-col items-center justify-start space-y-1">
 						<RightIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
@@ -50,7 +69,10 @@ export const RouteCard = ({ index, route }: { index: number; route: RouteDetail 
 			);
 		case "sharp_right":
 			return (
-				<div className="flex flex-row items-center justify-start ml-8 my-5">
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
 					<div className="flex flex-col items-center justify-start space-y-1">
 						<RightIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
@@ -63,7 +85,10 @@ export const RouteCard = ({ index, route }: { index: number; route: RouteDetail 
 			);
 		case "left":
 			return (
-				<div className="flex flex-row items-center justify-start ml-8 my-5">
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
 					<div className="flex flex-col items-center justify-start space-y-1">
 						<LeftIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
@@ -76,7 +101,10 @@ export const RouteCard = ({ index, route }: { index: number; route: RouteDetail 
 			);
 		case "sharp_left":
 			return (
-				<div className="flex flex-row items-center justify-start ml-8 my-5">
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
 					<div className="flex flex-col items-center justify-start space-y-1">
 						<LeftIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
@@ -89,7 +117,10 @@ export const RouteCard = ({ index, route }: { index: number; route: RouteDetail 
 			);
 		case "uturn":
 			return (
-				<div className="flex flex-row items-center justify-start ml-8 my-5">
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
 					<div className="flex flex-col items-center justify-start space-y-1">
 						<StraightIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
@@ -102,7 +133,10 @@ export const RouteCard = ({ index, route }: { index: number; route: RouteDetail 
 			);
 		case "origin":
 			return (
-				<div className="flex flex-row items-center justify-start ml-8 my-5">
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
 					<div className="flex flex-col items-center justify-start space-y-1">
 						<OriginIcon />
 						<div className="text-[#5F5F5F] text-kor-body3 text-[12px]">출발</div>
@@ -115,7 +149,10 @@ export const RouteCard = ({ index, route }: { index: number; route: RouteDetail 
 			);
 		case "finish":
 			return (
-				<div className="flex flex-row items-center justify-start ml-8 my-5">
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
 					<div className="flex flex-col items-center justify-start space-y-1">
 						<DestinationIcon />
 						<div className="text-[#5F5F5F] text-kor-body3 text-[12px]">도착</div>
@@ -128,7 +165,10 @@ export const RouteCard = ({ index, route }: { index: number; route: RouteDetail 
 			);
 		case "caution":
 			return (
-				<div className="flex flex-row items-center justify-start ml-8 my-5">
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
 					<div className="flex flex-col items-center justify-start space-y-1">
 						<CautionText />
 						<div className="text-system-orange text-kor-body3 text-[12px]">{formattedDistance}</div>

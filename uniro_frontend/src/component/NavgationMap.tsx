@@ -6,6 +6,7 @@ import {
 	NavigationButtonRouteType,
 	NavigationRouteList,
 	NavigationRouteListRecordWithMetaData,
+	RouteDetail,
 } from "../data/types/route";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import createMarkerElement from "../components/map/mapMarkers";
@@ -26,6 +27,7 @@ type MapProps = {
 	isDetailView: boolean;
 	topPadding?: number;
 	bottomPadding?: number;
+	currentRouteIdx: number;
 };
 
 // TODO: useEffect로 경로가 모두 로딩된 이후에 마커가 생성되도록 수정하기
@@ -62,6 +64,7 @@ const NavigationMap = ({
 	buttonState,
 	topPadding = 0,
 	bottomPadding = 0,
+	currentRouteIdx,
 }: MapProps) => {
 	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
 	const { origin, destination } = useRoutePoint();
@@ -300,6 +303,7 @@ const NavigationMap = ({
 			dyamicMarkersRef.current = [];
 			// [그림] 마커 찍기
 			routeDetails.forEach((routeDetail, index) => {
+				if (index === routeDetails.length - 1) return;
 				const { coordinates } = routeDetail;
 				const markerElement = createMarkerElement({
 					type: Markers.NUMBERED_WAYPOINT,
@@ -329,15 +333,71 @@ const NavigationMap = ({
 		dyamicMarkersRef.current = [];
 	};
 
+	const saveAllBounds = () => {
+		if (!map || !compositeRoutes) return;
+		const bounds = new google.maps.LatLngBounds();
+		Object.values(compositeRoutes).forEach((composite) => {
+			bounds.extend(composite!.bounds.getNorthEast());
+			bounds.extend(composite!.bounds.getSouthWest());
+		});
+		boundsRef.current = bounds;
+	};
+
 	useEffect(() => {
+		if (currentRouteIdx !== -1) return;
 		if (!map || !boundsRef.current) return;
+		saveAllBounds();
 		map.fitBounds(boundsRef.current, {
 			top: topPadding,
 			right: 50,
 			bottom: bottomPadding,
 			left: 50,
 		});
-	}, [map, bottomPadding, topPadding]);
+	}, [map, bottomPadding, topPadding, currentRouteIdx]);
+
+	useEffect(() => {
+		if (!map) return;
+		if (currentRouteIdx === -1) return;
+		const currentRoute = routeResult[buttonState];
+		if (!currentRoute) return;
+
+		const addOriginAndDestination = (routes: RouteDetail[]) => {
+			return [
+				{
+					dist: 0,
+					directionType: "origin" as Direction,
+					coordinates: { lat: origin!.lat, lng: origin!.lng },
+					cautionFactors: [],
+				},
+				...routes.slice(0, -1),
+				{
+					dist: 0,
+					directionType: "finish" as Direction,
+					coordinates: { lat: destination!.lat, lng: destination!.lng },
+					cautionFactors: [],
+				},
+			];
+		};
+
+		// 다음 구간까지의 길을 합쳐서 bounds를 계산
+		const { routeDetails } = currentRoute;
+		const modifiedRouteDetails = addOriginAndDestination(routeDetails);
+		const currentRouteDetail = modifiedRouteDetails[currentRouteIdx];
+
+		const bounds = new google.maps.LatLngBounds();
+		bounds.extend(currentRouteDetail.coordinates);
+		if (currentRouteIdx !== modifiedRouteDetails.length - 1) {
+			const nextRouteDetail = modifiedRouteDetails[currentRouteIdx + 1];
+			bounds.extend(nextRouteDetail.coordinates);
+		}
+		boundsRef.current = bounds;
+		map.fitBounds(bounds, {
+			top: topPadding,
+			right: 50,
+			bottom: bottomPadding,
+			left: 50,
+		});
+	}, [map, currentRouteIdx, buttonState, routeResult]);
 
 	useEffect(() => {
 		if (!AdvancedMarker || !map) return;
