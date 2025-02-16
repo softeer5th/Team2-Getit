@@ -134,7 +134,10 @@ public class AdminService {
     }
 
     public GetChangedRoutesByRevisionResDTO getChangedRoutesByRevision(Long univId, Long versionId) {
-        List<Route> revRoutes = getRevRoutes(univId,versionId);
+        List<Route> revRoutes = getRevRoutes(univId, versionId);
+
+        RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
+            .orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
 
         Map<Long, Route> revRouteMap = new HashMap<>();
         for(Route revRoute : revRoutes){
@@ -161,7 +164,7 @@ public class AdminService {
         List<Node> endNodes = determineEndNodes(lostAdjMap, lostNodeMap);
         LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(mapNodeInfo(lostNodeMap), routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
 
-        return GetChangedRoutesByRevisionResDTO.of(lostRouteDTO,changedRoutes);
+        return GetChangedRoutesByRevisionResDTO.of(lostRouteDTO, changedRoutes, revInfo.getRev());
     }
 
     private List<Route> getRevRoutes(Long univId, Long versionId) {
