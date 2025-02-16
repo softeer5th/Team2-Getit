@@ -13,8 +13,8 @@ import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enum/markerEnum";
 import useRoutePoint from "../hooks/useRoutePoint";
 import { AdvancedMarker } from "../data/types/marker";
-import { interpolate } from "../utils/interpolate";
 import { Direction } from "framer-motion";
+import { createRiskMarkers } from "../utils/markers/createRiskMarker";
 
 type MapProps = {
 	style?: React.CSSProperties;
@@ -186,32 +186,6 @@ const NavigationMap = ({
 			});
 		};
 	}, [map, buttonState, compositeRoutes, topPadding, bottomPadding]);
-
-	const centerCoordinate = (origin: google.maps.LatLngLiteral, destination: google.maps.LatLngLiteral) => {
-		return interpolate(origin, destination, 0.5);
-	};
-
-	const createRiskMarkers = (
-		riskData: DangerRoute[] | CautionRoute[],
-		map: google.maps.Map,
-		AdvancedMarker: typeof google.maps.marker.AdvancedMarkerElement,
-	): AdvancedMarker[] => {
-		const markers: AdvancedMarker[] = [];
-		riskData.forEach((route) => {
-			const marker = createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				centerCoordinate(route.node1, route.node2),
-				createMarkerElement({
-					type: Markers.DANGER,
-					className: "translate-marker",
-					hasAnimation: true,
-				}),
-			);
-			markers.push(marker);
-		});
-		return markers;
-	};
 
 	const createStartEndMarkers = () => {
 		if (!map || !origin || !destination || !AdvancedMarker) return;
