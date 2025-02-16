@@ -17,6 +17,7 @@ type TopBarProps = {
 	isDetailView: boolean;
 	navigationRoute: NavigationRouteList;
 	buttonType: NavigationButtonRouteType;
+	resetCurrentRouteIdx?: () => void;
 };
 
 type AnimatedValueProps = {
@@ -47,7 +48,7 @@ const AnimatedValue = ({ value, className }: AnimatedValueProps) => {
 	);
 };
 
-const NavigationDescription = ({ isDetailView, navigationRoute, buttonType }: TopBarProps) => {
+const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, resetCurrentRouteIdx }: TopBarProps) => {
 	const { origin, destination } = useRoutePoint();
 
 	const { university } = useUniversityInfo();
@@ -59,7 +60,7 @@ const NavigationDescription = ({ isDetailView, navigationRoute, buttonType }: To
 	};
 
 	return (
-		<div className="w-full p-5">
+		<div className="w-full p-5" onClick={resetCurrentRouteIdx ? resetCurrentRouteIdx : () => {}}>
 			<div className={`w-full flex flex-row items-center ${isDetailView ? "justify-start" : "justify-between"}`}>
 				<AnimatedValue
 					className="text-left text-kor-body3 text-primary-500 flex-1 font-semibold"

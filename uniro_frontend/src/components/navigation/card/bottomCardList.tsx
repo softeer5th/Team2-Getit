@@ -54,11 +54,11 @@ const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView
 					keyExists("MANUAL & CAUTION") || keyExists("ELECTRIC & CAUTION")
 						? {
 								totalCost: buttonType.includes("MANUAL")
-									? routeList["MANUAL & CAUTION"].totalCost
-									: routeList["ELECTRIC & CAUTION"].totalCost,
+									? routeList["MANUAL & CAUTION"]?.totalCost
+									: routeList["ELECTRIC & CAUTION"]?.totalCost,
 								totalDistance: buttonType.includes("MANUAL")
-									? routeList["MANUAL & CAUTION"].totalDistance
-									: routeList["ELECTRIC & CAUTION"].totalDistance,
+									? routeList["MANUAL & CAUTION"]?.totalDistance
+									: routeList["ELECTRIC & CAUTION"]?.totalDistance,
 							}
 						: undefined
 				}
@@ -83,11 +83,11 @@ const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView
 					routeList[buttonType]
 						? {
 								totalCost: buttonType.includes("MANUAL")
-									? routeList["MANUAL & SAFE"].totalCost
-									: routeList["ELECTRIC & SAFE"].totalCost,
+									? routeList["MANUAL & SAFE"]?.totalCost
+									: routeList["ELECTRIC & SAFE"]?.totalCost,
 								totalDistance: buttonType.includes("MANUAL")
-									? routeList["MANUAL & SAFE"].totalDistance
-									: routeList["ELECTRIC & SAFE"].totalDistance,
+									? routeList["MANUAL & SAFE"]?.totalDistance
+									: routeList["ELECTRIC & SAFE"]?.totalDistance,
 							}
 						: undefined
 				}
