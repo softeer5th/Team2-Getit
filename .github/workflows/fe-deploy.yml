@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - fe
+    paths:
+      - 'uniro_frontend/**'
 
 jobs:
   CI:
