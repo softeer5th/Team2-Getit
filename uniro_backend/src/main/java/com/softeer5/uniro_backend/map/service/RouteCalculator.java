@@ -50,7 +50,7 @@ public class RouteCalculator {
         }
     }
 
-    public GetAllRoutesResDTO assembleRoutes(List<Route> routes) {
+    public AllRoutesInfo assembleRoutes(List<Route> routes) {
         Map<Long, List<Route>> adjMap = new HashMap<>();
         Map<Long, Node> nodeMap = new HashMap<>();
         List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
@@ -82,7 +82,7 @@ public class RouteCalculator {
 
         startNode = determineStartNode(startNode, adjMap, nodeMap, routes);
 
-        return GetAllRoutesResDTO.of(nodeInfos, getCoreRoutes(adjMap, List.of(startNode)), buildingRoutes);
+        return AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, List.of(startNode)), buildingRoutes);
     }
 
     private Node determineStartNode(Node startNode, Map<Long, List<Route>> adjMap, Map<Long, Node> nodeMap, List<Route> routes) {

@@ -17,8 +17,10 @@ public class GetChangedRoutesByRevisionResDTO {
     private final LostRoutesDTO lostRoutes;
     @Schema(description = "현재 버전과 비교하여 변경된 주의/위험 요소 정보", example = "")
     private final List<ChangedRouteDTO> changedList;
+    @Schema(description = "최신 버전 id", example = "233")
+    private final Long versionId;
 
-    public static GetChangedRoutesByRevisionResDTO of(LostRoutesDTO lostRoutes, List<ChangedRouteDTO> changedList) {
-        return new GetChangedRoutesByRevisionResDTO(lostRoutes,changedList);
+    public static GetChangedRoutesByRevisionResDTO of(LostRoutesDTO lostRoutes, List<ChangedRouteDTO> changedList, Long versionId) {
+        return new GetChangedRoutesByRevisionResDTO(lostRoutes,changedList, versionId);
     }
 }
