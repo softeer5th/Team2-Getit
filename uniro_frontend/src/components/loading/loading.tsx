@@ -20,8 +20,8 @@ const Loading = ({ isLoading, loadingContent }: Props) => {
 					animate={{ opacity: 1 }}
 					exit={{ opacity: 0 }}
 					transition={{ duration: 0.3 }}
-					className="fixed inset-0 z-11 flex flex-col items-center justify-center w-full max-w-[450px] mx-auto bg-white 
-					bg-[url(/public/loading/background.svg)] bg-no-repeat bg-center bg-contain"
+					className="fixed inset-0 flex flex-col items-center justify-center w-full max-w-[450px] mx-auto bg-white 
+					bg-[url(/public/loading/background.svg)] bg-no-repeat bg-center bg-contain z-50"
 				>
 					<div className="flex flex-row items-center justify-center bg-white rounded-3xl space-x-1">
 						<img src={svgPath} className="h-4 w-4 ml-2 my-2" />
