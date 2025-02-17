@@ -21,7 +21,7 @@ export default function MapBottomSheet({ isVisible, selectedMarker, selectRouteP
 	return (
 		<AnimatedContainer
 			isVisible={isVisible}
-			className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto z-20"
+			className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto z-20 pt-3"
 			positionDelta={500}
 			transition={{
 				duration: 0.3,
@@ -29,7 +29,6 @@ export default function MapBottomSheet({ isVisible, selectedMarker, selectRouteP
 				damping: 20,
 			}}
 		>
-			<BottomSheetHandle dragControls={dragControls} />
 			<div ref={scrollRef} className="w-full overflow-y-auto h-fit" onScroll={preventScroll}>
 				<MapBottomSheetFromMarker
 					building={selectedMarker}
