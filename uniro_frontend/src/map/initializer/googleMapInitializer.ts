@@ -22,7 +22,7 @@ export const initializeMap = async (
 	const map = new Map(mapElement, {
 		center: HanyangUniversity,
 		zoom: 16,
-		minZoom: 15,
+		minZoom: 13,
 		maxZoom: 19,
 		draggable: true,
 		scrollwheel: true,
