@@ -524,7 +524,6 @@ export default function MapPage() {
 		if (!map) return;
 		if (origin && destination) {
 			setSearchMode("DESTINATION");
-			console.log("origin, destination", origin, destination);
 			const newBound = new google.maps.LatLngBounds();
 			newBound.extend(origin);
 			newBound.extend(destination);
