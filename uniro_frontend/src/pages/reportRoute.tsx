@@ -27,6 +27,7 @@ import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import removeMarkers from "../utils/markers/removeMarkers";
 import useMutationError from "../hooks/useMutationError";
+import TutorialModal from "../components/map/tutorialModal";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -61,6 +62,7 @@ export default function ReportRoutePage() {
 		navigate("/map");
 	});
 	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
+	const [isTutorialShown, setIsTutorialShown] = useState<boolean>(true);
 
 	if (!university) return;
 
@@ -139,6 +141,14 @@ export default function ReportRoutePage() {
 			},
 		},
 	);
+
+	const closeTutorial = () => {
+		setIsTutorialShown(false);
+	}
+
+	const openTutorial = () => {
+		setIsTutorialShown(true);
+	}
 
 	const addRiskMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
@@ -360,6 +370,7 @@ export default function ReportRoutePage() {
 					coords: [prevPoints.coords[0]],
 				};
 			});
+			setIsActive(false);
 			return;
 		} else if (newPoints.coords.length === 1) {
 			if (originPoint.current) {
@@ -424,6 +435,9 @@ export default function ReportRoutePage() {
 						}
 					});
 				}
+				else {
+					openTutorial();
+				}
 			});
 		}
 	}, [map]);
@@ -466,11 +480,7 @@ export default function ReportRoutePage() {
 
 	return (
 		<div className="relative w-full h-dvh">
-			<div className="w-full h-[57px] flex items-center justify-center absolute top-0 bg-black opacity-50 z-10 py-3 px-4">
-				<p className="text-gray-100 text-kor-body2 font-medium text-center">
-					선 위 또는 기존 지점을 선택하세요
-				</p>
-			</div>
+			{isTutorialShown && <TutorialModal onClose={closeTutorial} messages={['회색 선에서 시작할 점을 선택해주세요']} />}
 			<BackButton className="absolute top-[73px] left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
