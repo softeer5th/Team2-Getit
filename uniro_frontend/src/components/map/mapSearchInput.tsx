@@ -1,6 +1,7 @@
 import { InputHTMLAttributes, ReactNode } from "react";
 import Close from "/public/icons/close-circle.svg?react";
 import { Link } from "react-router";
+import GraduationCap from "../../assets/icon/graduationCap.svg?react";
 
 interface RouteInputProps extends InputHTMLAttributes<HTMLInputElement> {
 	placeholder: string;
@@ -22,6 +23,11 @@ export function BuildingInput({ placeholder, children, onClick }: RouteInputProp
 				className={`text-start flex-1 text-kor-body2  text-gray-700 font-medium`}
 			>
 				{placeholder}
+			</Link>
+			<Link to="/university">
+				<button className="bg-transparent active:bg-gray-500 hover:bg-gray-500 transition-colors rounded-2xl h-full -my-3 p-3 flex items-center justify-center">
+					<GraduationCap />
+				</button>
 			</Link>
 		</div>
 	);

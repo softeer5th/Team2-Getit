@@ -10,13 +10,19 @@ import { University } from "../data/types/university";
 
 export default function UniversitySearchPage() {
 	const [selectedUniv, setSelectedUniv] = useState<University>();
-	const { setUniversity } = useUniversityInfo();
+	const { university, setUniversity } = useUniversityInfo();
 	const [input, setInput] = useState<string>("");
 
 	const { data: universityList } = useQuery({
 		queryKey: ["university", input],
 		queryFn: () => getUniversityList(input),
 	});
+
+	useEffect(() => {
+		if (university) {
+			setSelectedUniv(university);
+		}
+	}, []);
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto py-5">
