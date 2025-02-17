@@ -12,3 +12,23 @@ export const login = ({ univId, code }: LoginBody) => {
         }
     );
 };
+
+export const getAllRevisions = (token: string, univId: number) => {
+    return getFetch<RevisionType[]>(
+        `/admin/${univId}/revisions`,
+        undefined,
+        token
+    ).then(transformAllRevisions);
+};
+
+export const getRevision = (
+    token: string,
+    univId: number,
+    versionId: number
+) => {
+    return getFetch<RevisionType[]>(
+        `/admin/${univId}/revisions/${versionId}`,
+        undefined,
+        token
+    );
+};
