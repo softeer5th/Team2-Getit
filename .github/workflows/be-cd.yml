@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - be
+      - fix/UNI-280-v2
 
 jobs:
   uniro-ci:
