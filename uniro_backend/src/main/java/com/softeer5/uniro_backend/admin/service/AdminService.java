@@ -147,7 +147,7 @@ public class AdminService {
         }
 
         List<Route> changedRoutes = routeAuditRepository.findUpdatedRouteByUnivIdWithNodes(univId,versionId);
-        List<Node> nodes = nodeRepository.findByUnivId(univId);
+        List<Node> nodes = nodeRepository.findAllByUnivId(univId);
         fetchNodes(changedRoutes,nodes);
 
 

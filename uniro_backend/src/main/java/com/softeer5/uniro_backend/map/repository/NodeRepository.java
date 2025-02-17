@@ -17,5 +17,5 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     @Query("DELETE FROM Node n WHERE n.univId = :univId AND n.createdAt > :versionTimeStamp")
     void deleteAllByCreatedAt(Long univId, LocalDateTime versionTimeStamp);
 
-    List<Node> findByUnivId(Long univId);
+    List<Node> findAllByUnivId(Long univId);
 }
