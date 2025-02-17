@@ -262,16 +262,6 @@ export default function ReportRoutePage() {
 		for (const coreRoutes of coreRouteList) {
 			const { coreNode1Id, coreNode2Id, routes: subRoutes } = coreRoutes;
 
-			// 가장 끝쪽 Core Node 그리기
-			const endNode = subRoutes[subRoutes.length - 1].node2;
-
-			createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				endNode,
-				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
-			);
-
 			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
 
 			const routePolyLine = new Polyline({
@@ -340,15 +330,6 @@ export default function ReportRoutePage() {
 					});
 				}
 			});
-
-			const startNode = subRoutes[0].node1;
-
-			createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				startNode,
-				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
-			);
 		}
 	};
 
