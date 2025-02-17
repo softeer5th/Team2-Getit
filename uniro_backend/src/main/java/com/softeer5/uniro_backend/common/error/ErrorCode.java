@@ -9,6 +9,7 @@ public enum ErrorCode {
 
     // common
     INVALID_INPUT_VALUE(400, "적절하지 않은 요청값입니다."),
+    INTERNAL_SERVER_ERROR(500, "서버 에러입니다."),
 
     // 길찾기
     FASTEST_ROUTE_NOT_FOUND(422, "경로가 없습니다."),
