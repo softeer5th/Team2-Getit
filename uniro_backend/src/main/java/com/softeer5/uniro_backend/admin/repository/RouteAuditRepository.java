@@ -25,10 +25,18 @@ public class RouteAuditRepository {
 
 	public List<Route> getAllRoutesAtRevision(Long univId, Long versionId) {
 		AuditReader auditReader = AuditReaderFactory.get(entityManager);
-		return auditReader.createQuery()
-			.forEntitiesAtRevision(Route.class, versionId)
-			.add(AuditEntity.property("univId").eq(univId))
-			.getResultList();
+		List<Route> allRevisions = auditReader.createQuery()
+				.forRevisionsOfEntity(Route.class, true, true)
+				.add(AuditEntity.revisionNumber().le(versionId))
+				.add(AuditEntity.property("univId").eq(univId))
+				.addOrder(AuditEntity.revisionNumber().asc())
+				.getResultList();
+
+		Map<Long, Route> uniqueRoutesMap = new HashMap<>();
+		for (Route route : allRevisions) {
+			uniqueRoutesMap.put(route.getId(), route);
+		}
+		return new ArrayList<>(uniqueRoutesMap.values());
 	}
 
 	public void deleteAllAfterVersionId(Long univId, Long versionId) {
