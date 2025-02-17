@@ -1,4 +1,4 @@
-import SearchIcon from "../../assets/icon/search.svg?react";
+	import SearchIcon from "../../assets/icon/search.svg?react";
 import OriginIcon from "../../assets/map/origin.svg?react";
 import SwitchIcon from "../../assets/switch.svg?react";
 import DestinationIcon from "../../assets/map/destination.svg?react";
@@ -9,6 +9,7 @@ import useSearchBuilding from "../../hooks/useSearchBuilding";
 import AnimatedContainer from "../../container/animatedContainer";
 import { BuildingInput, RouteInput } from "./mapSearchInput";
 import { Link } from "react-router";
+import useUniversityInfo from "../../hooks/useUniversityInfo";
 
 interface MapTopSheetProps {
 	isVisible: boolean;
@@ -16,6 +17,7 @@ interface MapTopSheetProps {
 
 export function MapTopBuildingSheet({ isVisible }: MapTopSheetProps) {
 	const { searchMode, setSearchMode } = useSearchBuilding();
+	const { university } = useUniversityInfo();
 
 	return (
 		<AnimatedContainer
@@ -30,7 +32,7 @@ export function MapTopBuildingSheet({ isVisible }: MapTopSheetProps) {
 			isTop={true}
 		>
 			<div className="flex-1 flex flex-row space-x-2">
-				<BuildingInput onClick={() => {}} placeholder={`한양대학교 건물을 검색해보세요`}>
+				<BuildingInput onClick={() => {}} placeholder={`${university?.name} 건물을 검색해보세요`}>
 					<SearchIcon />
 				</BuildingInput>
 
