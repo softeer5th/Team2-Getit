@@ -1,56 +1,75 @@
 export default function Fetch() {
-	const baseURL = import.meta.env.VITE_REACT_SERVER_BASE_URL;
+    const baseURL = import.meta.env.VITE_REACT_SERVER_BASE_URL;
 
-	const get = async <T>(url: string, params?: Record<string, string | number | boolean>): Promise<T> => {
-		const paramsURL = new URLSearchParams(
-			Object.entries(params || {}).map(([key, value]) => [key, String(value)]),
-		).toString();
+    const get = async <T>(
+        url: string,
+        params?: Record<string, string | number | boolean>,
+        token?: string
+    ): Promise<T> => {
+        const paramsURL = new URLSearchParams(
+            Object.entries(params || {}).map(([key, value]) => [
+                key,
+                String(value),
+            ])
+        ).toString();
 
-		const response = await fetch(`${baseURL}${url}?${paramsURL}`, {
-			method: "GET",
-		});
+        const headers: HeadersInit = token
+            ? { Authorization: `Bearer ${token}` }
+            : {};
 
-		if (!response.ok) {
-			throw new Error(`${response.status}-${response.statusText}`);
-		}
+        const response = await fetch(`${baseURL}${url}?${paramsURL}`, {
+            method: "GET",
+            headers: headers,
+        });
 
-		return response.json();
-	};
+        if (!response.ok) {
+            throw new Error(`${response.status}-${response.statusText}`);
+        }
 
-	const post = async <T, K>(url: string, body?: Record<string, K | K[]>): Promise<boolean> => {
-		const response = await fetch(`${baseURL}${url}`, {
-			method: "POST",
-			body: JSON.stringify(body),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
+        return response.json();
+    };
 
-		if (!response.ok) {
-			throw new Error(`${response.status}-${response.statusText}`);
-		}
+    const post = async <T, K>(
+        url: string,
+        body?: Record<string, K | K[]>
+    ): Promise<T> => {
+        const response = await fetch(`${baseURL}${url}`, {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: {
+                accept: "*/*",
+                "Content-Type": "application/json",
+            },
+        });
 
-		return response.ok;
-	};
+        if (!response.ok) {
+            throw new Error(`${response.status}-${response.statusText}`);
+        }
 
-	const put = async <T, K>(url: string, body?: Record<string, K>): Promise<T> => {
-		const response = await fetch(`${baseURL}${url}`, {
-			method: "PUT",
-			body: JSON.stringify(body),
-		});
+        return response.json();
+    };
 
-		if (!response.ok) {
-			throw new Error(`${response.status}-${response.statusText}`);
-		}
+    const put = async <T, K>(
+        url: string,
+        body?: Record<string, K>
+    ): Promise<T> => {
+        const response = await fetch(`${baseURL}${url}`, {
+            method: "PUT",
+            body: JSON.stringify(body),
+        });
 
-		return response.json();
-	};
+        if (!response.ok) {
+            throw new Error(`${response.status}-${response.statusText}`);
+        }
 
-	return {
-		get,
-		post,
-		put,
-	};
+        return response.json();
+    };
+
+    return {
+        get,
+        post,
+        put,
+    };
 }
 
 const { get, post, put } = Fetch();
