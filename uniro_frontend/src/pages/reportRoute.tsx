@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enum/markerEnum";
 import useMap from "../hooks/useMap";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
@@ -28,6 +27,7 @@ import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import removeMarkers from "../utils/markers/removeMarkers";
 import useMutationError from "../hooks/useMutationError";
 import TutorialModal from "../components/map/tutorialModal";
+import createMarkerElement from "../utils/markers/createMarkerElement";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -63,6 +63,8 @@ export default function ReportRoutePage() {
 	});
 	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
 	const [isTutorialShown, setIsTutorialShown] = useState<boolean>(true);
+
+	const { cautionMarkerElement, dangerMarkerElement, waypointMarkerElement, originMarkerElement, destinationMarkerElement } = createMarkerElement();
 
 	if (!university) return;
 
@@ -168,7 +170,7 @@ export default function ReportRoutePage() {
 					lat: (node1.lat + node2.lat) / 2,
 					lng: (node1.lng + node2.lng) / 2,
 				}),
-				createMarkerElement({ type }),
+				dangerMarkerElement({}),
 				() => {
 					setSelectedMarker((prevMarker) => {
 						if (prevMarker?.id === routeId) return undefined;
@@ -200,7 +202,7 @@ export default function ReportRoutePage() {
 					lat: (node1.lat + node2.lat) / 2,
 					lng: (node1.lng + node2.lng) / 2,
 				}),
-				createMarkerElement({ type }),
+				cautionMarkerElement({}),
 				() => {
 					setSelectedMarker((prevMarker) => {
 						if (prevMarker?.id === routeId) return undefined;
@@ -296,10 +298,7 @@ export default function ReportRoutePage() {
 					AdvancedMarker,
 					map,
 					nearestPoint,
-					createMarkerElement({
-						type: Markers.WAYPOINT,
-						className: "translate-waypoint",
-					}),
+					waypointMarkerElement({}),
 				);
 
 				setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker]);
@@ -318,9 +317,7 @@ export default function ReportRoutePage() {
 								element: new AdvancedMarker({
 									map: map,
 									position: nearestPoint,
-									content: createMarkerElement({
-										type: Markers.DESTINATION,
-									}),
+									content: destinationMarkerElement({ hasAnimation: true })
 								}),
 								coords: [...prevPoints.coords, nearestPoint],
 							};
@@ -330,7 +327,7 @@ export default function ReportRoutePage() {
 					const originMarker = new AdvancedMarker({
 						map: map,
 						position: nearestPoint,
-						content: createMarkerElement({ type: Markers.ORIGIN }),
+						content: originMarkerElement({ hasAnimation: true }),
 					});
 					originPoint.current = {
 						point: nearestPoint,
@@ -456,9 +453,7 @@ export default function ReportRoutePage() {
 								element: new AdvancedMarker({
 									map: map,
 									position: point,
-									content: createMarkerElement({
-										type: Markers.DESTINATION,
-									}),
+									content: destinationMarkerElement({})
 								}),
 								coords: [...prevPoints.coords, point],
 							};
@@ -475,27 +470,24 @@ export default function ReportRoutePage() {
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
-
-		if (isSelect) {
-			if (marker.type === Markers.DANGER) {
-				marker.element.content = createMarkerElement({
-					type: marker.type,
-					title: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
-					hasTopContent: true,
-				});
-			} else if (marker.type === Markers.CAUTION) {
-				marker.element.content = createMarkerElement({
-					type: marker.type,
-					title: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
-					hasTopContent: true,
-				});
+		if (marker.type === Markers.DANGER) {
+			if (isSelect) {
+				marker.element.content = dangerMarkerElement({ factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]) });
+				return;
 			}
+
+			marker.element.content = dangerMarkerElement({});
 			return;
 		}
+		if (marker.type === Markers.CAUTION) {
+			if (isSelect) {
+				marker.element.content = cautionMarkerElement({ factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]) });
+				return;
+			}
 
-		marker.element.content = createMarkerElement({
-			type: marker.type,
-		});
+			marker.element.content = cautionMarkerElement({});
+			return;
+		}
 	};
 
 	/** 선택된 마커가 있는 경우 */

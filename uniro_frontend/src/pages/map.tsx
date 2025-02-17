@@ -55,8 +55,8 @@ export default function MapPage() {
 		dangerMarkerElement,
 		buildingMarkerElement,
 		selectedBuildingMarkerElement,
-		originMarkerElement,
-		destinationMarkerElement,
+		originMarkerElementWithName,
+		destinationMarkerElementWithName,
 	} = createMarkerElement();
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
@@ -435,7 +435,7 @@ export default function MapPage() {
 
 		originMarker.map = map;
 
-		originMarker.content = originMarkerElement({ name: origin.buildingName });
+		originMarker.content = originMarkerElementWithName({ name: origin.buildingName });
 
 		if (origin !== undefined && destination === undefined) {
 			moveToBound(origin);
@@ -464,7 +464,7 @@ export default function MapPage() {
 
 		destinationMarker.map = map;
 
-		destinationMarker.content = destinationMarkerElement({
+		destinationMarker.content = destinationMarkerElementWithName({
 			name: destination.buildingName,
 		});
 

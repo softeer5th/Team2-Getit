@@ -1,4 +1,5 @@
 import { Markers } from "../../constant/enum/markerEnum";
+import { CautionIssue, DangerIssue } from "../../constant/enum/reportEnum";
 import { MarkerTypes } from "../../data/types/enum";
 import { animate } from "framer-motion";
 
@@ -14,7 +15,7 @@ interface NameMarkerProps extends MarkerProps {
 }
 
 interface RiskMarkerProps extends MarkerProps {
-	factors?: string[];
+	factors?: CautionIssue[] | DangerIssue[];
 }
 
 export default function createMarkerElement() {
@@ -206,7 +207,7 @@ export default function createMarkerElement() {
 		return attachAnimation(containerElement, hasAnimation);
 	};
 
-	const originMarkerElement = ({ className, name, hasAnimation = false }: NameMarkerProps): HTMLElement => {
+	const originMarkerElementWithName = ({ className, name, hasAnimation = false }: NameMarkerProps): HTMLElement => {
 		const containerElement = createContainerElement(`${className} translate-namedmarker`);
 
 		const imageElement = createImageElement(Markers.ORIGIN);
@@ -222,8 +223,44 @@ export default function createMarkerElement() {
 		return attachAnimation(containerElement, hasAnimation);
 	};
 
-	const destinationMarkerElement = ({ className, name, hasAnimation = false }: NameMarkerProps): HTMLElement => {
+	const destinationMarkerElementWithName = ({
+		className,
+		name,
+		hasAnimation = false,
+	}: NameMarkerProps): HTMLElement => {
 		const containerElement = createContainerElement(`${className} translate-namedmarker`);
+
+		const imageElement = createImageElement(Markers.DESTINATION);
+
+		containerElement.appendChild(imageElement);
+
+		if (name) {
+			const nameElement = createTextElement(Markers.DESTINATION, name);
+
+			containerElement.appendChild(nameElement);
+		}
+
+		return attachAnimation(containerElement, hasAnimation);
+	};
+
+	const originMarkerElement = ({ className, name, hasAnimation = false }: NameMarkerProps): HTMLElement => {
+		const containerElement = createContainerElement(`${className} translate-shadowmarker`);
+
+		const imageElement = createImageElement(Markers.ORIGIN);
+
+		containerElement.appendChild(imageElement);
+
+		if (name) {
+			const nameElement = createTextElement(Markers.ORIGIN, name);
+
+			containerElement.appendChild(nameElement);
+		}
+
+		return attachAnimation(containerElement, hasAnimation);
+	};
+
+	const destinationMarkerElement = ({ className, name, hasAnimation = false }: NameMarkerProps): HTMLElement => {
+		const containerElement = createContainerElement(`${className} translate-shadowmarker`);
 
 		const imageElement = createImageElement(Markers.DESTINATION);
 
@@ -248,13 +285,26 @@ export default function createMarkerElement() {
 		return attachAnimation(containerElement, hasAnimation);
 	};
 
+	const waypointMarkerElement = ({ className }: MarkerProps) => {
+		const containerElement = createContainerElement(`translate-waypoint ${className}`);
+
+		const imageElement = createImageElement(Markers.WAYPOINT);
+
+		containerElement.appendChild(imageElement);
+
+		return containerElement;
+	};
+
 	return {
 		dangerMarkerElement,
 		cautionMarkerElement,
 		buildingMarkerElement,
 		selectedBuildingMarkerElement,
+		originMarkerElementWithName,
+		destinationMarkerElementWithName,
 		originMarkerElement,
 		destinationMarkerElement,
 		reportMarkerElement,
+		waypointMarkerElement,
 	};
 }
