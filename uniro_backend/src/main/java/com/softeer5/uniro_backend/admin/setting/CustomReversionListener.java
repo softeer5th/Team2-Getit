@@ -8,6 +8,7 @@ public class CustomReversionListener implements RevisionListener {
     public void newRevision(Object revisionEntity) {
         RevInfo revinfo = (RevInfo) revisionEntity;
 
+        revinfo.setRevTimeStamp(RevisionContext.getTimeStamp());
         revinfo.setUnivId(RevisionContext.getUnivId());
         revinfo.setAction(RevisionContext.getAction());
     }
