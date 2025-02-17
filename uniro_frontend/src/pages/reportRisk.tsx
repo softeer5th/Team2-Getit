@@ -12,7 +12,6 @@ import { MarkerTypesWithElement } from "../data/types/marker";
 import Button from "../components/customButton";
 import { Link } from "react-router";
 import { ReportRiskMessage } from "../constant/enum/messageEnum";
-import { motion } from "framer-motion";
 import AnimatedContainer from "../container/animatedContainer";
 
 import BackButton from "../components/map/backButton";
@@ -26,6 +25,7 @@ import { getAllRisks } from "../api/routes";
 import useReportRisk from "../hooks/useReportRisk";
 import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
+import TutorialModal from "../components/map/tutorialModal";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	route: RouteId;
@@ -40,10 +40,20 @@ export default function ReportRiskPage() {
 	const [message, setMessage] = useState<ReportRiskMessage>(ReportRiskMessage.DEFAULT);
 	const { setReportRouteId } = useReportRisk();
 	const { university } = useUniversityInfo();
+	const [isTutorialShown, setIsTutorialShown] = useState<boolean>(true);
 
 	useRedirectUndefined<University | undefined>([university]);
 
 	if (!university) return;
+
+	const closeTutorial = () => {
+		setIsTutorialShown(false);
+		setMessage(ReportRiskMessage.DEFAULT);
+	}
+
+	const openTutorial = () => {
+		setIsTutorialShown(true);
+	}
 
 	const result = useSuspenseQueries({
 		queries: [
@@ -164,7 +174,6 @@ export default function ReportRiskPage() {
 					centerCoordinate(nearestEdge.node1, nearestEdge.node2),
 					createMarkerElement({
 						type: Markers.REPORT,
-						className: "translate-pinmarker",
 						hasAnimation: true,
 					}),
 				);
@@ -192,21 +201,15 @@ export default function ReportRiskPage() {
 					if (prevMarker) {
 						setMessage(ReportRiskMessage.DEFAULT);
 						resetMarker(prevMarker);
-					} else setMessage(ReportRiskMessage.ERROR);
-
+					} else {
+						setMessage(ReportRiskMessage.ERROR);
+						openTutorial();
+					}
 					return undefined;
 				});
 			});
 		}
 	}, [map, AdvancedMarker, Polyline]);
-
-	useEffect(() => {
-		if (message === ReportRiskMessage.ERROR) {
-			setTimeout(() => {
-				setMessage(ReportRiskMessage.DEFAULT);
-			}, 1000);
-		}
-	}, [message]);
 
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: reportMarkerTypes | undefined, isSelect: boolean) => {
@@ -251,16 +254,20 @@ export default function ReportRiskPage() {
 
 	return (
 		<div className="relative w-full h-dvh">
-			<div className="w-full h-[57px] flex items-center justify-center absolute top-0 bg-black opacity-50 z-10 py-3 px-4">
-				<motion.p
-					initial={{ x: 0 }}
-					animate={message === ReportRiskMessage.ERROR ? { x: [0, 5, -5, 2.5, -2.5, 0] } : { x: 0 }}
-					transition={{ duration: 0.5, ease: "easeOut" }}
-					className="text-gray-100 text-kor-body2 font-medium text-center"
-				>
-					{message}
-				</motion.p>
-			</div>
+			<AnimatedContainer
+				className="w-full h-[57px] absolute top-0 z-20"
+				positionDelta={57}
+				isTop={true}
+				isVisible={!isTutorialShown}
+				transition={{ type: 'spring', damping: 20 }}
+			>
+				<div className="w-full h-full flex items-center justify-center bg-black opacity-50 py-3 px-4">
+					<p className="text-gray-100">{message}</p>
+				</div>
+			</AnimatedContainer>
+
+			{isTutorialShown && <TutorialModal onClose={closeTutorial} messages={[message]} />}
+
 			<BackButton className="absolute top-[73px] left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
 			<AnimatedContainer
