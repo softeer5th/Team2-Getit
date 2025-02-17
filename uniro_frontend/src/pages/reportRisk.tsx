@@ -49,11 +49,11 @@ export default function ReportRiskPage() {
 	const closeTutorial = () => {
 		setIsTutorialShown(false);
 		setMessage(ReportRiskMessage.DEFAULT);
-	}
+	};
 
 	const openTutorial = () => {
 		setIsTutorialShown(true);
-	}
+	};
 
 	const result = useSuspenseQueries({
 		queries: [
@@ -196,6 +196,7 @@ export default function ReportRiskPage() {
 		addRiskMarker();
 
 		if (map) {
+			map.setCenter(university.centerPoint);
 			map.addListener("click", () => {
 				setReportMarker((prevMarker) => {
 					if (prevMarker) {
@@ -259,7 +260,7 @@ export default function ReportRiskPage() {
 				positionDelta={57}
 				isTop={true}
 				isVisible={!isTutorialShown}
-				transition={{ type: 'spring', damping: 20 }}
+				transition={{ type: "spring", damping: 20 }}
 			>
 				<div className="w-full h-full flex items-center justify-center bg-black opacity-50 py-3 px-4">
 					<p className="text-gray-100">{message}</p>
