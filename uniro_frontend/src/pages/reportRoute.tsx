@@ -290,6 +290,8 @@ export default function ReportRoutePage() {
 				const point = LatLngToLiteral(e.latLng);
 				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
 
+				setSelectedMarker(undefined);
+
 				const tempWaypointMarker = createAdvancedMarker(
 					AdvancedMarker,
 					map,
@@ -448,17 +450,15 @@ export default function ReportRoutePage() {
 
 		if (isSelect) {
 			if (marker.type === Markers.DANGER) {
-				const key = marker.factors[0] as DangerIssueType;
 				marker.element.content = createMarkerElement({
 					type: marker.type,
-					title: key && DangerIssue[key],
+					title: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
 					hasTopContent: true,
 				});
 			} else if (marker.type === Markers.CAUTION) {
-				const key = marker.factors[0] as CautionIssueType;
 				marker.element.content = createMarkerElement({
 					type: marker.type,
-					title: key && CautionIssue[key],
+					title: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
 					hasTopContent: true,
 				});
 			}
