@@ -139,6 +139,10 @@
 	transform: translateY(+4px);
 }
 
+@utility translate-building {
+	transform: translateY(10px);
+}
+
 @keyframes markerAppear {
 	0% {
 		transform: scale(0);

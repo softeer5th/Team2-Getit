@@ -8,11 +8,12 @@ type RouteListProps = {
 	changeCurrentRouteIdx: (index: number) => void;
 	currentRouteIdx: number;
 	routes?: RouteDetail[] | null;
+	cautionRouteIdx: number;
 };
 
 const Divider = () => <div className="border-[0.5px] border-gray-200 w-full"></div>;
 
-const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes }: RouteListProps) => {
+const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRouteIdx }: RouteListProps) => {
 	const { origin, destination } = useRoutePoint();
 
 	const addOriginAndDestination = (routes: RouteDetail[]) => {
@@ -33,13 +34,21 @@ const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes }: RouteList
 		];
 	};
 
+	useEffect(() => {
+		if (cautionRouteIdx === -1) return;
+		const target = document.getElementById(`route-${cautionRouteIdx}`);
+		if (target) {
+			target.scrollIntoView({ behavior: "smooth", block: "center" });
+		}
+	}, [cautionRouteIdx]);
+
 	return (
 		<div className="w-full">
 			{routes &&
 				addOriginAndDestination(routes).map((route, index) => (
 					<Fragment key={`${route.dist}-${route.coordinates.lat}-fragment`}>
 						<Divider />
-						<div className="flex flex-col">
+						<div id={`route-${index}`} className="flex flex-col">
 							<RouteCard
 								changeCurrentRouteIdx={changeCurrentRouteIdx}
 								currentRouteIdx={currentRouteIdx}

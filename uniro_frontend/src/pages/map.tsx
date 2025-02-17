@@ -51,7 +51,9 @@ export default function MapPage() {
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const buildingBoundary = useRef<google.maps.LatLngBounds | null>(null);
-	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; nodeId: NodeId }[]>([]);
+	const [buildingMarkers, setBuildingMarkers] = useState<{ element: AdvancedMarker; nodeId: NodeId; name: string }[]>(
+		[],
+	);
 
 	const [dangerMarkers, setDangerMarkers] = useState<{ element: AdvancedMarker; routeId: RouteId }[]>([]);
 	const [isDangerAcitve, setIsDangerActive] = useState<boolean>(false);
@@ -125,16 +127,10 @@ export default function MapPage() {
 
 	const [risks, buildings] = results;
 
-	const moveToBound = (coord: Coord) => {
+	const moveToBound = (coord: Coord, padding?: number | google.maps.Padding) => {
 		buildingBoundary.current = new google.maps.LatLngBounds();
 		buildingBoundary.current.extend(coord);
-		// 라이브러리를 다양한 화면을 관찰해보았을 때, h-가 377인것을 확인했습니다.
-		map?.fitBounds(buildingBoundary.current, {
-			top: 0,
-			right: 0,
-			bottom: BOTTOM_SHEET_HEIGHT,
-			left: 0,
-		});
+		map?.fitBounds(buildingBoundary.current, padding);
 	};
 
 	const exitBound = () => {
@@ -176,16 +172,16 @@ export default function MapPage() {
 		if (AdvancedMarker === null || map === null) return;
 
 		const buildingList = buildings.data;
-		const buildingMarkersWithID: { nodeId: NodeId; element: AdvancedMarker }[] = [];
+		const buildingMarkersWithID: { nodeId: NodeId; element: AdvancedMarker; name: string }[] = [];
 
 		for (const building of buildingList) {
 			const { nodeId, lat, lng, buildingName } = building;
 
 			const buildingMarker = createAdvancedMarker(
 				AdvancedMarker,
-				nodeId === origin?.nodeId || nodeId === destination?.nodeId ? map : null,
+				map,
 				new google.maps.LatLng(lat, lng),
-				createMarkerElement({ type: Markers.BUILDING, title: buildingName, className: "translate-marker" }),
+				createMarkerElement({ type: Markers.BUILDING, title: "", className: "translate-building" }),
 				() => {
 					setSelectedMarker({
 						id: nodeId,
@@ -197,7 +193,7 @@ export default function MapPage() {
 				},
 			);
 
-			buildingMarkersWithID.push({ nodeId: nodeId ? nodeId : -1, element: buildingMarker });
+			buildingMarkersWithID.push({ nodeId: nodeId ? nodeId : -1, element: buildingMarker, name: buildingName });
 		}
 
 		setBuildingMarkers(buildingMarkersWithID);
@@ -465,14 +461,26 @@ export default function MapPage() {
 			className: "translate-pinmarker",
 		});
 
+		if (origin !== undefined && destination === undefined) {
+			moveToBound(origin);
+			map?.setZoom(prevZoom.current)
+		}
+
 		return () => {
 			const curZoom = map?.getZoom() as number;
+
+			const originMarker = findBuildingMarker(origin.nodeId);
+			if (!originMarker) return;
+
 			originMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
-				title: origin.buildingName,
-				className: "translate-marker",
+				...(curZoom <= 16 ? {
+					className: "translate-building",
+				} : {
+					title: origin.buildingName,
+					className: "translate-marker",
+				})
 			});
-			if (curZoom <= 16) originMarker.map = null;
 		};
 	}, [origin, buildingMarkers]);
 
@@ -491,15 +499,26 @@ export default function MapPage() {
 			className: "translate-pinmarker",
 		});
 
+		if (destination !== undefined && origin === undefined) {
+			moveToBound(destination);
+			map?.setZoom(prevZoom.current)
+		}
+
 		return () => {
 			const curZoom = map?.getZoom() as number;
 
+			const destinationMarker = findBuildingMarker(destination.nodeId);
+			if (!destinationMarker) return;
+
 			destinationMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
-				title: destination.buildingName,
-				className: "translate-marker",
+				...(curZoom <= 16 ? {
+					className: "translate-building",
+				} : {
+					title: destination.buildingName,
+					className: "translate-marker",
+				})
 			});
-			if (curZoom <= 16) destinationMarker.map = null;
 		};
 	}, [destination, buildingMarkers]);
 
@@ -509,13 +528,23 @@ export default function MapPage() {
 			const newBound = new google.maps.LatLngBounds();
 			newBound.extend(origin);
 			newBound.extend(destination);
-			map?.fitBounds(newBound);
+			map?.fitBounds(newBound, {
+				top: 146,
+				left: 50,
+				right: 50,
+				bottom: 75,
+			});
 		}
 	}, [origin, destination]);
 
 	useEffect(() => {
 		if (selectedMarker && selectedMarker.type === Markers.BUILDING && selectedMarker.property) {
-			moveToBound({ lat: selectedMarker.property.lat, lng: selectedMarker.property.lng });
+			moveToBound({ lat: selectedMarker.property.lat, lng: selectedMarker.property.lng }, {
+				top: 0,
+				right: 0,
+				bottom: BOTTOM_SHEET_HEIGHT,
+				left: 0,
+			});
 			setBuilding(selectedMarker.property as Building);
 		}
 
@@ -523,6 +552,32 @@ export default function MapPage() {
 			setBuilding(undefined);
 		};
 	}, [selectedMarker]);
+
+	const toggleBuildingMarker = (isTitleShown: boolean) => {
+		if (isTitleShown) {
+			buildingMarkers
+				.filter((el) => el.nodeId !== destination?.nodeId && el.nodeId !== origin?.nodeId && el.nodeId !== selectedMarker?.id)
+				.forEach(
+					(marker) =>
+					(marker.element.content = createMarkerElement({
+						type: Markers.BUILDING,
+						title: marker.name,
+						className: "translate-marker",
+					})),
+				);
+			return;
+		}
+
+		buildingMarkers
+			.filter((el) => el.nodeId !== destination?.nodeId && el.nodeId !== origin?.nodeId && el.nodeId !== selectedMarker?.id)
+			.forEach(
+				(marker) =>
+				(marker.element.content = createMarkerElement({
+					type: Markers.BUILDING,
+					className: "translate-building",
+				})),
+			);
+	};
 
 	useEffect(() => {
 		if (!map) return;
@@ -544,13 +599,7 @@ export default function MapPage() {
 			}
 
 			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
-			toggleMarkers(
-				false,
-				buildingMarkers
-					.filter((el) => el.nodeId !== origin?.nodeId && el.nodeId !== destination?.nodeId)
-					.map((el) => el.element),
-				map,
-			);
+			toggleBuildingMarker(false);
 		} else if (prevZoom.current <= 16 && zoom >= 17) {
 			if (isCautionAcitve) {
 				toggleMarkers(
@@ -566,13 +615,8 @@ export default function MapPage() {
 					map,
 				);
 			}
-
 			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
-			toggleMarkers(
-				true,
-				buildingMarkers.map((el) => el.element),
-				map,
-			);
+			toggleBuildingMarker(true);
 		}
 	}, [map, zoom]);
 
@@ -582,7 +626,7 @@ export default function MapPage() {
 				isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode === "BUILDING"}
 			/>
 			<MapTopRouteSheet
-				isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode != "BUILDING"}
+				isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode !== "BUILDING"}
 			/>
 			<div ref={mapRef} className="w-full h-full" />
 			<MapBottomSheet
