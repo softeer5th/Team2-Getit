@@ -5,9 +5,6 @@ type Props = {
 	isLoading: boolean;
 	loadingContent?: string;
 };
-
-const svgModules = import.meta.glob("/src/assets/university/*.svg", { eager: true });
-
 const Loading = ({ isLoading, loadingContent }: Props) => {
 	const { university } = useUniversityInfo();
 
