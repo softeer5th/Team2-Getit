@@ -144,11 +144,11 @@ export default function ReportRoutePage() {
 
 	const closeTutorial = () => {
 		setIsTutorialShown(false);
-	}
+	};
 
 	const openTutorial = () => {
 		setIsTutorialShown(true);
-	}
+	};
 
 	const addRiskMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
@@ -415,15 +415,15 @@ export default function ReportRoutePage() {
 			}
 			return {
 				element: null,
-				coords: []
-			}
-		})
+				coords: [],
+			};
+		});
 		if (originPoint.current) {
 			originPoint.current.element.map = null;
 		}
 		setIsActive(false);
 		originPoint.current = undefined;
-	}
+	};
 
 	useEffect(() => {
 		if (newPolyLine.current) {
@@ -439,6 +439,7 @@ export default function ReportRoutePage() {
 		}
 
 		if (map && AdvancedMarker) {
+			map.setCenter(university.centerPoint);
 			map.addListener("click", (e: ClickEvent) => {
 				setSelectedMarker(undefined);
 				if (originPoint.current) {
@@ -464,8 +465,7 @@ export default function ReportRoutePage() {
 							};
 						}
 					});
-				}
-				else {
+				} else {
 					openTutorial();
 				}
 			});
@@ -508,7 +508,9 @@ export default function ReportRoutePage() {
 
 	return (
 		<div className="relative w-full h-dvh">
-			{isTutorialShown && <TutorialModal onClose={closeTutorial} messages={['회색 선에서 시작할 점을 선택해주세요']} />}
+			{isTutorialShown && (
+				<TutorialModal onClose={closeTutorial} messages={["회색 선에서 시작할 점을 선택해주세요"]} />
+			)}
 			<BackButton className="absolute top-4 left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
