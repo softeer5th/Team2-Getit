@@ -17,7 +17,7 @@ import useRedirectUndefined from "../hooks/useRedirectUndefined";
 import { University } from "../data/types/university";
 import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import { getAllRoutes, postReportRoute } from "../api/route";
-import { CoreRoute, CoreRoutesList, Route, RouteId } from "../data/types/route";
+import { CoreRoute, CoreRoutesList, RouteId } from "../data/types/route";
 import { Node, NodeId } from "../data/types/node";
 import { Coord } from "../data/types/coord";
 import useModal from "../hooks/useModal";
