@@ -18,7 +18,13 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ErrorBoundary from "./components/error/ErrorBoundary";
 import Errortest from "./pages/errorTest";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			staleTime: 300000
+		}
+	}
+});
 
 function App() {
 	const { location, fallback } = useDynamicSuspense();

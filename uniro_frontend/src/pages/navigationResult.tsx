@@ -41,6 +41,8 @@ const NavigationResultPage = () => {
 
 	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>("PEDES & SAFE");
 	const [currentRouteIdx, setCurrentRouteIdx] = useState(-1);
+	// Caution 마커를 위한 routeIdx state
+	const [cautionRouteIdx, setCautionRouteIdx] = useState(-1);
 
 	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
 
@@ -59,7 +61,7 @@ const NavigationResultPage = () => {
 						);
 						return response;
 					} catch (e) {
-						alert(`경로를 찾을 수 없습니다. (${e})`);
+						// alert(`경로를 찾을 수 없습니다. (${e})`);
 						return null;
 					}
 					// return await fetchMockJson().then((data) => {
@@ -75,13 +77,12 @@ const NavigationResultPage = () => {
 				queryKey: [university?.id, "risks"],
 				queryFn: () => getAllRisks(university?.id ?? 1001),
 				retry: 1,
-				staleTime: 0,
-				gcTime: 0,
 			},
 		],
 	});
 
 	const resetCurrentIndex = () => {
+		setCautionRouteIdx(-1);
 		setCurrentRouteIdx(-1);
 	};
 
@@ -107,6 +108,11 @@ const NavigationResultPage = () => {
 		setButtonState(buttonType);
 	};
 
+	const handleCautionMarkerClick = (index: number) => {
+		showDetailView();
+		setCurrentRouteIdx(index);
+	};
+
 	return (
 		<div className="relative h-dvh w-full max-w-[450px] mx-auto">
 			{/* 지도 영역 */}
@@ -118,7 +124,9 @@ const NavigationResultPage = () => {
 				risks={risks.data}
 				topPadding={topBarHeight}
 				bottomPadding={sheetHeight}
+				handleCautionMarkerClick={handleCautionMarkerClick}
 				currentRouteIdx={currentRouteIdx}
+				setCautionRouteIdx={setCautionRouteIdx}
 			/>
 
 			<AnimatedContainer
@@ -169,7 +177,7 @@ const NavigationResultPage = () => {
 				isVisible={isDetailView}
 				className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto"
 				positionDelta={MAX_SHEET_HEIGHT}
-				transition={{ type: "spring", damping: 20, duration: 0.3 }}
+				transition={{ type: "spring", damping: 20, duration: 0.7 }}
 				motionProps={{
 					drag: "y",
 					dragControls,
@@ -209,6 +217,7 @@ const NavigationResultPage = () => {
 								? routeList.data![buttonState]?.routeDetails
 								: null
 						}
+						cautionRouteIdx={cautionRouteIdx}
 					/>
 				</div>
 			</AnimatedContainer>

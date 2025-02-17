@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef } from "react";
 import useMap from "../hooks/useMap";
 import {
 	CautionRoute,
@@ -28,6 +28,8 @@ type MapProps = {
 	topPadding?: number;
 	bottomPadding?: number;
 	currentRouteIdx: number;
+	handleCautionMarkerClick: (index: number) => void;
+	setCautionRouteIdx: Dispatch<SetStateAction<number>>;
 };
 
 // TODO: useEffect로 경로가 모두 로딩된 이후에 마커가 생성되도록 수정하기
@@ -65,6 +67,8 @@ const NavigationMap = ({
 	topPadding = 0,
 	bottomPadding = 0,
 	currentRouteIdx,
+	handleCautionMarkerClick,
+	setCautionRouteIdx,
 }: MapProps) => {
 	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
 	const { origin, destination } = useRoutePoint();
@@ -193,7 +197,7 @@ const NavigationMap = ({
 		const originMarkerElement = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin?.buildingName,
-			className: "translate-pinmarker",
+			className: "translate-namedmarker",
 			hasAnimation: true,
 		});
 		const originMarker = createAdvancedMarker(AdvancedMarker, map, origin, originMarkerElement);
@@ -202,7 +206,7 @@ const NavigationMap = ({
 		const destinationMarkerElement = createMarkerElement({
 			type: Markers.DESTINATION,
 			title: destination?.buildingName,
-			className: "translate-pinmarker",
+			className: "translate-namedmarker",
 			hasAnimation: true,
 		});
 		const destinationMarker = createAdvancedMarker(AdvancedMarker, map, destination, destinationMarkerElement);
@@ -260,7 +264,10 @@ const NavigationMap = ({
 					hasAnimation,
 				});
 
-				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
+				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement, () => {
+					handleCautionMarkerClick(index + 1);
+					setCautionRouteIdx(index + 1);
+				});
 				markers.push(marker);
 			}
 		});
@@ -333,21 +340,12 @@ const NavigationMap = ({
 		dyamicMarkersRef.current = [];
 	};
 
-	const saveAllBounds = () => {
-		if (!map || !compositeRoutes) return;
-		const bounds = new google.maps.LatLngBounds();
-		Object.values(compositeRoutes).forEach((composite) => {
-			bounds.extend(composite!.bounds.getNorthEast());
-			bounds.extend(composite!.bounds.getSouthWest());
-		});
-		boundsRef.current = bounds;
-	};
-
 	useEffect(() => {
 		if (currentRouteIdx !== -1) return;
 		if (!map || !boundsRef.current) return;
-		saveAllBounds();
-		map.fitBounds(boundsRef.current, {
+
+		const activeBounds = compositeRoutes[buttonState]?.bounds;
+		map.fitBounds(activeBounds!, {
 			top: topPadding,
 			right: 50,
 			bottom: bottomPadding,

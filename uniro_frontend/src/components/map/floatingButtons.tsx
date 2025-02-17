@@ -42,12 +42,25 @@ export function UndoButton({ onClick, disabled }: UndoButtonProps) {
 		<button
 			disabled={disabled}
 			onClick={onClick}
-			className={`w-fit h-fit p-[14px] flex items-center justify-center rounded-full  bg-gray-100 border-gray-400 text-gray-700 ${disabled ? "bg-gray-300" : "active:bg-gray-200  active:text-gray-700"}`}
+			className={`w-fit h-fit p-[14px] flex items-center justify-center rounded-full border-2  ${disabled ? "bg-gray-300 border-gray-400 text-gray-500" : "active:bg-gray-200  active:text-gray-700 bg-primary-500 border-primary-500 text-gray-100"}`}
 		>
-			<UndoIcon />
+			<UndoIcon width={24} height={24} />
 		</button>
 	);
 }
+
+export function ResetButton({ onClick, disabled }: UndoButtonProps) {
+	return (
+		<button
+			disabled={disabled}
+			onClick={onClick}
+			className={`w-[56px] h-[56px] px-[6px] py-[14px] flex items-center justify-center rounded-full border-2  ${disabled ? "bg-gray-300 border-gray-400 text-gray-500" : "active:bg-gray-200  active:text-gray-700 bg-primary-500 border-primary-500 text-gray-100"}`}
+		>
+			<p className="text-kor-caption">초기화</p>
+		</button>
+	);
+}
+
 
 export function ReportButton({ ...rest }: ButtonHTMLAttributes<HTMLButtonElement>) {
 	return (
