@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useSuspenseQueries } from "@tanstack/react-query";
 
 import RouteList from "../components/navigation/route/routeList";
@@ -61,7 +61,7 @@ const NavigationResultPage = () => {
 						);
 						return response;
 					} catch (e) {
-						alert(`경로를 찾을 수 없습니다. (${e})`);
+						// alert(`경로를 찾을 수 없습니다. (${e})`);
 						return null;
 					}
 					// return await fetchMockJson().then((data) => {
@@ -77,8 +77,6 @@ const NavigationResultPage = () => {
 				queryKey: [university?.id, "risks"],
 				queryFn: () => getAllRisks(university?.id ?? 1001),
 				retry: 1,
-				staleTime: 0,
-				gcTime: 0,
 			},
 		],
 	});
