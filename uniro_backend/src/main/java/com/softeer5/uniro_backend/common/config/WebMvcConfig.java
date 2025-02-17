@@ -1,6 +1,7 @@
 package com.softeer5.uniro_backend.common.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -23,12 +24,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		registry.addInterceptor(jwtInterceptor)
 			.addPathPatterns("/admin/{univId}/**") // "/admin/{univId}/" 패턴만 적용
 			.excludePathPatterns("/admin/auth/login")
+			.excludePathPatterns("/**", HttpMethod.OPTIONS.name())
 			.order(0); // 가장 먼저 실행되도록 설정
 
 		// AdminInterceptor는 그 다음에 실행
 		registry.addInterceptor(adminInterceptor)
 			.addPathPatterns("/admin/{univId}/**") // "/admin/{univId}/" 패턴만 적용
 			.excludePathPatterns("/admin/auth/login")
+			.excludePathPatterns("/**", HttpMethod.OPTIONS.name())
 			.order(1); // JWT 이후에 실행되도록 설정
 	}
 }
