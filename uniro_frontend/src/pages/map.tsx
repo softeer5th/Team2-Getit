@@ -126,16 +126,10 @@ export default function MapPage() {
 
 	const [risks, buildings] = results;
 
-	const moveToBound = (coord: Coord) => {
+	const moveToBound = (coord: Coord, padding?: number | google.maps.Padding) => {
 		buildingBoundary.current = new google.maps.LatLngBounds();
 		buildingBoundary.current.extend(coord);
-		// 라이브러리를 다양한 화면을 관찰해보았을 때, h-가 377인것을 확인했습니다.
-		map?.fitBounds(buildingBoundary.current, {
-			top: 0,
-			right: 0,
-			bottom: BOTTOM_SHEET_HEIGHT,
-			left: 0,
-		});
+		map?.fitBounds(buildingBoundary.current, padding);
 	};
 
 	const exitBound = () => {
@@ -459,14 +453,26 @@ export default function MapPage() {
 			className: "translate-pinmarker",
 		});
 
+		if (origin !== undefined && destination === undefined) {
+			moveToBound(origin);
+			map?.setZoom(prevZoom.current)
+		}
+
 		return () => {
 			const curZoom = map?.getZoom() as number;
+
+			const originMarker = findBuildingMarker(origin.nodeId);
+			if (!originMarker) return;
+
 			originMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
-				title: origin.buildingName,
-				className: "translate-marker",
+				...(curZoom <= 16 ? {
+					className: "translate-building",
+				} : {
+					title: origin.buildingName,
+					className: "translate-marker",
+				})
 			});
-			if (curZoom <= 16) originMarker.map = null;
 		};
 	}, [origin, buildingMarkers]);
 
@@ -485,15 +491,26 @@ export default function MapPage() {
 			className: "translate-pinmarker",
 		});
 
+		if (destination !== undefined && origin === undefined) {
+			moveToBound(destination);
+			map?.setZoom(prevZoom.current)
+		}
+
 		return () => {
 			const curZoom = map?.getZoom() as number;
 
+			const destinationMarker = findBuildingMarker(destination.nodeId);
+			if (!destinationMarker) return;
+
 			destinationMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
-				title: destination.buildingName,
-				className: "translate-marker",
+				...(curZoom <= 16 ? {
+					className: "translate-building",
+				} : {
+					title: destination.buildingName,
+					className: "translate-marker",
+				})
 			});
-			if (curZoom <= 16) destinationMarker.map = null;
 		};
 	}, [destination, buildingMarkers]);
 
@@ -503,13 +520,23 @@ export default function MapPage() {
 			const newBound = new google.maps.LatLngBounds();
 			newBound.extend(origin);
 			newBound.extend(destination);
-			map?.fitBounds(newBound);
+			map?.fitBounds(newBound, {
+				top: 146,
+				left: 50,
+				right: 50,
+				bottom: 75,
+			});
 		}
 	}, [origin, destination]);
 
 	useEffect(() => {
 		if (selectedMarker && selectedMarker.type === Markers.BUILDING && selectedMarker.property) {
-			moveToBound({ lat: selectedMarker.property.lat, lng: selectedMarker.property.lng });
+			moveToBound({ lat: selectedMarker.property.lat, lng: selectedMarker.property.lng }, {
+				top: 0,
+				right: 0,
+				bottom: BOTTOM_SHEET_HEIGHT,
+				left: 0,
+			});
 			setBuilding(selectedMarker.property as Building);
 		}
 
@@ -521,26 +548,26 @@ export default function MapPage() {
 	const toggleBuildingMarker = (isTitleShown: boolean) => {
 		if (isTitleShown) {
 			buildingMarkers
-				.filter((el) => el.nodeId !== destination?.nodeId && el.nodeId !== origin?.nodeId)
+				.filter((el) => el.nodeId !== destination?.nodeId && el.nodeId !== origin?.nodeId && el.nodeId !== selectedMarker?.id)
 				.forEach(
 					(marker) =>
-						(marker.element.content = createMarkerElement({
-							type: Markers.BUILDING,
-							title: marker.name,
-							className: "translate-marker",
-						})),
+					(marker.element.content = createMarkerElement({
+						type: Markers.BUILDING,
+						title: marker.name,
+						className: "translate-marker",
+					})),
 				);
 			return;
 		}
 
 		buildingMarkers
-			.filter((el) => el.nodeId !== destination?.nodeId && el.nodeId !== origin?.nodeId)
+			.filter((el) => el.nodeId !== destination?.nodeId && el.nodeId !== origin?.nodeId && el.nodeId !== selectedMarker?.id)
 			.forEach(
 				(marker) =>
-					(marker.element.content = createMarkerElement({
-						type: Markers.BUILDING,
-						className: "translate-building",
-					})),
+				(marker.element.content = createMarkerElement({
+					type: Markers.BUILDING,
+					className: "translate-building",
+				})),
 			);
 	};
 
