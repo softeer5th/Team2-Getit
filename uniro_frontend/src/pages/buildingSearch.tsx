@@ -17,24 +17,23 @@ export default function BuildingSearchPage() {
 
 	if (!university) return;
 
-	const [input, setInput] = useState<string>('');
+	const [input, setInput] = useState<string>("");
 
 	const { data: buildings } = useQuery({
 		queryKey: [university.id, "buildings", input],
-		queryFn: () =>
-			getSearchBuildings(university.id, { name: input })
-	},)
+		queryFn: () => getSearchBuildings(university.id, { name: input }),
+	});
 
 	const handleBack = () => {
 		navigate(-1);
-	}
+	};
 
 	useRedirectUndefined<University | undefined>([university]);
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
-			<div className="flex flex-row px-[14px] py-4 border-b-[1px] border-gray-400">
-				<Input onChangeDebounce={(e) => setInput(e)} handleVoiceInput={() => { }} placeholder="" />
+			<div className="flex flex-row px-[14px] py-4 border-b-[1px] border-gray-400 ">
+				<Input onChangeDebounce={(e) => setInput(e)} handleVoiceInput={() => {}} placeholder="" />
 				<button onClick={handleBack} className="cursor-pointer p-1 rounded-[8px] active:bg-gray-200">
 					<CloseIcon />
 				</button>
@@ -50,7 +49,6 @@ export default function BuildingSearchPage() {
 					))}
 				</ul>
 			</div>
-
 		</div>
 	);
-}	
+}

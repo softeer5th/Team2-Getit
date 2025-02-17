@@ -43,13 +43,13 @@ export default function Input({ onChangeDebounce, placeholder, handleVoiceInput,
 
 	return (
 		<div
-			className={`h-[60px] w-full max-w-[450px] px-[14px] flex flex-row items-center justify-between border ${isFocus ? "border-gray-700" : "border-gray-400"} rounded-200`}
+			className={`h-[60px] flex-1 min-w-0 flex flex-row max-w-[450px] px-[14px] items-center justify-between border ${isFocus ? "border-gray-700" : "border-gray-400"} rounded-200`}
 		>
 			{isFocus ? <ChevronLeft stroke="#161616" /> : <Search stroke="#161616" />}
 			<input
 				placeholder={placeholder}
 				value={value}
-				className="h-full flex-1 mx-[14px] leading-[160%] font-medium text-gray-900 text-kor-body2 placeholder:text-gray-700 placeholder:font-medium caret-primary-500"
+				className="h-full flex-1 min-w-0 mx-[14px] leading-[160%] font-medium text-gray-900 text-kor-body2 placeholder:text-gray-700 placeholder:font-medium caret-primary-500 appearance-none"
 				{...rest}
 				onChange={handleChange}
 				onFocus={onFoucs}
