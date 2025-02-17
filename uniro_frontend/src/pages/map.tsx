@@ -618,7 +618,7 @@ export default function MapPage() {
 				isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode === "BUILDING"}
 			/>
 			<MapTopRouteSheet
-				isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode != "BUILDING"}
+				isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode !== "BUILDING"}
 			/>
 			<div ref={mapRef} className="w-full h-full" />
 			<MapBottomSheet
