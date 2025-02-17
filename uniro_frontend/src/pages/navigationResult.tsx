@@ -128,7 +128,7 @@ const NavigationResultPage = () => {
 				bottomPadding={sheetHeight}
 				handleCautionMarkerClick={handleCautionMarkerClick}
 				currentRouteIdx={currentRouteIdx}
-				setDangerRouteIdx={setCautionRouteIdx}
+				setCautionRouteIdx={setCautionRouteIdx}
 			/>
 
 			<AnimatedContainer

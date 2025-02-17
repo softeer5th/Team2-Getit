@@ -15,7 +15,6 @@ const Divider = () => <div className="border-[0.5px] border-gray-200 w-full"></d
 
 const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRouteIdx }: RouteListProps) => {
 	const { origin, destination } = useRoutePoint();
-	const currentItemRef = useRef<HTMLDivElement | null>(null);
 
 	const addOriginAndDestination = (routes: RouteDetail[]) => {
 		return [
@@ -49,11 +48,7 @@ const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRout
 				addOriginAndDestination(routes).map((route, index) => (
 					<Fragment key={`${route.dist}-${route.coordinates.lat}-fragment`}>
 						<Divider />
-						<div
-							id={`route-${index}`}
-							className="flex flex-col"
-							ref={currentRouteIdx === index ? currentItemRef : null}
-						>
+						<div id={`route-${index}`} className="flex flex-col">
 							<RouteCard
 								changeCurrentRouteIdx={changeCurrentRouteIdx}
 								currentRouteIdx={currentRouteIdx}
