@@ -100,7 +100,8 @@ public class AdminService {
 
     public GetAllRoutesByRevisionResDTO getAllRoutesByRevision(Long univId, Long versionId){
         List<Route> revRoutes = getRevRoutes(univId,versionId);
-        fetchNode(univId,versionId,revRoutes);
+        List<Node> revNodes = nodeAuditRepository.getAllNodesAtRevision(univId, versionId);
+        fetchNodes(revRoutes,revNodes);
         AllRoutesInfo routesInfo = routeCalculator.assembleRoutes(revRoutes);
 
         Map<Long, Route> revRouteMap = new HashMap<>();
@@ -134,20 +135,6 @@ public class AdminService {
         return GetAllRoutesByRevisionResDTO.of(routesInfo, getRiskRoutesResDTO, lostRouteDTO, changedRoutes);
     }
 
-    private void fetchNode(Long univId, Long versionId, List<Route> revRoutes) {
-
-        List<Node> revNodes = nodeAuditRepository.getAllNodesAtRevision(univId, versionId);
-        Map<Long, Node> nodeMap = new HashMap<>();
-        for(Node revNode : revNodes){
-            nodeMap.put(revNode.getId(), revNode);
-        }
-        for(Route revRoute : revRoutes){
-            revRoute.setNode1(nodeMap.get(revRoute.getNode1().getId()));
-            revRoute.setNode2(nodeMap.get(revRoute.getNode2().getId()));
-        }
-
-    }
-
     public GetChangedRoutesByRevisionResDTO getChangedRoutesByRevision(Long univId, Long versionId) {
         List<Route> revRoutes = getRevRoutes(univId, versionId);
 
@@ -159,16 +146,19 @@ public class AdminService {
             revRouteMap.put(revRoute.getId(), revRoute);
         }
 
-        List<Route> routes = getChangedRoutes(univId, versionId);
+        List<Route> changedRoutes = routeAuditRepository.findUpdatedRouteByUnivIdWithNodes(univId,versionId);
+        List<Node> nodes = nodeRepository.findByUnivId(univId);
+        fetchNodes(changedRoutes,nodes);
+
 
         Map<Long, List<Route>> lostAdjMap = new HashMap<>();
         Map<Long, Node> lostNodeMap = new HashMap<>();
-        List<ChangedRouteDTO> changedRoutes = new ArrayList<>();
+        List<ChangedRouteDTO> changedRoutesDto = new ArrayList<>();
 
-        for(Route route : routes){
+        for(Route route : changedRoutes){
             if(revRouteMap.containsKey(route.getId())){
                 Route revRoute = revRouteMap.get(route.getId());
-                handleRevisionRoute(revRoute, route, changedRoutes);
+                handleRevisionRoute(revRoute, route, changedRoutesDto);
                 continue;
             }
             //해당 시점 이후에 생성된 루트들 (과거 시점엔 보이지 않는 루트)
@@ -179,22 +169,20 @@ public class AdminService {
         List<Node> endNodes = determineEndNodes(lostAdjMap, lostNodeMap);
         LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(mapNodeInfo(lostNodeMap), routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
 
-        return GetChangedRoutesByRevisionResDTO.of(lostRouteDTO, changedRoutes, revInfo.getRev());
+        return GetChangedRoutesByRevisionResDTO.of(lostRouteDTO, changedRoutesDto, revInfo.getRev());
     }
 
-    private List<Route> getChangedRoutes(Long univId, Long versionId) {
-        List<Route> changedRoutes = routeAuditRepository.findUpdatedRouteByUnivIdWithNodes(univId,versionId);
-        List<Node> Nodes = nodeRepository.findByUnivId(univId);
+    private void fetchNodes(List<Route> routes, List<Node> nodes) {
         Map<Long, Node> nodeMap = new HashMap<>();
-        for(Node revNode : Nodes){
+        for(Node revNode : nodes){
             nodeMap.put(revNode.getId(), revNode);
         }
-        for(Route revRoute : changedRoutes){
+        for(Route revRoute : routes){
             revRoute.setNode1(nodeMap.get(revRoute.getNode1().getId()));
             revRoute.setNode2(nodeMap.get(revRoute.getNode2().getId()));
         }
-        return changedRoutes;
     }
+
 
     private List<Route> getRevRoutes(Long univId, Long versionId) {
         revInfoRepository.findById(versionId)
