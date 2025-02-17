@@ -5,7 +5,6 @@ import BuildingMapContainer from "../container/building/buildingMapContainer";
 import BuildingAddContainer from "../container/building/buildingAddContainer";
 import useMap from "../hooks/useMap";
 import { Coord } from "../data/types/coord";
-import useSearchBuilding from "../hooks/useUniversityRecord";
 
 import createMarkerElement from "../components/map/mapMarkers";
 import { QueryClient, useQueries } from "@tanstack/react-query";
@@ -16,8 +15,10 @@ import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import { Node, NodeId } from "../data/types/node";
 import { Markers } from "../constant/enum/markerEnum";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
+import useUniversity from "../hooks/useUniversity";
 
 const BuildingPage = () => {
+  const { university } = useUniversity();
   const queryClient = new QueryClient();
   const result = useQueries({
     queries: [
@@ -46,7 +47,6 @@ const BuildingPage = () => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<NodeId | null>(
     0
   );
-  const { getCurrentUniversityLngLat } = useSearchBuilding();
 
   // mode = add or view일 때 선택한 빌딩 좌표
   const [selectedCoord, setSelectedCoord] = useState<Coord | undefined>(
@@ -295,7 +295,7 @@ const BuildingPage = () => {
 
   // 지도가 로드되면 클릭 이벤트를 추가
   useEffect(() => {
-    if (!map || !mapLoaded) return;
+    if (!map || !mapLoaded || !university) return;
 
     if (routes.data) {
       if (routes.data) {
@@ -325,7 +325,7 @@ const BuildingPage = () => {
       google.maps.event.clearListeners(map, "rightclick");
     }
 
-    map.setCenter(getCurrentUniversityLngLat());
+    map.setCenter(university.centerPoint);
     eraseRoute();
 
     return () => {
@@ -333,7 +333,7 @@ const BuildingPage = () => {
       google.maps.event.clearListeners(map, "rightclick");
       clearBuildingMarkers();
     };
-  }, [map, mapLoaded, getCurrentUniversityLngLat, routes.data, buildings.data]);
+  }, [map, mapLoaded, routes.data, buildings.data]);
 
   useEffect(() => {
     if (!map || !mapLoaded) return;
@@ -398,11 +398,13 @@ const BuildingPage = () => {
   };
 
   const changeToConnectMode = () => {
+    if (!university) return;
+
     setMode("connect");
     setSelectedBuildingId(0);
     if (map) {
       map.setZoom(17);
-      map.setCenter(getCurrentUniversityLngLat());
+      map.setCenter(university?.centerPoint);
     }
   };
 
@@ -415,6 +417,7 @@ const BuildingPage = () => {
   };
 
   const resetToAddMode = () => {
+    if (!university) return;
     setMode("add");
     setSelectedBuildingId(0);
     setSelectedEdge(undefined);
@@ -422,7 +425,7 @@ const BuildingPage = () => {
     setSelectedSingleNode(null);
     if (map) {
       map.setZoom(17);
-      map.setCenter(getCurrentUniversityLngLat());
+      map.setCenter(university?.centerPoint);
     }
   };
 

@@ -3,10 +3,10 @@ import MainContainer from "../container/mainContainer";
 import { useQueries } from "@tanstack/react-query";
 import { transformAllRoutes } from "../utils/route";
 import useMap from "../hooks/useMap";
-import useSearchBuilding from "../hooks/useUniversityRecord";
 import { CoreRoute, CoreRoutesList } from "../data/types/route";
 import createMarkerElement from "../components/map/mapMarkers";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
+import useUniversity from "../hooks/useUniversity";
 
 type AdvancedMarker = google.maps.marker.AdvancedMarkerElement;
 type Polyline = google.maps.Polyline;
@@ -21,7 +21,7 @@ const SimulationPage = () => {
   const result = useQueries({
     queries: [{ queryKey: ["1001", "routes"], queryFn: getRoutes }],
   });
-  const { currentUniversity, getCurrentUniversityLngLat } = useSearchBuilding();
+  const { university } = useUniversity();
 
   const { mapRef, map, mapLoaded, AdvancedMarker, Polyline } = useMap();
   const [routes] = result;
@@ -135,11 +135,9 @@ const SimulationPage = () => {
   }, [routes]);
 
   useEffect(() => {
-    if (!map || !mapLoaded) return;
-    const universityLatLng = getCurrentUniversityLngLat();
-    console.log("Setting center to:", universityLatLng);
-    map.setCenter(universityLatLng);
-  }, [currentUniversity, mapLoaded]);
+    if (!map || !mapLoaded || !university) return;
+    map.setCenter(university.centerPoint);
+  }, [university, mapLoaded]);
 
   useEffect(() => {
     return () => {
