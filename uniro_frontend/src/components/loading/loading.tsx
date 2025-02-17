@@ -10,7 +10,7 @@ const svgModules = import.meta.glob("/src/assets/university/*.svg", { eager: tru
 
 const Loading = ({ isLoading, loadingContent }: Props) => {
 	const { university } = useUniversityInfo();
-	const svgPath = (svgModules[`/src/assets/university/${university}.svg`] as { default: string })?.default;
+
 	return (
 		<AnimatePresence>
 			{isLoading && (
@@ -24,7 +24,7 @@ const Loading = ({ isLoading, loadingContent }: Props) => {
 					bg-[url(/public/loading/background.svg)] bg-no-repeat bg-center bg-contain z-50"
 				>
 					<div className="flex flex-row items-center justify-center bg-white rounded-3xl space-x-1">
-						<img src={svgPath} className="h-4 w-4 ml-2 my-2" />
+						<img src={university?.imageUrl} className="h-4 w-4 ml-2 my-2" />
 						<p className="text-kor-body2 mr-2 my-1">{university?.name}</p>
 					</div>
 					<p className="text-kor-body2 mt-3">{loadingContent}</p>
