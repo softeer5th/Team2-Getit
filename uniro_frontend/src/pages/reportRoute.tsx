@@ -9,7 +9,7 @@ import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import { AdvancedMarker } from "../data/types/marker";
 import Button from "../components/customButton";
-import { CautionToggleButton, DangerToggleButton, UndoButton } from "../components/map/floatingButtons";
+import { CautionToggleButton, DangerToggleButton, ResetButton, UndoButton } from "../components/map/floatingButtons";
 import toggleMarkers from "../utils/markers/toggleMarkers";
 import BackButton from "../components/map/backButton";
 import useUniversityInfo from "../hooks/useUniversityInfo";
@@ -27,6 +27,7 @@ import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import removeMarkers from "../utils/markers/removeMarkers";
 import useMutationError from "../hooks/useMutationError";
+import TutorialModal from "../components/map/tutorialModal";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -61,6 +62,7 @@ export default function ReportRoutePage() {
 		navigate("/map");
 	});
 	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
+	const [isTutorialShown, setIsTutorialShown] = useState<boolean>(true);
 
 	if (!university) return;
 
@@ -139,6 +141,14 @@ export default function ReportRoutePage() {
 			},
 		},
 	);
+
+	const closeTutorial = () => {
+		setIsTutorialShown(false);
+	}
+
+	const openTutorial = () => {
+		setIsTutorialShown(true);
+	}
 
 	const addRiskMarker = () => {
 		if (AdvancedMarker === null || map === null) return;
@@ -262,16 +272,6 @@ export default function ReportRoutePage() {
 		for (const coreRoutes of coreRouteList) {
 			const { coreNode1Id, coreNode2Id, routes: subRoutes } = coreRoutes;
 
-			// 가장 끝쪽 Core Node 그리기
-			const endNode = subRoutes[subRoutes.length - 1].node2;
-
-			createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				endNode,
-				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
-			);
-
 			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
 
 			const routePolyLine = new Polyline({
@@ -289,6 +289,8 @@ export default function ReportRoutePage() {
 
 				const point = LatLngToLiteral(e.latLng);
 				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
+
+				setSelectedMarker(undefined);
 
 				const tempWaypointMarker = createAdvancedMarker(
 					AdvancedMarker,
@@ -340,15 +342,6 @@ export default function ReportRoutePage() {
 					});
 				}
 			});
-
-			const startNode = subRoutes[0].node1;
-
-			createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				startNode,
-				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
-			);
 		}
 	};
 
@@ -379,6 +372,7 @@ export default function ReportRoutePage() {
 					coords: [prevPoints.coords[0]],
 				};
 			});
+			setIsActive(false);
 			return;
 		} else if (newPoints.coords.length === 1) {
 			if (originPoint.current) {
@@ -402,6 +396,34 @@ export default function ReportRoutePage() {
 			};
 		});
 	};
+
+	/** Reset 함수
+	 * 모든 새로운 점 초기화, 시작점 초기화, waypoint 마커 초기화
+	 */
+	const resetPoints = () => {
+		setTempWayPoints((prevPoints) => {
+			const lastMarker = prevPoints.slice(-1)[0];
+
+			lastMarker.map = null;
+
+			return [...prevPoints.slice(0, -1)];
+		});
+
+		setNewPoints((prev) => {
+			if (prev.element) {
+				prev.element.map = null;
+			}
+			return {
+				element: null,
+				coords: []
+			}
+		})
+		if (originPoint.current) {
+			originPoint.current.element.map = null;
+		}
+		setIsActive(false);
+		originPoint.current = undefined;
+	}
 
 	useEffect(() => {
 		if (newPolyLine.current) {
@@ -443,6 +465,9 @@ export default function ReportRoutePage() {
 						}
 					});
 				}
+				else {
+					openTutorial();
+				}
 			});
 		}
 	}, [map]);
@@ -453,17 +478,15 @@ export default function ReportRoutePage() {
 
 		if (isSelect) {
 			if (marker.type === Markers.DANGER) {
-				const key = marker.factors[0] as DangerIssueType;
 				marker.element.content = createMarkerElement({
 					type: marker.type,
-					title: key && DangerIssue[key],
+					title: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
 					hasTopContent: true,
 				});
 			} else if (marker.type === Markers.CAUTION) {
-				const key = marker.factors[0] as CautionIssueType;
 				marker.element.content = createMarkerElement({
 					type: marker.type,
-					title: key && CautionIssue[key],
+					title: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
 					hasTopContent: true,
 				});
 			}
@@ -485,12 +508,8 @@ export default function ReportRoutePage() {
 
 	return (
 		<div className="relative w-full h-dvh">
-			<div className="w-full h-[57px] flex items-center justify-center absolute top-0 bg-black opacity-50 z-10 py-3 px-4">
-				<p className="text-gray-100 text-kor-body2 font-medium text-center">
-					선 위 또는 기존 지점을 선택하세요
-				</p>
-			</div>
-			<BackButton className="absolute top-[73px] left-4 z-5" />
+			{isTutorialShown && <TutorialModal onClose={closeTutorial} messages={['회색 선에서 시작할 점을 선택해주세요']} />}
+			<BackButton className="absolute top-4 left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
 				<div className="absolute w-full bottom-6 px-4">
@@ -503,6 +522,7 @@ export default function ReportRoutePage() {
 				</div>
 			)}
 			<div className="absolute right-4 bottom-[90px] space-y-2">
+				<ResetButton disabled={newPoints.coords.length === 0} onClick={resetPoints} />
 				<UndoButton disabled={newPoints.coords.length === 0} onClick={undoPoints} />
 				<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
 				<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
