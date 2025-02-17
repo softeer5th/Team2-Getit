@@ -114,22 +114,6 @@ const BuildingPage = () => {
     for (const coreRoutes of coreRouteList) {
       const { routes: subRoutes } = coreRoutes;
 
-      // 가장 끝쪽 Core Node 그리기
-      const endNode = subRoutes[subRoutes.length - 1].node2;
-
-      const endMarker = new AdvancedMarker({
-        map: map,
-        position: endNode,
-        content: createMarkerElement({
-          type: "waypoint",
-          className: "translate-waypoint",
-        }),
-      });
-
-      endMarker.addListener("click", () => {
-        if (mode === "view" || mode === "add") setSelectedBuildingId(0);
-      });
-
       const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
 
       const polyline = new Polyline({
@@ -200,21 +184,6 @@ const BuildingPage = () => {
         }
       );
       setPolylineList((prev) => [...prev, polyline]);
-
-      const startNode = subRoutes[0].node1;
-
-      const startMarker = new AdvancedMarker({
-        map: map,
-        position: startNode,
-        content: createMarkerElement({
-          type: "waypoint",
-          className: "translate-waypoint",
-        }),
-      });
-
-      startMarker.addListener("click", () => {
-        if (mode === "view" || mode === "add") setSelectedBuildingId(0);
-      });
     }
   };
 
