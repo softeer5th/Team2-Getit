@@ -197,7 +197,7 @@ const NavigationMap = ({
 		const originMarkerElement = createMarkerElement({
 			type: Markers.ORIGIN,
 			title: origin?.buildingName,
-			className: "translate-pinmarker",
+			className: "translate-namedmarker",
 			hasAnimation: true,
 		});
 		const originMarker = createAdvancedMarker(AdvancedMarker, map, origin, originMarkerElement);
@@ -206,7 +206,7 @@ const NavigationMap = ({
 		const destinationMarkerElement = createMarkerElement({
 			type: Markers.DESTINATION,
 			title: destination?.buildingName,
-			className: "translate-pinmarker",
+			className: "translate-namedmarker",
 			hasAnimation: true,
 		});
 		const destinationMarker = createAdvancedMarker(AdvancedMarker, map, destination, destinationMarkerElement);

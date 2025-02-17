@@ -1,7 +1,6 @@
 import { MouseEvent, useEffect, useState } from "react";
 import useMap from "../hooks/useMap";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
-import createMarkerElement from "../components/map/mapMarkers";
 import { CoreRoute, CoreRoutesList, RouteId } from "../data/types/route";
 import { Markers } from "../constant/enum/markerEnum";
 import { ClickEvent } from "../data/types/event";
@@ -26,6 +25,7 @@ import useReportRisk from "../hooks/useReportRisk";
 import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import TutorialModal from "../components/map/tutorialModal";
+import createMarkerElement from "../utils/markers/createMarkerElement";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	route: RouteId;
@@ -41,6 +41,7 @@ export default function ReportRiskPage() {
 	const { setReportRouteId } = useReportRisk();
 	const { university } = useUniversityInfo();
 	const [isTutorialShown, setIsTutorialShown] = useState<boolean>(true);
+	const { dangerMarkerElement, cautionMarkerElement, reportMarkerElement } = createMarkerElement();
 
 	useRedirectUndefined<University | undefined>([university]);
 
@@ -80,9 +81,19 @@ export default function ReportRiskPage() {
 		if (prevMarker.type === Markers.REPORT) {
 			prevMarker.element.map = null;
 			return;
-		} else {
-			prevMarker.element.content = createMarkerElement({ type: prevMarker.type });
 		}
+
+		if (prevMarker.type === Markers.CAUTION) {
+			prevMarker.element.content = cautionMarkerElement({});
+			return;
+		}
+
+		if (prevMarker.type === Markers.DANGER) {
+			prevMarker.element.content = dangerMarkerElement({});
+			return;
+		}
+
+		return;
 	};
 
 	const addRiskMarker = () => {
@@ -100,7 +111,7 @@ export default function ReportRiskPage() {
 					lat: (node1.lat + node2.lat) / 2,
 					lng: (node1.lng + node2.lng) / 2,
 				}),
-				createMarkerElement({ type }),
+				dangerMarkerElement({}),
 				() => {
 					setReportMarker((prevMarker) => {
 						if (prevMarker) resetMarker(prevMarker);
@@ -127,7 +138,7 @@ export default function ReportRiskPage() {
 					lat: (node1.lat + node2.lat) / 2,
 					lng: (node1.lng + node2.lng) / 2,
 				}),
-				createMarkerElement({ type }),
+				cautionMarkerElement({}),
 				() => {
 					setReportMarker((prevMarker) => {
 						if (prevMarker) resetMarker(prevMarker);
@@ -172,10 +183,7 @@ export default function ReportRiskPage() {
 					AdvancedMarker,
 					map,
 					centerCoordinate(nearestEdge.node1, nearestEdge.node2),
-					createMarkerElement({
-						type: Markers.REPORT,
-						hasAnimation: true,
-					}),
+					reportMarkerElement({})
 				);
 
 				setReportMarker((prevMarker) => {
@@ -216,26 +224,26 @@ export default function ReportRiskPage() {
 	const changeMarkerStyle = (marker: reportMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
-		if (isSelect) {
-			if (marker.type === Markers.DANGER) {
-				marker.element.content = createMarkerElement({
-					type: marker.type,
-					title: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
-					hasTopContent: true,
-				});
-			} else if (marker.type === Markers.CAUTION) {
-				marker.element.content = createMarkerElement({
-					type: marker.type,
-					title: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
-					hasTopContent: true,
-				});
-			}
-			return;
+		switch (marker.type) {
+			case Markers.DANGER:
+				if (isSelect) {
+					marker.element.content = dangerMarkerElement({ factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]) });
+					return;
+				}
+				else {
+					marker.element.content = dangerMarkerElement({});
+					return;
+				}
+			case Markers.CAUTION:
+				if (isSelect) {
+					marker.element.content = cautionMarkerElement({ factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]) });
+					return;
+				}
+				else {
+					marker.element.content = cautionMarkerElement({});
+					return;
+				}
 		}
-
-		marker.element.content = createMarkerElement({
-			type: marker.type,
-		});
 	};
 
 	/** 선택된 마커가 있는 경우 */
