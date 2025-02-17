@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
 import {
 	CautionRoute,
@@ -28,6 +28,8 @@ type MapProps = {
 	topPadding?: number;
 	bottomPadding?: number;
 	currentRouteIdx: number;
+	handleCautionMarkerClick: (index: number) => void;
+	setDangerRouteIdx: Dispatch<SetStateAction<number>>;
 };
 
 // TODO: useEffect로 경로가 모두 로딩된 이후에 마커가 생성되도록 수정하기
@@ -65,6 +67,8 @@ const NavigationMap = ({
 	topPadding = 0,
 	bottomPadding = 0,
 	currentRouteIdx,
+	handleCautionMarkerClick,
+	setDangerRouteIdx,
 }: MapProps) => {
 	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
 	const { origin, destination } = useRoutePoint();
@@ -260,7 +264,10 @@ const NavigationMap = ({
 					hasAnimation,
 				});
 
-				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement);
+				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement, () => {
+					handleCautionMarkerClick(index + 1);
+					setDangerRouteIdx(index + 1);
+				});
 				markers.push(marker);
 			}
 		});
