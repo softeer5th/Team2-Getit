@@ -16,7 +16,7 @@ export const createRiskMarkers = (
 	riskData.forEach((route) => {
 		const markerElement = createMarkerElement({
 			type: Markers.DANGER,
-			className: "translate-pinmarker",
+			className: "translate-shadowmarker",
 			hasAnimation: true,
 		});
 
