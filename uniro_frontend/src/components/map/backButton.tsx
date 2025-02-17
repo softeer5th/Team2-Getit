@@ -10,7 +10,7 @@ export default function BackButton({ className = "", onClick }: BackButtonProps)
     const navigate = useNavigate();
 
     const handleBack = () => {
-        navigate(-1);
+        navigate('/map');
     }
 
     return (

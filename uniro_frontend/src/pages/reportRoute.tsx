@@ -9,7 +9,7 @@ import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import { AdvancedMarker } from "../data/types/marker";
 import Button from "../components/customButton";
-import { CautionToggleButton, DangerToggleButton, UndoButton } from "../components/map/floatingButtons";
+import { CautionToggleButton, DangerToggleButton, ResetButton, UndoButton } from "../components/map/floatingButtons";
 import toggleMarkers from "../utils/markers/toggleMarkers";
 import BackButton from "../components/map/backButton";
 import useUniversityInfo from "../hooks/useUniversityInfo";
@@ -397,6 +397,34 @@ export default function ReportRoutePage() {
 		});
 	};
 
+	/** Reset 함수
+	 * 모든 새로운 점 초기화, 시작점 초기화, waypoint 마커 초기화
+	 */
+	const resetPoints = () => {
+		setTempWayPoints((prevPoints) => {
+			const lastMarker = prevPoints.slice(-1)[0];
+
+			lastMarker.map = null;
+
+			return [...prevPoints.slice(0, -1)];
+		});
+
+		setNewPoints((prev) => {
+			if (prev.element) {
+				prev.element.map = null;
+			}
+			return {
+				element: null,
+				coords: []
+			}
+		})
+		if (originPoint.current) {
+			originPoint.current.element.map = null;
+		}
+		setIsActive(false);
+		originPoint.current = undefined;
+	}
+
 	useEffect(() => {
 		if (newPolyLine.current) {
 			newPolyLine.current.setPath(newPoints.coords);
@@ -481,7 +509,7 @@ export default function ReportRoutePage() {
 	return (
 		<div className="relative w-full h-dvh">
 			{isTutorialShown && <TutorialModal onClose={closeTutorial} messages={['회색 선에서 시작할 점을 선택해주세요']} />}
-			<BackButton className="absolute top-[73px] left-4 z-5" />
+			<BackButton className="absolute top-4 left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
 				<div className="absolute w-full bottom-6 px-4">
@@ -494,6 +522,7 @@ export default function ReportRoutePage() {
 				</div>
 			)}
 			<div className="absolute right-4 bottom-[90px] space-y-2">
+				<ResetButton disabled={newPoints.coords.length === 0} onClick={resetPoints} />
 				<UndoButton disabled={newPoints.coords.length === 0} onClick={undoPoints} />
 				<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
 				<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />
