@@ -141,12 +141,6 @@ export default function MapPage() {
 	const initMap = () => {
 		if (map === null || !AdvancedMarker || !university) return;
 		map.setCenter(university.centerPoint);
-		map.fitBounds(
-			new google.maps.LatLngBounds(
-				new google.maps.LatLng(university.leftTopPoint.lat, university.leftTopPoint.lng),
-				new google.maps.LatLng(university.rightBottomPoint.lat, university.rightBottomPoint.lng),
-			),
-		);
 		map.addListener("click", (e: unknown) => {
 			exitBound();
 			setSelectedMarker(undefined);
