@@ -13,7 +13,7 @@ export default function UniversitySearchPage() {
 	const { university, setUniversity } = useUniversityInfo();
 	const [input, setInput] = useState<string>("");
 
-	const { data: universityList, status } = useQuery({
+	const { data: universityList } = useQuery({
 		queryKey: ["university", input],
 		queryFn: () => getUniversityList(input),
 	});

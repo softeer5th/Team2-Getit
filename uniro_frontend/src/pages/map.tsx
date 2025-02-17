@@ -32,6 +32,7 @@ import { getNavigationResult } from "../api/route";
 import useQueryError from "../hooks/useQueryError";
 import { Coord } from "../data/types/coord";
 import AnimatedContainer from "../container/animatedContainer";
+import Loading from "../components/loading/loading";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -64,7 +65,7 @@ export default function MapPage() {
 	const [universityMarker, setUniversityMarker] = useState<AdvancedMarker>();
 
 	const { origin, setOrigin, destination, setDestination } = useRoutePoint();
-	const { building: selectedBuilding, setBuilding, searchMode } = useSearchBuilding();
+	const { building: selectedBuilding, setBuilding, searchMode, setSearchMode } = useSearchBuilding();
 
 	const [_, isOpen, open, close] = useModal();
 
@@ -75,7 +76,7 @@ export default function MapPage() {
 	const navigate = useNavigate();
 	if (!university) return;
 
-	const [FailModal, { status, data, refetch: findFastRoute }] = useQueryError(
+	const [FailModal, { status, data, isFetching, refetch: findFastRoute }] = useQueryError(
 		{
 			queryKey: ["fastRoute", university.id, origin?.nodeId, destination?.nodeId],
 			queryFn: () =>
@@ -463,7 +464,7 @@ export default function MapPage() {
 
 		if (origin !== undefined && destination === undefined) {
 			moveToBound(origin);
-			map?.setZoom(prevZoom.current)
+			map?.setZoom(prevZoom.current);
 		}
 
 		return () => {
@@ -474,12 +475,14 @@ export default function MapPage() {
 
 			originMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
-				...(curZoom <= 16 ? {
-					className: "translate-building",
-				} : {
-					title: origin.buildingName,
-					className: "translate-marker",
-				})
+				...(curZoom <= 16
+					? {
+							className: "translate-building",
+						}
+					: {
+							title: origin.buildingName,
+							className: "translate-marker",
+						}),
 			});
 		};
 	}, [origin, buildingMarkers]);
@@ -501,7 +504,7 @@ export default function MapPage() {
 
 		if (destination !== undefined && origin === undefined) {
 			moveToBound(destination);
-			map?.setZoom(prevZoom.current)
+			map?.setZoom(prevZoom.current);
 		}
 
 		return () => {
@@ -512,19 +515,23 @@ export default function MapPage() {
 
 			destinationMarker.content = createMarkerElement({
 				type: Markers.BUILDING,
-				...(curZoom <= 16 ? {
-					className: "translate-building",
-				} : {
-					title: destination.buildingName,
-					className: "translate-marker",
-				})
+				...(curZoom <= 16
+					? {
+							className: "translate-building",
+						}
+					: {
+							title: destination.buildingName,
+							className: "translate-marker",
+						}),
 			});
 		};
 	}, [destination, buildingMarkers]);
 
 	/** 출발 도착 설정시, 출발 도착지가 한 눈에 보이도록 지도 조정 */
 	useEffect(() => {
+		if (!map) return;
 		if (origin && destination) {
+			setSearchMode("DESTINATION");
 			const newBound = new google.maps.LatLngBounds();
 			newBound.extend(origin);
 			newBound.extend(destination);
@@ -535,16 +542,19 @@ export default function MapPage() {
 				bottom: 75,
 			});
 		}
-	}, [origin, destination]);
+	}, [map, origin, destination]);
 
 	useEffect(() => {
 		if (selectedMarker && selectedMarker.type === Markers.BUILDING && selectedMarker.property) {
-			moveToBound({ lat: selectedMarker.property.lat, lng: selectedMarker.property.lng }, {
-				top: 0,
-				right: 0,
-				bottom: BOTTOM_SHEET_HEIGHT,
-				left: 0,
-			});
+			moveToBound(
+				{ lat: selectedMarker.property.lat, lng: selectedMarker.property.lng },
+				{
+					top: 0,
+					right: 0,
+					bottom: BOTTOM_SHEET_HEIGHT,
+					left: 0,
+				},
+			);
 			setBuilding(selectedMarker.property as Building);
 		}
 
@@ -556,26 +566,36 @@ export default function MapPage() {
 	const toggleBuildingMarker = (isTitleShown: boolean) => {
 		if (isTitleShown) {
 			buildingMarkers
-				.filter((el) => el.nodeId !== destination?.nodeId && el.nodeId !== origin?.nodeId && el.nodeId !== selectedMarker?.id)
+				.filter(
+					(el) =>
+						el.nodeId !== destination?.nodeId &&
+						el.nodeId !== origin?.nodeId &&
+						el.nodeId !== selectedMarker?.id,
+				)
 				.forEach(
 					(marker) =>
-					(marker.element.content = createMarkerElement({
-						type: Markers.BUILDING,
-						title: marker.name,
-						className: "translate-marker",
-					})),
+						(marker.element.content = createMarkerElement({
+							type: Markers.BUILDING,
+							title: marker.name,
+							className: "translate-marker",
+						})),
 				);
 			return;
 		}
 
 		buildingMarkers
-			.filter((el) => el.nodeId !== destination?.nodeId && el.nodeId !== origin?.nodeId && el.nodeId !== selectedMarker?.id)
+			.filter(
+				(el) =>
+					el.nodeId !== destination?.nodeId &&
+					el.nodeId !== origin?.nodeId &&
+					el.nodeId !== selectedMarker?.id,
+			)
 			.forEach(
 				(marker) =>
-				(marker.element.content = createMarkerElement({
-					type: Markers.BUILDING,
-					className: "translate-building",
-				})),
+					(marker.element.content = createMarkerElement({
+						type: Markers.BUILDING,
+						className: "translate-building",
+					})),
 			);
 	};
 
@@ -672,6 +692,7 @@ export default function MapPage() {
 
 			{isOpen && <ReportModal close={close} />}
 			<FailModal />
+			<Loading isLoading={isFetching} loadingContent="경로를 탐색중입니다" />
 		</div>
 	);
 }

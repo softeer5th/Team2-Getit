@@ -1,7 +1,5 @@
 import { create } from "zustand";
 import { Building } from "../data/types/node";
-import { RoutePointType } from "../data/types/route";
-import { RoutePoint } from "../constant/enum/routeEnum";
 
 export type SearchMode = "BUILDING" | "ORIGIN" | "DESTINATION";
 
