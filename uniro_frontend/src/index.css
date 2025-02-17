@@ -127,12 +127,12 @@
 	--text-eng-caption--line-height: 160%;
 }
 
-@utility translate-marker {
+@utility translate-namedmarker {
 	transform: translateY(40px);
 }
 
-@utility translate-pinmarker {
-	transform: translateY(40px);
+@utility translate-shadowmarker {
+	transform: translateY(2px);
 }
 
 @utility translate-waypoint {

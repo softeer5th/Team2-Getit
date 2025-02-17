@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
-import createMarkerElement from "../components/map/mapMarkers";
 import { Building, NodeId } from "../data/types/node";
 import MapBottomSheet from "../components/map/mapBottomSheet";
 import { MapTopBuildingSheet, MapTopRouteSheet } from "../components/map/TopSheet";
@@ -23,16 +22,17 @@ import { HanyangUniversity } from "../constant/university";
 import { University } from "../data/types/university";
 import { CautionIssueType, DangerIssueType, MarkerTypes } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
+import { Coord } from "../data/types/coord";
+import AnimatedContainer from "../container/animatedContainer";
+import Loading from "../components/loading/loading";
+import createMarkerElement from "../utils/markers/createMarkerElement";
 
 /** API 호출 */
-import { useQuery, useSuspenseQueries } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import { getAllRisks } from "../api/routes";
 import { getAllBuildings } from "../api/nodes";
 import { getNavigationResult } from "../api/route";
 import useQueryError from "../hooks/useQueryError";
-import { Coord } from "../data/types/coord";
-import AnimatedContainer from "../container/animatedContainer";
-import Loading from "../components/loading/loading";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -49,6 +49,15 @@ export default function MapPage() {
 	const { mapRef, map, AdvancedMarker } = useMap({ zoom: 16 });
 	const [zoom, setZoom] = useState<number>(16);
 	const prevZoom = useRef<number>(16);
+
+	const {
+		cautionMarkerElement,
+		dangerMarkerElement,
+		buildingMarkerElement,
+		selectedBuildingMarkerElement,
+		originMarkerElement,
+		destinationMarkerElement,
+	} = createMarkerElement();
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const buildingBoundary = useRef<google.maps.LatLngBounds | null>(null);
@@ -176,7 +185,7 @@ export default function MapPage() {
 				AdvancedMarker,
 				map,
 				new google.maps.LatLng(lat, lng),
-				createMarkerElement({ type: Markers.BUILDING, title: "", className: "translate-building" }),
+				buildingMarkerElement({ className: "translate-building" }),
 				() => {
 					setSelectedMarker({
 						id: nodeId,
@@ -212,7 +221,7 @@ export default function MapPage() {
 					lat: (node1.lat + node2.lat) / 2,
 					lng: (node1.lng + node2.lng) / 2,
 				}),
-				createMarkerElement({ type }),
+				dangerMarkerElement({}),
 				() => {
 					setSelectedMarker((prevMarker) => {
 						if (prevMarker && prevMarker.id === routeId) {
@@ -247,7 +256,7 @@ export default function MapPage() {
 					lat: (node1.lat + node2.lat) / 2,
 					lng: (node1.lng + node2.lng) / 2,
 				}),
-				createMarkerElement({ type }),
+				cautionMarkerElement({}),
 				() => {
 					setSelectedMarker((prevMarker) => {
 						if (prevMarker && prevMarker.id === routeId) {
@@ -332,61 +341,37 @@ export default function MapPage() {
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
-		if (marker.type === Markers.BUILDING && marker.property) {
-			if (marker.id === origin?.nodeId) {
-				marker.element.content = createMarkerElement({
-					type: Markers.ORIGIN,
-					title: marker.property.buildingName,
-					className: "translate-pinmarker",
-				});
-				return;
-			}
-
-			if (marker.id === destination?.nodeId) {
-				marker.element.content = createMarkerElement({
-					type: Markers.DESTINATION,
-					title: destination.buildingName,
-					className: "translate-pinmarker",
-				});
-				return;
-			}
-
-			if (isSelect) {
-				marker.element.content = createMarkerElement({
-					type: Markers.SELECTED_BUILDING,
-					title: marker.property.buildingName,
-					className: "translate-pinmarker",
-				});
-
-				return;
-			}
-
-			marker.element.content = createMarkerElement({
-				type: Markers.BUILDING,
-				title: marker.property.buildingName,
-				className: "translate-marker",
-			});
-		} else {
-			if (isSelect) {
-				if (marker.type === Markers.DANGER) {
-					marker.element.content = createMarkerElement({
-						type: marker.type,
-						title: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
-						hasTopContent: true,
-					});
-				} else if (marker.type === Markers.CAUTION) {
-					marker.element.content = createMarkerElement({
-						type: marker.type,
-						title: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
-						hasTopContent: true,
-					});
+		switch (marker.type) {
+			case Markers.CAUTION:
+				if (isSelect) {
+					marker.element.content = cautionMarkerElement({ factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]) });
+					return;
 				}
-				return;
-			}
+				else {
+					marker.element.content = cautionMarkerElement({});
+					return;
+				}
+			case Markers.DANGER:
+				if (isSelect) {
+					marker.element.content = dangerMarkerElement({ factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]) });
+					return;
+				}
+				else {
+					marker.element.content = dangerMarkerElement({});
+					return;
+				}
+			case Markers.BUILDING:
+				if (!marker.property) return;
 
-			marker.element.content = createMarkerElement({
-				type: marker.type,
-			});
+				if (isSelect) {
+					marker.element.content = selectedBuildingMarkerElement({ name: marker.property.buildingName })
+					return;
+				}
+				else {
+					marker.element.content = buildingMarkerElement({ name: marker.property.buildingName, className: "translate-namedmarker" })
+					return;
+
+				}
 		}
 	};
 
@@ -450,11 +435,7 @@ export default function MapPage() {
 
 		originMarker.map = map;
 
-		originMarker.content = createMarkerElement({
-			type: Markers.ORIGIN,
-			title: origin.buildingName,
-			className: "translate-pinmarker",
-		});
+		originMarker.content = originMarkerElement({ name: origin.buildingName });
 
 		if (origin !== undefined && destination === undefined) {
 			moveToBound(origin);
@@ -467,17 +448,10 @@ export default function MapPage() {
 			const originMarker = findBuildingMarker(origin.nodeId);
 			if (!originMarker) return;
 
-			originMarker.content = createMarkerElement({
-				type: Markers.BUILDING,
-				...(curZoom <= 16
-					? {
-							className: "translate-building",
-						}
-					: {
-							title: origin.buildingName,
-							className: "translate-marker",
-						}),
-			});
+			originMarker.content =
+				curZoom <= 16
+					? buildingMarkerElement({ className: "translate-building" })
+					: buildingMarkerElement({ name: origin.buildingName, className: "translate-namedmarker" });
 		};
 	}, [origin, buildingMarkers]);
 
@@ -490,10 +464,8 @@ export default function MapPage() {
 
 		destinationMarker.map = map;
 
-		destinationMarker.content = createMarkerElement({
-			type: Markers.DESTINATION,
-			title: destination.buildingName,
-			className: "translate-pinmarker",
+		destinationMarker.content = destinationMarkerElement({
+			name: destination.buildingName,
 		});
 
 		if (destination !== undefined && origin === undefined) {
@@ -507,17 +479,10 @@ export default function MapPage() {
 			const destinationMarker = findBuildingMarker(destination.nodeId);
 			if (!destinationMarker) return;
 
-			destinationMarker.content = createMarkerElement({
-				type: Markers.BUILDING,
-				...(curZoom <= 16
-					? {
-							className: "translate-building",
-						}
-					: {
-							title: destination.buildingName,
-							className: "translate-marker",
-						}),
-			});
+			destinationMarker.content =
+				curZoom <= 16
+					? buildingMarkerElement({ className: "translate-building" })
+					: buildingMarkerElement({ name: destination.buildingName, className: "translate-namedmarker" });
 		};
 	}, [destination, buildingMarkers]);
 
@@ -568,11 +533,7 @@ export default function MapPage() {
 				)
 				.forEach(
 					(marker) =>
-						(marker.element.content = createMarkerElement({
-							type: Markers.BUILDING,
-							title: marker.name,
-							className: "translate-marker",
-						})),
+						marker.element.content = buildingMarkerElement({ className: 'translate-building' })
 				);
 			return;
 		}
@@ -586,10 +547,7 @@ export default function MapPage() {
 			)
 			.forEach(
 				(marker) =>
-					(marker.element.content = createMarkerElement({
-						type: Markers.BUILDING,
-						className: "translate-building",
-					})),
+					marker.element.content = buildingMarkerElement({ name: marker.name, className: 'translate-namedmarker' })
 			);
 	};
 
@@ -613,7 +571,7 @@ export default function MapPage() {
 			}
 
 			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
-			toggleBuildingMarker(false);
+			toggleBuildingMarker(true);
 		} else if (prevZoom.current <= 16 && zoom >= 17) {
 			if (isCautionAcitve) {
 				toggleMarkers(
@@ -630,7 +588,7 @@ export default function MapPage() {
 				);
 			}
 			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
-			toggleBuildingMarker(true);
+			toggleBuildingMarker(false);
 		}
 	}, [map, zoom]);
 
