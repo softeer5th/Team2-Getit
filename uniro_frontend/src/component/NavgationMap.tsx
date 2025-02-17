@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef } from "react";
 import useMap from "../hooks/useMap";
 import {
 	CautionRoute,
@@ -340,21 +340,12 @@ const NavigationMap = ({
 		dyamicMarkersRef.current = [];
 	};
 
-	const saveAllBounds = () => {
-		if (!map || !compositeRoutes) return;
-		const bounds = new google.maps.LatLngBounds();
-		Object.values(compositeRoutes).forEach((composite) => {
-			bounds.extend(composite!.bounds.getNorthEast());
-			bounds.extend(composite!.bounds.getSouthWest());
-		});
-		boundsRef.current = bounds;
-	};
-
 	useEffect(() => {
 		if (currentRouteIdx !== -1) return;
 		if (!map || !boundsRef.current) return;
-		saveAllBounds();
-		map.fitBounds(boundsRef.current, {
+
+		const activeBounds = compositeRoutes[buttonState]?.bounds;
+		map.fitBounds(activeBounds!, {
 			top: topPadding,
 			right: 50,
 			bottom: bottomPadding,
