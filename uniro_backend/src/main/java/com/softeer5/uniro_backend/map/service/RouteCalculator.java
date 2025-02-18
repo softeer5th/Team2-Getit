@@ -60,15 +60,15 @@ public class RouteCalculator {
         List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
 
         for (Route route : routes) {
-            nodeMap.put(route.getNode1().getId(), route.getNode1());
-            nodeMap.put(route.getNode2().getId(), route.getNode2());
 
             if (isBuildingRoute(route)) {
                 List<RouteCoordinatesInfoResDTO> routeCoordinates = new ArrayList<>();
                 routeCoordinates.add(RouteCoordinatesInfoResDTO.of(route.getId(), route.getNode1().getId(), route.getNode2().getId()));
                 buildingRoutes.add(BuildingRouteResDTO.of(route.getNode1().getId(), route.getNode2().getId(), routeCoordinates));
-                //continue;
+                continue;
             }
+            nodeMap.put(route.getNode1().getId(), route.getNode1());
+            nodeMap.put(route.getNode2().getId(), route.getNode2());
 
             adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
             adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);

@@ -2,6 +2,7 @@ FROM openjdk:17
 
 ARG JAR_FILE=./build/libs/*.jar
 ARG SPRING_PROFILE
+ARG JAVA_OPTS="-Xmx500m"
 
 COPY ${JAR_FILE} uniro-server.jar
 
