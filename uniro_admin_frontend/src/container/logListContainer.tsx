@@ -4,16 +4,20 @@ import LogList from "../components/log/logList";
 import { RevisionType } from "../data/types/revision";
 
 interface LogListContainerProps {
-  selected: number;
-  revisions: RevisionType[];
-  setSelect: Dispatch<SetStateAction<number>>;
+  selected: RevisionType;
+  revisions: RevisionType[] | undefined;
+  isFetching: boolean;
+  setSelect: Dispatch<SetStateAction<RevisionType>>;
 }
 
-const LogListContainer = ({ setSelect, selected, revisions }: LogListContainerProps) => {
+const LogListContainer = ({ setSelect, selected, revisions, isFetching }: LogListContainerProps) => {
   return (
-    <div className="flex flex-col items-start w-1/5 border-x-2 border-gray-300 h-full">
+    <div className="flex flex-col items-start h-full w-1/5 border-x-2 border-gray-300 h-full">
       <LogTitle />
-      <LogList setSelect={setSelect} selected={selected} revisions={revisions} />
+      {
+        !revisions || isFetching ? <div className="flex-1 flex flex-col w-full h-full overflow-y-scroll px-1 space-y-2 mb-2 ">loading...</div> :
+          <LogList setSelect={setSelect} selected={selected} revisions={revisions} />
+      }
     </div>
   );
 };
