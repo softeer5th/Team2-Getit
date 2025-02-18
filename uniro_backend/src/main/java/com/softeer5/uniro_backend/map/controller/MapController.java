@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import com.softeer5.uniro_backend.map.service.MapService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -29,6 +30,13 @@ public class MapController implements MapApi {
 	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
 		GetAllRoutesResDTO allRoutes = mapService.getAllRoutes(univId);
 		return ResponseEntity.ok().body(allRoutes);
+	}
+
+	@GetMapping("/{univId}/test")
+	public SseEmitter streamRoutes(@PathVariable("univId") Long univId){
+		SseEmitter emitter = new SseEmitter(30 * 60 * 1000L);
+		mapService.getAllRoutesByStream(univId, emitter);
+		return emitter;
 	}
 
 	@Override

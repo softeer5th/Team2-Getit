@@ -4,6 +4,7 @@ import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 import static com.softeer5.uniro_backend.map.entity.RoadExclusionPolicy.calculateCost;
 import static com.softeer5.uniro_backend.map.entity.RoadExclusionPolicy.isAvailableRoute;
+import static java.util.Collections.addAll;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
@@ -28,6 +29,7 @@ import org.locationtech.jts.index.strtree.STRtree;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class RouteCalculator {
@@ -54,7 +56,8 @@ public class RouteCalculator {
         Map<Long, List<Route>> adjMap = new HashMap<>();
         Map<Long, Node> nodeMap = new HashMap<>();
         List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
-        Node startNode = null;
+        //List<Node> startNode = new ArrayList<>();
+        List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
 
         for (Route route : routes) {
             nodeMap.put(route.getNode1().getId(), route.getNode1());
@@ -64,42 +67,30 @@ public class RouteCalculator {
                 List<RouteCoordinatesInfoResDTO> routeCoordinates = new ArrayList<>();
                 routeCoordinates.add(RouteCoordinatesInfoResDTO.of(route.getId(), route.getNode1().getId(), route.getNode2().getId()));
                 buildingRoutes.add(BuildingRouteResDTO.of(route.getNode1().getId(), route.getNode2().getId(), routeCoordinates));
-                continue;
+                //continue;
             }
 
             adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
             adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
-
-            if (startNode == null) {
-                if (route.getNode1().isCore()) startNode = route.getNode1();
-                else if (route.getNode2().isCore()) startNode = route.getNode2();
-            }
         }
 
-        List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
+        nodeInfos.addAll(nodeMap.entrySet().stream()
             .map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getX(), entry.getValue().getY()))
-            .toList();
+            .toList());
 
-        startNode = determineStartNode(startNode, adjMap, nodeMap, routes);
+        List<Node> startNode = determineStartNodes(adjMap, nodeMap, routes);
 
-        return AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, List.of(startNode)), buildingRoutes);
+        return AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
     }
 
-    private Node determineStartNode(Node startNode, Map<Long, List<Route>> adjMap, Map<Long, Node> nodeMap, List<Route> routes) {
-        if (startNode != null) return startNode;
-
-        List<Long> endNodes = adjMap.entrySet().stream()
-            .filter(entry -> entry.getValue().size() == 1)
-            .map(Map.Entry::getKey)
-            .toList();
-
-        if (endNodes.size() == IS_SINGLE_ROUTE) {
-            return nodeMap.get(endNodes.get(0));
-        } else if (endNodes.isEmpty()) {
-            return routes.get(0).getNode1();
-        } else {
-            throw new RouteException("Invalid Map", ErrorCode.INVALID_MAP);
-        }
+    private List<Node> determineStartNodes(Map<Long, List<Route>> adjMap,
+                                           Map<Long, Node> nodeMap,
+                                           List<Route> routes) {
+        return nodeMap.values().stream()
+                .filter(node -> node.isCore()
+                        || (adjMap.containsKey(node.getId()) && adjMap.get(node.getId()).size() == 1))
+                .distinct() // nodeMap의 값이 이미 유니크하다면 생략 가능
+                .collect(Collectors.toList());
     }
 
 
