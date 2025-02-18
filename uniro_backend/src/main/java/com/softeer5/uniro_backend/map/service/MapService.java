@@ -56,6 +56,8 @@ public class MapService {
 
 	private final MapClient mapClient;
 
+	ObjectMapper mapper = new ObjectMapper();
+
 	public GetAllRoutesResDTO getAllRoutes(Long univId) {
 		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
@@ -83,7 +85,7 @@ public class MapService {
 					batch.add(route);
 					entityManager.detach(route);
 
-					// 100건 모이면 배치 처리
+					// 500건 모이면 배치 처리
 					if (batch.size() == 500) {
 						AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
 						emitter.send(allRoutesInfo);
@@ -107,7 +109,88 @@ public class MapService {
 			}
 	}
 
-	public List<FastestRouteResDTO> findFastestRoute(Long univId, Long startNodeId, Long endNodeId){
+	public GetAllRoutesResDTO getAllRoutesWithNoSSE(Long univId) {
+		List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
+		List<CoreRouteResDTO> coreRoutes = new ArrayList<>();
+		List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
+
+		try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
+			List<Route> batch = new ArrayList<>(500);
+			Iterator<Route> iterator = routeStream.iterator();
+			while (iterator.hasNext()) {
+				Route route = iterator.next();
+				batch.add(route);
+				entityManager.detach(route);
+
+				// 100건 모이면 배치 처리
+				if (batch.size() == 500) {
+					AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+					nodeInfos.addAll(allRoutesInfo.getNodeInfos());
+					coreRoutes.addAll(allRoutesInfo.getCoreRoutes());
+					buildingRoutes.addAll(allRoutesInfo.getBuildingRoutes());
+					batch.clear();
+					entityManager.clear();
+				}
+			}
+
+			// 남은 배치 처리
+			if (!batch.isEmpty()) {
+				AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+				nodeInfos.addAll(allRoutesInfo.getNodeInfos());
+				coreRoutes.addAll(allRoutesInfo.getCoreRoutes());
+				buildingRoutes.addAll(allRoutesInfo.getBuildingRoutes());
+				batch.clear();
+				entityManager.clear();
+			}
+
+		}
+
+		return GetAllRoutesResDTO.of(nodeInfos,coreRoutes,buildingRoutes,1L);
+	}
+
+	public String getAllRoutesWithString(Long univId) {
+		//List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+		StringBuilder nodeInfos = new StringBuilder();
+		StringBuilder coreRoutes = new StringBuilder();
+		StringBuilder buildingInfos = new StringBuilder();
+
+		try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
+			List<Route> batch = new ArrayList<>(100);
+			Iterator<Route> iterator = routeStream.iterator();
+			int a = 0;
+			while (iterator.hasNext()) {
+				a++;
+				Route route = iterator.next();
+				batch.add(route);
+				entityManager.detach(route);
+				// 1000건 모이면 처리
+				if (batch.size() == 100) {
+					AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);  // 배치 처리 로직 실행
+					try {
+						nodeInfos.append(mapper.writeValueAsString(allRoutesInfo.getNodeInfos()));
+						coreRoutes.append(mapper.writeValueAsString(allRoutesInfo.getCoreRoutes()));
+						buildingInfos.append(mapper.writeValueAsString(allRoutesInfo.getBuildingRoutes()));
+					} catch (JsonProcessingException e) {
+
+					}
+					batch.forEach(entityManager::detach); // 메모리에서 detach
+					batch.clear();
+					entityManager.clear();
+				}
+			}
+
+			// 남은 데이터 처리
+			if (!batch.isEmpty()) {
+				batch.forEach(entityManager::detach);
+			}
+		}
+
+		StringBuilder result = new StringBuilder();
+		result.append("{\"nodeInfos\": ").append(nodeInfos).append(",\"coreRoutes\": ").append(coreRoutes).append(",\"buildingInfos\": ").append(buildingInfos).append("}");
+		return result.toString();
+	}
+
+		public List<FastestRouteResDTO> findFastestRoute(Long univId, Long startNodeId, Long endNodeId){
 
 		if(startNodeId.equals(endNodeId)){
 			throw new RouteCalculationException("Start and end nodes cannot be the same", SAME_START_AND_END_POINT);

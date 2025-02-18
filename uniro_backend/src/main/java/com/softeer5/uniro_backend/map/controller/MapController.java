@@ -32,11 +32,22 @@ public class MapController implements MapApi {
 		return ResponseEntity.ok().body(allRoutes);
 	}
 
-	@GetMapping("/{univId}/test")
+	@GetMapping("/{univId}/sse")
 	public SseEmitter streamRoutes(@PathVariable("univId") Long univId){
 		SseEmitter emitter = new SseEmitter(30 * 60 * 1000L);
 		mapService.getAllRoutesByStream(univId, emitter);
 		return emitter;
+	}
+
+	@GetMapping("/{univId}/nosse")
+	public ResponseEntity<GetAllRoutesResDTO> streamRoutesWithNoSSE(@PathVariable("univId") Long univId){
+		GetAllRoutesResDTO allRoutes = mapService.getAllRoutesWithNoSSE(univId);
+		return ResponseEntity.ok().body(allRoutes);
+	}
+
+	@GetMapping("/{univId}/string")
+	public ResponseEntity<String> streamRoutesWithString(@PathVariable("univId") Long univId){
+		return ResponseEntity.ok().body(mapService.getAllRoutesWithString(univId));
 	}
 
 	@Override
