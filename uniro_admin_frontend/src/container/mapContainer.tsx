@@ -1,160 +1,87 @@
-import { useEffect, useRef, useState, version } from "react";
 import { RevisionDataType, RevisionType } from "../data/types/revision";
-import useMap from "../hooks/useMap";
 import useUniversity from "../hooks/useUniversity";
-import { CoreRoutes } from "../data/types/route";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { patchRevision } from "../api/admin";
+import useLogin from "../hooks/useLogin";
+import LogMap from "../component/LogMap";
+import { useEffect, useState } from "react";
 
 interface MapContainerProps {
 	rev: RevisionType;
 	data: RevisionDataType | undefined;
 }
 
-const dashSymbol = {
-	path: "M 0,-1 0,1",
-	strokeOpacity: 1,
-	scale: 3,
-};
 
 const MapContainer = ({ rev, data }: MapContainerProps) => {
+	const { accessToken } = useLogin();
 	const { university } = useUniversity();
-	const { AdvancedMarker, Polyline, map, mapRef } = useMap();
-	const cachedRoute = useRef<Map<string, google.maps.Polyline>>(new Map());
+	const queryClient = useQueryClient();
+	const [modalOpen, setModalOpen] = useState<boolean>(false);
+	const [failModalOpen, setFailModalOpen] = useState<boolean>(false);
 
-	const { mutate } = useMutation({})
-
-	const drawBuildingRoute = (coreRouteList: CoreRoutes[]) => {
-		if (!Polyline || !AdvancedMarker || !map) return;
-
-		for (const coreRoutes of coreRouteList) {
-			const { coreNode1Id, coreNode2Id, routes: subRoutes } = coreRoutes;
-
-			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
-
-			const routePolyLine = new Polyline({
-				map: map,
-				path: subNodes.map((el) => {
-					return { lat: el.lat, lng: el.lng };
-				}),
-				strokeOpacity: 0,
-				strokeColor: "#808080",
-				icons: [
-					{
-						icon: dashSymbol,
-						offset: "0",
-						repeat: "20px",
-					},
-				],
-				geodesic: true,
-			});
+	const { status, isSuccess, mutate } = useMutation({
+		mutationFn: () => patchRevision(accessToken, university?.id ?? -1, data?.rev ?? -1),
+		onSuccess: () => {
+			closeModal();
+			queryClient.invalidateQueries({ queryKey: [university?.id], exact: false, });
+		},
+		onError: () => {
+			closeModal();
+			openFailModal();
 		}
-	};
+	})
 
-	const drawRoute = (coreRouteList: CoreRoutes[]) => {
-		if (!Polyline || !AdvancedMarker || !map) return;
-
-		// const color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0")}`
-		for (const coreRoutes of coreRouteList) {
-			const { coreNode1Id, coreNode2Id, routes: subRoutes } = coreRoutes;
-
-			const routeIds = subRoutes.map(el => el.routeId)
-
-			const key = coreNode1Id < coreNode2Id ? routeIds.join('_') : routeIds.reverse().join('_')
-
-			if (cachedRoute.current.has(key)) {
-				const cachedPolyline = cachedRoute.current.get(key);
-				if (!cachedPolyline) continue;
-
-				cachedPolyline.setMap(map);
-				cachedPolyline.setOptions({
-					strokeColor: "#808080"
-				})
-				continue;
-			}
-
-			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
-
-			const routePolyLine = new Polyline({
-				map: map,
-				path: subNodes.map((el) => {
-					return { lat: el.lat, lng: el.lng };
-				}),
-				strokeColor: "#808080",
-				geodesic: true
-			});
-
-			cachedRoute.current.set(key, routePolyLine);
-		}
-	};
-
-	const findCachedCoreRoute = (coreRouteList: CoreRoutes[]) => {
-		if (!Polyline) return;
-
-		for (const coreRoutes of coreRouteList) {
-			const { coreNode1Id, coreNode2Id, routes } = coreRoutes;
-
-			const routeIds = routes.map(el => el.routeId)
-
-			const key = coreNode1Id < coreNode2Id ? routeIds.join('_') : routeIds.reverse().join('_')
-
-			if (cachedRoute.current.has(key)) {
-				const polyline = cachedRoute.current.get(key);
-
-				if (!polyline) return;
-
-				polyline.setMap(map);
-				polyline.setOptions({
-					strokeColor: "red"
-				})
-
-				continue;
-			}
-
-			const subNodes = [routes[0].node1, ...routes.map((el) => el.node2)];
-
-			const routePolyLine = new Polyline({
-				map: map,
-				path: subNodes.map((el) => {
-					return { lat: el.lat, lng: el.lng };
-				}),
-				strokeOpacity: 0.5,
-				strokeColor: "red",
-				geodesic: true
-			});
-
-			cachedRoute.current.set(key, routePolyLine);
-		}
+	const openFailModal = () => {
+		setFailModalOpen(true)
 	}
 
-	useEffect(() => {
-		if (!data) return;
+	const closeFailModal = () => {
+		setFailModalOpen(false);
+	}
 
-		for (const polyline of cachedRoute.current.values()) {
-			polyline.setMap(null);
-		}
+	const openModal = () => {
+		setModalOpen(true)
+	}
 
-		drawRoute(data.routesInfo.coreRoutes);
-		drawBuildingRoute(data.routesInfo.buildingRoutes);
-
-		findCachedCoreRoute(data.lostRoutes.coreRoutes);
-	}, [map, data])
-
-
-	useEffect(() => {
-		if (!map || !university) return;
-		map.setCenter(university.centerPoint)
-	}, [map, university])
+	const closeModal = () => {
+		setModalOpen(false);
+	}
 
 
 	return (
 		<div className="flex flex-col w-4/5 h-full pb-4 px-1">
 			<div className="flex flex-row items-center justify-between w-full h-[50px] px-2">
 				<div className="text-kor-heading2">VERSION : {data?.rev} / {rev.revTime.slice(0, 10)}  {rev.revTime.slice(11, -1)}</div>
-				<button className="rounded-100 bg-primary-500 py-2 px-4 text-system-skyblue hover:bg-primary-600">
+				<button onClick={openModal} className="rounded-100 bg-primary-500 py-2 px-4 text-system-skyblue hover:bg-primary-600">
 					수정하기
 				</button>
 			</div>
-			<div ref={mapRef} className="w-full h-full" />
+			<LogMap revisionData={data} center={university?.centerPoint} />
+			{
+				modalOpen &&
+				<div className="w-screen h-screen absolute top-0 left-0 flex items-center justify-center bg-[rgba(0,0,0,0.5)]">
+					<div className="w-[300px] h-[300px] bg-gray-100 rounded-200 p-5 space-y-4 flex flex-col justify-center">
+						<h2 className="font-bold text-xl "><i>{data?.rev}</i> 로 되돌리시겠습니까?</h2>
+						<p className="font-semibold">되돌리기 작업은 취소될 수 없습니다.</p>
+						<div className="w-full flex justify-around ">
+							<button className="w-[100px] h-[30px] border border-gray-400 rounded-100 cursor-pointer text-primary-500" onClick={() => mutate()}>확인</button>
+							<button className="w-[100px] h-[30px] border border-gray-400 rounded-100 cursor-pointer text-system-red" onClick={closeModal}>취소</button>
+						</div>
+					</div>
+				</div>
+			}
+			{
+				failModalOpen &&
+				<div className="w-screen h-screen absolute top-0 left-0 flex items-center justify-center bg-[rgba(0,0,0,0.5)]">
+					<div className="w-[300px] h-[300px] bg-gray-100 rounded-200 p-5 space-y-4 flex flex-col justify-center">
+						<h2 className="font-bold text-xl text-system-red ">에러가 발생하였습니다.</h2>
+						<p className="font-semibold">관리자에게 문의바랍니다.</p>
+						<div className="w-full flex justify-around ">
+							<button className="w-[100px] h-[30px] border border-gray-400 rounded-100 cursor-pointer text-system-red" onClick={closeFailModal}>확인</button>
+						</div>
+					</div>
+				</div>
+			}
 		</div>
 	);
 };

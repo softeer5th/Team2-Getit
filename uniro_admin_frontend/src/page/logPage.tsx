@@ -20,7 +20,7 @@ const LogPage = () => {
 	const [selectedRev, setSelectedRev] = useState<RevisionType>({ rev: -1, revTime: '', univId: -1, action: LogActionEnum.CREATE_BUILDING });
 
 	const { data: revisionData, isFetching } = useQuery({
-		queryKey: [university?.id, "revision", selectedRev],
+		queryKey: [university?.id, "revision", selectedRev.rev],
 		queryFn: () => getRevision(accessToken, university ? university.id : -1, selectedRev.rev),
 		enabled: selectedRev.rev !== -1 ? true : false,
 	});
