@@ -55,7 +55,7 @@ public class AdminService {
     @DisableAudit
     public void rollbackRev(Long univId, Long versionId){
         RevInfo revInfo = revInfoRepository.findFirstByUnivIdAndRevAfter(univId, versionId)
-            .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
+            .orElseThrow(() -> new AdminException("Already the latest version id", ALREADY_LATEST_VERSION_ID));
 
         List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
         List<Node> revNodes = nodeAuditRepository.getAllNodesAtRevision(univId, versionId);
