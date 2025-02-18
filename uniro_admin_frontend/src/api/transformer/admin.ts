@@ -1,5 +1,5 @@
 import { CoreRoute, Route, RouteId } from "../../data/types/route";
-import { RevisionDataType, RevisionType } from "../../data/types/revision";
+import { ChangedRouteType, ChangedRouteWithNodeType, RevisionDataType, RevisionType } from "../../data/types/revision";
 import { GetRevisionResponse } from "../type/response/admin";
 import { NodeId } from "../../data/types/node";
 
@@ -12,6 +12,11 @@ export const transformGetRevision = (res: GetRevisionResponse, versionId: number
 	const { nodeInfos: lostNodeInfos } = res.lostRoutes;
 	const nodeMap = new Map(nodeInfos.map((node) => [node.nodeId, node]));
 	const lostNodeMap = new Map(lostNodeInfos.map((node) => [node.nodeId, node]));
+	const routes = res.routesInfo.coreRoutes.map((coreRoute) => coreRoute.routes).flat();
+
+	const routeNodeMap = new Map(
+		routes.map(({ routeId, startNodeId, endNodeId }) => [routeId, [startNodeId, endNodeId]]),
+	);
 
 	const createRoutes = ({
 		routeId,
@@ -65,6 +70,27 @@ export const transformGetRevision = (res: GetRevisionResponse, versionId: number
 		};
 	};
 
+	const addNodeToChangedList = (changed: ChangedRouteType): ChangedRouteWithNodeType | undefined => {
+		const { routeId } = changed;
+		const routeInfo = routeNodeMap.get(routeId);
+
+		if (!routeInfo) return;
+
+		const [startNodeId, endNodeId] = routeInfo;
+
+		const node1 = nodeMap.get(startNodeId);
+
+		const node2 = nodeMap.get(endNodeId);
+
+		if (!node1 || !node2) return;
+
+		return {
+			...changed,
+			node1,
+			node2,
+		};
+	};
+
 	return {
 		routesInfo: {
 			coreRoutes: res.routesInfo.coreRoutes.map((coreRoute) => {
@@ -90,7 +116,7 @@ export const transformGetRevision = (res: GetRevisionResponse, versionId: number
 				};
 			}),
 		},
-		changedList: res.changedList,
+		changedList: res.changedList.map(addNodeToChangedList),
 		rev: versionId,
 	};
 };

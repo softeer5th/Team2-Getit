@@ -18,9 +18,14 @@ type ChangedType = {
 
 export type ChangedRouteType = {
 	routeId: RouteId;
-	current: ChangedType[];
-	difference: ChangedType[];
+	current: ChangedType;
+	difference: ChangedType;
 };
+
+export interface ChangedRouteWithNodeType extends ChangedRouteType {
+	node1: Node;
+	node2: Node;
+}
 
 export type RevisionDataType = {
 	routesInfo: {
@@ -35,6 +40,6 @@ export type RevisionDataType = {
 		nodeInfos: Node[];
 		coreRoutes: CoreRoutes[];
 	};
-	changedList: ChangedRouteType[];
+	changedList: (ChangedRouteWithNodeType | undefined)[];
 	rev: number;
 };
