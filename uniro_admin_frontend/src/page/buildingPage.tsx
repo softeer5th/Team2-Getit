@@ -22,11 +22,11 @@ const BuildingPage = () => {
   const queryClient = new QueryClient();
   const result = useQueries({
     queries: [
-      { queryKey: ["1001", "routes"], queryFn: () => getAllRoutes(1001) },
+      { queryKey: [university?.id, "routes"], queryFn: () => getAllRoutes(university?.id ?? -1) },
       {
-        queryKey: [1001, "buildings"],
+        queryKey: [university?.id, "buildings"],
         queryFn: () =>
-          getAllBuildings(1001, {
+          getAllBuildings(university?.id ?? -1, {
             leftUpLat: 38,
             leftUpLng: 127,
             rightDownLat: 37,
@@ -362,7 +362,7 @@ const BuildingPage = () => {
 
   // 새로고침 기능
   const refreshBuildings = () => {
-    queryClient.invalidateQueries({ queryKey: [1001, "buildings"] });
+    queryClient.invalidateQueries({ queryKey: [university?.id, "buildings"] });
     buildings.refetch();
   };
 

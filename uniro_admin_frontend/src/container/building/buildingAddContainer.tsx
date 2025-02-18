@@ -3,6 +3,7 @@ import { Building, Node, NodeId } from "../../data/types/node";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postBuilding } from "../../api/nodes";
 import { postBuildingRoute } from "../../api/route";
+import useUniversity from "../../hooks/useUniversity";
 
 type Coord = {
   lat: number;
@@ -30,6 +31,7 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
   drawSingleRoute,
   resetConnectMode,
 }) => {
+  const { university } = useUniversity();
   const queryClient = useQueryClient();
   const [buildingName, setBuildingName] = useState("");
   const [buildingPhoto, setBuildingPhoto] = useState("");
@@ -47,9 +49,9 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
       lat: number;
       lng: number;
       level: number;
-    }) => postBuilding(1001, body),
+    }) => postBuilding(university?.id ?? -1, body),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [1001, "buildings"] });
+      queryClient.invalidateQueries({ queryKey: [university?.id, "buildings"] });
     },
     onError: (error) => {
       alert("건물 추가에 실패했습니다.");
@@ -58,10 +60,10 @@ const BuildingAddContainer: React.FC<BuildingAddContainerProps> = ({
 
   const addBuildingRoute = useMutation({
     mutationFn: (body: { buildingNodeId: NodeId; nodeId: NodeId }) =>
-      postBuildingRoute(1001, body),
+      postBuildingRoute(university?.id ?? -1, body),
     onSuccess: () => {
       alert("경로가 추가되었습니다.");
-      queryClient.invalidateQueries({ queryKey: [1001, "routes"] });
+      queryClient.invalidateQueries({ queryKey: [university?.id, "routes"] });
     },
     onError: (error) => {
       alert("경로 추가에 실패했습니다.");

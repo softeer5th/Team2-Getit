@@ -16,7 +16,7 @@ const BuildingMap = ({ style }: MapProps) => {
 
   useEffect(() => {
     if (!map || !mapLoaded || !university) return;
-    map.setCenter(university?.centerPoint);
+    map.setCenter(university.centerPoint);
   }, [university, mapLoaded, map]);
 
   return (
