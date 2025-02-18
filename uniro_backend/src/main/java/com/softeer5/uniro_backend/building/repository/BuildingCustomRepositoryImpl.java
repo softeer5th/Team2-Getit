@@ -23,7 +23,7 @@ public class BuildingCustomRepositoryImpl implements BuildingCustomRepository {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<BuildingNode> searchBuildings(Long univId, String name, Integer pageSize) {
+	public List<BuildingNode> searchBuildings(Long univId, String trimmedName, Integer pageSize) {
 
 		return queryFactory
 			.select(new QBuildingNode(building, node))
@@ -31,13 +31,13 @@ public class BuildingCustomRepositoryImpl implements BuildingCustomRepository {
 			.innerJoin(node).on(node.id.eq(building.nodeId))
 			.where(
 				building.univId.eq(univId),
-				nameCondition(name)
+				nameCondition(trimmedName)
 			)
 			.orderBy(building.name.asc())
 			.limit(pageSize)
 			.fetch();
 	}
-	private BooleanExpression nameCondition(String name) {
-		return name == null || name.isEmpty() ? null : building.name.containsIgnoreCase(name);
+	private BooleanExpression nameCondition(String trimmedName) {
+		return trimmedName == null || trimmedName.isEmpty() ? null : building.trimmedName.containsIgnoreCase(trimmedName);
 	}
 }

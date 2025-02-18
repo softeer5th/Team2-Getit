@@ -17,18 +17,18 @@ public class UnivCustomRepositoryImpl implements UnivCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Univ> searchUniv(String name, Integer pageSize) {
+    public List<Univ> searchUniv(String trimmedName, Integer pageSize) {
 
         return queryFactory
                 .selectFrom(univ)
                 .where(
-                    nameCondition(name)
+                    nameCondition(trimmedName)
                 )
                 .orderBy(univ.name.asc())
                 .limit(pageSize)
                 .fetch();
     }
-    private BooleanExpression nameCondition(String name) {
-        return name == null || name.isEmpty() ? null : univ.name.containsIgnoreCase(name);
+    private BooleanExpression nameCondition(String trimmedName) {
+        return trimmedName == null || trimmedName.isEmpty() ? null : univ.trimmedName.containsIgnoreCase(trimmedName);
     }
 }
