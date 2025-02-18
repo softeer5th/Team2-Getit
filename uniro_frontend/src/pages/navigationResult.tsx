@@ -39,12 +39,12 @@ const NavigationResultPage = () => {
 	const { university } = useUniversityInfo();
 	const { origin, destination } = useRoutePoint();
 
+	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
+
 	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>("PEDES & SAFE");
 	const [currentRouteIdx, setCurrentRouteIdx] = useState(-1);
 	// Caution 마커를 위한 routeIdx state
 	const [cautionRouteIdx, setCautionRouteIdx] = useState(-1);
-
-	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
 
 	useScrollControl();
 
@@ -54,20 +54,11 @@ const NavigationResultPage = () => {
 				queryKey: ["fastRoute", university?.id, origin?.nodeId ?? 1, destination?.nodeId ?? 2],
 				queryFn: async () => {
 					try {
-						const response = await getNavigationResult(
-							university?.id ?? 1001,
-							origin?.nodeId ?? 1,
-							destination?.nodeId ?? 2,
-						);
+						const response = await getNavigationResult(university!.id, origin!.nodeId, destination!.nodeId);
 						return response;
 					} catch (e) {
-						// alert(`경로를 찾을 수 없습니다. (${e})`);
 						return null;
 					}
-					// return await fetchMockJson().then((data) => {
-					// 	const response = transformFastRoute(data);
-					// 	return response;
-					// });
 				},
 				retry: 1,
 				staleTime: 0,
@@ -114,114 +105,116 @@ const NavigationResultPage = () => {
 	};
 
 	return (
-		<div className="relative h-dvh w-full max-w-[450px] mx-auto">
-			{/* 지도 영역 */}
-			<NavigationMap
-				style={{ width: "100%", height: "100%" }}
-				routeResult={routeList.data!}
-				buttonState={buttonState}
-				isDetailView={isDetailView}
-				risks={risks.data}
-				topPadding={topBarHeight}
-				bottomPadding={sheetHeight}
-				handleCautionMarkerClick={handleCautionMarkerClick}
-				currentRouteIdx={currentRouteIdx}
-				setCautionRouteIdx={setCautionRouteIdx}
-			/>
-
-			<AnimatedContainer
-				isVisible={!isDetailView}
-				positionDelta={286}
-				className="absolute top-0 left-0 w-full flex flex-col space-y-2"
-				isTop={true}
-				transition={{ type: "spring", damping: 20, duration: 0.3 }}
-			>
-				<div className="max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
-					<NavigationDescription
-						isDetailView={false}
-						navigationRoute={routeList.data![buttonState]}
-						buttonType={buttonState}
-					/>
-				</div>
-				<NavigationNavBar
-					route={routeList.data!}
-					dataLength={routeList.data!.dataLength}
-					buttonType={buttonState}
-					setButtonState={handleButtonStateChange}
+		routeList.data && (
+			<div className="relative h-dvh w-full max-w-[450px] mx-auto">
+				{/* 지도 영역 */}
+				<NavigationMap
+					style={{ width: "100%", height: "100%" }}
+					routeResult={routeList.data!}
+					buttonState={buttonState}
+					isDetailView={isDetailView}
+					risks={risks.data}
+					topPadding={topBarHeight}
+					bottomPadding={sheetHeight}
+					handleCautionMarkerClick={handleCautionMarkerClick}
+					currentRouteIdx={currentRouteIdx}
+					setCautionRouteIdx={setCautionRouteIdx}
 				/>
-			</AnimatedContainer>
 
-			<AnimatedContainer
-				isVisible={!isDetailView}
-				className="absolute bottom-0 left-0 w-full mb-[30px] px-4"
-				positionDelta={88}
-			>
-				<BottomCardList
-					routeList={routeList.data!}
-					buttonType={buttonState}
-					showDetailView={showDetailView}
-					setButtonState={setButtonState}
-				></BottomCardList>
-			</AnimatedContainer>
-
-			<AnimatedContainer
-				isVisible={isDetailView}
-				className="absolute top-4 left-4 z-10"
-				positionDelta={60}
-				isTop={true}
-			>
-				<BackButton onClick={hideDetailView} />
-			</AnimatedContainer>
-
-			<AnimatedContainer
-				isVisible={isDetailView}
-				className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto"
-				positionDelta={MAX_SHEET_HEIGHT}
-				transition={{ type: "spring", damping: 20, duration: 0.7 }}
-				motionProps={{
-					drag: "y",
-					dragControls,
-					dragListener: false,
-					dragElastic: {
-						top: 0,
-						bottom: 0.3,
-					},
-					dragConstraints: {
-						top: 0,
-						bottom: MIN_SHEET_HEIGHT,
-					},
-					onDrag: handleDrag,
-					onDragEnd: handleDragEnd,
-				}}
-			>
-				<BottomSheetHandle resetCurrentIdx={resetCurrentIndex} dragControls={dragControls} />
-				<div
-					ref={scrollRef}
-					className="w-full overflow-y-auto"
-					style={{
-						height: MAX_SHEET_HEIGHT - BOTTOM_SHEET_HANDLE_HEIGHT,
-					}}
-					onScroll={preventScroll}
+				<AnimatedContainer
+					isVisible={!isDetailView}
+					positionDelta={286}
+					className="absolute top-0 left-0 w-full flex flex-col space-y-2"
+					isTop={true}
+					transition={{ type: "spring", damping: 20, duration: 0.3 }}
 				>
-					<NavigationDescription
-						resetCurrentRouteIdx={resetCurrentIndex}
-						isDetailView={true}
+					<div className="max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
+						<NavigationDescription
+							isDetailView={false}
+							navigationRoute={routeList.data![buttonState]}
+							buttonType={buttonState}
+						/>
+					</div>
+					<NavigationNavBar
+						route={routeList.data!}
+						dataLength={routeList.data!.dataLength}
 						buttonType={buttonState}
-						navigationRoute={routeList.data![buttonState]}
+						setButtonState={handleButtonStateChange}
 					/>
-					<RouteList
-						changeCurrentRouteIdx={changeCurrentIndex}
-						currentRouteIdx={currentRouteIdx}
-						routes={
-							routeList.data![buttonState]?.routeDetails
-								? routeList.data![buttonState]?.routeDetails
-								: null
-						}
-						cautionRouteIdx={cautionRouteIdx}
-					/>
-				</div>
-			</AnimatedContainer>
-		</div>
+				</AnimatedContainer>
+
+				<AnimatedContainer
+					isVisible={!isDetailView}
+					className="absolute bottom-0 left-0 w-full mb-[30px] px-4"
+					positionDelta={88}
+				>
+					<BottomCardList
+						routeList={routeList.data!}
+						buttonType={buttonState}
+						showDetailView={showDetailView}
+						setButtonState={setButtonState}
+					></BottomCardList>
+				</AnimatedContainer>
+
+				<AnimatedContainer
+					isVisible={isDetailView}
+					className="absolute top-4 left-4 z-10"
+					positionDelta={60}
+					isTop={true}
+				>
+					<BackButton onClick={hideDetailView} />
+				</AnimatedContainer>
+
+				<AnimatedContainer
+					isVisible={isDetailView}
+					className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto"
+					positionDelta={MAX_SHEET_HEIGHT}
+					transition={{ type: "spring", damping: 20, duration: 0.7 }}
+					motionProps={{
+						drag: "y",
+						dragControls,
+						dragListener: false,
+						dragElastic: {
+							top: 0,
+							bottom: 0.3,
+						},
+						dragConstraints: {
+							top: 0,
+							bottom: MIN_SHEET_HEIGHT,
+						},
+						onDrag: handleDrag,
+						onDragEnd: handleDragEnd,
+					}}
+				>
+					<BottomSheetHandle resetCurrentIdx={resetCurrentIndex} dragControls={dragControls} />
+					<div
+						ref={scrollRef}
+						className="w-full overflow-y-auto"
+						style={{
+							height: MAX_SHEET_HEIGHT - BOTTOM_SHEET_HANDLE_HEIGHT,
+						}}
+						onScroll={preventScroll}
+					>
+						<NavigationDescription
+							resetCurrentRouteIdx={resetCurrentIndex}
+							isDetailView={true}
+							buttonType={buttonState}
+							navigationRoute={routeList.data![buttonState]}
+						/>
+						<RouteList
+							changeCurrentRouteIdx={changeCurrentIndex}
+							currentRouteIdx={currentRouteIdx}
+							routes={
+								routeList.data![buttonState]?.routeDetails
+									? routeList.data![buttonState]?.routeDetails
+									: null
+							}
+							cautionRouteIdx={cautionRouteIdx}
+						/>
+					</div>
+				</AnimatedContainer>
+			</div>
+		)
 	);
 };
 
