@@ -18,4 +18,6 @@ public interface RevInfoRepository extends JpaRepository<RevInfo,Long> {
     void deleteAllAfterVersionId(Long univId, Long versionId);
 
     Optional<RevInfo> findFirstByUnivIdOrderByRevDesc(Long univId);
+
+    Optional<RevInfo> findFirstByUnivIdAndRevAfter(Long univId, Long rev);
 }
