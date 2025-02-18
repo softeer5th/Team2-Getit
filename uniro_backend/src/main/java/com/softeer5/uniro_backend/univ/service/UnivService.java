@@ -16,8 +16,8 @@ import java.util.List;
 public class UnivService {
     private final UnivRepository univRepository;
 
-    public SearchUnivResDTO searchUniv(String name, Integer pageSize) {
-        List<Univ> universities = univRepository.searchUniv(name, pageSize);
+    public SearchUnivResDTO searchUniv(String trimmedName, Integer pageSize) {
+        List<Univ> universities = univRepository.searchUniv(trimmedName, pageSize);
 
         List<UnivInfo> univInfos = universities.stream().map(UnivInfo::of).toList();
 

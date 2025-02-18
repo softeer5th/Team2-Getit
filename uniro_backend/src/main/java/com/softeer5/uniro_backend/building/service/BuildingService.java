@@ -46,9 +46,9 @@ public class BuildingService {
 			.toList();
 	}
 
-	public SearchBuildingResDTO searchBuildings(Long univId, String name, Integer pageSize){
+	public SearchBuildingResDTO searchBuildings(Long univId, String trimmedName, Integer pageSize){
 
-		List<BuildingNode> buildingNodes = buildingRepository.searchBuildings(univId, name, pageSize);
+		List<BuildingNode> buildingNodes = buildingRepository.searchBuildings(univId, trimmedName, pageSize);
 
 		List<GetBuildingResDTO> data = buildingNodes.stream()
 			.map(buildingNode -> GetBuildingResDTO.of(buildingNode.getBuilding(), buildingNode.getNode()))
@@ -80,6 +80,7 @@ public class BuildingService {
 				.phoneNumber(createBuildingNodeReqDTO.getPhoneNumber())
 				.address(createBuildingNodeReqDTO.getAddress())
 				.name(createBuildingNodeReqDTO.getBuildingName())
+				.trimmedName(createBuildingNodeReqDTO.getBuildingName().strip())
 				.imageUrl(createBuildingNodeReqDTO.getBuildingImageUrl())
 				.level(createBuildingNodeReqDTO.getLevel())
 				.nodeId(node.getId())

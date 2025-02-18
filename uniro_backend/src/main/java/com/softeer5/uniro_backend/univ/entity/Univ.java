@@ -31,6 +31,10 @@ public class Univ {
 	@NotNull
 	private String name;
 
+	@Column(length = 20)
+	@NotNull
+	private String trimmedName;
+
 	@Column(length = 200, name = "image_url")
 	@NotNull
 	private String imageUrl;
