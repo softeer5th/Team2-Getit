@@ -9,7 +9,7 @@ function App() {
   const { isLogin } = useLogin();
 
   if (!isLogin) {
-    return <LoginPage />
+    return <LoginPage />;
   }
 
   return (

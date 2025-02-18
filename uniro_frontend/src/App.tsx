@@ -21,14 +21,15 @@ import Errortest from "./pages/errorTest";
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
-			staleTime: 300000
-		}
-	}
+			staleTime: 300000,
+		},
+	},
 });
 
 function App() {
 	const { location, fallback } = useDynamicSuspense();
 	useNetworkStatus();
+
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ErrorBoundary key={location.key} fallback={<ErrorPage />}>
