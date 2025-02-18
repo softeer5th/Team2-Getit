@@ -78,7 +78,7 @@ public class MapService {
 	@Async
 	public void getAllRoutesByStream(Long univId, SseEmitter emitter) {
 			try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
-				List<Route> batch = new ArrayList<>(500);
+				List<Route> batch = new ArrayList<>(2500);
 				Iterator<Route> iterator = routeStream.iterator();
 				while (iterator.hasNext()) {
 					Route route = iterator.next();
@@ -86,7 +86,7 @@ public class MapService {
 					entityManager.detach(route);
 
 					// 500건 모이면 배치 처리
-					if (batch.size() == 500) {
+					if (batch.size() == 2500) {
 						AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
 						emitter.send(allRoutesInfo);
 						batch.clear();

@@ -20,7 +20,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = {"node1", "node2"})
     @Query("SELECT r FROM Route r WHERE r.univId = :univId")
-    @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = "500"))
+    @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = "2500"))
     Stream<Route> findAllRouteByUnivIdWithNodesStream(Long univId);
 
     @Query(value = "SELECT r.* FROM route r " +
