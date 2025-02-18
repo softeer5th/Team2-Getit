@@ -166,7 +166,7 @@ export default function MapPage() {
 		const centerMarker = createUniversityMarker(
 			AdvancedMarker,
 			map,
-			HanyangUniversity,
+			university.centerPoint,
 			university ? university.name : "",
 		);
 		setUniversityMarker(centerMarker);
