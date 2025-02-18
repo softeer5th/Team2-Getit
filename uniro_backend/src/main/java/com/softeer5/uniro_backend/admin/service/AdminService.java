@@ -54,7 +54,8 @@ public class AdminService {
     @Transactional
     @DisableAudit
     public void rollbackRev(Long univId, Long versionId){
-        RevInfo revInfo = revInfoRepository.findById(versionId)
+        Long rollbackVersionId = versionId + 1;
+        RevInfo revInfo = revInfoRepository.findById(rollbackVersionId)
             .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
 
         List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
