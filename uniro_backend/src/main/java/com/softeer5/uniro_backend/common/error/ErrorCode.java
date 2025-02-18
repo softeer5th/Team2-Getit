@@ -35,6 +35,7 @@ public enum ErrorCode {
     INTERSECTION_ONLY_ALLOWED_POINT(400, "기존 경로와 겹칠 수 없습니다."),
 
     // 어드민
+    ALREADY_LATEST_VERSION_ID(400, "현재 가장 최신 버전 id 입니다."),
     INVALID_VERSION_ID(400, "유효하지 않은 버전 id 입니다."),
     INVALID_ADMIN_CODE(403, "유효하지 않은 어드민 코드 입니다."),
     INVALID_TOKEN(401, "유효하지 않은 토큰입니다."),
