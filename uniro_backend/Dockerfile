@@ -11,4 +11,4 @@ COPY ${JAR_FILE} uniro-server.jar
 ENV SPRING_PROFILE=${SPRING_PROFILE}
 ENV JAVA_OPTS=${JAVA_OPTS}
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Duser.timezone=Asia/Seoul -Dspring.profiles.active=${SPRING_PROFILE} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof -jar uniro-server.jar"]
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -Duser.timezone=Asia/Seoul -Dspring.profiles.active=${SPRING_PROFILE} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof -jar uniro-server.jar"]
