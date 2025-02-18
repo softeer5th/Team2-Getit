@@ -1,27 +1,21 @@
 import React, { useEffect, useState } from "react";
 import MainContainer from "../container/mainContainer";
 import { useQueries } from "@tanstack/react-query";
-import { transformAllRoutes } from "../utils/route";
 import useMap from "../hooks/useMap";
-import useSearchBuilding from "../hooks/useUniversityRecord";
 import { CoreRoute, CoreRoutesList } from "../data/types/route";
 import createMarkerElement from "../components/map/mapMarkers";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
+import useUniversity from "../hooks/useUniversity";
+import { getAllRoutes } from "../api/route";
 
 type AdvancedMarker = google.maps.marker.AdvancedMarkerElement;
 type Polyline = google.maps.Polyline;
 
-const getRoutes = () => {
-  return fetch(`${import.meta.env.VITE_REACT_SERVER_BASE_URL}/1001/routes`)
-    .then((res) => res.json())
-    .then(transformAllRoutes);
-};
-
 const SimulationPage = () => {
+  const { university } = useUniversity();
   const result = useQueries({
-    queries: [{ queryKey: ["1001", "routes"], queryFn: getRoutes }],
+    queries: [{ queryKey: [university?.id, "routes"], queryFn: () => getAllRoutes(university?.id ?? -1) }],
   });
-  const { currentUniversity, getCurrentUniversityLngLat } = useSearchBuilding();
 
   const { mapRef, map, mapLoaded, AdvancedMarker, Polyline } = useMap();
   const [routes] = result;
@@ -135,11 +129,9 @@ const SimulationPage = () => {
   }, [routes]);
 
   useEffect(() => {
-    if (!map || !mapLoaded) return;
-    const universityLatLng = getCurrentUniversityLngLat();
-    console.log("Setting center to:", universityLatLng);
-    map.setCenter(universityLatLng);
-  }, [currentUniversity, mapLoaded]);
+    if (!map || !mapLoaded || !university) return;
+    map.setCenter(university.centerPoint);
+  }, [university, mapLoaded]);
 
   useEffect(() => {
     return () => {
