@@ -30,6 +30,7 @@ const queryClient = new QueryClient({
 function App() {
 	const { location, fallback } = useDynamicSuspense();
 	useNetworkStatus();
+
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ErrorBoundary key={location.key} fallback={<ErrorPage />}>
