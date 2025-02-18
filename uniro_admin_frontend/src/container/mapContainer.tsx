@@ -16,9 +16,8 @@ interface MapContainerProps {
 
 export interface ChangedInfo {
 	current: ChangedType;
-	difference: ChangedType
+	difference: ChangedType;
 }
-
 
 const MapContainer = ({ rev, data }: MapContainerProps) => {
 	const { accessToken } = useLogin();
@@ -33,65 +32,61 @@ const MapContainer = ({ rev, data }: MapContainerProps) => {
 		mutationFn: () => patchRevision(accessToken, university?.id ?? -1, data?.rev ?? -1),
 		onSuccess: () => {
 			closeModal();
-			queryClient.invalidateQueries({ queryKey: [university?.id], exact: false, });
+			queryClient.invalidateQueries({ queryKey: [university?.id], exact: false });
 		},
 		onError: () => {
 			closeModal();
 			openFailModal();
-		}
-	})
+		},
+	});
 
 	const openFailModal = () => {
-		setFailModalOpen(true)
-	}
+		setFailModalOpen(true);
+	};
 
 	const closeFailModal = () => {
 		setFailModalOpen(false);
-	}
+	};
 
 	const openModal = () => {
-		setModalOpen(true)
-	}
+		setModalOpen(true);
+	};
 
 	const closeModal = () => {
 		setModalOpen(false);
-	}
+	};
 
 	const openInfoModal = () => {
-		setInfoModalOpen(true)
-	}
+		setInfoModalOpen(true);
+	};
 
 	const closeInfoModal = () => {
 		setInfoModalOpen(false);
 		setInfo(undefined);
-	}
+	};
 
 	useEffect(() => {
 		if (!info) return;
 		openInfoModal();
-	}, [info])
+	}, [info]);
 
 	return (
 		<div className="flex flex-col w-4/5 h-full pb-4 px-1">
 			<div className="flex flex-row items-center justify-between w-full h-[50px] px-2">
-				<div className="text-kor-heading2">VERSION : {data?.rev} / {rev.revTime.slice(0, 10)}  {rev.revTime.slice(11, -1)}</div>
-				<button onClick={openModal} className="rounded-100 bg-primary-500 py-2 px-4 text-system-skyblue hover:bg-primary-600">
+				<div className="text-kor-heading2">
+					VERSION : {data?.rev} / {rev.revTime.slice(0, 10)} {rev.revTime.slice(11, -1)}
+				</div>
+				<button
+					onClick={openModal}
+					className="rounded-100 bg-primary-500 py-2 px-4 text-system-skyblue hover:bg-primary-600"
+				>
 					수정하기
 				</button>
 			</div>
 			<LogMap revisionData={data} center={university?.centerPoint} setInfo={setInfo} />
-			{
-				modalOpen &&
-				<RollbackModal rev={data!.rev} onRollback={() => mutate()} onClose={closeModal} />
-			}
-			{
-				failModalOpen &&
-				<FailModal onClose={closeFailModal} />
-			}
-			{
-				infoModalOpen &&
-				<InfoModal info={info!} onClose={closeInfoModal} />
-			}
+			{modalOpen && <RollbackModal rev={data!.rev} onRollback={() => mutate()} onClose={closeModal} />}
+			{failModalOpen && <FailModal onClose={closeFailModal} />}
+			{infoModalOpen && <InfoModal info={info!} onClose={closeInfoModal} />}
 		</div>
 	);
 };
