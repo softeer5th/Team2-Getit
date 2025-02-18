@@ -166,7 +166,7 @@ export default function MapPage() {
 		const centerMarker = createUniversityMarker(
 			AdvancedMarker,
 			map,
-			HanyangUniversity,
+			university.centerPoint,
 			university ? university.name : "",
 		);
 		setUniversityMarker(centerMarker);
@@ -279,11 +279,11 @@ export default function MapPage() {
 	};
 
 	const toggleCautionButton = () => {
-		if (!map) return;
+		if (!map || !university) return;
 		if (zoom <= 16) {
 			map.setOptions({
 				zoom: 17,
-				center: HanyangUniversity,
+				center: university.centerPoint,
 			});
 		}
 		setIsCautionActive((isActive) => {
@@ -296,11 +296,11 @@ export default function MapPage() {
 		});
 	};
 	const toggleDangerButton = () => {
-		if (!map) return;
+		if (!map || !university) return;
 		if (zoom <= 16) {
 			map.setOptions({
 				zoom: 17,
-				center: HanyangUniversity,
+				center: university.centerPoint,
 			});
 		}
 		setIsDangerActive((isActive) => {
@@ -344,19 +344,21 @@ export default function MapPage() {
 		switch (marker.type) {
 			case Markers.CAUTION:
 				if (isSelect) {
-					marker.element.content = cautionMarkerElement({ factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]) });
+					marker.element.content = cautionMarkerElement({
+						factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
+					});
 					return;
-				}
-				else {
+				} else {
 					marker.element.content = cautionMarkerElement({});
 					return;
 				}
 			case Markers.DANGER:
 				if (isSelect) {
-					marker.element.content = dangerMarkerElement({ factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]) });
+					marker.element.content = dangerMarkerElement({
+						factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
+					});
 					return;
-				}
-				else {
+				} else {
 					marker.element.content = dangerMarkerElement({});
 					return;
 				}
@@ -364,13 +366,14 @@ export default function MapPage() {
 				if (!marker.property) return;
 
 				if (isSelect) {
-					marker.element.content = selectedBuildingMarkerElement({ name: marker.property.buildingName })
+					marker.element.content = selectedBuildingMarkerElement({ name: marker.property.buildingName });
 					return;
-				}
-				else {
-					marker.element.content = buildingMarkerElement({ name: marker.property.buildingName, className: "translate-namedmarker" })
+				} else {
+					marker.element.content = buildingMarkerElement({
+						name: marker.property.buildingName,
+						className: "translate-namedmarker",
+					});
 					return;
-
 				}
 		}
 	};
@@ -532,8 +535,7 @@ export default function MapPage() {
 						el.nodeId !== selectedMarker?.id,
 				)
 				.forEach(
-					(marker) =>
-						marker.element.content = buildingMarkerElement({ className: 'translate-building' })
+					(marker) => (marker.element.content = buildingMarkerElement({ className: "translate-building" })),
 				);
 			return;
 		}
@@ -547,7 +549,10 @@ export default function MapPage() {
 			)
 			.forEach(
 				(marker) =>
-					marker.element.content = buildingMarkerElement({ name: marker.name, className: 'translate-namedmarker' })
+					(marker.element.content = buildingMarkerElement({
+						name: marker.name,
+						className: "translate-namedmarker",
+					})),
 			);
 	};
 

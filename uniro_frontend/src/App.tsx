@@ -17,18 +17,20 @@ import { Suspense } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ErrorBoundary from "./components/error/ErrorBoundary";
 import Errortest from "./pages/errorTest";
+import NotFoundPage from "./pages/notFound";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
-			staleTime: 300000
-		}
-	}
+			staleTime: 300000,
+		},
+	},
 });
 
 function App() {
 	const { location, fallback } = useDynamicSuspense();
 	useNetworkStatus();
+
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ErrorBoundary key={location.key} fallback={<ErrorPage />}>
@@ -46,6 +48,7 @@ function App() {
 						<Route path="/error" element={<ErrorPage />} />
 						<Route path="/error/offline" element={<OfflinePage />} />
 						<Route path="/error/test" element={<Errortest />} />
+						<Route path="*" element={<NotFoundPage />} />
 					</Routes>
 				</Suspense>
 			</ErrorBoundary>

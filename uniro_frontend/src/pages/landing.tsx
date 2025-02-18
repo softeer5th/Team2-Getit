@@ -2,8 +2,24 @@ import LandingButton from "../components/landingButton";
 import Logo from "../assets/logo.svg?react";
 import UNIRO from "../assets/UNIRO.svg?react";
 import { Link } from "react-router";
+import useRoutePoint from "../hooks/useRoutePoint";
+import useUniversityInfo from "../hooks/useUniversityInfo";
+import { useEffect } from "react";
 
 export default function LandingPage() {
+	const { setUniversity } = useUniversityInfo();
+	const { setDestination, setOrigin } = useRoutePoint();
+
+	const initData = () => {
+		setDestination(undefined);
+		setOrigin(undefined);
+		setUniversity(undefined);
+	};
+
+	useEffect(() => {
+		initData();
+	}, []);
+
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center bg-[url(/public/background.png)] bg-cover">
 			<div>

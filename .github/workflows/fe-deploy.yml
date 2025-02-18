@@ -5,7 +5,7 @@ on:
     branches:
       - fe
     paths:
-      - 'uniro_frontend/**'
+      - "uniro_frontend/**"
 
 jobs:
   CI:
@@ -20,6 +20,15 @@ jobs:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver: docker-container
+
+      - name: Create .env from secret
+        run: |
+          echo "${{ secrets.FE_ENV }}" > uniro_frontend/.env
+
       - name: Google Cloud SDK 설정
         uses: "google-github-actions/auth@v2"
         with:
@@ -28,14 +37,15 @@ jobs:
       - name: Docker를 위한 gcloud 인증 설정
         run: gcloud auth configure-docker --quiet
 
-      - name: Create .env from secret
-        run: |
-          echo "${{ secrets.FE_ENV }}" > uniro_frontend/.env
-
       - name: Docker 이미지 빌드 및 푸시
-        run: |
-          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} -f uniro_frontend/Dockerfile .
-          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: uniro_frontend/Dockerfile
+          push: true
+          tags: gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   CD:
     runs-on: ubuntu-latest
@@ -57,12 +67,9 @@ jobs:
           envs: GCP_PROJECT_ID, IMAGE_NAME, IMAGE_TAG, DEPLOY_PATH, TEST
           script: |
             cd ${DEPLOY_PATH}
-            sudo docker ps -a --format '{{.ID}} {{.Names}}' \
-                | egrep -v 'nginx-container|uniro-backoffice' \
-                | awk '{print $1}' \
-                | xargs -r sudo docker stop || true
-            sudo docker rm $(sudo docker ps -a -q) || true
+            sudo docker rm -f ${IMAGE_NAME} || true
             sudo docker login -u _json_key --password-stdin https://gcr.io <<< '${{ secrets.GCP_SA_KEY }}'
             sudo docker pull gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:${IMAGE_TAG}
             sudo docker run -d --name ${IMAGE_NAME} -p 3000:3000 gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:${IMAGE_TAG}
             sudo docker network connect nginx_app-network ${IMAGE_NAME}
+            sudo docker restart nginx-container
