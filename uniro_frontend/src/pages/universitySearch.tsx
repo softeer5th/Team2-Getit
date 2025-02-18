@@ -7,10 +7,12 @@ import useUniversityInfo from "../hooks/useUniversityInfo";
 import { useQuery } from "@tanstack/react-query";
 import { getUniversityList } from "../api/search";
 import { University } from "../data/types/university";
+import useRoutePoint from "../hooks/useRoutePoint";
 
 export default function UniversitySearchPage() {
 	const [selectedUniv, setSelectedUniv] = useState<University>();
 	const { university, setUniversity } = useUniversityInfo();
+	const { setDestination, setOrigin } = useRoutePoint();
 	const [input, setInput] = useState<string>("");
 
 	const { data: universityList } = useQuery({
@@ -22,6 +24,13 @@ export default function UniversitySearchPage() {
 		if (university) {
 			setSelectedUniv(university);
 		}
+	}, []);
+
+	// 경로가 선택된 상태에서 이 페이지에 들어올 수 있는 가능성은 거의 없지만,
+	// Origin과 Destination이 남아있을 가능성을 방어한 코드입니다.
+	useEffect(() => {
+		setDestination(undefined);
+		setOrigin(undefined);
 	}, []);
 
 	return (

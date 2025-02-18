@@ -4,14 +4,14 @@ import { University } from "../data/types/university";
 
 interface UniversityInfoStore {
 	university: University | undefined;
-	setUniversity: (university: University) => void;
+	setUniversity: (university: University | undefined) => void;
 	resetUniversity: () => void;
 }
 const useUniversityInfo = create(
 	persist<UniversityInfoStore>(
 		(set) => ({
 			university: undefined,
-			setUniversity: (newUniversity: University) => {
+			setUniversity: (newUniversity: University | undefined) => {
 				set(() => ({ university: newUniversity }));
 			},
 			resetUniversity: () => {
