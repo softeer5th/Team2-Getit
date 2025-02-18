@@ -36,7 +36,6 @@ public class Building {
 	private String name;
 
 	@Column(length = 30)
-	@NotNull
 	private String trimmedName;
 
 	@Column(length = 200)
