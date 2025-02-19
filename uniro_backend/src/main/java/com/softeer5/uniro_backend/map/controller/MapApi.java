@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -28,6 +29,13 @@ public interface MapApi {
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
 	ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId);
+
+	@Operation(summary = "모든 지도(노드,루트) 조회 by sse")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "모든 지도 조회 성공"),
+			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
+	})
+	SseEmitter getAllRoutes(@PathVariable("univId") Long univId);
 
 	@Operation(summary = "위험&주의 요소 조회")
 	@ApiResponses(value = {
