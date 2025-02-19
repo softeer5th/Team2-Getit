@@ -8,7 +8,7 @@ import useRoutePoint from "../hooks/useRoutePoint";
 import useSearchBuilding from "../hooks/useSearchBuilding";
 import Button from "../components/customButton";
 import { AdvancedMarker } from "../data/types/marker";
-import { RouteId, RoutePointType } from "../data/types/route";
+import { CoreRoutesList, RouteId, RoutePointType } from "../data/types/route";
 import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
 import createAdvancedMarker, { createUniversityMarker } from "../utils/markers/createAdvanedMarker";
@@ -18,7 +18,6 @@ import useModal from "../hooks/useModal";
 import ReportModal from "../components/map/reportModal";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-import { HanyangUniversity } from "../constant/university";
 import { University } from "../data/types/university";
 import { CautionIssueType, DangerIssueType, MarkerTypes } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
@@ -31,7 +30,7 @@ import createMarkerElement from "../utils/markers/createMarkerElement";
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { getAllRisks } from "../api/routes";
 import { getAllBuildings } from "../api/nodes";
-import { getNavigationResult } from "../api/route";
+import { getAllRoutes, getNavigationResult } from "../api/route";
 import useQueryError from "../hooks/useQueryError";
 
 export type SelectedMarkerTypes = {
@@ -46,7 +45,7 @@ export type SelectedMarkerTypes = {
 const BOTTOM_SHEET_HEIGHT = 377;
 
 export default function MapPage() {
-	const { mapRef, map, AdvancedMarker } = useMap({ zoom: 16 });
+	const { mapRef, map, AdvancedMarker, Polyline } = useMap({ zoom: 16 });
 	const [zoom, setZoom] = useState<number>(16);
 	const prevZoom = useRef<number>(16);
 
@@ -81,6 +80,8 @@ export default function MapPage() {
 	const { university } = useUniversityInfo();
 
 	useRedirectUndefined<University | undefined>([university]);
+
+	const polylines = useRef<google.maps.Polyline[]>([]);
 
 	const navigate = useNavigate();
 	if (!university) return;
@@ -132,10 +133,14 @@ export default function MapPage() {
 						rightDownLng: 128,
 					}),
 			},
+			{
+				queryKey: ["routes", university.id],
+				queryFn: () => getAllRoutes(university.id),
+			},
 		],
 	});
 
-	const [risks, buildings] = results;
+	const [risks, buildings, routes] = results;
 
 	const moveToBound = (coord: Coord, padding?: number | google.maps.Padding) => {
 		buildingBoundary.current = new google.maps.LatLngBounds();
@@ -576,6 +581,7 @@ export default function MapPage() {
 			}
 
 			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
+			polylines.current.forEach((el) => el.setMap(null));
 			toggleBuildingMarker(true);
 		} else if (prevZoom.current <= 16 && zoom >= 17) {
 			if (isCautionAcitve) {
@@ -593,9 +599,39 @@ export default function MapPage() {
 				);
 			}
 			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
+			polylines.current.forEach((el) => el.setMap(map));
 			toggleBuildingMarker(false);
 		}
 	}, [map, zoom]);
+
+	const drawRoute = (coreRouteList: CoreRoutesList) => {
+		if (!Polyline || !AdvancedMarker || !map) return;
+
+		const tempLines = [];
+
+		for (const coreRoutes of coreRouteList) {
+			const { routes: subRoutes } = coreRoutes;
+
+			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
+
+			const routePolyLine = new Polyline({
+				map: null,
+				path: subNodes.map((el) => {
+					return { lat: el.lat, lng: el.lng };
+				}),
+
+				strokeColor: "#3585fc",
+			});
+
+			tempLines.push(routePolyLine);
+		}
+
+		polylines.current = tempLines;
+	};
+
+	useEffect(() => {
+		drawRoute(routes.data);
+	}, [routes.data, map, Polyline, AdvancedMarker]);
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">

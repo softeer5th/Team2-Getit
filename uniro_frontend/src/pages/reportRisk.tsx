@@ -168,7 +168,7 @@ export default function ReportRiskPage() {
 				path: subNodes.map((el) => {
 					return { lat: el.lat, lng: el.lng };
 				}),
-				strokeColor: "#808080",
+				strokeColor: "#3585fc",
 			});
 
 			routePolyLine.addListener("click", (e: ClickEvent) => {
@@ -183,7 +183,7 @@ export default function ReportRiskPage() {
 					AdvancedMarker,
 					map,
 					centerCoordinate(nearestEdge.node1, nearestEdge.node2),
-					reportMarkerElement({})
+					reportMarkerElement({}),
 				);
 
 				setReportMarker((prevMarker) => {
@@ -227,19 +227,21 @@ export default function ReportRiskPage() {
 		switch (marker.type) {
 			case Markers.DANGER:
 				if (isSelect) {
-					marker.element.content = dangerMarkerElement({ factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]) });
+					marker.element.content = dangerMarkerElement({
+						factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
+					});
 					return;
-				}
-				else {
+				} else {
 					marker.element.content = dangerMarkerElement({});
 					return;
 				}
 			case Markers.CAUTION:
 				if (isSelect) {
-					marker.element.content = cautionMarkerElement({ factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]) });
+					marker.element.content = cautionMarkerElement({
+						factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
+					});
 					return;
-				}
-				else {
+				} else {
 					marker.element.content = cautionMarkerElement({});
 					return;
 				}
