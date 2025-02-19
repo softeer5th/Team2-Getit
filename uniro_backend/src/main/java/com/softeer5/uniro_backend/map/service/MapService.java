@@ -39,10 +39,12 @@ import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class MapService {
 	private final RouteRepository routeRepository;
 	private final NodeRepository nodeRepository;
@@ -58,11 +60,14 @@ public class MapService {
 
 	public GetAllRoutesResDTO getAllRoutes(Long univId) {
 
-		if(redisService.getData(univId.toString()) == null){
+		if(!redisService.hasData(univId.toString())){
 			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 			List<LightRoute> lightRoutes = routes.stream().map(LightRoute::new).toList();
 			LightRoutes value = new LightRoutes(lightRoutes);
 			redisService.saveData(univId.toString(), value);
+		}
+		else{
+			log.info("🚀🚀🚀🚀🚀🚀🚀HIT🚀🚀🚀🚀🚀🚀🚀");
 		}
 
 		LightRoutes lightRoutes = (LightRoutes) redisService.getData(univId.toString());

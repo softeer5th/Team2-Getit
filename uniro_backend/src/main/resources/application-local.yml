@@ -3,7 +3,7 @@ spring:
     hikari:
       maximum-pool-size: 30
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/uniro?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/uniro-db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password:
   jpa:
