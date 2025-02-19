@@ -12,15 +12,15 @@ interface MapContextReturn {
 	Map: typeof google.maps.Map | null;
 	createPolyline: (
 		opts?: google.maps.PolylineOptions,
-		onClick?: (e: ClickEvent) => void,
+		onClick?: (self: google.maps.Polyline, e: ClickEvent) => void,
 	) => google.maps.Polyline | undefined;
 	createAdvancedMarker: (
 		opts?: google.maps.marker.AdvancedMarkerElementOptions,
-		onClick?: (e: ClickEvent) => void,
+		onClick?: (self: google.maps.marker.AdvancedMarkerElement, e: ClickEvent) => void,
 	) => google.maps.marker.AdvancedMarkerElement | undefined;
 	createPolygon: (
 		opts?: google.maps.PolygonOptions,
-		onClick?: (e: ClickEvent) => void,
+		onClick?: (self: google.maps.Polygon, e: ClickEvent) => void,
 	) => google.maps.Polygon | undefined;
 }
 
@@ -40,33 +40,36 @@ export function MapProvider({ children }: { children: ReactNode }) {
 	});
 
 	const createAdvancedMarker = useCallback(
-		(opts?: google.maps.marker.AdvancedMarkerElementOptions, onClick?: (e: ClickEvent) => void) => {
+		(
+			opts?: google.maps.marker.AdvancedMarkerElementOptions,
+			onClick?: (self: google.maps.marker.AdvancedMarkerElement, e: ClickEvent) => void,
+		) => {
 			if (!mapClasses.AdvancedMarker) return undefined;
 
 			const object = new mapClasses.AdvancedMarker(opts);
-			if (onClick) object.addListener("click", onClick);
+			if (onClick) object.addListener("click", (e: ClickEvent) => onClick(object, e));
 			return object;
 		},
 		[mapClasses.AdvancedMarker],
 	);
 
 	const createPolyline = useCallback(
-		(opts?: google.maps.PolylineOptions, onClick?: (e: ClickEvent) => void) => {
+		(opts?: google.maps.PolylineOptions, onClick?: (self: google.maps.Polyline, e: ClickEvent) => void) => {
 			if (!mapClasses.Polyline) return undefined;
 
 			const object = new mapClasses.Polyline(opts);
-			if (onClick) object.addListener("click", onClick);
+			if (onClick) object.addListener("click", (e: ClickEvent) => onClick(object, e));
 			return object;
 		},
 		[mapClasses.Polyline],
 	);
 
 	const createPolygon = useCallback(
-		(opts?: google.maps.PolygonOptions, onClick?: (e: ClickEvent) => void) => {
+		(opts?: google.maps.PolygonOptions, onClick?: (self: google.maps.Polygon, e: ClickEvent) => void) => {
 			if (!mapClasses.Polygon) return undefined;
 
 			const object = new mapClasses.Polygon(opts);
-			if (onClick) object.addListener("click", onClick);
+			if (onClick) object.addListener("click", (e: ClickEvent) => onClick(object, e));
 			return object;
 		},
 		[mapClasses.Polygon],
