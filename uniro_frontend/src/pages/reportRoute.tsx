@@ -1,7 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Markers } from "../constant/enum/markerEnum";
 import useMap from "../hooks/useMap";
-import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import { ClickEvent } from "../data/types/event";
 import createSubNodes from "../utils/polylines/createSubnodes";
 import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
@@ -38,7 +37,7 @@ type SelectedMarkerTypes = {
 
 export default function ReportRoutePage() {
 	const queryClient = useQueryClient();
-	const { AdvancedMarker, Polyline } = useContext(MapContext);
+	const { createAdvancedMarker, createPolyline } = useContext(MapContext);
 	const { map, mapRef } = useMap({ zoom: 18, minZoom: 17 });
 	const originPoint = useRef<{ point: Node; element: AdvancedMarker } | undefined>();
 	const [newPoints, setNewPoints] = useState<{ element: AdvancedMarker | null; coords: (Coord | Node)[] }>({
@@ -159,7 +158,7 @@ export default function ReportRoutePage() {
 	};
 
 	const addRiskMarker = () => {
-		if (AdvancedMarker === null || map === null) return;
+		if (map === null) return;
 		const { dangerRoutes, cautionRoutes } = risks.data;
 
 		/** 위험 마커 생성 */
@@ -170,25 +169,27 @@ export default function ReportRoutePage() {
 			const type = Markers.DANGER;
 
 			const dangerMarker = createAdvancedMarker(
-				AdvancedMarker,
-				null,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				dangerMarkerElement({}),
-				() => {
+				{
+					map: null,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: dangerMarkerElement({}),
+				},
+				(self) => {
 					setSelectedMarker((prevMarker) => {
 						if (prevMarker?.id === routeId) return undefined;
 						return {
 							type: Markers.DANGER,
-							element: dangerMarker,
+							element: self,
 							factors: dangerFactors,
 							id: routeId,
 						};
 					});
 				},
 			);
+			if (!dangerMarker) return;
 
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
@@ -202,25 +203,28 @@ export default function ReportRoutePage() {
 			const type = Markers.CAUTION;
 
 			const cautionMarker = createAdvancedMarker(
-				AdvancedMarker,
-				null,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				cautionMarkerElement({}),
-				() => {
+				{
+					map: null,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: cautionMarkerElement({}),
+				},
+				(self) => {
 					setSelectedMarker((prevMarker) => {
 						if (prevMarker?.id === routeId) return undefined;
 						return {
 							type: Markers.CAUTION,
-							element: cautionMarker,
+							element: self,
 							factors: cautionFactors,
 							id: routeId,
 						};
 					});
 				},
 			);
+			if (!cautionMarker) return;
+
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
 
@@ -251,7 +255,7 @@ export default function ReportRoutePage() {
 	};
 
 	const reportNewRoute = () => {
-		if (!newPolyLine.current || !Polyline) return;
+		if (!newPolyLine.current) return;
 
 		const subNodes = [];
 		const edges = newPoints.coords.map((node, idx) => [node, newPoints.coords[idx + 1]]).slice(0, -1);
@@ -259,7 +263,10 @@ export default function ReportRoutePage() {
 		const lastPoint = newPoints.coords[newPoints.coords.length - 1] as Node | Coord;
 
 		for (const edge of edges) {
-			const subNode = createSubNodes(new Polyline({ path: edge })).slice(0, -1);
+			const tempPolyline = createPolyline({ path: edge });
+			if (!tempPolyline) continue;
+
+			const subNode = createSubNodes(tempPolyline).slice(0, -1);
 			subNodes.push(...subNode);
 		}
 
@@ -275,76 +282,78 @@ export default function ReportRoutePage() {
 	};
 
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
-		if (!Polyline || !AdvancedMarker || !map) return;
+		if (!map) return;
 
 		for (const coreRoutes of coreRouteList) {
 			const { coreNode1Id, coreNode2Id, routes: subRoutes } = coreRoutes;
 
 			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
 
-			const routePolyLine = new Polyline({
-				map: map,
-				path: subNodes.map((el) => {
-					return { lat: el.lat, lng: el.lng };
-				}),
-				strokeColor: "#3585fc",
-			});
-
-			routePolyLine.addListener("click", (e: ClickEvent) => {
-				const edges: CoreRoute[] = subRoutes.map(({ routeId, node1, node2 }) => {
-					return { routeId, node1, node2 };
-				});
-
-				const point = LatLngToLiteral(e.latLng);
-				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
-
-				setSelectedMarker(undefined);
-
-				const tempWaypointMarker = createAdvancedMarker(
-					AdvancedMarker,
-					map,
-					nearestPoint,
-					waypointMarkerElement({}),
-				);
-
-				setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker]);
-
-				if (originPoint.current) {
-					setNewPoints((prevPoints) => {
-						if (prevPoints.element) {
-							prevPoints.element.position = nearestPoint;
-							return {
-								...prevPoints,
-								coords: [...prevPoints.coords, nearestPoint],
-							};
-						} else {
-							setIsActive(true);
-							return {
-								element: new AdvancedMarker({
-									map: map,
-									position: nearestPoint,
-									content: destinationMarkerElement({ hasAnimation: true }),
-								}),
-								coords: [...prevPoints.coords, nearestPoint],
-							};
-						}
+			const routePolyline = createPolyline(
+				{
+					map: map,
+					path: subNodes.map((el) => {
+						return { lat: el.lat, lng: el.lng };
+					}),
+					strokeColor: "#3585fc",
+				},
+				(self, e) => {
+					const edges: CoreRoute[] = subRoutes.map(({ routeId, node1, node2 }) => {
+						return { routeId, node1, node2 };
 					});
-				} else {
-					const originMarker = new AdvancedMarker({
+
+					const point = LatLngToLiteral(e.latLng);
+					const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
+
+					setSelectedMarker(undefined);
+
+					const tempWaypointMarker = createAdvancedMarker({
 						map: map,
 						position: nearestPoint,
-						content: originMarkerElement({ hasAnimation: true }),
+						content: waypointMarkerElement({}),
 					});
-					originPoint.current = {
-						point: nearestPoint,
-						element: originMarker,
-					};
-					setNewPoints({
-						element: null,
-						coords: [nearestPoint],
-					});
-				}
-			});
+
+					if (tempWaypointMarker) setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker]);
+
+					if (originPoint.current) {
+						setNewPoints((prevPoints) => {
+							if (prevPoints.element) {
+								prevPoints.element.position = nearestPoint;
+								return {
+									...prevPoints,
+									coords: [...prevPoints.coords, nearestPoint],
+								};
+							} else {
+								setIsActive(true);
+								return {
+									element: createAdvancedMarker({
+										map: map,
+										position: nearestPoint,
+										content: destinationMarkerElement({ hasAnimation: true }),
+									})!,
+									coords: [...prevPoints.coords, nearestPoint],
+								};
+							}
+						});
+					} else {
+						const originMarker = createAdvancedMarker({
+							map: map,
+							position: nearestPoint,
+							content: originMarkerElement({ hasAnimation: true }),
+						});
+
+						if (originMarker)
+							originPoint.current = {
+								point: nearestPoint,
+								element: originMarker,
+							};
+						setNewPoints({
+							element: null,
+							coords: [nearestPoint],
+						});
+					}
+				},
+			);
 		}
 	};
 
@@ -405,11 +414,9 @@ export default function ReportRoutePage() {
 	 */
 	const resetPoints = () => {
 		setTempWayPoints((prevPoints) => {
-			const lastMarker = prevPoints.slice(-1)[0];
+			prevPoints.forEach((el) => (el.map = null));
 
-			lastMarker.map = null;
-
-			return [...prevPoints.slice(0, -1)];
+			return [];
 		});
 
 		setNewPoints((prev) => {
@@ -437,11 +444,10 @@ export default function ReportRoutePage() {
 	useEffect(() => {
 		drawRoute(routes.data);
 		addRiskMarker();
-		if (Polyline) {
-			newPolyLine.current = new Polyline({ map: map, path: [], strokeColor: "#0367FB" });
-		}
 
-		if (map && AdvancedMarker) {
+		newPolyLine.current = createPolyline({ map: map, path: [], strokeColor: "#0367FB" });
+
+		if (map) {
 			map.setCenter(university.centerPoint);
 			map.addListener("click", (e: ClickEvent) => {
 				setSelectedMarker(undefined);
@@ -457,11 +463,11 @@ export default function ReportRoutePage() {
 						} else {
 							setIsActive(true);
 							return {
-								element: new AdvancedMarker({
+								element: createAdvancedMarker({
 									map: map,
 									position: point,
 									content: destinationMarkerElement({}),
-								}),
+								})!,
 								coords: [...prevPoints.coords, point],
 							};
 						}

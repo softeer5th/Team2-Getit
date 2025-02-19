@@ -11,7 +11,7 @@ import { AdvancedMarker } from "../data/types/marker";
 import { CoreRoutesList, RouteId, RoutePointType } from "../data/types/route";
 import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
-import createAdvancedMarker, { createUniversityMarker } from "../utils/markers/createAdvanedMarker";
+import { createUniversityMarker } from "../utils/markers/createAdvanedMarker";
 import toggleMarkers from "../utils/markers/toggleMarkers";
 import { useNavigate } from "react-router";
 import useModal from "../hooks/useModal";
@@ -46,7 +46,7 @@ export type SelectedMarkerTypes = {
 const BOTTOM_SHEET_HEIGHT = 377;
 
 export default function MapPage() {
-	const { AdvancedMarker, Polygon, Polyline } = useContext(MapContext);
+	const { createPolyline, createAdvancedMarker, createPolygon } = useContext(MapContext);
 	const { map, mapRef } = useMap();
 	const [zoom, setZoom] = useState<number>(16);
 	const prevZoom = useRef<number>(16);
@@ -156,7 +156,7 @@ export default function MapPage() {
 	};
 
 	const initMap = () => {
-		if (!map || !AdvancedMarker || !university) return;
+		if (!map || !university) return;
 		map.setCenter(university.centerPoint);
 		map.addListener("click", (e: unknown) => {
 			exitBound();
@@ -171,17 +171,17 @@ export default function MapPage() {
 			});
 		});
 
-		const centerMarker = createUniversityMarker(
-			AdvancedMarker,
-			map,
-			university.centerPoint,
-			university ? university.name : "",
-		);
+		const centerMarker = createAdvancedMarker({
+			map: map,
+			position: university.centerPoint,
+			content: createUniversityMarker(university ? university.name : ""),
+		});
+
 		setUniversityMarker(centerMarker);
 	};
 
 	const addBuildings = () => {
-		if (AdvancedMarker === null || !map) return;
+		if (!map) return;
 
 		const buildingList = buildings.data;
 		const buildingMarkersWithID: { nodeId: NodeId; element: AdvancedMarker; name: string }[] = [];
@@ -190,20 +190,22 @@ export default function MapPage() {
 			const { nodeId, lat, lng, buildingName } = building;
 
 			const buildingMarker = createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				new google.maps.LatLng(lat, lng),
-				buildingMarkerElement({ className: "translate-building" }),
-				() => {
+				{
+					map: map,
+					position: new google.maps.LatLng(lat, lng),
+					content: buildingMarkerElement({ className: "translate-building" }),
+				},
+				(self) => {
 					setSelectedMarker({
 						id: nodeId,
 						type: Markers.BUILDING,
-						element: buildingMarker,
+						element: self,
 						property: building,
 						from: "Marker",
 					});
 				},
 			);
+			if (!buildingMarker) return;
 
 			buildingMarkersWithID.push({ nodeId: nodeId ? nodeId : -1, element: buildingMarker, name: buildingName });
 		}
@@ -212,7 +214,7 @@ export default function MapPage() {
 	};
 
 	const addRiskMarker = () => {
-		if (AdvancedMarker === null || map === null) return;
+		if (map === null) return;
 		const { dangerRoutes, cautionRoutes } = risks.data;
 
 		/** 위험 마커 생성 */
@@ -223,14 +225,15 @@ export default function MapPage() {
 			const type = Markers.DANGER;
 
 			const dangerMarker = createAdvancedMarker(
-				AdvancedMarker,
-				null,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				dangerMarkerElement({}),
-				() => {
+				{
+					map: null,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: dangerMarkerElement({}),
+				},
+				(self) => {
 					setSelectedMarker((prevMarker) => {
 						if (prevMarker && prevMarker.id === routeId) {
 							return undefined;
@@ -238,13 +241,14 @@ export default function MapPage() {
 						return {
 							id: routeId,
 							type: type,
-							element: dangerMarker,
+							element: self,
 							factors: dangerFactors,
 							from: "Marker",
 						};
 					});
 				},
 			);
+			if (!dangerMarker) return;
 
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
@@ -258,14 +262,15 @@ export default function MapPage() {
 			const type = Markers.CAUTION;
 
 			const cautionMarker = createAdvancedMarker(
-				AdvancedMarker,
-				null,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				cautionMarkerElement({}),
-				() => {
+				{
+					map: null,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: cautionMarkerElement({}),
+				},
+				(self) => {
 					setSelectedMarker((prevMarker) => {
 						if (prevMarker && prevMarker.id === routeId) {
 							return undefined;
@@ -273,13 +278,15 @@ export default function MapPage() {
 						return {
 							id: routeId,
 							type: type,
-							element: cautionMarker,
+							element: self,
 							factors: cautionFactors,
 							from: "Marker",
 						};
 					});
 				},
 			);
+			if (!cautionMarker) return;
+
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
 
@@ -393,10 +400,8 @@ export default function MapPage() {
 	};
 
 	const drawPolygon = () => {
-		if (!Polygon) return;
-
 		const polygonPath = university.areaPolygon;
-		const areaPolygon = new Polygon({
+		const areaPolygon = createPolygon({
 			map: map,
 			paths: polygonPath,
 			fillColor: "#ff2d55",
@@ -413,11 +418,8 @@ export default function MapPage() {
 		initMap();
 		addBuildings();
 		addRiskMarker();
-	}, [map]);
-
-	useEffect(() => {
 		drawPolygon();
-	}, [map, Polygon]);
+	}, [map]);
 
 	/** 선택된 마커가 있는 경우 */
 	useEffect(() => {
@@ -630,7 +632,7 @@ export default function MapPage() {
 	}, [map, zoom]);
 
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
-		if (!Polyline || !AdvancedMarker || !map) return;
+		if (!map) return;
 
 		const tempLines = [];
 
@@ -639,7 +641,7 @@ export default function MapPage() {
 
 			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
 
-			const routePolyLine = new Polyline({
+			const routePolyLine = createPolyline({
 				map: null,
 				path: subNodes.map((el) => {
 					return { lat: el.lat, lng: el.lng };
@@ -647,7 +649,7 @@ export default function MapPage() {
 
 				strokeColor: "#3585fc",
 			});
-
+			if (!routePolyLine) continue;
 			tempLines.push(routePolyLine);
 		}
 
@@ -656,7 +658,7 @@ export default function MapPage() {
 
 	useEffect(() => {
 		drawRoute(routes.data);
-	}, [routes.data, map, Polyline, AdvancedMarker]);
+	}, [routes.data, map]);
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">

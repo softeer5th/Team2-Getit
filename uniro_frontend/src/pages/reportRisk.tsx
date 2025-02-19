@@ -34,7 +34,7 @@ interface reportMarkerTypes extends MarkerTypesWithElement {
 }
 
 export default function ReportRiskPage() {
-	const { Polyline, AdvancedMarker } = useContext(MapContext);
+	const { createPolyline, createAdvancedMarker } = useContext(MapContext);
 	const { map, mapRef } = useMap({ zoom: 18, minZoom: 17 });
 
 	const [reportMarker, setReportMarker] = useState<reportMarkerTypes>();
@@ -99,28 +99,28 @@ export default function ReportRiskPage() {
 	};
 
 	const addRiskMarker = () => {
-		if (AdvancedMarker === null || !map) return;
+		if (!map) return;
 		const { dangerRoutes, cautionRoutes } = risks.data;
 
 		for (const route of dangerRoutes) {
 			const { routeId, node1, node2, dangerFactors } = route;
-			const type = Markers.DANGER;
 
-			const dangerMarker = createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				dangerMarkerElement({}),
-				() => {
+			createAdvancedMarker(
+				{
+					map: map,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: dangerMarkerElement({}),
+				},
+				(self) => {
 					setReportMarker((prevMarker) => {
 						if (prevMarker) resetMarker(prevMarker);
 
 						return {
 							type: Markers.DANGER,
-							element: dangerMarker,
+							element: self,
 							route: routeId,
 							factors: dangerFactors,
 						};
@@ -133,21 +133,22 @@ export default function ReportRiskPage() {
 			const { routeId, node1, node2, cautionFactors } = route;
 			const type = Markers.CAUTION;
 
-			const cautionMarker = createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				cautionMarkerElement({}),
-				() => {
+			createAdvancedMarker(
+				{
+					map: map,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: cautionMarkerElement({}),
+				},
+				(self) => {
 					setReportMarker((prevMarker) => {
 						if (prevMarker) resetMarker(prevMarker);
 
 						return {
 							type: Markers.CAUTION,
-							element: cautionMarker,
+							element: self,
 							route: routeId,
 							factors: cautionFactors,
 						};
@@ -158,46 +159,48 @@ export default function ReportRiskPage() {
 	};
 
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
-		if (!Polyline || !AdvancedMarker || !map) return;
+		if (!map) return;
 
 		for (const coreRoutes of coreRouteList) {
 			const { routes: subRoutes } = coreRoutes;
 
 			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
 
-			const routePolyLine = new Polyline({
-				map: map,
-				path: subNodes.map((el) => {
-					return { lat: el.lat, lng: el.lng };
-				}),
-				strokeColor: "#3585fc",
-			});
+			const routePolyLine = createPolyline(
+				{
+					map: map,
+					path: subNodes.map((el) => {
+						return { lat: el.lat, lng: el.lng };
+					}),
+					strokeColor: "#3585fc",
+				},
+				(self, e) => {
+					const edges: CoreRoute[] = subRoutes.map(({ routeId, node1, node2 }) => {
+						return { routeId, node1, node2 };
+					});
 
-			routePolyLine.addListener("click", (e: ClickEvent) => {
-				const edges: CoreRoute[] = subRoutes.map(({ routeId, node1, node2 }) => {
-					return { routeId, node1, node2 };
-				});
+					const point = LatLngToLiteral(e.latLng);
+					const { edge: nearestEdge } = findNearestSubEdge(edges, point);
 
-				const point = LatLngToLiteral(e.latLng);
-				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
+					const newReportMarker = createAdvancedMarker({
+						map: map,
+						position: centerCoordinate(nearestEdge.node1, nearestEdge.node2),
+						content: reportMarkerElement({}),
+					});
 
-				const newReportMarker = createAdvancedMarker(
-					AdvancedMarker,
-					map,
-					centerCoordinate(nearestEdge.node1, nearestEdge.node2),
-					reportMarkerElement({}),
-				);
+					if (!newReportMarker) return;
 
-				setReportMarker((prevMarker) => {
-					if (prevMarker) resetMarker(prevMarker);
+					setReportMarker((prevMarker) => {
+						if (prevMarker) resetMarker(prevMarker);
 
-					return {
-						type: Markers.REPORT,
-						element: newReportMarker,
-						route: nearestEdge.routeId,
-					};
-				});
-			});
+						return {
+							type: Markers.REPORT,
+							element: newReportMarker,
+							route: nearestEdge.routeId,
+						};
+					});
+				},
+			);
 		}
 	};
 
@@ -220,7 +223,7 @@ export default function ReportRiskPage() {
 				});
 			});
 		}
-	}, [map, AdvancedMarker, Polyline]);
+	}, [map]);
 
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: reportMarkerTypes | undefined, isSelect: boolean) => {

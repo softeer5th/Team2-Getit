@@ -17,11 +17,8 @@ export default function createAdvancedMarker(
 }
 
 export function createUniversityMarker(
-	AdvancedMarker: typeof google.maps.marker.AdvancedMarkerElement,
-	map: google.maps.Map | null,
-	position: google.maps.LatLng | google.maps.LatLngLiteral,
 	university: string,
-) {
+):HTMLElement {
 	const container = document.createElement("div");
 	container.className = `flex flex-col items-center`;
 	const markerTitle = document.createElement("p");
@@ -37,11 +34,5 @@ export function createUniversityMarker(
 	markerImage.src = (markerImages[`/src/assets/markers/university.svg`] as { default: string })?.default;
 	container.appendChild(markerImage);
 
-	const newMarker = new AdvancedMarker({
-		map: map,
-		position: position,
-		content: container,
-	});
-
-	return newMarker;
+	return container;
 }
