@@ -52,7 +52,7 @@ public class RouteCacheCalculator {
 			.map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getLng(), entry.getValue().getLat()))
 			.toList();
 
-		List<LightNode>startNode = determineStartNodes(adjMap, nodeMap);
+		List<LightNode> startNode = determineStartNodes(adjMap, nodeMap);
 
 		return AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
 	}

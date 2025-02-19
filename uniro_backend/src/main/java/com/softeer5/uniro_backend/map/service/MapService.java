@@ -52,17 +52,15 @@ public class MapService {
 
 	private final MapClient mapClient;
 
-	private final Map<Long, List<LightRoute>> cache = new HashMap<>();
+	private final Map<Long, GetAllRoutesResDTO> cache = new HashMap<>();
 
 	public GetAllRoutesResDTO getAllRoutes(Long univId) {
 
-		if(!cache.containsKey(univId)){
-			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
-			List<LightRoute> lightRoutes = routes.stream().map(LightRoute::new).toList();
-			cache.put(univId, lightRoutes);
+		if(cache.containsKey(univId)){
+			return cache.get(univId);
 		}
 
-		List<LightRoute> routes = cache.get(univId);
+		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
 		// 맵이 존재하지 않을 경우 예외
 		if(routes.isEmpty()) {
@@ -72,10 +70,12 @@ public class MapService {
 		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
 			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
 
-		AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(routes);
-
-		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
+		AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(routes);
+		GetAllRoutesResDTO response = GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
 			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
+		cache.put(univId, response);
+
+		return response;
 	}
 
 	public List<FastestRouteResDTO> findFastestRoute(Long univId, Long startNodeId, Long endNodeId){
