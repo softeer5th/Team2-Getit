@@ -18,6 +18,8 @@ import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.map.cache.LightRoute;
+import com.softeer5.uniro_backend.map.cache.RouteCacheCalculator;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.entity.Node;
 
@@ -46,11 +48,21 @@ public class MapService {
 	private final RevInfoRepository revInfoRepository;
 
 	private final RouteCalculator routeCalculator;
+	private final RouteCacheCalculator routeCacheCalculator;
 
 	private final MapClient mapClient;
 
+	private final Map<Long, List<LightRoute>> cache = new HashMap<>();
+
 	public GetAllRoutesResDTO getAllRoutes(Long univId) {
-		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+
+		if(!cache.containsKey(univId)){
+			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+			List<LightRoute> lightRoutes = routes.stream().map(LightRoute::new).toList();
+			cache.put(univId, lightRoutes);
+		}
+
+		List<LightRoute> routes = cache.get(univId);
 
 		// 맵이 존재하지 않을 경우 예외
 		if(routes.isEmpty()) {
@@ -60,7 +72,7 @@ public class MapService {
 		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
 			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
 
-		AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(routes);
+		AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(routes);
 
 		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
 			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
