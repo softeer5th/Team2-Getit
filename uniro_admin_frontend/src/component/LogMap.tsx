@@ -222,7 +222,7 @@ export default function LogMap({ center, revisionData, setInfo }: LogMapProps) {
     };
 
     const addChangedMarkers = (changedList: (ChangedRouteWithNodeType | undefined)[]) => {
-        if (!AdvancedMarker) return;
+        if (!AdvancedMarker || !map) return;
 
         for (const changed of changedList) {
             if (!changed) continue;
