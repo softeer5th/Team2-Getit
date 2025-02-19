@@ -7,6 +7,7 @@ const useMap = (mapOptions?: google.maps.MapOptions) => {
 	const [overlay, setOverlay] = useState<google.maps.OverlayView | null>(null);
 	const [AdvancedMarker, setAdvancedMarker] = useState<typeof google.maps.marker.AdvancedMarkerElement | null>(null);
 	const [Polyline, setPolyline] = useState<typeof google.maps.Polyline | null>(null);
+	const [Polygon, setPolylgon] = useState<typeof google.maps.Polygon | null>(null);
 	const [mapLoaded, setMapLoaded] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -14,7 +15,7 @@ const useMap = (mapOptions?: google.maps.MapOptions) => {
 
 		const initMap = async () => {
 			try {
-				const { map, overlay, AdvancedMarkerElement, Polyline } = await initializeMap(
+				const { map, overlay, AdvancedMarkerElement, Polyline, Polygon } = await initializeMap(
 					mapRef.current,
 					mapOptions,
 				);
@@ -22,6 +23,7 @@ const useMap = (mapOptions?: google.maps.MapOptions) => {
 				setOverlay(overlay);
 				setAdvancedMarker(() => AdvancedMarkerElement);
 				setPolyline(() => Polyline);
+				setPolylgon(() => Polygon);
 				setMapLoaded(true);
 			} catch (e) {
 				alert("Error while initializing map: " + e);
@@ -37,7 +39,7 @@ const useMap = (mapOptions?: google.maps.MapOptions) => {
 		};
 	}, []);
 
-	return { mapRef, map, overlay, AdvancedMarker, Polyline, mapLoaded };
+	return { mapRef, map, overlay, AdvancedMarker, Polyline, Polygon, mapLoaded };
 };
 
 export default useMap;

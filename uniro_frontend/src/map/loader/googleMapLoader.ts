@@ -7,10 +7,10 @@ const GoogleMapsLoader = new Loader({
 });
 
 const loadGoogleMapsLibraries = async () => {
-	const { Map, OverlayView, Polyline } = await GoogleMapsLoader.importLibrary("maps");
+	const { Map, OverlayView, Polyline, Polygon } = await GoogleMapsLoader.importLibrary("maps");
 	const { AdvancedMarkerElement } = await GoogleMapsLoader.importLibrary("marker");
 
-	return { Map, OverlayView, AdvancedMarkerElement, Polyline };
+	return { Map, OverlayView, AdvancedMarkerElement, Polyline, Polygon };
 };
 
 export default loadGoogleMapsLibraries;

@@ -45,7 +45,7 @@ export type SelectedMarkerTypes = {
 const BOTTOM_SHEET_HEIGHT = 377;
 
 export default function MapPage() {
-	const { mapRef, map, AdvancedMarker, Polyline } = useMap({ zoom: 16 });
+	const { mapRef, map, AdvancedMarker, Polyline, Polygon } = useMap({ zoom: 16 });
 	const [zoom, setZoom] = useState<number>(16);
 	const prevZoom = useRef<number>(16);
 
@@ -82,6 +82,7 @@ export default function MapPage() {
 	useRedirectUndefined<University | undefined>([university]);
 
 	const polylines = useRef<google.maps.Polyline[]>([]);
+	const polygon = useRef<google.maps.Polygon>();
 
 	const navigate = useNavigate();
 	if (!university) return;
@@ -389,12 +390,32 @@ export default function MapPage() {
 		return matchedMarker;
 	};
 
+	const drawPolygon = () => {
+		if (!Polygon) return;
+
+		const polygonPath = university.areaPolygon;
+		const areaPolygon = new Polygon({
+			map: map,
+			paths: polygonPath,
+			fillColor: "#ff2d55",
+			fillOpacity: 0.1,
+			strokeColor: "#ff2d55",
+			strokeOpacity: 0.5,
+		});
+
+		polygon.current = areaPolygon;
+	};
+
 	/** 초기 렌더링 시, 건물 | 위험 | 주의 마커 생성 */
 	useEffect(() => {
 		initMap();
 		addBuildings();
 		addRiskMarker();
 	}, [map]);
+
+	useEffect(() => {
+		drawPolygon();
+	}, [map, Polygon]);
 
 	/** 선택된 마커가 있는 경우 */
 	useEffect(() => {
@@ -582,6 +603,7 @@ export default function MapPage() {
 
 			toggleMarkers(true, universityMarker ? [universityMarker] : [], map);
 			polylines.current.forEach((el) => el.setMap(null));
+			polygon.current?.setMap(map);
 			toggleBuildingMarker(true);
 		} else if (prevZoom.current <= 16 && zoom >= 17) {
 			if (isCautionAcitve) {
@@ -600,6 +622,7 @@ export default function MapPage() {
 			}
 			toggleMarkers(false, universityMarker ? [universityMarker] : [], map);
 			polylines.current.forEach((el) => el.setMap(map));
+			polygon.current?.setMap(null);
 			toggleBuildingMarker(false);
 		}
 	}, [map, zoom]);
