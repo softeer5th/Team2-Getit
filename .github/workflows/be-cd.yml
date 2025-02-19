@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - be
+      - redis/UNI-255
 
 jobs:
   uniro-ci:
