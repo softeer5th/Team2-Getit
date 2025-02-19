@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Input from "../components/customInput";
 import UniversityButton from "../components/universityButton";
 import Button from "../components/customButton";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import { useQuery } from "@tanstack/react-query";
 import { getUniversityList } from "../api/search";
@@ -14,6 +14,7 @@ export default function UniversitySearchPage() {
 	const { university, setUniversity } = useUniversityInfo();
 	const { setDestination, setOrigin } = useRoutePoint();
 	const [input, setInput] = useState<string>("");
+	const navigation = useNavigate();
 
 	const { data: universityList } = useQuery({
 		queryKey: ["university", input],
@@ -55,6 +56,11 @@ export default function UniversitySearchPage() {
 								key={`university-${univ.id}`}
 								selected={selectedUniv?.id === univ.id}
 								onClick={() => {
+									if (selectedUniv?.id === univ.id) {
+										setUniversity(univ);
+										navigation("/map");
+										return;
+									}
 									setSelectedUniv(univ);
 								}}
 								name={univ.name}
