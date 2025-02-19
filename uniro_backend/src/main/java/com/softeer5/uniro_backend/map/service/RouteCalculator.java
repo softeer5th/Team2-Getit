@@ -510,6 +510,7 @@ public class RouteCalculator {
         int endNodeCount = 0;
 
         for (Route route : routes) {
+            if(isBuildingRoute(route)) continue;
             Node node1 = route.getNode1();
             Node node2 = route.getNode2();
 
