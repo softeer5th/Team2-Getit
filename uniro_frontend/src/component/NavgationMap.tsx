@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef } from "react";
+import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import useMap from "../hooks/useMap";
 import {
 	CautionRoute,
@@ -15,6 +15,7 @@ import useRoutePoint from "../hooks/useRoutePoint";
 import { AdvancedMarker } from "../data/types/marker";
 import { Direction } from "framer-motion";
 import { createRiskMarkers } from "../utils/markers/createRiskMarker";
+import MapContext from "../map/mapContext";
 
 type MapProps = {
 	style?: React.CSSProperties;
@@ -70,7 +71,8 @@ const NavigationMap = ({
 	handleCautionMarkerClick,
 	setCautionRouteIdx,
 }: MapProps) => {
-	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
+	const { AdvancedMarker, Polyline } = useContext(MapContext);
+	const { mapRef, map } = useMap();
 	const { origin, destination } = useRoutePoint();
 
 	const boundsRef = useRef<google.maps.LatLngBounds | null>(null);

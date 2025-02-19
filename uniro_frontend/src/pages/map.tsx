@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
 import { Building, NodeId } from "../data/types/node";
 import MapBottomSheet from "../components/map/mapBottomSheet";
@@ -25,6 +25,7 @@ import { Coord } from "../data/types/coord";
 import AnimatedContainer from "../container/animatedContainer";
 import Loading from "../components/loading/loading";
 import createMarkerElement from "../utils/markers/createMarkerElement";
+import MapContext from "../map/mapContext";
 
 /** API 호출 */
 import { useSuspenseQueries } from "@tanstack/react-query";
@@ -45,7 +46,8 @@ export type SelectedMarkerTypes = {
 const BOTTOM_SHEET_HEIGHT = 377;
 
 export default function MapPage() {
-	const { mapRef, map, AdvancedMarker, Polyline, Polygon } = useMap({ zoom: 16 });
+	const { AdvancedMarker, Polygon, Polyline } = useContext(MapContext);
+	const { map, mapRef } = useMap();
 	const [zoom, setZoom] = useState<number>(16);
 	const prevZoom = useRef<number>(16);
 
@@ -154,7 +156,7 @@ export default function MapPage() {
 	};
 
 	const initMap = () => {
-		if (map === null || !AdvancedMarker || !university) return;
+		if (!map || !AdvancedMarker || !university) return;
 		map.setCenter(university.centerPoint);
 		map.addListener("click", (e: unknown) => {
 			exitBound();
@@ -179,7 +181,7 @@ export default function MapPage() {
 	};
 
 	const addBuildings = () => {
-		if (AdvancedMarker === null || map === null) return;
+		if (AdvancedMarker === null || !map) return;
 
 		const buildingList = buildings.data;
 		const buildingMarkersWithID: { nodeId: NodeId; element: AdvancedMarker; name: string }[] = [];

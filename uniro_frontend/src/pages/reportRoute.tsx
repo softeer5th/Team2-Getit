@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Markers } from "../constant/enum/markerEnum";
 import useMap from "../hooks/useMap";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
@@ -20,7 +20,6 @@ import { CoreRoute, CoreRoutesList, RouteId } from "../data/types/route";
 import { Node, NodeId } from "../data/types/node";
 import { Coord } from "../data/types/coord";
 import useModal from "../hooks/useModal";
-import { useNavigate } from "react-router";
 import { getAllRisks } from "../api/routes";
 import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
@@ -28,6 +27,7 @@ import removeMarkers from "../utils/markers/removeMarkers";
 import useMutationError from "../hooks/useMutationError";
 import TutorialModal from "../components/map/tutorialModal";
 import createMarkerElement from "../utils/markers/createMarkerElement";
+import MapContext from "../map/mapContext";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -37,9 +37,9 @@ type SelectedMarkerTypes = {
 };
 
 export default function ReportRoutePage() {
-	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
+	const { AdvancedMarker, Polyline } = useContext(MapContext);
+	const { map, mapRef } = useMap({ zoom: 18, minZoom: 17 });
 	const originPoint = useRef<{ point: Node; element: AdvancedMarker } | undefined>();
 	const [newPoints, setNewPoints] = useState<{ element: AdvancedMarker | null; coords: (Coord | Node)[] }>({
 		element: null,

@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useState } from "react";
+import { MouseEvent, useContext, useEffect, useState } from "react";
 import useMap from "../hooks/useMap";
 import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import { CoreRoute, CoreRoutesList, RouteId } from "../data/types/route";
@@ -26,6 +26,7 @@ import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import TutorialModal from "../components/map/tutorialModal";
 import createMarkerElement from "../utils/markers/createMarkerElement";
+import MapContext from "../map/mapContext";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	route: RouteId;
@@ -33,7 +34,8 @@ interface reportMarkerTypes extends MarkerTypesWithElement {
 }
 
 export default function ReportRiskPage() {
-	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
+	const { Polyline, AdvancedMarker } = useContext(MapContext);
+	const { map, mapRef } = useMap({ zoom: 18, minZoom: 17 });
 
 	const [reportMarker, setReportMarker] = useState<reportMarkerTypes>();
 
@@ -97,7 +99,7 @@ export default function ReportRiskPage() {
 	};
 
 	const addRiskMarker = () => {
-		if (AdvancedMarker === null || map === null) return;
+		if (AdvancedMarker === null || !map) return;
 		const { dangerRoutes, cautionRoutes } = risks.data;
 
 		for (const route of dangerRoutes) {
