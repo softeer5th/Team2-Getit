@@ -30,7 +30,7 @@ const ReportForm = () => {
 
 	const [disabled, setDisabled] = useState<boolean>(true);
 
-	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(redirectToMap);
+	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal();
 
 	const [errorTitle, setErrorTitle] = useState<string>("");
 

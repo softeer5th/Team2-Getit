@@ -59,7 +59,7 @@ export default function ReportRoutePage() {
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(() => {
-		navigate("/map");
+		// navigate("/map");
 	});
 	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
 	const [isTutorialShown, setIsTutorialShown] = useState<boolean>(true);
