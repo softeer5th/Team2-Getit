@@ -59,12 +59,18 @@ export default function ReportRoutePage() {
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(() => {
-		navigate("/map");
+		// navigate("/map");
 	});
 	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
 	const [isTutorialShown, setIsTutorialShown] = useState<boolean>(true);
 
-	const { cautionMarkerElement, dangerMarkerElement, waypointMarkerElement, originMarkerElement, destinationMarkerElement } = createMarkerElement();
+	const {
+		cautionMarkerElement,
+		dangerMarkerElement,
+		waypointMarkerElement,
+		originMarkerElement,
+		destinationMarkerElement,
+	} = createMarkerElement();
 
 	if (!university) return;
 
@@ -281,7 +287,7 @@ export default function ReportRoutePage() {
 				path: subNodes.map((el) => {
 					return { lat: el.lat, lng: el.lng };
 				}),
-				strokeColor: "#808080",
+				strokeColor: "#3585fc",
 			});
 
 			routePolyLine.addListener("click", (e: ClickEvent) => {
@@ -317,7 +323,7 @@ export default function ReportRoutePage() {
 								element: new AdvancedMarker({
 									map: map,
 									position: nearestPoint,
-									content: destinationMarkerElement({ hasAnimation: true })
+									content: destinationMarkerElement({ hasAnimation: true }),
 								}),
 								coords: [...prevPoints.coords, nearestPoint],
 							};
@@ -454,7 +460,7 @@ export default function ReportRoutePage() {
 								element: new AdvancedMarker({
 									map: map,
 									position: point,
-									content: destinationMarkerElement({})
+									content: destinationMarkerElement({}),
 								}),
 								coords: [...prevPoints.coords, point],
 							};
@@ -472,7 +478,9 @@ export default function ReportRoutePage() {
 		if (!map || !marker) return;
 		if (marker.type === Markers.DANGER) {
 			if (isSelect) {
-				marker.element.content = dangerMarkerElement({ factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]) });
+				marker.element.content = dangerMarkerElement({
+					factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
+				});
 				return;
 			}
 
@@ -481,7 +489,9 @@ export default function ReportRoutePage() {
 		}
 		if (marker.type === Markers.CAUTION) {
 			if (isSelect) {
-				marker.element.content = cautionMarkerElement({ factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]) });
+				marker.element.content = cautionMarkerElement({
+					factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
+				});
 				return;
 			}
 
