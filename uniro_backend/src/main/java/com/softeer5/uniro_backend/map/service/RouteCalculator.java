@@ -8,7 +8,6 @@ import static com.softeer5.uniro_backend.map.entity.RoadExclusionPolicy.isAvaila
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
-import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.*;
@@ -54,11 +53,8 @@ public class RouteCalculator {
         Map<Long, List<Route>> adjMap = new HashMap<>();
         Map<Long, Node> nodeMap = new HashMap<>();
         List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
-        Node startNode = null;
 
         for (Route route : routes) {
-            nodeMap.put(route.getNode1().getId(), route.getNode1());
-            nodeMap.put(route.getNode2().getId(), route.getNode2());
 
             if (isBuildingRoute(route)) {
                 List<RouteCoordinatesInfoResDTO> routeCoordinates = new ArrayList<>();
@@ -67,39 +63,29 @@ public class RouteCalculator {
                 continue;
             }
 
+            nodeMap.put(route.getNode1().getId(), route.getNode1());
+            nodeMap.put(route.getNode2().getId(), route.getNode2());
+
             adjMap.computeIfAbsent(route.getNode1().getId(), k -> new ArrayList<>()).add(route);
             adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
 
-            if (startNode == null) {
-                if (route.getNode1().isCore()) startNode = route.getNode1();
-                else if (route.getNode2().isCore()) startNode = route.getNode2();
-            }
         }
 
         List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
-            .map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getX(), entry.getValue().getY()))
-            .toList();
+                .map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getX(), entry.getValue().getY()))
+                .toList();
 
-        startNode = determineStartNode(startNode, adjMap, nodeMap, routes);
+        List<Node>startNode = determineStartNodes(adjMap, nodeMap);
 
-        return AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, List.of(startNode)), buildingRoutes);
+        return AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
     }
 
-    private Node determineStartNode(Node startNode, Map<Long, List<Route>> adjMap, Map<Long, Node> nodeMap, List<Route> routes) {
-        if (startNode != null) return startNode;
-
-        List<Long> endNodes = adjMap.entrySet().stream()
-            .filter(entry -> entry.getValue().size() == 1)
-            .map(Map.Entry::getKey)
-            .toList();
-
-        if (endNodes.size() == IS_SINGLE_ROUTE) {
-            return nodeMap.get(endNodes.get(0));
-        } else if (endNodes.isEmpty()) {
-            return routes.get(0).getNode1();
-        } else {
-            throw new RouteException("Invalid Map", ErrorCode.INVALID_MAP);
-        }
+    private List<Node> determineStartNodes(Map<Long, List<Route>> adjMap,
+                                           Map<Long, Node> nodeMap) {
+        return nodeMap.values().stream()
+                .filter(node -> node.isCore()
+                        || (adjMap.containsKey(node.getId()) && adjMap.get(node.getId()).size() == 1))
+                .toList();
     }
 
 
