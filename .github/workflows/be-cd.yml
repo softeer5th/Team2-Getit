@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - be
+      - test/UNI-327
 
 jobs:
   uniro-ci:
