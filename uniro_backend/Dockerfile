@@ -8,5 +8,5 @@ COPY ${JAR_FILE} uniro-server.jar
 ENV SPRING_PROFILE=${SPRING_PROFILE}
 
 # JVM 메모리 설정 추가
-ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul","-Dspring.profiles.active=${SPRING_PROFILE}","-XX:+HeapDumpOnOutOfMemoryError","-XX:HeapDumpPath=/tmp/heapdump.hprof","-jar", "uniro-server.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul","-Dspring.profiles.active=${SPRING_PROFILE}","-XX:+HeapDumpOnOutOfMemoryError","-XX:HeapDumpPath=/tmp/heapdump.hprof", "-Xmx500m", "-jar", "uniro-server.jar"]
 
