@@ -15,14 +15,15 @@ import reactor.core.scheduler.Schedulers;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.softeer5.uniro_backend.common.constant.UniroConst.MAX_GOOGLE_API_BATCH_SIZE;
+import static com.softeer5.uniro_backend.common.constant.UniroConst.SUCCESS_STATUS;
+
 @Service
 @Slf4j
 public class MapClientImpl implements MapClient{
     @Value("${map.api.key}")
     private String apiKey;
     private final String baseUrl = "https://maps.googleapis.com/maps/api/elevation/json";
-    private final Integer MAX_BATCH_SIZE = 100;
-    private final String SUCCESS_STATUS = "OK";
     private final WebClient webClient;
 
     public MapClientImpl() {
@@ -51,11 +52,12 @@ public class MapClientImpl implements MapClient{
 
         if(nodesWithoutHeight.isEmpty()) return;
 
-        List<List<Node>> partitions = partitionNodes(nodesWithoutHeight, MAX_BATCH_SIZE);
+        List<List<Node>> partitions = partitionNodes(nodesWithoutHeight, MAX_GOOGLE_API_BATCH_SIZE);
 
         List<Mono<Void>> apiCalls = partitions.stream()
                 .map(batch -> fetchElevationAsync(batch)
                         .subscribeOn(Schedulers.boundedElastic())
+                        .publishOn(Schedulers.boundedElastic())
                         .doOnNext(response -> mapElevationToNodes(response, batch))
                         .then())
                 .toList();
