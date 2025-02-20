@@ -170,14 +170,14 @@ export const RouteCard = ({
 					onClick={onClick}
 					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
-					<div className="flex flex-col items-center justify-start space-y-1">
+					<div className="flex flex-col items-center justify-start space-y-1 mr-1">
 						<CautionText />
 						<div className="text-system-orange text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
 					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
 						{/* TODO: Auto Resize Text 적용 */}
 						<NumberIcon index={index} />
-						<div className="text-[clamp(0.8rem, 4ch, 2rem)] text-left text-kor-body1 text-gray-900">
+						<div className="text-left text-kor-body1 sm:text-[12px] text-gray-900">
 							{cautionFactors && cautionFactors.length > 0
 								? cautionFactors
 										.map((factor) => CautionIssue[factor as keyof typeof CautionIssue])
@@ -193,14 +193,14 @@ export const RouteCard = ({
 					onClick={onClick}
 					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
-					<div className="flex flex-col items-center justify-start space-y-1">
+					<div className="flex flex-col items-center justify-start space-y-1 mr-1">
 						<DangerText />
 						<div className="text-system-red text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
 					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
 						{/* TODO: Auto Resize Text 적용 */}
 						<NumberIcon index={index} />
-						<div className="text-[clamp(0.8rem, 4ch, 2rem)] text-left text-kor-body1 text-gray-900">
+						<div className="text-left text-kor-body1 max-sm:text-[12px] text-gray-900 overflow-x-auto">
 							{dangerFactors && dangerFactors.length > 0
 								? dangerFactors
 										.map((factor) => DangerIssue[factor as keyof typeof DangerIssue])

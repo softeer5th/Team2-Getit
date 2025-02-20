@@ -3,9 +3,10 @@ import Cancel from "../../assets/icon/close.svg?react";
 import CautionIcon from "../../assets/icon/cautionText.svg?react";
 import SafeIcon from "../../assets/icon/safeText.svg?react";
 import DestinationIcon from "../../assets/icon/destination.svg?react";
+import DangerIcon from "../../assets/icon/dangerText.svg?react";
 import OriginIcon from "../../assets/icon/start.svg?react";
 import ResultDivider from "../../assets/icon/resultDivider.svg?react";
-import { NavigationButtonRouteType, NavigationRouteList, NavigationRouteType } from "../../data/types/route";
+import { NavigationButtonRouteType, NavigationRouteList } from "../../data/types/route";
 import useRoutePoint from "../../hooks/useRoutePoint";
 import { formatDistance } from "../../utils/navigation/formatDistance";
 import { Link } from "react-router";
@@ -54,6 +55,12 @@ const returnTitleText = (hasCaution: boolean, hasDanger: boolean) => {
 	return "안전";
 };
 
+const returnIcon = (hasCaution: boolean, hasDanger: boolean) => {
+	if (hasDanger) return <DangerIcon />;
+	if (hasCaution) return <CautionIcon />;
+	return <SafeIcon />;
+};
+
 const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, resetCurrentRouteIdx }: TopBarProps) => {
 	const { origin, destination } = useRoutePoint();
 
@@ -96,7 +103,7 @@ const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, rese
 				</div>
 				<div className="h-[11px] border-[0.5px] border-gray-600" />
 				<div className="flex flex-1 flex-row items-center justify-start ">
-					{navigationRoute ? navigationRoute.hasCaution ? <CautionIcon /> : <SafeIcon /> : null}
+					{returnIcon(navigationRoute.hasCaution, navigationRoute.hasDanger)}
 					<span className="ml-1 text-kor-body3 text-gray-700">
 						{navigationRoute
 							? `가는 길에 ${returnTitleText(navigationRoute.hasCaution, navigationRoute.hasDanger)} 요소가 ${navigationRoute.hasCaution || navigationRoute.hasDanger ? "있어요" : "없어요"}`
