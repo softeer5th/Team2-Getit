@@ -58,7 +58,7 @@ public class AdminService {
 
         Univ univ = univRepository.findById(univId)
                 .orElseThrow(()-> new UnivException("Univ not found", UNIV_NOT_FOUND));
-        Long limitVersion = Optional.ofNullable(univ.getLimitVersion()).orElse(0L);
+        long limitVersion = univ.getLimitVersion();
         if(limitVersion > versionId){
             throw new AdminException("version is too low", CANT_ROLLBACK_BELOW_MINIMUM_VERSION);
         }

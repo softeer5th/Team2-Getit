@@ -60,7 +60,8 @@ public class Univ {
 	private Polygon areaPolygon;
 
 	@Column(name = "limit_version")
-	private Long limitVersion;
+	@NotNull
+	private long limitVersion;
 
 	public Map<String, Double> getCenterXY(){
 		return Map.of("lat", centerPoint.getY(), "lng", centerPoint.getX());
