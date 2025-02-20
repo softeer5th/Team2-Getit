@@ -3,21 +3,27 @@ package com.softeer5.uniro_backend.map.repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import jakarta.persistence.QueryHint;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.softeer5.uniro_backend.map.entity.Route;
+
+import static com.softeer5.uniro_backend.common.constant.UniroConst.STREAM_FETCH_SIZE_AS_STRING;
 
 public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = {"node1", "node2"})
     @Query("SELECT r FROM Route r WHERE r.univId = :univId")
     List<Route> findAllRouteByUnivIdWithNodes(Long univId);
+
+    @EntityGraph(attributePaths = {"node1", "node2"})
+    @Query("SELECT r FROM Route r WHERE r.univId = :univId")
+    @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = STREAM_FETCH_SIZE_AS_STRING))
+    Stream<Route> findAllRouteByUnivIdWithNodesStream(Long univId);
 
     @Query(value = "SELECT r.* FROM route r " +
             "WHERE r.univ_id = :univId " +

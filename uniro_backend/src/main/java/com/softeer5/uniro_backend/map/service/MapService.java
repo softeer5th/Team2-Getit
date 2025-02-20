@@ -1,11 +1,11 @@
 package com.softeer5.uniro_backend.map.service;
 
-import static com.softeer5.uniro_backend.common.constant.UniroConst.BUILDING_ROUTE_DISTANCE;
-import static com.softeer5.uniro_backend.common.constant.UniroConst.CORE_NODE_CONDITION;
+import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 import static com.softeer5.uniro_backend.common.utils.GeoUtils.getInstance;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.entity.RevInfo;
@@ -29,8 +29,11 @@ import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.dto.request.CreateBuildingRouteReqDTO;
 import com.softeer5.uniro_backend.map.dto.response.*;
+import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +42,7 @@ import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -47,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MapService {
 	private final RouteRepository routeRepository;
+	private final EntityManager entityManager;
 	private final NodeRepository nodeRepository;
 	private final BuildingRepository buildingRepository;
 	private final RevInfoRepository revInfoRepository;
@@ -86,6 +91,43 @@ public class MapService {
 		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
 			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
 	}
+
+	@Async
+	public void getAllRoutesByStream(Long univId, SseEmitter emitter) {
+		try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
+			List<Route> batch = new ArrayList<>(STREAM_FETCH_SIZE);
+			Iterator<Route> iterator = routeStream.iterator();
+			while (iterator.hasNext()) {
+				Route route = iterator.next();
+				batch.add(route);
+				entityManager.detach(route);
+
+				if (batch.size() == STREAM_FETCH_SIZE) {
+					processBatch(batch, emitter);
+				}
+			}
+			// 남은 배치 처리
+			if (!batch.isEmpty()) {
+				processBatch(batch, emitter);
+			}
+			emitter.complete();
+			log.info("[SSE emitter complete] " + Thread.currentThread().getName());
+		}
+		catch (Exception e) {
+			emitter.completeWithError(e);
+			log.error(e.getMessage());
+		}
+	}
+
+	private void processBatch(List<Route> batch, SseEmitter emitter) throws Exception {
+		if (!batch.isEmpty()) {
+			AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+			emitter.send(allRoutesInfo);
+			batch.clear();
+			entityManager.clear();
+		}
+	}
+
 
 	public List<FastestRouteResDTO> findFastestRoute(Long univId, Long startNodeId, Long endNodeId){
 
