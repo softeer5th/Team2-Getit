@@ -51,6 +51,7 @@ import jakarta.persistence.EntityManager;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SqlGroup({
 	@Sql(value = "/sql/delete-all-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+	@Sql(value = "/sql/insert-univ-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
 	@Sql(value = "/sql/delete-all-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 })
 class AdminServiceTest {
