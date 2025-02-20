@@ -17,6 +17,7 @@ public class TestContainerConfig implements BeforeAllCallback {
 		if (redis == null) {
 			redis = new GenericContainer<>(DockerImageName.parse(REDIS_IMAGE))
 				.withExposedPorts(REDIS_PORT)
+				.withReuse(true)
 				.waitingFor(Wait.forListeningPort()); // Redis가 포트를 열 때까지 기다림
 			redis.start();
 		}
