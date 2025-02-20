@@ -261,5 +261,7 @@ public class MapService {
 
 		nodeRepository.saveAll(nodesForSave);
 		routeRepository.saveAll(routes);
+
+		redisService.deleteData(univId.toString());
 	}
 }
