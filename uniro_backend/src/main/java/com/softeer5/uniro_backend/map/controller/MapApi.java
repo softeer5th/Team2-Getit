@@ -28,7 +28,7 @@ public interface MapApi {
 			@ApiResponse(responseCode = "200", description = "모든 지도 조회 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
-	ResponseEntity<AllRoutesInfo> getAllRoutesAndNodes(@PathVariable("univId") Long univId);
+	ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId);
 
 	@Operation(summary = "모든 지도(노드,루트) 조회 by sse")
 	@ApiResponses(value = {
