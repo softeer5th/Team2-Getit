@@ -17,6 +17,7 @@ import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
+import com.softeer5.uniro_backend.common.redis.RedisService;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.entity.Node;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.softeer5.uniro_backend.map.dto.request.PostRiskReqDTO;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
+import com.softeer5.uniro_backend.map.service.vo.LightRoute;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -52,8 +54,38 @@ public class MapService {
 	private final RevInfoRepository revInfoRepository;
 
 	private final RouteCalculator routeCalculator;
+	private final RouteCacheCalculator routeCacheCalculator;
 
 	private final MapClient mapClient;
+
+	private final RedisService redisService;
+
+	private final Map<Long, List<LightRoute>> cache = new HashMap<>();
+
+	public GetAllRoutesResDTO getAllRoutesByLocalCache(Long univId) {
+
+		if(!cache.containsKey(univId)){
+			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+			List<LightRoute> lightRoutes = routes.stream().map(LightRoute::new).toList();
+			cache.put(univId, lightRoutes);
+		}
+
+		List<LightRoute> routes = cache.get(univId);
+
+		// 맵이 존재하지 않을 경우 예외
+		if(routes.isEmpty()) {
+			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
+		}
+
+		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
+			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
+
+		AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(routes);
+		GetAllRoutesResDTO response = GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
+			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
+
+		return response;
+	}
 
 	public GetAllRoutesResDTO getAllRoutes(Long univId) {
 		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
