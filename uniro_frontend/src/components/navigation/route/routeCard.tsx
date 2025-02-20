@@ -12,7 +12,7 @@ import { CautionIssue, DangerIssue } from "../../../constant/enum/reportEnum";
 
 const NumberIcon = ({ index }: { index: number }) => {
 	return (
-		<div className="w-[18px] h-[18px] rounded-[9px] bg-[#9AC2FD] flex flex-center items-center justify-center">
+		<div className="w-[18px] h-[18px] rounded-[9px] bg-[#9AC2FD] flex flex-center items-center justify-center flex-shrink-0">
 			<div className="text-white text-[11px] text-left">{index}</div>
 		</div>
 	);
