@@ -236,7 +236,7 @@ public class MapService {
 
 	@Transactional
 	@RevisionOperation(RevisionOperationType.CREATE_ROUTE)
-	synchronized public AllRoutesInfo createRoute(Long univId, CreateRoutesReqDTO requests){
+	public synchronized AllRoutesInfo createRoute(Long univId, CreateRoutesReqDTO requests){
 
 		if(requests.getCoordinates().size() >= CREATE_ROUTE_LIMIT_COUNT){
 			throw new RouteException("creat route limit exceeded", CREATE_ROUTE_LIMIT_EXCEEDED);
@@ -254,6 +254,8 @@ public class MapService {
 
 		nodeRepository.saveAll(nodesForSave);
 		routeRepository.saveAll(routes);
+
+		redisService.deleteData(univId.toString());
 
 		return routeCalculator.assembleRoutes(routes);
 	}
