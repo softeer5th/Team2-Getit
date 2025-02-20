@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +23,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.softeer5.uniro_backend.common.TestContainerConfig;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
@@ -41,7 +39,6 @@ import com.softeer5.uniro_backend.map.repository.RouteRepository;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
-@Import(TestContainerConfig.class)
 class MapServiceTest {
 
 	@Container
@@ -59,8 +56,6 @@ class MapServiceTest {
 		registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
 	}
 
-	@Autowired
-	private RouteCalculator routeCalculator;
 	@Autowired
 	private MapService mapService;
 	@Autowired

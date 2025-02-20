@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import com.softeer5.uniro_backend.admin.dto.response.ChangedRouteDTO;
 import com.softeer5.uniro_backend.admin.dto.response.GetAllRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.admin.dto.response.LostRoutesDTO;
-import com.softeer5.uniro_backend.common.TestContainerConfig;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.enums.CautionFactor;
 import org.hibernate.envers.AuditReader;
@@ -23,7 +22,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,7 +60,6 @@ import jakarta.persistence.EntityManager;
 	@Sql(value = "/sql/insert-univ-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
 	@Sql(value = "/sql/delete-all-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 })
-@Import(TestContainerConfig.class)
 class AdminServiceTest {
 
 	@Container
