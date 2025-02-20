@@ -691,7 +691,7 @@ export default function MapPage() {
 	}, [map, zoom]);
 
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
-		if (!map || !cachedRouteRef.current) return;
+        if (!map || !cachedRouteRef.current) return;
 
 		console.log("----------MAIN PAGE  | DRAW CORE ROUTES----------");
 
@@ -721,8 +721,9 @@ export default function MapPage() {
 					usedKeys.add(key);
 				}
 
-				removeAllListener(cachedPolyline);
-				cachedPolyline.setMap(map);
+                removeAllListener(cachedPolyline);
+                cachedPolyline.setMap(zoom <= 16 ? null : map);
+                tempLines.push(cachedPolyline);
 				continue;
 			}
 

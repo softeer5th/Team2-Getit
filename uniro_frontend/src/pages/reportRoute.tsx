@@ -29,6 +29,7 @@ import createMarkerElement from "../utils/markers/createMarkerElement";
 import MapContext from "../map/mapContext";
 import { CacheContext } from "../map/mapCacheContext";
 import removeAllListener from "../utils/map/removeAllListener";
+import { transformAllRoutes } from "../api/transformer/route";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -88,7 +89,7 @@ export default function ReportRoutePage() {
 
 	const [routes, risks] = result;
 
-	const [ErrorModal, { mutate, status }] = useMutationError(
+	const [ErrorModal, { data: reportedRoute, mutate, status }] = useMutationError(
 		{
 			mutationFn: ({
 				startNodeId,
@@ -99,7 +100,7 @@ export default function ReportRoutePage() {
 				endNodeId: NodeId | null;
 				coordinates: Coord[];
 			}) => postReportRoute(university.id, { startNodeId, endNodeId, coordinates }),
-			onSuccess: () => {
+			onSuccess: (data) => {
 				openSuccess();
 				if (newPoints.element) newPoints.element.map = null;
 				if (originPoint.current) {
@@ -115,6 +116,14 @@ export default function ReportRoutePage() {
 					return [];
 				});
 				if (newPolyLine.current) newPolyLine.current.setPath([]);
+
+				const routes = transformAllRoutes(data);
+
+				queryClient.setQueryData(["routes", university.id], (prev: CoreRoutesList) => {
+					return [...prev, ...routes];
+				});
+				console.log(status);
+				setIsActive(false);
 			},
 			onError: () => {
 				if (newPoints.element) newPoints.element.map = null;
@@ -689,10 +698,7 @@ export default function ReportRoutePage() {
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
 				<div className="absolute w-full bottom-6 px-4">
-					<Button
-						onClick={reportNewRoute}
-						variant={status === "pending" || status === "success" ? "disabled" : "primary"}
-					>
+					<Button onClick={reportNewRoute} variant={status === "pending" ? "disabled" : "primary"}>
 						{status === "pending" ? "제보하는 중.." : "제보하기"}
 					</Button>
 				</div>
