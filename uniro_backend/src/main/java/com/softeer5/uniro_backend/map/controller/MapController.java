@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.map.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.softeer5.uniro_backend.admin.service.AdminService;
 import com.softeer5.uniro_backend.map.dto.request.CreateBuildingRouteReqDTO;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
@@ -14,16 +15,20 @@ import org.springframework.web.bind.annotation.*;
 import com.softeer5.uniro_backend.map.service.MapService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
+@Slf4j
 public class MapController implements MapApi {
 
 	private final MapService mapService;
 	private final AdminService adminService;
+	private final ObjectMapper objectMapper;
 
 	@GetMapping("/{univId}/routes-local")
 	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodesByLocalCache(@PathVariable("univId") Long univId){
@@ -35,7 +40,24 @@ public class MapController implements MapApi {
 	@GetMapping("/{univId}/routes")
 	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
 		GetAllRoutesResDTO allRoutes = mapService.getAllRoutes(univId);
-		return ResponseEntity.ok().body(allRoutes);
+
+		ResponseEntity<GetAllRoutesResDTO> body = ResponseEntity.ok().body(allRoutes);
+
+		long duration = 0;
+		try{
+			long startTime = System.nanoTime();
+			String json = objectMapper.writeValueAsString(body); // JSON 직렬화
+			long endTime = System.nanoTime();
+
+			duration = (endTime - startTime) / 1_000_000; // ms 단위 변환
+		}
+		catch (Exception e){
+
+		}
+
+		log.info("🧪🧪🧪🧪🧪Serialization Time: {} ms", duration);
+
+		return body;
 	}
 
 	@Override
