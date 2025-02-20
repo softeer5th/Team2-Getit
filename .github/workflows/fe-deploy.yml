@@ -72,4 +72,4 @@ jobs:
             sudo docker pull gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:${IMAGE_TAG}
             sudo docker run -d --name ${IMAGE_NAME} -p 3000:3000 gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:${IMAGE_TAG}
             sudo docker network connect nginx_app-network ${IMAGE_NAME}
-            sudo docker restart nginx-container
+            sudo docker exec nginx-container nginx -s reload
