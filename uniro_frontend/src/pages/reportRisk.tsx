@@ -1,13 +1,11 @@
 import { MouseEvent, useContext, useEffect, useState } from "react";
 import useMap from "../hooks/useMap";
-import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import { CoreRoute, CoreRoutesList, RouteId } from "../data/types/route";
 import { Markers } from "../constant/enum/markerEnum";
 import { ClickEvent } from "../data/types/event";
 import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import centerCoordinate from "../utils/coordinates/centerCoordinate";
-import { AdvancedMarker, MarkerTypesWithElement } from "../data/types/marker";
 import Button from "../components/customButton";
 import { Link } from "react-router";
 import { ReportRiskMessage } from "../constant/enum/messageEnum";
@@ -31,6 +29,7 @@ import { CacheContext } from "../map/mapCacheContext";
 import removeAllListener from "../utils/map/removeAllListener";
 import useReportedRisk from "../hooks/useReportRiskResult";
 import { interpolate } from "../utils/interpolate";
+import { MarkerTypesWithElement, AdvancedMarker } from "../data/types/marker";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	route: RouteId;
@@ -302,7 +301,7 @@ export default function ReportRiskPage() {
 	};
 
 	const moveToMarker = () => {
-		if (!map || !AdvancedMarker) return;
+		if (!map) return;
 		const { routeId } = reportedData;
 		const route = findRouteById(routes.data, routeId!);
 		if (!route) return;
