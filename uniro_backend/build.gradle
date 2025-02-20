@@ -81,6 +81,8 @@ dependencies {
 	testImplementation 'org.testcontainers:junit-jupiter:1.19.5'
 	testImplementation 'org.testcontainers:jdbc:1.19.5'
 	testImplementation 'org.testcontainers:mysql:1.19.5'
+	testImplementation("org.testcontainers:redis:1.19.4")
+	testImplementation("redis.clients:jedis:5.1.0") // Redis 클라이언트
 
 	// jwt
 	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
