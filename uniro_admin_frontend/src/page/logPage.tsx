@@ -12,7 +12,11 @@ import { LogActionEnum } from "../constant/enum/logActionEnum";
 const LogPage = () => {
 	const { accessToken } = useLogin();
 	const { university } = useUniversity();
-	const { data: revisions } = useQuery({
+	const {
+		data: revisions,
+		refetch,
+		isFetching: isVersionsFetching,
+	} = useQuery({
 		queryKey: [university?.id, "revisions"],
 		queryFn: () => getAllRevisions(accessToken, university ? university.id : -1),
 	});
@@ -37,6 +41,8 @@ const LogPage = () => {
 	return (
 		<MainContainer>
 			<LogListContainer
+				isVersionsFetching={isVersionsFetching}
+				refetch={() => refetch()}
 				setSelect={setSelectedRev}
 				selected={selectedRev}
 				revisions={revisions}
