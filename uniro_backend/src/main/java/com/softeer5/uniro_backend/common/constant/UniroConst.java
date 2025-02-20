@@ -16,6 +16,6 @@ public final class UniroConst {
 	public static final String STREAM_FETCH_SIZE_AS_STRING = "" + STREAM_FETCH_SIZE;
 
 
-	public static final Integer MAX_GOOGLE_API_BATCH_SIZE = 100;
+	public static final Integer MAX_GOOGLE_API_BATCH_SIZE = 300;
 	public static final String SUCCESS_STATUS = "OK";
 }
