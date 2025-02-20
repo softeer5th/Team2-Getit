@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -18,6 +19,9 @@ public class AllRoutesInfo {
     private final List<CoreRouteResDTO> coreRoutes;
     @Schema(description = "빌딩 루트 정보 (id, startNodeId, endNodeId)", example = "")
     private final List<BuildingRouteResDTO> buildingRoutes;
+    @Setter
+    @Schema(description = "배치 사이즈", example = "1")
+    private int batchSize = 1;
 
     public static AllRoutesInfo of(List<NodeInfoResDTO> nodeInfos, List<CoreRouteResDTO> coreRoutes,
                                         List<BuildingRouteResDTO> buildingRoutes) {
