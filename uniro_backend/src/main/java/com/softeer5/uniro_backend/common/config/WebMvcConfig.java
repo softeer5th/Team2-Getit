@@ -1,6 +1,7 @@
 package com.softeer5.uniro_backend.common.config;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -35,31 +37,35 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		this.jwtInterceptor = jwtInterceptor;
 	}
 
-	@Override
-	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		// 기존 FastJson 컨버터 설정
-		FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-		FastJsonConfig config = new FastJsonConfig();
-		config.setDateFormat("yyyy-MM-dd HH:mm:ss");
-		config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
-		config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
-		converter.setFastJsonConfig(config);
-		converter.setDefaultCharset(StandardCharsets.UTF_8);
-		converter.setSupportedMediaTypes(List.of(
-			MediaType.APPLICATION_JSON,
-			new MediaType("application", "json", StandardCharsets.UTF_8),
-			new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)
-		));
-
-		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
-		stringConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.TEXT_PLAIN));
-
-		converters.add(0, converter);
-		converters.add(1, stringConverter);
-		converters.add(2, new ByteArrayHttpMessageConverter());
-
-		converters.forEach(c -> log.info("✔ {}", c.getClass().getName()));
-	}
+	// @Override
+	// public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	// 	converters.add(new MappingJackson2HttpMessageConverter());
+	//
+	// 	// 기존 FastJson 컨버터 설정
+	// 	FastJsonHttpMessageConverter fastJsonConverter = new FastJsonHttpMessageConverter();
+	// 	FastJsonConfig config = new FastJsonConfig();
+	// 	config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+	// 	config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
+	// 	config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
+	// 	fastJsonConverter.setFastJsonConfig(config);
+	// 	fastJsonConverter.setDefaultCharset(StandardCharsets.UTF_8);
+	// 	fastJsonConverter.setSupportedMediaTypes(List.of(
+	// 		MediaType.APPLICATION_JSON,
+	// 		new MediaType("application", "json", StandardCharsets.UTF_8),
+	// 		new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)
+	// 	));
+	//
+	//
+	// 	StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+	// 	stringConverter.setSupportedMediaTypes(List.of(MediaType.TEXT_PLAIN));
+	//
+	//
+	// 	converters.add(0, fastJsonConverter);
+	// 	converters.add(1, stringConverter);
+	// 	converters.add(2, new ByteArrayHttpMessageConverter());
+	//
+	// 	converters.forEach(c -> log.info("✔ {}", c.getClass().getName()));
+	// }
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
