@@ -18,7 +18,7 @@ import BackButton from "../components/map/backButton";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 import { University } from "../data/types/university";
-import { useSuspenseQueries } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import { getAllRoutes } from "../api/route";
 import { getAllRisks } from "../api/routes";
 import useReportRisk from "../hooks/useReportRisk";
@@ -29,6 +29,8 @@ import createMarkerElement from "../utils/markers/createMarkerElement";
 import MapContext from "../map/mapContext";
 import { CacheContext } from "../map/mapCacheContext";
 import removeAllListener from "../utils/map/removeAllListener";
+import useReportedRisk from "../hooks/useReportRiskResult";
+import { interpolate } from "../utils/interpolate";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	route: RouteId;
@@ -44,9 +46,12 @@ export default function ReportRiskPage() {
 
 	const [message, setMessage] = useState<ReportRiskMessage>(ReportRiskMessage.DEFAULT);
 	const { setReportRouteId } = useReportRisk();
+	const { reportedData, clearReportedRouteData } = useReportedRisk();
 	const { university } = useUniversityInfo();
 	const [isTutorialShown, setIsTutorialShown] = useState<boolean>(true);
 	const { dangerMarkerElement, cautionMarkerElement, reportMarkerElement } = createMarkerElement();
+
+	const queryClient = useQueryClient();
 
 	useRedirectUndefined<University | undefined>([university]);
 
@@ -286,9 +291,65 @@ export default function ReportRiskPage() {
 		}
 	};
 
+	const findRouteById = (routesList: CoreRoutesList, targetRouteId: RouteId): CoreRoute | undefined => {
+		for (const coreRoutes of routesList) {
+			const foundRoute = coreRoutes.routes.find((route) => route.routeId === targetRouteId);
+			if (foundRoute) {
+				return foundRoute;
+			}
+		}
+		return undefined;
+	};
+
+	const moveToMarker = () => {
+		if (!map || !AdvancedMarker) return;
+		const { routeId } = reportedData;
+		const route = findRouteById(routes.data, routeId!);
+		if (!route) return;
+		const node1 = route.node1;
+		const node2 = route.node2;
+		const reportedCoord = interpolate({ lat: node1.lat, lng: node1.lng }, { lat: node2.lat, lng: node2.lng }, 0.5);
+		map.setCenter(reportedCoord);
+		clearReportedRouteData();
+	};
+
 	useEffect(() => {
+		if (reportedData?.routeId) {
+			const foundRoute = findRouteById(routes.data, reportedData.routeId!);
+			if (!foundRoute) return;
+
+			queryClient.setQueryData(
+				[university.id, "risks"],
+				(prev: { dangerRoutes: CoreRoute[]; cautionRoutes: CoreRoute[] }) => {
+					let newDangerRoutes = prev.dangerRoutes;
+					let newCautionRoutes = prev.cautionRoutes;
+
+					if (reportedData.dangerFactors.length > 0) {
+						if (!newDangerRoutes.some((route) => route.routeId === foundRoute.routeId)) {
+							newDangerRoutes = [...newDangerRoutes, foundRoute];
+						}
+					} else {
+						newDangerRoutes = newDangerRoutes.filter((route) => route.routeId !== foundRoute.routeId);
+					}
+
+					if (reportedData.cautionFactors.length > 0) {
+						if (!newCautionRoutes.some((route) => route.routeId === foundRoute.routeId)) {
+							newCautionRoutes = [...newCautionRoutes, foundRoute];
+						}
+					} else {
+						newCautionRoutes = newCautionRoutes.filter((route) => route.routeId !== foundRoute.routeId);
+					}
+
+					return { dangerRoutes: newDangerRoutes, cautionRoutes: newCautionRoutes };
+				},
+			);
+		}
+		addRiskMarker();
+
 		if (map) {
-			map.setCenter(university.centerPoint);
+			if (reportedData) moveToMarker();
+			else map.setCenter(university.centerPoint);
+
 			map.addListener("click", () => {
 				setReportMarker((prevMarker) => {
 					if (prevMarker) {

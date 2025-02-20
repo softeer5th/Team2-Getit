@@ -133,10 +133,10 @@ export default function MapPage() {
 				queryKey: [university.id, "buildings"],
 				queryFn: () =>
 					getAllBuildings(university.id, {
-						leftUpLat: 38,
-						leftUpLng: 127,
-						rightDownLat: 37,
-						rightDownLng: 128,
+						leftUpLat: 35,
+						leftUpLng: 126,
+						rightDownLat: 38,
+						rightDownLng: 130,
 					}),
 				refetchInterval: 300000,
 			},

@@ -1,46 +1,7 @@
 @import "tailwindcss";
 
-@font-face {
-	font-family: "AppleSDGothicNeo";
-	font-style: normal;
-	font-weight: 700;
-	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoB.woff") format("woff");
-	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
-}
-
-@font-face {
-	font-family: "AppleSDGothicNeo";
-	font-style: normal;
-	font-weight: 500;
-	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoM.woff") format("woff");
-	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
-}
-
-@font-face {
-	font-family: "AppleSDGothicNeo";
-	font-style: normal;
-	font-weight: 400;
-	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoR.woff") format("woff");
-	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
-}
-
-@font-face {
-	font-family: "AppleSDGothicNeo";
-	font-style: normal;
-	font-weight: 600;
-	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoSB.woff") format("woff");
-	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
-}
-
-@font-face {
-	font-family: "SF Pro Display";
-	font-style: normal;
-	font-weight: 400;
-	src: url("/fonts/SF_Pro_Display/SF-Pro-Display-Regular.woff") format("woff");
-}
-
 * {
-	font-family: "SF Pro Display", "AppleSDGothicNeo" !important;
+	font-family: -apple-system, BlinkMacSystemFont;
 	outline: none;
 	--webkit-scrollbar-width: none;
 	box-sizing: border-box;
@@ -170,4 +131,16 @@
 		opacity: 0;
 		transform: scale(0);
 	}
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+.spinner {
+	animation: spin 1s linear infinite;
 }
