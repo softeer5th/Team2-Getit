@@ -19,7 +19,7 @@ spring:
     open-in-view: false
   data:
     redis:
-      host: ${REDIS_HOST}
+      host: host.docker.internal
       password: ${REDIS_PASSWORD}
       port: 6379
 map:
