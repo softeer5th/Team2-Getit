@@ -19,6 +19,7 @@ public enum ErrorCode {
     ROUTE_NOT_FOUND(404, "루트를 찾을 수 없습니다."),
     CAUTION_DANGER_CANT_EXIST_SIMULTANEOUSLY(400, "위험요소와 주의요소는 동시에 존재할 수 없습니다."),
     INVALID_MAP(500,"현재 지도 데이터가 제약조건에 어긋난 상태입니다."),
+    CREATE_ROUTE_LIMIT_EXCEEDED(400, "길 추가 최대 길이를 초과하였습니다."),
 
     //길 생성
     ELEVATION_API_ERROR(500, "구글 해발고도 API에서 오류가 발생했습니다."),
@@ -34,6 +35,9 @@ public enum ErrorCode {
     // 경로 계산
     INTERSECTION_ONLY_ALLOWED_POINT(400, "기존 경로와 겹칠 수 없습니다."),
 
+    // 대학
+    UNIV_NOT_FOUND(404, "대학을 찾을 수 없습니다."),
+
     // 어드민
     ALREADY_LATEST_VERSION_ID(400, "현재 가장 최신 버전 id 입니다."),
     INVALID_VERSION_ID(400, "유효하지 않은 버전 id 입니다."),
@@ -42,6 +46,7 @@ public enum ErrorCode {
     UNAUTHORIZED_UNIV(401, "해당 대학교의 권한이 없습니다."),
     INVALID_UNIV_ID(400, "유효하지 않은 대학교 id 입니다."),
     RECENT_REVISION_NOT_FOUND(404, "최신 버전을 찾을 수 없습니다."),
+    CANT_ROLLBACK_BELOW_MINIMUM_VERSION(400, "롤백하려는 버전이 허용된 최소 버전보다 낮습니다.")
     ;
 
     private final int httpStatus;
