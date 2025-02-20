@@ -200,7 +200,7 @@ public class MapService {
 
 	@Transactional
 	@RevisionOperation(RevisionOperationType.CREATE_ROUTE)
-	synchronized public void createRoute(Long univId, CreateRoutesReqDTO requests){
+	synchronized public AllRoutesInfo createRoute(Long univId, CreateRoutesReqDTO requests){
 
 		List<Route> savedRoutes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
@@ -214,5 +214,7 @@ public class MapService {
 
 		nodeRepository.saveAll(nodesForSave);
 		routeRepository.saveAll(routes);
+
+		return routeCalculator.assembleRoutes(routes);
 	}
 }
