@@ -35,31 +35,31 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		this.jwtInterceptor = jwtInterceptor;
 	}
 
-	// @Override
-	// public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-	// 	// 기존 FastJson 컨버터 설정
-	// 	FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-	// 	FastJsonConfig config = new FastJsonConfig();
-	// 	config.setDateFormat("yyyy-MM-dd HH:mm:ss");
-	// 	config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
-	// 	config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
-	// 	converter.setFastJsonConfig(config);
-	// 	converter.setDefaultCharset(StandardCharsets.UTF_8);
-	// 	converter.setSupportedMediaTypes(List.of(
-	// 		MediaType.APPLICATION_JSON,
-	// 		new MediaType("application", "json", StandardCharsets.UTF_8),
-	// 		new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)
-	// 	));
-	//
-	// 	StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
-	// 	stringConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.TEXT_PLAIN));
-	//
-	// 	converters.add(0, converter);
-	// 	converters.add(1, stringConverter);
-	// 	converters.add(2, new ByteArrayHttpMessageConverter());
-	//
-	// 	converters.forEach(c -> log.info("✔ {}", c.getClass().getName()));
-	// }
+	@Override
+	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+		// 기존 FastJson 컨버터 설정
+		FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+		FastJsonConfig config = new FastJsonConfig();
+		config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+		config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
+		config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
+		converter.setFastJsonConfig(config);
+		converter.setDefaultCharset(StandardCharsets.UTF_8);
+		converter.setSupportedMediaTypes(List.of(
+			MediaType.APPLICATION_JSON,
+			new MediaType("application", "json", StandardCharsets.UTF_8),
+			new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)
+		));
+
+		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+		stringConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.TEXT_PLAIN));
+
+		converters.add(0, converter);
+		converters.add(1, stringConverter);
+		converters.add(2, new ByteArrayHttpMessageConverter());
+
+		converters.forEach(c -> log.info("✔ {}", c.getClass().getName()));
+	}
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
