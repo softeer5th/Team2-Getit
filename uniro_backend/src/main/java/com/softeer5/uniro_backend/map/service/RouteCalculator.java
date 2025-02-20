@@ -135,6 +135,7 @@ public class RouteCalculator {
             }
 
             boolean hasCaution = false;
+            boolean hasDanger = false;
             double totalDistance = 0.0;
 
             // 결과를 DTO로 정리
@@ -145,6 +146,9 @@ public class RouteCalculator {
                 totalDistance += route.getDistance();
                 if (!route.getCautionFactors().isEmpty()) {
                     hasCaution = true;
+                }
+                if(!route.getDangerFactors().isEmpty()){
+                    hasDanger = true;
                 }
 
                 Node firstNode = route.getNode1();
@@ -164,7 +168,7 @@ public class RouteCalculator {
 
             List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
-            result.add(FastestRouteResDTO.of(policy, hasCaution, totalDistance,
+            result.add(FastestRouteResDTO.of(policy, hasCaution, hasDanger, totalDistance,
                     calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER, totalDistance),
                     calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER,totalDistance),
                     calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER,totalDistance),
@@ -372,6 +376,16 @@ public class RouteCalculator {
                 accumulatedDistance = halfOfRouteDistance;
                 checkPointNodeCoordinates = getCenter(now, nxt);
                 checkPointType = DirectionType.CAUTION;
+                checkPointCautionFactors = nowRoute.getCautionFactorsByList();
+            }
+
+            if(!nowRoute.getDangerFactors().isEmpty()){
+                double halfOfRouteDistance = calculateRouteDistance(nowRoute)/2;
+                details.add(RouteDetailResDTO.of(accumulatedDistance - halfOfRouteDistance,
+                        checkPointType, checkPointNodeCoordinates, checkPointCautionFactors));
+                accumulatedDistance = halfOfRouteDistance;
+                checkPointNodeCoordinates = getCenter(now, nxt);
+                checkPointType = DirectionType.DANGER;
                 checkPointCautionFactors = nowRoute.getCautionFactorsByList();
             }
 
