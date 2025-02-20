@@ -19,6 +19,7 @@ public enum ErrorCode {
     ROUTE_NOT_FOUND(404, "루트를 찾을 수 없습니다."),
     CAUTION_DANGER_CANT_EXIST_SIMULTANEOUSLY(400, "위험요소와 주의요소는 동시에 존재할 수 없습니다."),
     INVALID_MAP(500,"현재 지도 데이터가 제약조건에 어긋난 상태입니다."),
+    CREATE_ROUTE_LIMIT_EXCEEDED(400, "길 추가 최대 길이를 초과하였습니다."),
 
     //길 생성
     ELEVATION_API_ERROR(500, "구글 해발고도 API에서 오류가 발생했습니다."),

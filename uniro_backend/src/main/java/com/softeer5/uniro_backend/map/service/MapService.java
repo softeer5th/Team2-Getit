@@ -202,6 +202,10 @@ public class MapService {
 	@RevisionOperation(RevisionOperationType.CREATE_ROUTE)
 	synchronized public void createRoute(Long univId, CreateRoutesReqDTO requests){
 
+		if(requests.getCoordinates().size() >= CREATE_ROUTE_LIMIT_COUNT){
+			throw new RouteException("creat route limit exceeded", CREATE_ROUTE_LIMIT_EXCEEDED);
+		}
+
 		List<Route> savedRoutes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
 		List<Node> nodesForSave = routeCalculator.createValidRouteNodes(univId, requests.getStartNodeId(),
