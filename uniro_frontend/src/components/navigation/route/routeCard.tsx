@@ -8,7 +8,7 @@ import DangerText from "../../../assets/icon/dangerText.svg?react";
 import { RouteDetail } from "../../../data/types/route";
 import useRoutePoint from "../../../hooks/useRoutePoint";
 import { formatDistance } from "../../../utils/navigation/formatDistance";
-import { CautionIssue } from "../../../constant/enum/reportEnum";
+import { CautionIssue, DangerIssue } from "../../../constant/enum/reportEnum";
 
 const NumberIcon = ({ index }: { index: number }) => {
 	return (
@@ -203,7 +203,7 @@ export const RouteCard = ({
 						<div className="text-[clamp(0.8rem, 4ch, 2rem)] text-left text-kor-body1 text-gray-900">
 							{dangerFactors && dangerFactors.length > 0
 								? dangerFactors
-										.map((factor) => CautionIssue[factor as keyof typeof CautionIssue])
+										.map((factor) => DangerIssue[factor as keyof typeof DangerIssue])
 										.join(", ")
 								: "위험 요소가 없습니다."}
 						</div>

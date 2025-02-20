@@ -48,6 +48,12 @@ const AnimatedValue = ({ value, className }: AnimatedValueProps) => {
 	);
 };
 
+const returnTitleText = (hasCaution: boolean, hasDanger: boolean) => {
+	if (hasDanger) return "위험";
+	if (hasCaution) return "주의";
+	return "안전";
+};
+
 const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, resetCurrentRouteIdx }: TopBarProps) => {
 	const { origin, destination } = useRoutePoint();
 
@@ -93,7 +99,7 @@ const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, rese
 					{navigationRoute ? navigationRoute.hasCaution ? <CautionIcon /> : <SafeIcon /> : null}
 					<span className="ml-1 text-kor-body3 text-gray-700">
 						{navigationRoute
-							? `가는 길에 주의 요소가 ${navigationRoute?.hasCaution ? "있어요" : "없어요"}`
+							? `가는 길에 ${returnTitleText(navigationRoute.hasCaution, navigationRoute.hasDanger)} 요소가 ${navigationRoute.hasCaution || navigationRoute.hasDanger ? "있어요" : "없어요"}`
 							: "  배리어프리 경로가 존재하지 않습니다.  "}
 					</span>
 				</div>

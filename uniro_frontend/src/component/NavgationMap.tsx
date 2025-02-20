@@ -68,7 +68,6 @@ const NavigationMap = ({
 	bottomPadding = 0,
 	currentRouteIdx,
 	handleCautionMarkerClick,
-	setCautionRouteIdx,
 }: MapProps) => {
 	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
 	const { origin, destination } = useRoutePoint();
@@ -266,7 +265,6 @@ const NavigationMap = ({
 
 				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement, () => {
 					handleCautionMarkerClick(index + 1);
-					setCautionRouteIdx(index + 1);
 				});
 				markers.push(marker);
 			}

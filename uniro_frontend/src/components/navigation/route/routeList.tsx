@@ -9,11 +9,18 @@ type RouteListProps = {
 	currentRouteIdx: number;
 	routes?: RouteDetail[] | null;
 	cautionRouteIdx: number;
+	isDetailView: boolean;
 };
 
 const Divider = () => <div className="border-[0.5px] border-gray-200 w-full"></div>;
 
-const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRouteIdx }: RouteListProps) => {
+const RouteList = ({
+	changeCurrentRouteIdx,
+	currentRouteIdx,
+	routes,
+	cautionRouteIdx,
+	isDetailView,
+}: RouteListProps) => {
 	const { origin, destination } = useRoutePoint();
 
 	const addOriginAndDestination = (routes: RouteDetail[]) => {
@@ -42,7 +49,7 @@ const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRout
 		if (target) {
 			target.scrollIntoView({ behavior: "smooth", block: "center" });
 		}
-	}, [cautionRouteIdx]);
+	}, [cautionRouteIdx, isDetailView]);
 
 	return (
 		<div className="w-full">
