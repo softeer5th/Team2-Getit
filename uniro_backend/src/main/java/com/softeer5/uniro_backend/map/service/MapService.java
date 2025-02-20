@@ -74,6 +74,9 @@ public class MapService {
 
 	@Async
 	public void getAllRoutesByStream(Long univId, SseEmitter emitter) {
+		int batchSize = routeRepository.countByUnivId(univId);
+		batchSize = batchSize % STREAM_FETCH_SIZE == 0 ? batchSize / STREAM_FETCH_SIZE : batchSize / STREAM_FETCH_SIZE + 1;
+
 		try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
 			List<Route> batch = new ArrayList<>(STREAM_FETCH_SIZE);
 			Iterator<Route> iterator = routeStream.iterator();
@@ -83,12 +86,12 @@ public class MapService {
 				entityManager.detach(route);
 
 				if (batch.size() == STREAM_FETCH_SIZE) {
-					processBatch(batch, emitter);
+					processBatch(batch, emitter, batchSize);
 				}
 			}
 			// 남은 배치 처리
 			if (!batch.isEmpty()) {
-				processBatch(batch, emitter);
+				processBatch(batch, emitter, batchSize);
 			}
 			emitter.complete();
 			log.info("[SSE emitter complete] " + Thread.currentThread().getName());
@@ -99,9 +102,10 @@ public class MapService {
 		}
 	}
 
-	private void processBatch(List<Route> batch, SseEmitter emitter) throws Exception {
+	private void processBatch(List<Route> batch, SseEmitter emitter, int size) throws Exception {
 		if (!batch.isEmpty()) {
 			AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+			allRoutesInfo.setBatchSize(size);
 			emitter.send(allRoutesInfo);
 			batch.clear();
 			entityManager.clear();

@@ -81,4 +81,5 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
             """)
     int countByUnivIdAndNodeId(Long univId, Long nodeId);
 
+    int countByUnivId(Long univId);
 }
