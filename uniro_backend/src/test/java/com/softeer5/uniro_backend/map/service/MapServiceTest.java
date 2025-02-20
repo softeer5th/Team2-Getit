@@ -6,10 +6,10 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.softeer5.uniro_backend.common.TestContainerConfig;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
@@ -34,6 +35,7 @@ import com.softeer5.uniro_backend.map.repository.RouteRepository;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
+@ExtendWith(TestContainerConfig.class)
 class MapServiceTest {
 
 	@Autowired

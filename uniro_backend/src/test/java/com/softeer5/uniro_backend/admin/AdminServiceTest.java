@@ -12,26 +12,24 @@ import java.util.stream.Collectors;
 import com.softeer5.uniro_backend.admin.dto.response.ChangedRouteDTO;
 import com.softeer5.uniro_backend.admin.dto.response.GetAllRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.admin.dto.response.LostRoutesDTO;
+import com.softeer5.uniro_backend.common.TestContainerConfig;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.enums.CautionFactor;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import com.softeer5.uniro_backend.admin.entity.RevInfo;
 import com.softeer5.uniro_backend.admin.test_repository.RevInfoTestRepository;
@@ -58,21 +56,8 @@ import jakarta.persistence.EntityManager;
 	@Sql(value = "/sql/insert-univ-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
 	@Sql(value = "/sql/delete-all-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 })
+@ExtendWith(TestContainerConfig.class)
 class AdminServiceTest {
-
-	private static final GenericContainer<?> redisContainer =
-		new GenericContainer<>(DockerImageName.parse("redis:7.0.12"))
-			.withExposedPorts(6379);
-
-	@BeforeEach
-	static void setUp() {
-		redisContainer.start();
-	}
-
-	@AfterEach
-	static void tearDown() {
-		redisContainer.stop();
-	}
 
 	@Autowired
 	private AdminService adminService;
