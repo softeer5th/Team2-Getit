@@ -24,8 +24,8 @@ public class RedisService {
 		redisTemplate.opsForValue().set(key, value, Duration.ofMinutes(1000)); // 10분 TTL
 		long endTime = System.nanoTime();
 
-		long duration = TimeUnit.NANOSECONDS.toMicros(endTime - startTime);
-		log.info("🔴🔴🔴🔴🔴🔴🔴 Redis 직렬화 및 저장 시간: {} 마이크로초", duration);
+		long duration = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+		log.info("🔴🔴🔴🔴🔴🔴🔴 Redis 직렬화 및 저장 시간: {} ms", duration);
 
 		cacheMap.put(key, true);
 	}
@@ -35,8 +35,8 @@ public class RedisService {
 		Object data = redisTemplate.opsForValue().get(key);
 		long endTime = System.nanoTime();
 
-		long duration = TimeUnit.NANOSECONDS.toMicros(endTime - startTime);
-		log.info("🟢🟢🟢🟢🟢🟢🟢 Redis 역직렬화 및 조회 시간: {} 마이크로초", duration);
+		long duration = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+		log.info("🟢🟢🟢🟢🟢🟢🟢 Redis 역직렬화 및 조회 시간: {} ms", duration);
 		cacheMap.put(key, true);
 		return data;
 	}
