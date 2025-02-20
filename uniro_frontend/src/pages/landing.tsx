@@ -1,5 +1,4 @@
 import LandingButton from "../components/landingButton";
-import Logo from "../assets/logo.svg?react";
 import UNIRO from "../assets/UNIRO.svg?react";
 import { Link, useNavigate } from "react-router";
 import useRoutePoint from "../hooks/useRoutePoint";
@@ -45,7 +44,7 @@ export default function LandingPage() {
 			</motion.p>
 			<div className="w-full absolute bottom-6 left-[50%] px-[14px] translate-x-[-50%] flex flex-col items-start">
 				<div className="flex flex-row items-center space-x-[7px] mb-5">
-					<Logo />
+					<img src="/logo.webp" className="w-8 h-8"></img>
 					<UNIRO />
 				</div>
 				<Link to="/university" className="w-full">
