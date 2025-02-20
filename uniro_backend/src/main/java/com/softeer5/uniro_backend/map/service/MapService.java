@@ -30,6 +30,7 @@ import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -119,37 +120,80 @@ public class MapService {
 
 	@Async
 	public void getAllRoutesByStream(Long univId, SseEmitter emitter) {
-		int batchSize = routeRepository.countByUnivId(univId);
-		batchSize = batchSize % STREAM_FETCH_SIZE == 0 ? batchSize / STREAM_FETCH_SIZE : batchSize / STREAM_FETCH_SIZE + 1;
+		String redisKeyPrefix = univId + ":";
+		int batchNumber = 1;
 
-		try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
-			List<Route> batch = new ArrayList<>(STREAM_FETCH_SIZE);
-			Iterator<Route> iterator = routeStream.iterator();
-			while (iterator.hasNext()) {
-				Route route = iterator.next();
-				batch.add(route);
-				entityManager.detach(route);
+		String startKey = redisKeyPrefix + batchNumber;
+		boolean hasRedisData = redisService.hasData(startKey);
 
-				if (batch.size() == STREAM_FETCH_SIZE) {
-					processBatch(batch, emitter, batchSize);
+		try {
+			// 1️⃣ Redis 데이터가 있다면 우선 처리
+			if (hasRedisData) {
+				log.info("🚀🚀🚀🚀🚀🚀🚀HIT🚀🚀🚀🚀🚀🚀🚀");
+				while (true) {
+					String redisKey = redisKeyPrefix + batchNumber;
+					if (!redisService.hasData(redisKey)) {
+						break; // 데이터가 없으면 종료
+					}
+
+					// Redis에서 데이터 가져오기
+					LightRoutes lightRoutes = (LightRoutes) redisService.getData(redisKey);
+					if (lightRoutes == null) {
+						break;
+					}
+
+					List<LightRoute> batch = lightRoutes.getLightRoutes();
+
+					// 배치 처리 후 SSE 전송
+					processBatch(batch, emitter, batch.size());
+
+					batchNumber++;
+					// Thread.sleep(10); // 부하 방지
 				}
+
+				emitter.complete();
+				log.info("[SSE emitter complete] Redis data used.");
+				return;
 			}
-			// 남은 배치 처리
-			if (!batch.isEmpty()) {
-				processBatch(batch, emitter, batchSize);
+
+			// 2️⃣ Redis에 데이터가 없으면 기존 DB 조회 방식 사용
+			try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
+				List<LightRoute> batch = new ArrayList<>(STREAM_FETCH_SIZE);
+				Iterator<Route> iterator = routeStream.iterator();
+				while (iterator.hasNext()) {
+					Route route = iterator.next();
+					batch.add(new LightRoute(route));
+					entityManager.detach(route);
+
+					if (batch.size() == STREAM_FETCH_SIZE) {
+						LightRoutes value = new LightRoutes(batch);
+						redisService.saveData(redisKeyPrefix + batchNumber, value);
+
+						processBatch(batch, emitter, batch.size());
+						batchNumber++;
+					}
+				}
+
+				// 남은 배치 처리
+				if (!batch.isEmpty()) {
+					LightRoutes value = new LightRoutes(batch);
+					redisService.saveData(univId + ":" + batchNumber, value);
+
+					processBatch(batch, emitter, batch.size());
+				}
+
+				emitter.complete();
+				log.info("[SSE emitter complete] DB data used.");
 			}
-			emitter.complete();
-			log.info("[SSE emitter complete] " + Thread.currentThread().getName());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			emitter.completeWithError(e);
-			log.error(e.getMessage());
+			log.error("SSE error: " + e.getMessage());
 		}
 	}
 
-	private void processBatch(List<Route> batch, SseEmitter emitter, int size) throws Exception {
+	private void processBatch(List<LightRoute> batch, SseEmitter emitter, int size) throws Exception {
 		if (!batch.isEmpty()) {
-			AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+			AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(batch);
 			allRoutesInfo.setBatchSize(size);
 			emitter.send(allRoutesInfo);
 			batch.clear();
