@@ -33,6 +33,8 @@ import { getAllRisks } from "../api/routes";
 import { getAllBuildings } from "../api/nodes";
 import { getAllRoutes, getNavigationResult } from "../api/route";
 import useQueryError from "../hooks/useQueryError";
+import { CacheContext } from "../map/mapCacheContext";
+import removeAllListener from "../utils/map/removeAllListener";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -47,6 +49,7 @@ const BOTTOM_SHEET_HEIGHT = 377;
 
 export default function MapPage() {
 	const { createPolyline, createAdvancedMarker, createPolygon } = useContext(MapContext);
+	const { cachedMarkerRef, cachedRouteRef, usedRouteRef } = useContext(CacheContext);
 	const { map, mapRef } = useMap();
 	const [zoom, setZoom] = useState<number>(16);
 	const prevZoom = useRef<number>(16);
@@ -135,10 +138,12 @@ export default function MapPage() {
 						rightDownLat: 37,
 						rightDownLng: 128,
 					}),
+				refetchInterval: 300000,
 			},
 			{
 				queryKey: ["routes", university.id],
 				queryFn: () => getAllRoutes(university.id),
+				refetchInterval: 300000,
 			},
 		],
 	});
@@ -213,8 +218,31 @@ export default function MapPage() {
 		setBuildingMarkers(buildingMarkersWithID);
 	};
 
+	const onClickRiskMarker = (
+		self: AdvancedMarker,
+		routeId: RouteId,
+		type: MarkerTypes,
+		factors: DangerIssueType[] | CautionIssueType[],
+	) => {
+		setSelectedMarker((prevMarker) => {
+			if (prevMarker && prevMarker.id === routeId) {
+				return undefined;
+			}
+			return {
+				id: routeId,
+				type: type,
+				element: self,
+				factors: factors,
+				from: "Marker",
+			};
+		});
+	};
+
 	const addRiskMarker = () => {
-		if (map === null) return;
+		if (!map) return;
+
+		console.log("----------MAIN PAGE  | ADD RISK MARKER----------");
+
 		const { dangerRoutes, cautionRoutes } = risks.data;
 
 		/** 위험 마커 생성 */
@@ -223,6 +251,21 @@ export default function MapPage() {
 		for (const route of dangerRoutes) {
 			const { routeId, node1, node2, dangerFactors } = route;
 			const type = Markers.DANGER;
+
+			const key = routeId;
+
+			const cachedDangerMarker = cachedMarkerRef.current!.danger.get(key);
+
+			if (cachedDangerMarker) {
+				removeAllListener(cachedDangerMarker);
+				cachedDangerMarker.map = zoom <= 16 ? null : map;
+				cachedDangerMarker.addListener("click", () =>
+					onClickRiskMarker(cachedDangerMarker, routeId, type, dangerFactors),
+				);
+
+				dangerMarkersWithId.push({ routeId, element: cachedDangerMarker });
+				continue;
+			}
 
 			const dangerMarker = createAdvancedMarker(
 				{
@@ -233,23 +276,12 @@ export default function MapPage() {
 					},
 					content: dangerMarkerElement({}),
 				},
-				(self) => {
-					setSelectedMarker((prevMarker) => {
-						if (prevMarker && prevMarker.id === routeId) {
-							return undefined;
-						}
-						return {
-							id: routeId,
-							type: type,
-							element: self,
-							factors: dangerFactors,
-							from: "Marker",
-						};
-					});
-				},
+				(self) => onClickRiskMarker(self, routeId, type, dangerFactors),
 			);
 			if (!dangerMarker) return;
 
+			console.log(`MAIN PAGE | NEW DANGER MARKER ${key}`);
+			cachedMarkerRef.current!.danger.set(key, dangerMarker);
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
 		setDangerMarkers(dangerMarkersWithId);
@@ -261,6 +293,21 @@ export default function MapPage() {
 			const { routeId, node1, node2, cautionFactors } = route;
 			const type = Markers.CAUTION;
 
+			const key = routeId;
+
+			const cachedCautionMarker = cachedMarkerRef.current!.caution.get(key);
+
+			if (cachedCautionMarker) {
+				removeAllListener(cachedCautionMarker);
+				cachedCautionMarker.map = zoom <= 16 ? null : map;
+				cachedCautionMarker.addListener("click", () =>
+					onClickRiskMarker(cachedCautionMarker, routeId, type, cautionFactors),
+				);
+
+				cautionMarkersWithId.push({ routeId, element: cachedCautionMarker });
+				continue;
+			}
+
 			const cautionMarker = createAdvancedMarker(
 				{
 					map: null,
@@ -270,23 +317,12 @@ export default function MapPage() {
 					},
 					content: cautionMarkerElement({}),
 				},
-				(self) => {
-					setSelectedMarker((prevMarker) => {
-						if (prevMarker && prevMarker.id === routeId) {
-							return undefined;
-						}
-						return {
-							id: routeId,
-							type: type,
-							element: self,
-							factors: cautionFactors,
-							from: "Marker",
-						};
-					});
-				},
+				(self) => onClickRiskMarker(self, routeId, type, cautionFactors),
 			);
 			if (!cautionMarker) return;
 
+			console.log(`MAIN PAGE | NEW CAUTION MARKER ${key}`);
+			cachedMarkerRef.current!.caution.set(key, cautionMarker);
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
 
@@ -417,7 +453,6 @@ export default function MapPage() {
 	useEffect(() => {
 		initMap();
 		addBuildings();
-		addRiskMarker();
 		drawPolygon();
 	}, [map]);
 
@@ -632,14 +667,40 @@ export default function MapPage() {
 	}, [map, zoom]);
 
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
-		if (!map) return;
+		if (!map || !cachedRouteRef.current) return;
+
+		console.log("----------MAIN PAGE  | DRAW CORE ROUTES----------");
+
+		let isReDraw = false;
+
+		if (usedRouteRef.current!.size !== 0) isReDraw = true;
+
+		const usedKeys = new Set();
 
 		const tempLines = [];
 
 		for (const coreRoutes of coreRouteList) {
-			const { routes: subRoutes } = coreRoutes;
+			const { coreNode1Id, coreNode2Id, routes: subRoutes } = coreRoutes;
 
 			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
+
+			const routeIds = subRoutes.map((el) => el.routeId);
+
+			const key = coreNode1Id < coreNode2Id ? routeIds.join("_") : routeIds.reverse().join("_");
+
+			const cachedPolyline = cachedRouteRef.current.get(key);
+
+			if (cachedPolyline) {
+				if (!isReDraw) {
+					usedRouteRef.current!.add(key);
+				} else {
+					usedKeys.add(key);
+				}
+
+				removeAllListener(cachedPolyline);
+				cachedPolyline.setMap(map);
+				continue;
+			}
 
 			const routePolyLine = createPolyline({
 				map: null,
@@ -651,14 +712,37 @@ export default function MapPage() {
 			});
 			if (!routePolyLine) continue;
 			tempLines.push(routePolyLine);
+
+			if (cachedRouteRef.current) {
+				cachedRouteRef.current.set(key, routePolyLine);
+			}
+
+			console.log(`MAIN PAGE | NEW CORE ROUTE ${coreNode1Id}-${coreNode2Id}`);
+		}
+		if (isReDraw) {
+			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;
+
+			deleteKeys.forEach((key) => {
+				console.log("DELETED CORE ROUTE", key);
+				cachedRouteRef.current!.get(key)?.setMap(null);
+				cachedRouteRef.current!.delete(key);
+			});
 		}
 
 		polylines.current = tempLines;
 	};
 
 	useEffect(() => {
+		addRiskMarker();
+	}, [risks.data, map]);
+
+	useEffect(() => {
 		drawRoute(routes.data);
 	}, [routes.data, map]);
+
+	useEffect(() => {
+		usedRouteRef.current?.clear();
+	}, []);
 
 	return (
 		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
