@@ -1,16 +1,18 @@
 package com.softeer5.uniro_backend.map.cache;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.softeer5.uniro_backend.map.entity.Node;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
-class LightNode implements Serializable {
+@Setter
+@AllArgsConstructor
+public class LightNode {
 	private long id;
 	private double lat;
 	private double lng;

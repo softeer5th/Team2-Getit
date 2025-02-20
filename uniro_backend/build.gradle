@@ -93,6 +93,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate6'
+	implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.55'
 }
 
 tasks.named('test') {

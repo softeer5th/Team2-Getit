@@ -2,14 +2,17 @@ package com.softeer5.uniro_backend.map.cache;
 
 import java.io.Serializable;
 
-import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.map.entity.Route;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
+@Setter
+@AllArgsConstructor
 public class LightRoute implements Serializable {
 	private long id;
 	private double distance;
