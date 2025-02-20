@@ -12,6 +12,7 @@ import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.common.exception.custom.UnivException;
+import com.softeer5.uniro_backend.common.redis.RedisService;
 import com.softeer5.uniro_backend.map.dto.response.AllRoutesInfo;
 import com.softeer5.uniro_backend.map.dto.response.GetChangedRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
@@ -44,6 +45,8 @@ public class AdminService {
     private final NodeAuditRepository nodeAuditRepository;
 
     private final RouteCalculator routeCalculator;
+
+    private final RedisService redisService;
 
     public List<RevInfoDTO> getAllRevInfo(Long univId){
         return revInfoRepository.findAllByUnivId(univId).stream().map(r -> RevInfoDTO.of(r.getRev(),
@@ -105,6 +108,7 @@ public class AdminService {
             }
         }
 
+        redisService.deleteData(univId.toString());
     }
 
     public GetAllRoutesByRevisionResDTO getAllRoutesByRevision(Long univId, Long versionId){
