@@ -38,7 +38,7 @@ type SelectedMarkerTypes = {
 };
 
 export default function ReportRoutePage() {
-	const { usedRouteRef, cachedMarkerRef, cachedRouteRef } = useContext(CacheContext);
+	const { usedRouteRef, cachedMarkerRef, cachedRouteRef, usedMarkerRef } = useContext(CacheContext);
 	const queryClient = useQueryClient();
 	const { createAdvancedMarker, createPolyline } = useContext(MapContext);
 	const { map, mapRef } = useMap({ zoom: 18, minZoom: 17 });
@@ -180,6 +180,11 @@ export default function ReportRoutePage() {
 		if (!map) return;
 
 		console.log("----------ROUTE PAGE | ADD RISK MARKER----------");
+		let isReDraw = false;
+
+		if (usedMarkerRef.current!.size !== 0) isReDraw = true;
+
+		const usedKeys = new Set();
 
 		const { dangerRoutes, cautionRoutes } = risks.data;
 
@@ -188,21 +193,22 @@ export default function ReportRoutePage() {
 
 		for (const route of dangerRoutes) {
 			const { routeId, node1, node2, dangerFactors } = route;
-			const type = Markers.DANGER;
 
-			const key = routeId;
+			const key = `DANGER_${routeId}`;
 
 			const cachedDangerMarker = cachedMarkerRef.current!.get(key);
 
 			if (cachedDangerMarker) {
-				const cachedType = cachedDangerMarker.type;
-
-				if (cachedType !== type) continue;
+				if (!isReDraw) {
+					usedMarkerRef.current!.add(key);
+				} else {
+					usedKeys.add(key);
+				}
 
 				removeAllListener(cachedDangerMarker.element);
-				cachedDangerMarker.element.map = map;
+				cachedDangerMarker.element.map = null;
 				cachedDangerMarker.element.addListener("click", () =>
-					onClickRiskMarker(cachedDangerMarker.element, routeId, type, dangerFactors),
+					onClickRiskMarker(cachedDangerMarker.element, routeId, Markers.DANGER, dangerFactors),
 				);
 
 				continue;
@@ -217,12 +223,12 @@ export default function ReportRoutePage() {
 					},
 					content: dangerMarkerElement({}),
 				},
-				(self) => onClickRiskMarker(self, routeId, type, dangerFactors),
+				(self) => onClickRiskMarker(self, routeId, Markers.DANGER, dangerFactors),
 			);
-			if (!dangerMarker) return;
+			if (!dangerMarker) continue;
 
-			console.log(`NEW DANGER MARKER ${key}`);
-			cachedMarkerRef.current!.set(key, { type: type, element: dangerMarker });
+			console.log(`ROUTE PAGE | NEW DANGER MARKER ${key}`);
+			cachedMarkerRef.current!.set(key, { type: Markers.DANGER, element: dangerMarker });
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
 		setDangerMarkers(dangerMarkersWithId);
@@ -232,22 +238,23 @@ export default function ReportRoutePage() {
 
 		for (const route of cautionRoutes) {
 			const { routeId, node1, node2, cautionFactors } = route;
-			const type = Markers.CAUTION;
 
-			const key = routeId;
+			const key = `CAUTION_${routeId}`;
 
 			const cachedCautionMarker = cachedMarkerRef.current!.get(key);
 
 			if (cachedCautionMarker) {
-				const cachedType = cachedCautionMarker.type;
-
-				if (cachedType !== Markers.CAUTION) continue;
+				if (!isReDraw) {
+					usedMarkerRef.current!.add(key);
+				} else {
+					usedKeys.add(key);
+				}
 
 				removeAllListener(cachedCautionMarker.element);
-				cachedCautionMarker.element.map = map;
 				cachedCautionMarker.element.addListener("click", () =>
-					onClickRiskMarker(cachedCautionMarker.element, routeId, type, cautionFactors),
+					onClickRiskMarker(cachedCautionMarker.element, routeId, Markers.CAUTION, cautionFactors),
 				);
+				cachedCautionMarker.element.map = null;
 
 				continue;
 			}
@@ -261,16 +268,26 @@ export default function ReportRoutePage() {
 					},
 					content: cautionMarkerElement({}),
 				},
-				(self) => onClickRiskMarker(self, routeId, type, cautionFactors),
+				(self) => onClickRiskMarker(self, routeId, Markers.CAUTION, cautionFactors),
 			);
-			if (!cautionMarker) return;
 
-			console.log(`NEW CAUTION MARKER ${key}`);
+			if (!cautionMarker) continue;
+
+			console.log(`ROUTE PAGE | NEW CAUTION MARKER ${key}`);
 			cachedMarkerRef.current!.set(key, { type: Markers.CAUTION, element: cautionMarker });
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
-
 		setCautionMarkers(cautionMarkersWithId);
+
+		if (isReDraw) {
+			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
+
+			deleteKeys.forEach((key) => {
+				console.log("DELETED RISK MARKER", key);
+				cachedMarkerRef.current!.get(key)!.element.map = null;
+				cachedMarkerRef.current!.delete(key);
+			});
+		}
 	};
 
 	const toggleCautionButton = () => {
@@ -655,6 +672,12 @@ export default function ReportRoutePage() {
 
 	useEffect(() => {
 		usedRouteRef.current?.clear();
+		usedMarkerRef.current?.clear();
+
+		return () => {
+			usedRouteRef.current?.clear();
+			usedMarkerRef.current?.clear();
+		};
 	}, []);
 
 	return (
