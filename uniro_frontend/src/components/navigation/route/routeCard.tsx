@@ -4,6 +4,7 @@ import StraightIcon from "../../../assets/route/straight.svg?react";
 import RightIcon from "../../../assets/route/right.svg?react";
 import LeftIcon from "../../../assets/route/left.svg?react";
 import CautionText from "../../../assets/icon/cautionText.svg?react";
+import DangerText from "../../../assets/icon/dangerText.svg?react";
 import { RouteDetail } from "../../../data/types/route";
 import useRoutePoint from "../../../hooks/useRoutePoint";
 import { formatDistance } from "../../../utils/navigation/formatDistance";
@@ -28,7 +29,7 @@ export const RouteCard = ({
 	index: number;
 	route: RouteDetail;
 }) => {
-	const { dist: distance, directionType, cautionFactors } = route;
+	const { dist: distance, directionType, cautionFactors, dangerFactors } = route;
 	const formattedDistance = formatDistance(distance);
 	const { origin, destination } = useRoutePoint();
 	const onClick = () => {
@@ -182,6 +183,29 @@ export const RouteCard = ({
 										.map((factor) => CautionIssue[factor as keyof typeof CautionIssue])
 										.join(", ")
 								: "주의 요소가 없습니다."}
+						</div>
+					</div>
+				</div>
+			);
+		case "danger":
+			return (
+				<div
+					onClick={onClick}
+					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+				>
+					<div className="flex flex-col items-center justify-start space-y-1">
+						<DangerText />
+						<div className="text-system-red text-kor-body3 text-[12px]">{formattedDistance}</div>
+					</div>
+					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
+						{/* TODO: Auto Resize Text 적용 */}
+						<NumberIcon index={index} />
+						<div className="text-[clamp(0.8rem, 4ch, 2rem)] text-left text-kor-body1 text-gray-900">
+							{dangerFactors && dangerFactors.length > 0
+								? dangerFactors
+										.map((factor) => CautionIssue[factor as keyof typeof CautionIssue])
+										.join(", ")
+								: "위험 요소가 없습니다."}
 						</div>
 					</div>
 				</div>

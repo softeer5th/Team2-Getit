@@ -23,6 +23,7 @@ const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRout
 				directionType: "origin" as Direction,
 				coordinates: { lat: origin!.lat, lng: origin!.lng },
 				cautionFactors: [],
+				dangerFactors: [],
 			},
 			...routes.slice(0, -1),
 			{
@@ -30,6 +31,7 @@ const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRout
 				directionType: "finish" as Direction,
 				coordinates: { lat: destination!.lat, lng: destination!.lng },
 				cautionFactors: [],
+				dangerFactors: [],
 			},
 		];
 	};
