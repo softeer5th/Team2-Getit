@@ -254,16 +254,20 @@ export default function MapPage() {
 
 			const key = routeId;
 
-			const cachedDangerMarker = cachedMarkerRef.current!.danger.get(key);
+			const cachedDangerMarker = cachedMarkerRef.current!.get(key);
 
 			if (cachedDangerMarker) {
-				removeAllListener(cachedDangerMarker);
-				cachedDangerMarker.map = zoom <= 16 ? null : map;
-				cachedDangerMarker.addListener("click", () =>
-					onClickRiskMarker(cachedDangerMarker, routeId, type, dangerFactors),
+				const cachedType = cachedDangerMarker.type;
+
+				if (cachedType !== type) continue;
+
+				removeAllListener(cachedDangerMarker.element);
+				cachedDangerMarker.element.map = zoom <= 16 ? null : map;
+				cachedDangerMarker.element.addListener("click", () =>
+					onClickRiskMarker(cachedDangerMarker.element, routeId, type, dangerFactors),
 				);
 
-				dangerMarkersWithId.push({ routeId, element: cachedDangerMarker });
+				dangerMarkersWithId.push({ routeId, element: cachedDangerMarker.element });
 				continue;
 			}
 
@@ -281,7 +285,7 @@ export default function MapPage() {
 			if (!dangerMarker) return;
 
 			console.log(`MAIN PAGE | NEW DANGER MARKER ${key}`);
-			cachedMarkerRef.current!.danger.set(key, dangerMarker);
+			cachedMarkerRef.current!.set(key, { type: type, element: dangerMarker });
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
 		setDangerMarkers(dangerMarkersWithId);
@@ -295,19 +299,22 @@ export default function MapPage() {
 
 			const key = routeId;
 
-			const cachedCautionMarker = cachedMarkerRef.current!.caution.get(key);
+			const cachedCautionMarker = cachedMarkerRef.current!.get(key);
 
 			if (cachedCautionMarker) {
-				removeAllListener(cachedCautionMarker);
-				cachedCautionMarker.map = zoom <= 16 ? null : map;
-				cachedCautionMarker.addListener("click", () =>
-					onClickRiskMarker(cachedCautionMarker, routeId, type, cautionFactors),
+				const cachedType = cachedCautionMarker.type;
+
+				if (cachedType !== type) continue;
+
+				removeAllListener(cachedCautionMarker.element);
+				cachedCautionMarker.element.map = zoom <= 16 ? null : map;
+				cachedCautionMarker.element.addListener("click", () =>
+					onClickRiskMarker(cachedCautionMarker.element, routeId, type, cautionFactors),
 				);
 
-				cautionMarkersWithId.push({ routeId, element: cachedCautionMarker });
+				cautionMarkersWithId.push({ routeId, element: cachedCautionMarker.element });
 				continue;
 			}
-
 			const cautionMarker = createAdvancedMarker(
 				{
 					map: null,
@@ -322,7 +329,8 @@ export default function MapPage() {
 			if (!cautionMarker) return;
 
 			console.log(`MAIN PAGE | NEW CAUTION MARKER ${key}`);
-			cachedMarkerRef.current!.caution.set(key, cautionMarker);
+			// cachedMarkerRef.current!.caution.set(key, cautionMarker);
+			cachedMarkerRef.current!.set(key, { type: type, element: cautionMarker });
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
 

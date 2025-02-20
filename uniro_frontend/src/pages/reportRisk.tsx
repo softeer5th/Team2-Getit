@@ -135,14 +135,18 @@ export default function ReportRiskPage() {
 
 			const key = routeId;
 
-			const cachedDangerMarker = cachedMarkerRef.current!.danger.get(key);
+			const cachedDangerMarker = cachedMarkerRef.current!.get(key);
 
 			if (cachedDangerMarker) {
-				removeAllListener(cachedDangerMarker);
-				cachedDangerMarker.map = map;
-				// cachedDangerMarker.addListener("click", () =>
-				// 	onClickRiskMarker(cachedDangerMarker, routeId, type, dangerFactors),
-				// );
+				const cachedType = cachedDangerMarker.type;
+
+				if (cachedType !== Markers.DANGER) continue;
+
+				removeAllListener(cachedDangerMarker.element);
+				cachedDangerMarker.element.map = map;
+				cachedDangerMarker.element.addListener("click", () =>
+					onClickRiskMarker(cachedDangerMarker.element, Markers.DANGER, routeId, dangerFactors),
+				);
 
 				continue;
 			}
@@ -161,7 +165,7 @@ export default function ReportRiskPage() {
 			if (!dangerMarker) continue;
 
 			console.log(`RISK PAGE | NEW DANGER MARKER ${key}`);
-			cachedMarkerRef.current!.danger.set(key, dangerMarker);
+			cachedMarkerRef.current!.set(key, { type: Markers.DANGER, element: dangerMarker });
 		}
 
 		for (const route of cautionRoutes) {
@@ -169,14 +173,18 @@ export default function ReportRiskPage() {
 
 			const key = routeId;
 
-			const cachedCautionMarker = cachedMarkerRef.current!.caution.get(key);
+			const cachedCautionMarker = cachedMarkerRef.current!.get(key);
 
 			if (cachedCautionMarker) {
-				removeAllListener(cachedCautionMarker);
-				cachedCautionMarker.map = map;
-				// cachedDangerMarker.addListener("click", () =>
-				// 	onClickRiskMarker(cachedDangerMarker, routeId, type, dangerFactors),
-				// );
+				const cachedType = cachedCautionMarker.type;
+
+				if (cachedType !== Markers.CAUTION) continue;
+
+				removeAllListener(cachedCautionMarker.element);
+				cachedCautionMarker.element.addListener("click", () =>
+					onClickRiskMarker(cachedCautionMarker.element, Markers.CAUTION, routeId, cautionFactors),
+				);
+				cachedCautionMarker.element.map = map;
 
 				continue;
 			}
@@ -197,7 +205,7 @@ export default function ReportRiskPage() {
 			if (!cautionMarker) continue;
 
 			console.log(`RISK PAGE | NEW CAUTION MARKER ${key}`);
-			cachedMarkerRef.current!.caution.set(key, cautionMarker);
+			cachedMarkerRef.current!.set(key, { type: Markers.CAUTION, element: cautionMarker });
 		}
 	};
 
@@ -343,7 +351,6 @@ export default function ReportRiskPage() {
 				},
 			);
 		}
-		addRiskMarker();
 
 		if (map) {
 			if (reportedData) moveToMarker();

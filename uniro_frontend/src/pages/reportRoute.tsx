@@ -192,13 +192,17 @@ export default function ReportRoutePage() {
 
 			const key = routeId;
 
-			const cachedDangerMarker = cachedMarkerRef.current!.danger.get(key);
+			const cachedDangerMarker = cachedMarkerRef.current!.get(key);
 
 			if (cachedDangerMarker) {
-				removeAllListener(cachedDangerMarker);
-				cachedDangerMarker.map = map;
-				cachedDangerMarker.addListener("click", () =>
-					onClickRiskMarker(cachedDangerMarker, routeId, type, dangerFactors),
+				const cachedType = cachedDangerMarker.type;
+
+				if (cachedType !== type) continue;
+
+				removeAllListener(cachedDangerMarker.element);
+				cachedDangerMarker.element.map = map;
+				cachedDangerMarker.element.addListener("click", () =>
+					onClickRiskMarker(cachedDangerMarker.element, routeId, type, dangerFactors),
 				);
 
 				continue;
@@ -218,7 +222,7 @@ export default function ReportRoutePage() {
 			if (!dangerMarker) return;
 
 			console.log(`NEW DANGER MARKER ${key}`);
-			cachedMarkerRef.current!.danger.set(key, dangerMarker);
+			cachedMarkerRef.current!.set(key, { type: type, element: dangerMarker });
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
 		setDangerMarkers(dangerMarkersWithId);
@@ -232,13 +236,17 @@ export default function ReportRoutePage() {
 
 			const key = routeId;
 
-			const cachedCautionMarker = cachedMarkerRef.current!.caution.get(key);
+			const cachedCautionMarker = cachedMarkerRef.current!.get(key);
 
 			if (cachedCautionMarker) {
-				removeAllListener(cachedCautionMarker);
-				cachedCautionMarker.map = map;
-				cachedCautionMarker.addListener("click", () =>
-					onClickRiskMarker(cachedCautionMarker, routeId, type, cautionFactors),
+				const cachedType = cachedCautionMarker.type;
+
+				if (cachedType !== Markers.CAUTION) continue;
+
+				removeAllListener(cachedCautionMarker.element);
+				cachedCautionMarker.element.map = map;
+				cachedCautionMarker.element.addListener("click", () =>
+					onClickRiskMarker(cachedCautionMarker.element, routeId, type, cautionFactors),
 				);
 
 				continue;
@@ -258,7 +266,7 @@ export default function ReportRoutePage() {
 			if (!cautionMarker) return;
 
 			console.log(`NEW CAUTION MARKER ${key}`);
-			cachedMarkerRef.current!.caution.set(key, cautionMarker);
+			cachedMarkerRef.current!.set(key, { type: Markers.CAUTION, element: cautionMarker });
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
 
