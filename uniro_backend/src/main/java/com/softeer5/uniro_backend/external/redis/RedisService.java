@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.common.redis;
+package com.softeer5.uniro_backend.external.redis;
 
 import java.time.Duration;
 import java.util.HashMap;

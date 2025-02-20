@@ -17,7 +17,7 @@ import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
-import com.softeer5.uniro_backend.common.redis.RedisService;
+import com.softeer5.uniro_backend.external.redis.RedisService;
 import com.softeer5.uniro_backend.external.MapClient;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.entity.Node;

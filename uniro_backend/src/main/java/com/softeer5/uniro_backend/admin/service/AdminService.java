@@ -12,7 +12,7 @@ import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.common.exception.custom.UnivException;
-import com.softeer5.uniro_backend.common.redis.RedisService;
+import com.softeer5.uniro_backend.external.redis.RedisService;
 import com.softeer5.uniro_backend.map.dto.response.AllRoutesInfo;
 import com.softeer5.uniro_backend.map.dto.response.GetChangedRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
