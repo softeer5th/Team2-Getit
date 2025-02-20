@@ -43,6 +43,7 @@ public enum ErrorCode {
     UNAUTHORIZED_UNIV(401, "해당 대학교의 권한이 없습니다."),
     INVALID_UNIV_ID(400, "유효하지 않은 대학교 id 입니다."),
     RECENT_REVISION_NOT_FOUND(404, "최신 버전을 찾을 수 없습니다."),
+    CANT_ROLLBACK_BELOW_MINIMUM_VERSION(400, "롤백하려는 버전이 허용된 최소 버전보다 낮습니다.")
     ;
 
     private final int httpStatus;

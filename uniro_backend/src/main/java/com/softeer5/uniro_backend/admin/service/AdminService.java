@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.admin.service;
 
+import static com.softeer5.uniro_backend.admin.enums.UniversityVersionLimit.getLimitVersionByUnivId;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 
 import com.softeer5.uniro_backend.admin.annotation.DisableAudit;
@@ -54,6 +55,10 @@ public class AdminService {
     @Transactional
     @DisableAudit
     public void rollbackRev(Long univId, Long versionId){
+        if(getLimitVersionByUnivId(univId) > versionId){
+            throw new AdminException("version is too low", CANT_ROLLBACK_BELOW_MINIMUM_VERSION);
+        }
+
         RevInfo revInfo = revInfoRepository.findFirstByUnivIdAndRevAfter(univId, versionId)
             .orElseThrow(() -> new AdminException("Already the latest version id", ALREADY_LATEST_VERSION_ID));
 
