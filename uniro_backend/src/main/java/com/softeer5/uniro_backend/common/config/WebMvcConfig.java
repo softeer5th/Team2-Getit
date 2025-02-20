@@ -43,8 +43,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
 		converter.setFastJsonConfig(config);
 		converter.setDefaultCharset(StandardCharsets.UTF_8);
-		converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
-		converter.setSupportedMediaTypes(Collections.singletonList(new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)));
+
+		converter.setSupportedMediaTypes(List.of(
+			MediaType.APPLICATION_JSON, // application/json 지원
+			new MediaType("application", "json", StandardCharsets.UTF_8),
+			new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)
+		));
+
 		converters.add(0, converter);
 		converters.forEach(c -> log.info("✔ {}", c.getClass().getName()));
 	}
