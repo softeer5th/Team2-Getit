@@ -4,4 +4,5 @@ export const enum Markers {
 	REMOVED = "removed",
 	CHANGED = "changed",
 	CREATED = "created",
+	BUILDING = "building",
 }

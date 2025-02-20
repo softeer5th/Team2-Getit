@@ -12,12 +12,21 @@ import { LogActionEnum } from "../constant/enum/logActionEnum";
 const LogPage = () => {
 	const { accessToken } = useLogin();
 	const { university } = useUniversity();
-	const { data: revisions } = useQuery({
+	const {
+		data: revisions,
+		refetch,
+		isFetching: isVersionsFetching,
+	} = useQuery({
 		queryKey: [university?.id, "revisions"],
 		queryFn: () => getAllRevisions(accessToken, university ? university.id : -1),
 	});
 
-	const [selectedRev, setSelectedRev] = useState<RevisionType>({ rev: -1, revTime: '', univId: -1, action: LogActionEnum.CREATE_BUILDING });
+	const [selectedRev, setSelectedRev] = useState<RevisionType>({
+		rev: -1,
+		revTime: "",
+		univId: -1,
+		action: LogActionEnum.CREATE_BUILDING,
+	});
 
 	const { data: revisionData, isFetching } = useQuery({
 		queryKey: [university?.id, "revision", selectedRev.rev],
@@ -31,8 +40,15 @@ const LogPage = () => {
 
 	return (
 		<MainContainer>
-			<LogListContainer setSelect={setSelectedRev} selected={selectedRev} revisions={revisions} isFetching={isFetching} />
-			<MapContainer data={revisionData} rev={selectedRev} />
+			<LogListContainer
+				isVersionsFetching={isVersionsFetching}
+				refetch={() => refetch()}
+				setSelect={setSelectedRev}
+				selected={selectedRev}
+				revisions={revisions}
+				isFetching={isFetching}
+			/>
+			<MapContainer data={revisionData} rev={selectedRev} freshRev={revisions ? revisions[0].rev : -1} />
 		</MainContainer>
 	);
 };
