@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -35,22 +36,23 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+		// 기존 FastJson 컨버터 설정
 		FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-		//custom configuration...
 		FastJsonConfig config = new FastJsonConfig();
 		config.setDateFormat("yyyy-MM-dd HH:mm:ss");
 		config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
 		config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
 		converter.setFastJsonConfig(config);
 		converter.setDefaultCharset(StandardCharsets.UTF_8);
-
 		converter.setSupportedMediaTypes(List.of(
-			MediaType.APPLICATION_JSON, // application/json 지원
+			MediaType.APPLICATION_JSON,
 			new MediaType("application", "json", StandardCharsets.UTF_8),
 			new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)
 		));
 
 		converters.add(0, converter);
+		converters.add(1, new ByteArrayHttpMessageConverter());
+
 		converters.forEach(c -> log.info("✔ {}", c.getClass().getName()));
 	}
 
