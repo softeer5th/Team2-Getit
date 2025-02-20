@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -50,8 +51,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
 			new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)
 		));
 
+		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+		stringConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.TEXT_PLAIN));
+
 		converters.add(0, converter);
-		converters.add(1, new ByteArrayHttpMessageConverter());
+		converters.add(1, stringConverter);
+		converters.add(2, new ByteArrayHttpMessageConverter());
 
 		converters.forEach(c -> log.info("✔ {}", c.getClass().getName()));
 	}
