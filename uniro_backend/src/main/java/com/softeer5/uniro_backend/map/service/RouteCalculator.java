@@ -283,6 +283,24 @@ public class RouteCalculator {
         Point p2 = secondNode.getCoordinates();
         Point p3 = thirdNode.getCoordinates();
 
+        return calculateAngle(p1, p2, p3);
+    }
+
+    private DirectionType calculateDirection(Node secondNode, Route inBoundRoute, Route beforeInBoundRoute,
+                                             Route outBoundRoute, Route afterOutBoundRoute) {
+        Node firstNode = inBoundRoute.getNode1().equals(secondNode) ? inBoundRoute.getNode2() : inBoundRoute.getNode1();
+        firstNode = beforeInBoundRoute.getNode1().equals(firstNode) ? beforeInBoundRoute.getNode2() : beforeInBoundRoute.getNode1();
+        Node thirdNode = outBoundRoute.getNode1().equals(secondNode) ? outBoundRoute.getNode2() : outBoundRoute.getNode1();
+        thirdNode = afterOutBoundRoute.getNode1().equals(thirdNode) ? afterOutBoundRoute.getNode2() : afterOutBoundRoute.getNode1();
+
+        Point p1 = firstNode.getCoordinates();
+        Point p2 = secondNode.getCoordinates();
+        Point p3 = thirdNode.getCoordinates();
+
+        return calculateAngle(p1, p2, p3);
+    }
+
+    private DirectionType calculateAngle(Point p1, Point p2, Point p3) {
         double v1x = p2.getX() - p1.getX();
         double v1y = p2.getY() - p1.getY();
 
@@ -366,7 +384,15 @@ public class RouteCalculator {
                 break;
             }
             if(nxt.isCore()){
-                DirectionType directionType = calculateDirection(nxt, nowRoute, shortestRoutes.get(i+1));
+                DirectionType directionType;
+                if(i == shortestRoutes.size()-2) {
+                    directionType = calculateDirection(nxt, nowRoute, shortestRoutes.get(i + 1));
+                }
+                else{
+                    directionType = calculateDirection(nxt, nowRoute, shortestRoutes.get(i-1),
+                            shortestRoutes.get(i+1), shortestRoutes.get(i+2));
+                }
+
                 if(directionType == DirectionType.STRAIGHT){
                     now = nxt;
                     continue;
