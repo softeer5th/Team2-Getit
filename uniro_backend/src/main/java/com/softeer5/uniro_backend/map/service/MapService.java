@@ -38,6 +38,7 @@ import com.softeer5.uniro_backend.map.dto.request.PostRiskReqDTO;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
 import com.softeer5.uniro_backend.map.service.vo.LightRoute;
+import com.softeer5.uniro_backend.map.service.vo.LightRoutes;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -88,7 +89,19 @@ public class MapService {
 	}
 
 	public GetAllRoutesResDTO getAllRoutes(Long univId) {
-		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+
+		if(!redisService.hasData(univId.toString())){
+			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+			List<LightRoute> lightRoutes = routes.stream().map(LightRoute::new).toList();
+			LightRoutes value = new LightRoutes(lightRoutes);
+			redisService.saveData(univId.toString(), value);
+		}
+		else{
+			log.info("🚀🚀🚀🚀🚀🚀🚀HIT🚀🚀🚀🚀🚀🚀🚀");
+		}
+
+		LightRoutes lightRoutes = (LightRoutes) redisService.getData(univId.toString());
+		List<LightRoute> routes = lightRoutes.getLightRoutes();
 
 		// 맵이 존재하지 않을 경우 예외
 		if(routes.isEmpty()) {
@@ -96,12 +109,12 @@ public class MapService {
 		}
 
 		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
-				.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
+			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
 
-		AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(routes);
+		AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(routes);
 
 		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
-				allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
+			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
 	}
 
 	@Async
