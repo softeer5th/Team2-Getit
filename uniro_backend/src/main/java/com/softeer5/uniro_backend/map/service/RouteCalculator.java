@@ -275,23 +275,21 @@ public class RouteCalculator {
     }
 
     // 두 route 간의 각도를 통한 계산으로 방향성을 정하는 메서드
-    private DirectionType calculateDirection(Node secondNode, Route inBoundRoute, Route outBoundRoute) {
-        Node firstNode = inBoundRoute.getNode1().equals(secondNode) ? inBoundRoute.getNode2() : inBoundRoute.getNode1();
-        Node thirdNode = outBoundRoute.getNode1().equals(secondNode) ? outBoundRoute.getNode2() : outBoundRoute.getNode1();
+    private DirectionType calculateDirection(Node secondNode, List<Route> shortestRoutes, int idx) {
+        Node firstNode = shortestRoutes.get(idx).getNode1().equals(secondNode) ?
+                shortestRoutes.get(idx).getNode2() : shortestRoutes.get(idx).getNode1();
+        Node thirdNode = shortestRoutes.get(idx+1).getNode2().equals(secondNode) ?
+                shortestRoutes.get(idx+1).getNode1() : shortestRoutes.get(idx+1).getNode2();
 
-        Point p1 = firstNode.getCoordinates();
-        Point p2 = secondNode.getCoordinates();
-        Point p3 = thirdNode.getCoordinates();
+        if(idx-1 >= 0){
+            firstNode = shortestRoutes.get(idx-1).getNode1().equals(secondNode) ?
+                    shortestRoutes.get(idx-1).getNode2() : shortestRoutes.get(idx-1).getNode1();
+        }
 
-        return calculateAngle(p1, p2, p3);
-    }
-
-    private DirectionType calculateDirection(Node secondNode, Route inBoundRoute, Route beforeInBoundRoute,
-                                             Route outBoundRoute, Route afterOutBoundRoute) {
-        Node firstNode = inBoundRoute.getNode1().equals(secondNode) ? inBoundRoute.getNode2() : inBoundRoute.getNode1();
-        firstNode = beforeInBoundRoute.getNode1().equals(firstNode) ? beforeInBoundRoute.getNode2() : beforeInBoundRoute.getNode1();
-        Node thirdNode = outBoundRoute.getNode1().equals(secondNode) ? outBoundRoute.getNode2() : outBoundRoute.getNode1();
-        thirdNode = afterOutBoundRoute.getNode1().equals(thirdNode) ? afterOutBoundRoute.getNode2() : afterOutBoundRoute.getNode1();
+        if(idx+2 <= shortestRoutes.size()-1){
+            thirdNode = shortestRoutes.get(idx+2).getNode2().equals(secondNode) ?
+                    shortestRoutes.get(idx+2).getNode1() : shortestRoutes.get(idx+2).getNode2();
+        }
 
         Point p1 = firstNode.getCoordinates();
         Point p2 = secondNode.getCoordinates();
@@ -384,14 +382,7 @@ public class RouteCalculator {
                 break;
             }
             if(nxt.isCore()){
-                DirectionType directionType;
-                if(i == shortestRoutes.size()-2) {
-                    directionType = calculateDirection(nxt, nowRoute, shortestRoutes.get(i + 1));
-                }
-                else{
-                    directionType = calculateDirection(nxt, nowRoute, shortestRoutes.get(i-1),
-                            shortestRoutes.get(i+1), shortestRoutes.get(i+2));
-                }
+                DirectionType directionType = calculateDirection(nxt, shortestRoutes, i);
 
                 if(directionType == DirectionType.STRAIGHT){
                     now = nxt;
