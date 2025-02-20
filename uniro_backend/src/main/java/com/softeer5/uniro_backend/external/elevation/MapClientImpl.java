@@ -50,8 +50,8 @@ public class MapClientImpl implements MapClient{
 
         List<Mono<Void>> apiCalls = partitions.stream()
                 .map(batch -> fetchElevationAsync(batch)
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .publishOn(Schedulers.boundedElastic())
+                        .subscribeOn(Schedulers.parallel())
+                        .publishOn(Schedulers.parallel())
                         .doOnNext(response -> mapElevationToNodes(response, batch))
                         .then())
                 .toList();
