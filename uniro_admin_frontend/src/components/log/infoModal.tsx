@@ -1,14 +1,24 @@
 import { CautionIssue, DangerIssue } from "../../constant/enum/reportEnum";
 import { ChangedInfo } from "../../container/mapContainer";
 
-export default function InfoModal({ info, onClose }: { info: ChangedInfo; onClose: () => void }) {
+export default function InfoModal({
+	info,
+	onClose,
+	rev,
+	freshRev,
+}: {
+	info: ChangedInfo;
+	onClose: () => void;
+	rev: number;
+	freshRev: number;
+}) {
 	return (
 		<div className="w-screen h-screen absolute top-0 left-0 flex items-center justify-center bg-[rgba(0,0,0,0.5)]">
 			<div className="w-[500px] h-[400px] bg-gray-100 rounded-200 p-5 space-y-4 flex flex-col justify-center">
 				<h2 className="font-bold text-xl text-primary-500 ">위험 주의 요소 변경사항.</h2>
-				<div className="flex flex-row flex-1">
+				<div className="relative flex flex-row flex-1">
 					<div className="w-1/2 space-y-5 border-r-1 border-gray-400">
-						<h2 className="text-lg font-bold">현재 버전</h2>
+						<h2 className="text-lg font-bold">선택된 버전 v{rev}</h2>
 						{info!.difference.cautionFactors.length + info!.difference.dangerFactors.length === 0 ? (
 							<>
 								<div>
@@ -33,7 +43,7 @@ export default function InfoModal({ info, onClose }: { info: ChangedInfo; onClos
 						)}
 					</div>
 					<div className="w-1/2 space-y-5 ">
-						<h2 className="text-lg font-bold">최신 버전</h2>
+						<h2 className="text-lg font-bold">최신 버전 v{freshRev}</h2>
 						{info!.current.cautionFactors.length + info!.current.dangerFactors.length === 0 ? (
 							<>
 								<div>

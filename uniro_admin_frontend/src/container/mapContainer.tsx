@@ -12,6 +12,7 @@ import InfoModal from "../components/log/infoModal";
 interface MapContainerProps {
 	rev: RevisionType;
 	data: RevisionDataType | undefined;
+	freshRev: number;
 }
 
 export interface ChangedInfo {
@@ -19,7 +20,7 @@ export interface ChangedInfo {
 	difference: ChangedType;
 }
 
-const MapContainer = ({ rev, data }: MapContainerProps) => {
+const MapContainer = ({ rev, data, freshRev }: MapContainerProps) => {
 	const { accessToken } = useLogin();
 	const { university } = useUniversity();
 	const queryClient = useQueryClient();
@@ -86,7 +87,7 @@ const MapContainer = ({ rev, data }: MapContainerProps) => {
 			<LogMap revisionData={data} center={university?.centerPoint} setInfo={setInfo} />
 			{modalOpen && <RollbackModal rev={data!.rev} onRollback={() => mutate()} onClose={closeModal} />}
 			{failModalOpen && <FailModal onClose={closeFailModal} />}
-			{infoModalOpen && <InfoModal info={info!} onClose={closeInfoModal} />}
+			{infoModalOpen && <InfoModal rev={rev.rev} freshRev={freshRev} info={info!} onClose={closeInfoModal} />}
 		</div>
 	);
 };
