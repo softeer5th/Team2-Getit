@@ -24,7 +24,7 @@ export default function LandingPage() {
 
 	return (
 		<div
-			className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center bg-[url(/public/background.png)] bg-cover"
+			className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center bg-[url(/public/background.webp)] bg-cover"
 			onClick={() => navigate("/university")}
 		>
 			<motion.p
