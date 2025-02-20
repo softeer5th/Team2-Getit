@@ -704,14 +704,12 @@ export default function MapPage() {
 		const tempLines = [];
 
 		for (const coreRoutes of coreRouteList) {
-			const { coreNode1Id, coreNode2Id, routes: subRoutes } = coreRoutes;
+			const { coreNode1Id, coreNode2Id, routes: edges } = coreRoutes;
 
-			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
+			const subNodes = [edges[0].node1, ...edges.map((el) => el.node2)];
 
-			const routeIds = subRoutes.map((el) => el.routeId);
-
-			const key = coreNode1Id < coreNode2Id ? routeIds.join("_") : routeIds.reverse().join("_");
-
+            const key = coreNode1Id < coreNode2Id ?`${edges[0].routeId}_${edges.slice(-1)[0].routeId}` :`${edges.slice(-1)[0].routeId}_${edges[0].routeId}`
+            
 			const cachedPolyline = cachedRouteRef.current.get(key);
 
 			if (cachedPolyline) {
@@ -742,7 +740,7 @@ export default function MapPage() {
 				cachedRouteRef.current.set(key, routePolyLine);
 			}
 
-			console.log(`MAIN PAGE | NEW CORE ROUTE ${coreNode1Id}-${coreNode2Id}`);
+			console.log(`MAIN PAGE | NEW CORE ROUTE ${key}`);
 		}
 		if (isReDraw) {
 			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;

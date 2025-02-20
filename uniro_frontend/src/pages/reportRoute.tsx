@@ -418,9 +418,7 @@ export default function ReportRoutePage() {
 
 			const subNodes = [edges[0].node1, ...edges.map((el) => el.node2)];
 
-			const routeIds = edges.map((el) => el.routeId);
-
-			const key = coreNode1Id < coreNode2Id ? routeIds.join("_") : routeIds.reverse().join("_");
+            const key = coreNode1Id < coreNode2Id ?`${edges[0].routeId}_${edges.slice(-1)[0].routeId}` :`${edges.slice(-1)[0].routeId}_${edges[0].routeId}`
 
 			const cachedPolyline = cachedRouteRef.current.get(key);
 
@@ -503,7 +501,7 @@ export default function ReportRoutePage() {
 				cachedRouteRef.current.set(key, routePolyline);
 			}
 
-			console.log(`ROUTE PAGE | NEW CORE ROUTE ${coreNode1Id}-${coreNode2Id}`);
+			console.log(`ROUTE PAGE | NEW CORE ROUTE ${key}`);
 		}
 
 		if (isReDraw) {
