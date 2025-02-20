@@ -35,6 +35,9 @@ public enum ErrorCode {
     // 경로 계산
     INTERSECTION_ONLY_ALLOWED_POINT(400, "기존 경로와 겹칠 수 없습니다."),
 
+    // 대학
+    UNIV_NOT_FOUND(404, "대학을 찾을 수 없습니다."),
+
     // 어드민
     ALREADY_LATEST_VERSION_ID(400, "현재 가장 최신 버전 id 입니다."),
     INVALID_VERSION_ID(400, "유효하지 않은 버전 id 입니다."),

@@ -1,6 +1,5 @@
 package com.softeer5.uniro_backend.admin.service;
 
-import static com.softeer5.uniro_backend.admin.enums.UniversityVersionLimit.getLimitVersionByUnivId;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 
 import com.softeer5.uniro_backend.admin.annotation.DisableAudit;
@@ -12,6 +11,7 @@ import com.softeer5.uniro_backend.admin.repository.RouteAuditRepository;
 import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
+import com.softeer5.uniro_backend.common.exception.custom.UnivException;
 import com.softeer5.uniro_backend.map.dto.response.AllRoutesInfo;
 import com.softeer5.uniro_backend.map.dto.response.GetChangedRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
@@ -21,14 +21,13 @@ import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
 import com.softeer5.uniro_backend.map.service.RouteCalculator;
+import com.softeer5.uniro_backend.univ.entity.Univ;
+import com.softeer5.uniro_backend.univ.repository.UnivRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +38,7 @@ public class AdminService {
     private final RouteRepository routeRepository;
     private final NodeRepository nodeRepository;
     private final BuildingRepository buildingRepository;
+    private final UnivRepository univRepository;
 
     private final RouteAuditRepository routeAuditRepository;
     private final NodeAuditRepository nodeAuditRepository;
@@ -55,7 +55,11 @@ public class AdminService {
     @Transactional
     @DisableAudit
     public void rollbackRev(Long univId, Long versionId){
-        if(getLimitVersionByUnivId(univId) > versionId){
+
+        Univ univ = univRepository.findById(univId)
+                .orElseThrow(()-> new UnivException("Univ not found", UNIV_NOT_FOUND));
+        Long limitVersion = Optional.ofNullable(univ.getLimitVersion()).orElse(0L);
+        if(limitVersion > versionId){
             throw new AdminException("version is too low", CANT_ROLLBACK_BELOW_MINIMUM_VERSION);
         }
 

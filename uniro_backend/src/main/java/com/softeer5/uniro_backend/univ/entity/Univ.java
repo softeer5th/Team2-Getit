@@ -59,6 +59,8 @@ public class Univ {
 	@NotNull
 	private Polygon areaPolygon;
 
+	private Long limitVersion;
+
 	public Map<String, Double> getCenterXY(){
 		return Map.of("lat", centerPoint.getY(), "lng", centerPoint.getX());
 	}
