@@ -10,6 +10,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.softeer5.uniro_backend.map.cache.TimingRedisSerializer;
 
 @Configuration
 public class RedisConfig {
@@ -27,14 +28,15 @@ public class RedisConfig {
 
 		StringRedisSerializer stringSerializer = new StringRedisSerializer();
 		GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+		TimingRedisSerializer timingJsonSerializer = new TimingRedisSerializer(jsonSerializer);
 
 		// Key serializer 설정
 		template.setKeySerializer(stringSerializer);
 		template.setHashKeySerializer(stringSerializer);
 
 		// Value serializer 설정
-		template.setValueSerializer(jsonSerializer);
-		template.setHashValueSerializer(jsonSerializer);
+		template.setValueSerializer(timingJsonSerializer);
+		template.setHashValueSerializer(timingJsonSerializer);
 
 		template.afterPropertiesSet();
 		return template;
