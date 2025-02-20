@@ -214,18 +214,9 @@ export default function ReportRiskPage() {
 		return undefined;
 	};
 
-	const checkTypeOfReportedData = () => {
-		const { routeId, cautionFactors, dangerFactors } = reportedData;
-		if ((routeId && cautionFactors.length > 0) || dangerFactors.length > 0)
-			return cautionFactors.length > 0 ? Markers.CAUTION : Markers.DANGER;
-		return null;
-	};
-
 	const moveToMarker = () => {
 		if (!map || !AdvancedMarker) return;
 		const { routeId } = reportedData;
-		const type = checkTypeOfReportedData();
-		if (type === null) return;
 		const route = findRouteById(routes.data, routeId!);
 		if (!route) return;
 		const node1 = route.node1;
