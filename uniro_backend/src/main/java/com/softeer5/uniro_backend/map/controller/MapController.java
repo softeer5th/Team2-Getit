@@ -66,10 +66,10 @@ public class MapController implements MapApi {
 
 	@Override
 	@PostMapping("/{univId}/route")
-	public ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
+	public ResponseEntity<AllRoutesInfo> createRoute (@PathVariable("univId") Long univId,
 											 @RequestBody @Valid CreateRoutesReqDTO routes){
-		mapService.createRoute(univId, routes);
-		return ResponseEntity.status(HttpStatus.CREATED).build();
+		AllRoutesInfo createdRoutes = mapService.createRoute(univId, routes);
+		return ResponseEntity.ok().body(createdRoutes);
 	}
 
 	@Override

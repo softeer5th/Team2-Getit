@@ -64,12 +64,12 @@ public class MapService {
 		}
 
 		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
-			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
+				.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
 
 		AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(routes);
 
 		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
-			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
+				allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
 	}
 
 	@Async
@@ -200,7 +200,7 @@ public class MapService {
 
 	@Transactional
 	@RevisionOperation(RevisionOperationType.CREATE_ROUTE)
-	synchronized public void createRoute(Long univId, CreateRoutesReqDTO requests){
+	synchronized public AllRoutesInfo createRoute(Long univId, CreateRoutesReqDTO requests){
 
 		List<Route> savedRoutes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
 
@@ -214,5 +214,7 @@ public class MapService {
 
 		nodeRepository.saveAll(nodesForSave);
 		routeRepository.saveAll(routes);
+
+		return routeCalculator.assembleRoutes(routes);
 	}
 }

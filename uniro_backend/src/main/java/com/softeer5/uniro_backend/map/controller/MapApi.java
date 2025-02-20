@@ -67,7 +67,7 @@ public interface MapApi {
 			@ApiResponse(responseCode = "201", description = "길 추가 성공"),
 			@ApiResponse(responseCode = "400", description = "EXCEPTION(임시)", content = @Content),
 	})
-	ResponseEntity<Void> createRoute (@PathVariable("univId") Long univId,
+	ResponseEntity<AllRoutesInfo> createRoute (@PathVariable("univId") Long univId,
 									  @RequestBody CreateRoutesReqDTO routes);
 
 	@Operation(summary = "빠른 길 계산")
