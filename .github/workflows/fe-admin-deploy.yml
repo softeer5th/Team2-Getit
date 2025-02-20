@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - fe
-      - feat/UNI-313
+      - feat/UNI-312
     # paths:
     #   - "uniro_admin_frontend/**"
 
