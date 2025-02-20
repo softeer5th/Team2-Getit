@@ -4,18 +4,13 @@ export default function Fetch() {
 	const get = async <T>(
 		url: string,
 		params?: Record<string, string | number | boolean>,
-		token?: string
+		token?: string,
 	): Promise<T> => {
 		const paramsURL = new URLSearchParams(
-			Object.entries(params || {}).map(([key, value]) => [
-				key,
-				String(value),
-			])
+			Object.entries(params || {}).map(([key, value]) => [key, String(value)]),
 		).toString();
 
-		const headers: HeadersInit = token
-			? { Authorization: `Bearer ${token}` }
-			: {};
+		const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
 
 		const response = await fetch(`${baseURL}${url}?${paramsURL}`, {
 			method: "GET",
@@ -28,10 +23,7 @@ export default function Fetch() {
 		return response.json();
 	};
 
-	const post = async <T, K>(
-		url: string,
-		body?: Record<string, K | K[]>
-	): Promise<T> => {
+	const post = async <T, K>(url: string, body?: Record<string, K | K[]>): Promise<T> => {
 		const response = await fetch(`${baseURL}${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),
@@ -44,13 +36,20 @@ export default function Fetch() {
 			throw new Error(`${response.status}-${response.statusText}`);
 		}
 
+		try {
+			const res = await response.json();
+
+			return res;
+		} catch (err) {
+			if (err instanceof SyntaxError) {
+				return true as T;
+			}
+		}
+
 		return response.json();
 	};
 
-	const put = async <T, K>(
-		url: string,
-		body?: Record<string, K>
-	): Promise<T> => {
+	const put = async <T, K>(url: string, body?: Record<string, K>): Promise<T> => {
 		const response = await fetch(`${baseURL}${url}`, {
 			method: "PUT",
 			body: JSON.stringify(body),
