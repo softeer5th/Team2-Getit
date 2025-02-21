@@ -167,11 +167,14 @@ public class RouteCalculator {
                     fastestRouteResult.isHasCaution(),
                     fastestRouteResult.isHasDanger(),
                     fastestRouteResult.getTotalDistance(),
-                    calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()
+                    calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER,
+                            fastestRouteDTO.getTotalWeightDistance() % BUILDING_ROUTE_DISTANCE
                                 + fastestRouteResult.getHeightIncreaseWeight() - fastestRouteResult.getHeightDecreaseWeight()),
-                    calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()
+                    calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER,
+                            fastestRouteDTO.getTotalWeightDistance() % BUILDING_ROUTE_DISTANCE
                             + fastestRouteResult.getHeightIncreaseWeight() + fastestRouteResult.getHeightDecreaseWeight()),
-                    calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()),
+                    calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER,
+                            fastestRouteDTO.getTotalWeightDistance() % BUILDING_ROUTE_DISTANCE),
                     fastestRouteResult.getRouteInfoDTOS(),
                     details));
         }
