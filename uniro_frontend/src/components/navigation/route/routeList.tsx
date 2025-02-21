@@ -52,7 +52,7 @@ const RouteList = ({
 	}, [cautionRouteIdx, isDetailView]);
 
 	return (
-		<div className="w-full">
+		<div className="w-full scroll-x-hidden">
 			{routes &&
 				addOriginAndDestination(routes).map((route, index) => (
 					<Fragment key={`${route.dist}-${route.coordinates.lat}-fragment`}>
