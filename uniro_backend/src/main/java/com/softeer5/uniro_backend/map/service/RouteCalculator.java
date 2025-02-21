@@ -257,7 +257,8 @@ public class RouteCalculator {
 
     // 차이에 따른 가중치를 계산하는 메서드
     private double calculateWeight(double diff, double routeDistance){
-        return (Math.pow(diff,2) * routeDistance) / HEURISTIC_WEIGHT_NORMALIZATION_FACTOR;
+        double result = (Math.pow(diff,2) * routeDistance) / HEURISTIC_WEIGHT_NORMALIZATION_FACTOR;
+        return result > LIMIT_RANGE ? 0 : result;
     }
 
     // 길찾기 결과를 파싱하여 출발지 -> 도착지 형태로 재배열하는 메서드
@@ -317,6 +318,8 @@ public class RouteCalculator {
 
             routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
         }
+        if(Math.abs(heightDecreaseWeight) > LIMIT_RANGE) heightDecreaseWeight = 0.0;
+        if(Math.abs(heightIncreaseWeight) > LIMIT_RANGE) heightIncreaseWeight = 0.0;
         return FastestRouteResultDTO.of(hasCaution,hasDanger,totalDistance,heightIncreaseWeight,heightDecreaseWeight,routeInfoDTOS);
     }
 
