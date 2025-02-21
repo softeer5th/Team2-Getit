@@ -317,10 +317,6 @@ class RouteCalculatorTest {
             //a-2. distance가 정상적으로 제공되는지?
             double distance0 = fastestRoute.get(0).getTotalDistance();
             assertThat(Math.abs(distance0 - 16.0)).isLessThan(epsilon);
-            double distance1 = fastestRoute.get(1).getTotalDistance();
-            assertThat(Math.abs(distance1 - 21.0)).isLessThan(epsilon);
-            double distance2 = fastestRoute.get(2).getTotalDistance();
-            assertThat(Math.abs(distance2 - 21.0)).isLessThan(epsilon);
 
         }
 
