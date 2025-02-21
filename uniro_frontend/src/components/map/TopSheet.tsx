@@ -8,7 +8,6 @@ import useRoutePoint from "../../hooks/useRoutePoint";
 import useSearchBuilding from "../../hooks/useSearchBuilding";
 import AnimatedContainer from "../../container/animatedContainer";
 import { BuildingInput, RouteInput } from "./mapSearchInput";
-import { Link } from "react-router";
 import useUniversityInfo from "../../hooks/useUniversityInfo";
 
 interface MapTopSheetProps {
@@ -16,7 +15,7 @@ interface MapTopSheetProps {
 }
 
 export function MapTopBuildingSheet({ isVisible }: MapTopSheetProps) {
-	const { searchMode, setSearchMode } = useSearchBuilding();
+	const { setSearchMode } = useSearchBuilding();
 	const { university } = useUniversityInfo();
 
 	return (
@@ -50,7 +49,7 @@ export function MapTopBuildingSheet({ isVisible }: MapTopSheetProps) {
 
 export function MapTopRouteSheet({ isVisible }: MapTopSheetProps) {
 	const { origin, setOrigin, destination, setDestination, switchBuilding } = useRoutePoint();
-	const { searchMode, setSearchMode } = useSearchBuilding();
+	const { setSearchMode } = useSearchBuilding();
 
 	const resetRoutePoint = () => {
 		setOrigin(undefined);
