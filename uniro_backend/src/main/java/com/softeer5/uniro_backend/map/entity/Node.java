@@ -6,18 +6,14 @@ import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import jakarta.persistence.EntityListeners;
+import com.softeer5.uniro_backend.map.enums.HeightStatus;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.envers.Audited;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
@@ -47,6 +43,11 @@ public class Node {
 	@CreatedDate
 	private LocalDateTime createdAt;
 
+	@NotNull
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	private HeightStatus status;
+
 	public Map<String, Double> getXY(){
 		return Map.of("lat", coordinates.getY(), "lng", coordinates.getX());
 	}
@@ -61,6 +62,10 @@ public class Node {
 
 	public void setHeight(double height) {
 		this.height = height;
+	}
+
+	public void setStatus(HeightStatus status) {
+		this.status = status;
 	}
 
 	public void setCoordinates(Point coordinates) {
@@ -79,10 +84,11 @@ public class Node {
 	}
 
 	@Builder
-	private Node(Point coordinates, double height, boolean isCore, Long univId) {
+	private Node(Point coordinates, double height, boolean isCore, Long univId, HeightStatus status) {
 		this.coordinates = coordinates;
 		this.height = height;
 		this.isCore = isCore;
 		this.univId = univId;
+		this.status = status;
 	}
 }
