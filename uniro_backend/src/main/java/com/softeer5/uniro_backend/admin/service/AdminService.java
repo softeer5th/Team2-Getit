@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.admin.service;
 
+import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 
 import com.softeer5.uniro_backend.admin.annotation.DisableAudit;
@@ -108,7 +109,8 @@ public class AdminService {
             }
         }
 
-        redisService.deleteData(univId.toString());
+        int routeCount = routes.size();
+        redisService.deleteRoutesData(univId.toString(), routeCount / STREAM_FETCH_SIZE + 1);
     }
 
     public GetAllRoutesByRevisionResDTO getAllRoutesByRevision(Long univId, Long versionId){
