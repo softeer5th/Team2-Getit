@@ -35,6 +35,7 @@ import { getAllRoutes, getNavigationResult } from "../api/route";
 import useQueryError from "../hooks/useQueryError";
 import { CacheContext } from "../map/mapCacheContext";
 import removeAllListener from "../utils/map/removeAllListener";
+import { i } from "framer-motion/client";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -416,7 +417,6 @@ export default function MapPage() {
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
-
 		switch (marker.type) {
 			case Markers.CAUTION:
 				if (isSelect) {
@@ -440,6 +440,8 @@ export default function MapPage() {
 				}
 			case Markers.BUILDING:
 				if (!marker.property) return;
+
+				if (marker.id === origin?.nodeId || marker.id === destination?.nodeId) return;
 
 				if (isSelect) {
 					marker.element.content = selectedBuildingMarkerElement({ name: marker.property.buildingName });
@@ -768,6 +770,11 @@ export default function MapPage() {
 	}, [routes.data, map]);
 
 	useEffect(() => {
+		if (!origin || !destination) {
+			setOrigin(undefined);
+			setDestination(undefined);
+		}
+
 		usedRouteRef.current?.clear();
 		usedMarkerRef.current?.clear();
 
