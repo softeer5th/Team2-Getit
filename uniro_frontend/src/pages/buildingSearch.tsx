@@ -21,7 +21,7 @@ export default function BuildingSearchPage() {
 
 	const { data: buildings } = useQuery({
 		queryKey: [university.id, "buildings", input],
-		queryFn: () => getSearchBuildings(university.id, { name: input }),
+		queryFn: () => getSearchBuildings(university.id, { name: input, "page-size": 50 }),
 	});
 
 	const handleBack = () => {
