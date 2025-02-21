@@ -217,8 +217,7 @@ public class RouteCalculator {
 
             for(Route route : adjMap.getOrDefault(currentNode.getId(), Collections.emptyList())){
                 Node nextNode = route.getNode1().getId().equals(currentNode.getId())?route.getNode2():route.getNode1();
-                double newDistance = currentDistance + route.getDistance()
-                                                + getHeightHeuristicWeight(maxHeight,minHeight,nextNode, route.getDistance(), policy);
+                double newDistance = currentDistance + route.getDistance();
 
                 if(policy==RoadExclusionPolicy.WHEEL_FAST && !route.getCautionFactors().isEmpty()){
                     currentCautionCount++;
@@ -313,7 +312,7 @@ public class RouteCalculator {
                 heightIncreaseWeight += Math.exp(heightDiff) - 1;
             }
             else{
-                heightDecreaseWeight += Math.exp(heightDiff) - 1;
+                heightDecreaseWeight += Math.exp(-heightDiff) - 1;
             }
 
             routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
