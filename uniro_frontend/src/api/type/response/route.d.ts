@@ -26,6 +26,7 @@ export type GetSingleRouteRiskResponse = {
 export type GetFastestRouteResponse = {
 	routeType?: NavigationRouteType;
 	hasCaution: boolean;
+	hasDanger: boolean;
 	totalDistance: number;
 	pedestrianTotalCost?: number | null;
 	manualTotalCost?: number | null;

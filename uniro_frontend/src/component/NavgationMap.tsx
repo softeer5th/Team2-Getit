@@ -68,8 +68,14 @@ const NavigationMap = ({
 	bottomPadding = 0,
 	currentRouteIdx,
 	handleCautionMarkerClick,
-	setCautionRouteIdx,
 }: MapProps) => {
+	const buttonStateRef = useRef(buttonState);
+
+	// Listener들이 항상 최신 buttonStateRef를 참조하도록 ref 사용
+	useEffect(() => {
+		buttonStateRef.current = buttonState;
+	}, [buttonState]);
+
 	const { mapRef, map, AdvancedMarker, Polyline } = useMap();
 	const { origin, destination } = useRoutePoint();
 
@@ -201,7 +207,9 @@ const NavigationMap = ({
 			hasAnimation: true,
 		});
 		const originMarker = createAdvancedMarker(AdvancedMarker, map, origin, originMarkerElement);
-
+		originMarker.addListener("click", () => {
+			handleCautionMarkerClick(0);
+		});
 		// 도착지 마커
 		const destinationMarkerElement = createMarkerElement({
 			type: Markers.DESTINATION,
@@ -210,7 +218,9 @@ const NavigationMap = ({
 			hasAnimation: true,
 		});
 		const destinationMarker = createAdvancedMarker(AdvancedMarker, map, destination, destinationMarkerElement);
-
+		destinationMarker.addListener("click", () => {
+			handleCautionMarkerClick(routeResult[buttonStateRef.current].routeDetails.length);
+		});
 		// bounds 업데이트
 		boundsRef.current?.extend(origin);
 		boundsRef.current?.extend(destination);
@@ -266,7 +276,6 @@ const NavigationMap = ({
 
 				const marker = createAdvancedMarker(AdvancedMarker, map, coordinates, markerElement, () => {
 					handleCautionMarkerClick(index + 1);
-					setCautionRouteIdx(index + 1);
 				});
 				markers.push(marker);
 			}

@@ -58,6 +58,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				// PEDES-SAFE는 항상 존재, PEDES-CAUTION은 존재하지 않
 				record[`PEDES & SAFE`] = {
 					hasCaution: route.hasCaution,
+					hasDanger: route.hasDanger,
 					totalDistance: route.totalDistance,
 					totalCost: route.pedestrianTotalCost ?? 0,
 					routes: route.routes,
@@ -68,6 +69,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				if (route.manualTotalCost && route.hasCaution) {
 					record[`MANUAL & CAUTION`] = {
 						hasCaution: route.hasCaution,
+						hasDanger: route.hasDanger,
 						totalDistance: route.totalDistance,
 						totalCost: route.manualTotalCost ?? 0,
 						routes: route.routes,
@@ -77,6 +79,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				if (route.electricTotalCost && route.hasCaution) {
 					record[`ELECTRIC & CAUTION`] = {
 						hasCaution: route.hasCaution,
+						hasDanger: route.hasDanger,
 						totalDistance: route.totalDistance,
 						totalCost: route.electricTotalCost ?? 0,
 						routes: route.routes,
@@ -88,6 +91,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				if (route.manualTotalCost && !route.hasCaution) {
 					record[`MANUAL & SAFE`] = {
 						hasCaution: route.hasCaution,
+						hasDanger: route.hasDanger,
 						totalDistance: route.totalDistance,
 						totalCost: route.manualTotalCost ?? 0,
 						routes: route.routes,
@@ -97,6 +101,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				if (route.electricTotalCost && !route.hasCaution) {
 					record[`ELECTRIC & SAFE`] = {
 						hasCaution: route.hasCaution,
+						hasDanger: route.hasDanger,
 						totalDistance: route.totalDistance,
 						totalCost: route.electricTotalCost ?? 0,
 						routes: route.routes,
