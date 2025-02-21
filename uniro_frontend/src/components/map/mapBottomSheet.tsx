@@ -3,11 +3,11 @@ import Button from "../customButton";
 import Call from "/public/icons/call-thick.svg?react";
 import Location from "/public/icons/location-thick.svg?react";
 import AnimatedContainer from "../../container/animatedContainer";
-import BottomSheetHandle from "../navigation/bottomSheet/bottomSheetHandle";
 import { useNavigationBottomSheet } from "../../hooks/useNavigationBottomSheet";
 import { RoutePointType } from "../../data/types/route";
 import { RoutePoint } from "../../constant/enum/routeEnum";
 import useSearchBuilding from "../../hooks/useSearchBuilding";
+import { useEffect, useState } from "react";
 
 interface MapBottomSheetProps {
 	isVisible: boolean;
@@ -49,24 +49,39 @@ interface MapBottomSheetFromMarkerProps {
 function MapBottomSheetFromMarker({ building, onClickLeft, onClickRight }: MapBottomSheetFromMarkerProps) {
 	if (!building || building.property === undefined) return;
 
+	const [imageLoaded, setImageLoaded] = useState(false);
 	const { buildingName, buildingImageUrl, phoneNumber, address } = building.property;
 
 	const { setSearchMode } = useSearchBuilding();
 
 	const handlLeftClick = () => {
-		setSearchMode('ORIGIN');
+		setSearchMode("ORIGIN");
 		onClickLeft();
-	}
+	};
 
 	const handleRightClick = () => {
-		setSearchMode('DESTINATION');
+		setSearchMode("DESTINATION");
 		onClickRight();
-	}
+	};
+
+	useEffect(() => {
+		setImageLoaded(false);
+	}, [buildingImageUrl]);
 
 	return (
 		<div className="h-full px-5 pt-3 pb-6 flex flex-col items-between">
 			<div className="mb-[14px]">
-				<img src={buildingImageUrl} className="w-full h-[150px] mb-[14px] rounded-300 object-cover" />
+				<div className="mb-[14px] relative">
+					{!imageLoaded && (
+						<div className="absolute inset-0 w-full h-[150px] bg-gray-300 rounded-300 animate-pulse" />
+					)}
+					<img
+						src={buildingImageUrl}
+						onLoad={() => setImageLoaded(true)}
+						onError={() => setImageLoaded(true)}
+						className="w-full h-[150px] mb-[14px] rounded-300 object-cover"
+					/>
+				</div>
 				<div className="flex flex-col space-y-1">
 					<p className="text-kor-heading2 font-semibold text-gray-900 text-left">{buildingName}</p>
 					<p className="text-kor-body3 font-medium text-gray-700 flex flex-row">
