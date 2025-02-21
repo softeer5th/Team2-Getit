@@ -50,10 +50,12 @@ export type RouteDetail = {
 	directionType: Direction;
 	coordinates: Coord;
 	cautionFactors: CautionIssueType[];
+	dangerFactors: DangerIssueType[];
 };
 
 export type NavigationRouteList = {
 	hasCaution: boolean;
+	hasDanger: boolean;
 	totalDistance: number;
 	totalCost: number;
 	routes: Route[];

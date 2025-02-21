@@ -82,17 +82,17 @@ const NavigationResultPage = () => {
 	};
 
 	const showDetailView = () => {
+		setIsDetailView(true);
 		setSheetHeight(MAX_SHEET_HEIGHT);
 		setTopBarHeight(PADDING_FOR_MAP_BOUNDARY);
 		resetCurrentIndex();
-		setIsDetailView(true);
 	};
 
 	const hideDetailView = () => {
 		setSheetHeight(CLOSED_SHEET_HEIGHT);
 		setTopBarHeight(INITIAL_TOP_BAR_HEIGHT);
-		resetCurrentIndex();
 		setIsDetailView(false);
+		resetCurrentIndex();
 	};
 
 	const handleButtonStateChange = (buttonType: NavigationButtonRouteType) => {
@@ -101,7 +101,15 @@ const NavigationResultPage = () => {
 
 	const handleCautionMarkerClick = (index: number) => {
 		showDetailView();
+		if (isDetailView) {
+			setCautionRouteIdx(index);
+			setCurrentRouteIdx(index);
+			return;
+		}
 		setCurrentRouteIdx(index);
+		setTimeout(() => {
+			setCautionRouteIdx(index);
+		}, 800);
 	};
 
 	return (
@@ -202,6 +210,7 @@ const NavigationResultPage = () => {
 							navigationRoute={routeList.data![buttonState]}
 						/>
 						<RouteList
+							isDetailView={isDetailView}
 							changeCurrentRouteIdx={changeCurrentIndex}
 							currentRouteIdx={currentRouteIdx}
 							routes={

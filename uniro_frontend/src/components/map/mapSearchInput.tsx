@@ -20,7 +20,7 @@ export function BuildingInput({ placeholder, children, onClick }: RouteInputProp
 			<Link
 				onClick={onClick}
 				to="/building"
-				className={`text-start flex-1 text-kor-body2  text-gray-700 font-medium`}
+				className={`text-start flex-1 text-kor-body2  text-gray-700 font-medium max-sm:text-[12px]`}
 			>
 				{placeholder}
 			</Link>

@@ -1,4 +1,4 @@
-	import SearchIcon from "../../assets/icon/search.svg?react";
+import SearchIcon from "../../assets/icon/search.svg?react";
 import OriginIcon from "../../assets/map/origin.svg?react";
 import SwitchIcon from "../../assets/switch.svg?react";
 import DestinationIcon from "../../assets/map/destination.svg?react";

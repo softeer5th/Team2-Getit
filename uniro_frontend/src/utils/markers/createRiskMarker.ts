@@ -5,12 +5,11 @@ import { DangerIssueType } from "../../data/types/enum";
 import { AdvancedMarker } from "../../data/types/marker";
 import { DangerRoute } from "../../data/types/route";
 import centerCoordinate from "../coordinates/centerCoordinate";
-import createAdvancedMarker from "./createAdvanedMarker";
 
 export const createRiskMarkers = (
 	riskData: DangerRoute[],
 	map: google.maps.Map,
-	AdvancedMarker: typeof google.maps.marker.AdvancedMarkerElement,
+	createAdvancedMarker: (opts:google.maps.marker.AdvancedMarkerElementOptions)=> AdvancedMarker | undefined,
 ): AdvancedMarker[] => {
 	const markers: AdvancedMarker[] = [];
 	riskData.forEach((route) => {
@@ -20,12 +19,12 @@ export const createRiskMarkers = (
 			hasAnimation: true,
 		});
 
-		const marker = createAdvancedMarker(
-			AdvancedMarker,
-			map,
-			centerCoordinate(route.node1, route.node2),
-			markerElement,
-		);
+        const marker = createAdvancedMarker({
+            
+			map: map,
+			position: centerCoordinate(route.node1, route.node2),
+			content: markerElement,   
+        });
 
 		const markerEl = marker.content as HTMLElement;
 		const innerEl = markerEl.querySelector("div");

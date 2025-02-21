@@ -9,11 +9,18 @@ type RouteListProps = {
 	currentRouteIdx: number;
 	routes?: RouteDetail[] | null;
 	cautionRouteIdx: number;
+	isDetailView: boolean;
 };
 
 const Divider = () => <div className="border-[0.5px] border-gray-200 w-full"></div>;
 
-const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRouteIdx }: RouteListProps) => {
+const RouteList = ({
+	changeCurrentRouteIdx,
+	currentRouteIdx,
+	routes,
+	cautionRouteIdx,
+	isDetailView,
+}: RouteListProps) => {
 	const { origin, destination } = useRoutePoint();
 
 	const addOriginAndDestination = (routes: RouteDetail[]) => {
@@ -23,6 +30,7 @@ const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRout
 				directionType: "origin" as Direction,
 				coordinates: { lat: origin!.lat, lng: origin!.lng },
 				cautionFactors: [],
+				dangerFactors: [],
 			},
 			...routes.slice(0, -1),
 			{
@@ -30,6 +38,7 @@ const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRout
 				directionType: "finish" as Direction,
 				coordinates: { lat: destination!.lat, lng: destination!.lng },
 				cautionFactors: [],
+				dangerFactors: [],
 			},
 		];
 	};
@@ -40,10 +49,10 @@ const RouteList = ({ changeCurrentRouteIdx, currentRouteIdx, routes, cautionRout
 		if (target) {
 			target.scrollIntoView({ behavior: "smooth", block: "center" });
 		}
-	}, [cautionRouteIdx]);
+	}, [cautionRouteIdx, isDetailView]);
 
 	return (
-		<div className="w-full">
+		<div className="w-full scroll-x-hidden">
 			{routes &&
 				addOriginAndDestination(routes).map((route, index) => (
 					<Fragment key={`${route.dist}-${route.coordinates.lat}-fragment`}>

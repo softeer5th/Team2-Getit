@@ -56,6 +56,7 @@ const ReportForm = () => {
 			}
 		},
 		retry: 1,
+		gcTime: 0,
 	});
 
 	const [reportMode, setReportMode] = useState<ReportModeType | null>(
