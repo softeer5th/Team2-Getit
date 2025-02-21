@@ -68,10 +68,16 @@ const NavigationMap = ({
 	bottomPadding = 0,
 	currentRouteIdx,
 	handleCautionMarkerClick,
-	setCautionRouteIdx,
 }: MapProps) => {
 	const { createAdvancedMarker, createPolyline } = useContext(MapContext);
 	const { mapRef, map } = useMap();
+	const buttonStateRef = useRef(buttonState);
+
+	// Listener들이 항상 최신 buttonStateRef를 참조하도록 ref 사용
+	useEffect(() => {
+		buttonStateRef.current = buttonState;
+	}, [buttonState]);
+
 	const { origin, destination } = useRoutePoint();
 
 	const boundsRef = useRef<google.maps.LatLngBounds | null>(null);
@@ -200,11 +206,16 @@ const NavigationMap = ({
 			className: "translate-namedmarker",
 			hasAnimation: true,
 		});
-		const originMarker = createAdvancedMarker({
-			map: map,
-			position: origin,
-			content: originMarkerElement,
-		});
+		const originMarker = createAdvancedMarker(
+			{
+				map: map,
+				position: origin,
+				content: originMarkerElement,
+			},
+			() => {
+				handleCautionMarkerClick(0);
+			},
+		);
 
 		// 도착지 마커
 		const destinationMarkerElement = createMarkerElement({
@@ -213,11 +224,16 @@ const NavigationMap = ({
 			className: "translate-namedmarker",
 			hasAnimation: true,
 		});
-		const destinationMarker = createAdvancedMarker({
-			map: map,
-			position: destination,
-			content: destinationMarkerElement,
-		});
+		const destinationMarker = createAdvancedMarker(
+			{
+				map: map,
+				position: destination,
+				content: destinationMarkerElement,
+			},
+			() => {
+				handleCautionMarkerClick(routeResult[buttonStateRef.current].routeDetails.length);
+			},
+		);
 
 		// bounds 업데이트
 		boundsRef.current?.extend(origin);
@@ -279,7 +295,6 @@ const NavigationMap = ({
 					},
 					() => {
 						handleCautionMarkerClick(index + 1);
-						setCautionRouteIdx(index + 1);
 					},
 				);
 				if (marker) markers.push(marker);

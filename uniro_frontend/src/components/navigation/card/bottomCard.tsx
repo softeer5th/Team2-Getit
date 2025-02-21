@@ -77,15 +77,18 @@ const BottomCard: React.FC<BottomCardProps> = ({ routeInfo, type, selected, onCl
 			onClick={onClick}
 		>
 			<div className="flex-1 flex-col items-start justify-start">
-				<div className="flex-1 flex flex-row items-center justify-start text-left">
-					<div className="flex h-full text-eng-heading1 font-bold font-[SF Pro Display] mr-0.5 pb-1">
+				<div className="flex-1 flex flex-row max-sm:flex-col max-sm:items-start items-center justify-start text-left">
+					<div className="flex flex-row items-end h-full text-eng-heading1 font-bold font-[SF Pro Display] mr-0.5 pb-1">
 						{routeInfo?.totalCost ? Math.floor(routeInfo.totalCost / 60) : "-"}
+						<span className="items-end h-full text-[16px] -mb-1 font-semibold max-sm:text-[12px] ml-[1px]">
+							분
+						</span>
 					</div>
-					<div className="flex items-baseline text-kor-heading1 h-full text-[16px] -mb-1 font-semibold">
-						분<span className="font-normal ml-2 -mb-1">{theme.label}</span>
+					<div className="flex items-baseline text-kor-heading1 h-full text-[16px] -mb-1 font-semibold max-sm:text-[12px]">
+						<div className="font-normal ml-[1px] sm:ml-1 sm:-mb-1">{theme.label}</div>
 					</div>
 				</div>
-				<div className="text-left ml-1 mr-0.5 mt-1 text-[14px]">
+				<div className="text-left ml-[1px] mr-0.5 mt-1 text-[14px]">
 					{routeInfo?.totalDistance ? formatDistance(routeInfo.totalDistance) : "- m"}
 				</div>
 			</div>
