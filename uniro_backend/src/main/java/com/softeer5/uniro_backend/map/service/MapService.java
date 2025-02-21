@@ -308,7 +308,9 @@ public class MapService {
 		nodeRepository.saveAll(nodesForSave);
 		routeRepository.saveAll(routes);
 
-		redisService.deleteData(univId.toString());
+		int routeCount = routeRepository.countByUnivId(univId);
+
+		redisService.deleteRoutesData(univId.toString(), routeCount / STREAM_FETCH_SIZE + 1);
 
 		return routeCalculator.assembleRoutes(routes);
 	}

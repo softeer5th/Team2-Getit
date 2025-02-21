@@ -49,4 +49,13 @@ public class RedisService {
 		redisTemplate.delete(key);
 		cacheMap.remove(key);
 	}
+
+	public void deleteRoutesData(String key, int batchNumber) {
+		String redisKeyPrefix = key + ":";
+
+		for(int i=1; i<=batchNumber; i++){
+			redisTemplate.delete(redisKeyPrefix + i);
+		}
+		cacheMap.remove(key);
+	}
 }
