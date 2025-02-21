@@ -40,13 +40,13 @@ export const RouteCard = ({
 			return (
 				<div
 					onClick={onClick}
-					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors active:shadow-inner ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+					className={`grid grid-cols-10 items-center justify-start pl-8 py-5 transition-colors active:shadow-inner ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
-					<div className="flex flex-col items-center justify-start space-y-1">
+					<div className="flex flex-col items-center justify-start space-y-1 col-span-1">
 						<StraightIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
-					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
+					<div className="flex flex-row items-center justify-start ml-4 space-x-[14px] col-span-9">
 						<NumberIcon index={index} />
 						<div className="text-kor-body1 text-gray-900">직진</div>
 					</div>
@@ -56,13 +56,13 @@ export const RouteCard = ({
 			return (
 				<div
 					onClick={onClick}
-					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+					className={`grid grid-cols-10 items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
-					<div className="flex flex-col items-center justify-start space-y-1">
+					<div className="flex flex-col items-center justify-start space-y-1 col-span-1">
 						<RightIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
-					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
+					<div className="flex flex-row items-center justify-start ml-4 space-x-[14px] col-span-9">
 						<NumberIcon index={index} />
 						<div className="text-kor-body1 text-gray-900">우회전</div>
 					</div>
@@ -72,13 +72,13 @@ export const RouteCard = ({
 			return (
 				<div
 					onClick={onClick}
-					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+					className={`grid grid-cols-10 items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
-					<div className="flex flex-col items-center justify-start space-y-1">
+					<div className="flex flex-col items-center justify-start space-y-1 col-span-1">
 						<RightIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
-					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
+					<div className="flex flex-row items-center justify-start ml-4 space-x-[14px] col-span-9">
 						<NumberIcon index={index} />
 						<div className="text-kor-body1 text-gray-900">급격한 우회전</div>
 					</div>
@@ -88,13 +88,13 @@ export const RouteCard = ({
 			return (
 				<div
 					onClick={onClick}
-					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+					className={`grid grid-cols-10 items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
-					<div className="flex flex-col items-center justify-start space-y-1">
+					<div className="flex flex-col items-center justify-start space-y-1 col-span-1">
 						<LeftIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
-					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
+					<div className="flex flex-row items-center justify-start ml-4 space-x-[14px] col-span-9">
 						<NumberIcon index={index} />
 						<div className="text-kor-body1 text-gray-900">좌회전</div>
 					</div>
@@ -104,13 +104,13 @@ export const RouteCard = ({
 			return (
 				<div
 					onClick={onClick}
-					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+					className={`grid grid-cols-10 items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
-					<div className="flex flex-col items-center justify-start space-y-1">
+					<div className="flex flex-col items-center justify-start space-y-1 col-span-1">
 						<LeftIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
-					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
+					<div className="flex flex-row items-center justify-start ml-4 space-x-[14px] col-span-9">
 						<NumberIcon index={index} />
 						<div className="text-kor-body1 text-gray-900">급격한 좌회전</div>
 					</div>
@@ -120,13 +120,13 @@ export const RouteCard = ({
 			return (
 				<div
 					onClick={onClick}
-					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+					className={`grid grid-cols-10 items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
-					<div className="flex flex-col items-center justify-start space-y-1">
+					<div className="flex flex-col items-center justify-start space-y-1 col-span-1">
 						<StraightIcon />
 						<div className="text-primary-400 text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
-					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
+					<div className="flex flex-row items-center justify-start ml-4 space-x-[14px] col-span-9">
 						<NumberIcon index={index} />
 						<div className="text-kor-body1 text-gray-900">유턴</div>
 					</div>
@@ -177,7 +177,7 @@ export const RouteCard = ({
 					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
 						{/* TODO: Auto Resize Text 적용 */}
 						<NumberIcon index={index} />
-						<div className="text-left text-kor-body1 sm:text-[12px] text-gray-900">
+						<div className="text-left text-kor-body1 max-sm:text-[12px] text-gray-900 word-break">
 							{cautionFactors && cautionFactors.length > 0
 								? cautionFactors
 										.map((factor) => CautionIssue[factor as keyof typeof CautionIssue])
