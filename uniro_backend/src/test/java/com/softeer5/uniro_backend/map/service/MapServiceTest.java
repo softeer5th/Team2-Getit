@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -24,7 +23,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
-import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.external.elevation.MapClient;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
