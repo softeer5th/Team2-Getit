@@ -175,7 +175,6 @@ export const RouteCard = ({
 						<div className="text-system-orange text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
 					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
-						{/* TODO: Auto Resize Text 적용 */}
 						<NumberIcon index={index} />
 						<div className="text-left text-kor-body1 max-sm:text-[12px] text-gray-900 word-break">
 							{cautionFactors && cautionFactors.length > 0
@@ -198,7 +197,6 @@ export const RouteCard = ({
 						<div className="text-system-red text-kor-body3 text-[12px]">{formattedDistance}</div>
 					</div>
 					<div className="flex flex-row items-center justify-center ml-4 space-x-[14px]">
-						{/* TODO: Auto Resize Text 적용 */}
 						<NumberIcon index={index} />
 						<div className="text-left text-kor-body1 max-sm:text-[12px] text-gray-900 overflow-x-auto">
 							{dangerFactors && dangerFactors.length > 0
