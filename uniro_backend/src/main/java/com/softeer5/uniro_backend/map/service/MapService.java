@@ -19,6 +19,7 @@ import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationExcept
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
 import com.softeer5.uniro_backend.common.redis.RedisService;
 import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.external.event.RouteCreatedEvent;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.entity.Node;
 
@@ -30,6 +31,7 @@ import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,11 +55,10 @@ public class MapService {
 	private final NodeRepository nodeRepository;
 	private final BuildingRepository buildingRepository;
 	private final RevInfoRepository revInfoRepository;
+	private final ApplicationEventPublisher eventPublisher;
 
 	private final RouteCalculator routeCalculator;
 	private final RouteCacheCalculator routeCacheCalculator;
-
-	private final MapClient mapClient;
 
 	private final RedisService redisService;
 
@@ -261,7 +262,6 @@ public class MapService {
 			requests.getEndNodeId(),
 			requests.getCoordinates(), savedRoutes);
 
-		mapClient.fetchHeights(nodesForSave);
 
 		List<Route> routes = routeCalculator.createLinkedRouteAndSave(univId, nodesForSave);
 
@@ -270,6 +270,7 @@ public class MapService {
 
 		redisService.deleteData(univId.toString());
 
+		eventPublisher.publishEvent(new RouteCreatedEvent());
 		return routeCalculator.assembleRoutes(routes);
 	}
 }
