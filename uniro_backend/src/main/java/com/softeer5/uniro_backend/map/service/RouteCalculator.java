@@ -10,6 +10,7 @@ import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
 import com.softeer5.uniro_backend.map.dto.FastestRouteDTO;
+import com.softeer5.uniro_backend.map.dto.FastestRouteResultDTO;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.*;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
@@ -154,57 +155,24 @@ public class RouteCalculator {
                 shortestRoutes.remove(shortestRoutes.size() - 1);
             }
 
-            boolean hasCaution = false;
-            boolean hasDanger = false;
-            double totalDistance = 0.0;
-            double heightIncreaseWeight = 0.0;
-            double heightDecreaseWeight = 0.0;
-
-            // 결과를 DTO로 정리
-            List<RouteInfoResDTO> routeInfoDTOS = new ArrayList<>();
-            Node currentNode = startNode;
-            // 외부 변수를 수정해야하기 때문에 for-loop문 사용
-            for (Route route : shortestRoutes) {
-                totalDistance += route.getDistance();
-                if (!route.getCautionFactors().isEmpty()) {
-                    hasCaution = true;
-                }
-                if(!route.getDangerFactors().isEmpty()){
-                    hasDanger = true;
-                }
-
-                Node firstNode = route.getNode1();
-                Node secondNode = route.getNode2();
-                if (currentNode.getId().equals(secondNode.getId())) {
-                    Node temp = firstNode;
-                    firstNode = secondNode;
-                    secondNode = temp;
-                }
-                currentNode = secondNode;
-
-                double heightDiff = firstNode.getHeight() - secondNode.getHeight();
-                if(heightDiff > 0){
-                    heightIncreaseWeight += Math.exp(heightDiff) - 1;
-                }
-                else{
-                    heightDecreaseWeight += Math.exp(heightDiff) - 1;
-                }
-
-                routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
-            }
+            FastestRouteResultDTO fastestRouteResult = func(shortestRoutes, startNode);
 
             //처음과 마지막을 제외한 구간에서 빌딩노드를 거쳐왔다면, 이는 유효한 길이 없는 것이므로 예외처리
-            if (totalDistance > BUILDING_ROUTE_DISTANCE - 1) continue;
+            if (fastestRouteResult.getTotalDistance() > BUILDING_ROUTE_DISTANCE - 1) continue;
 
             List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
-            result.add(FastestRouteResDTO.of(policy, hasCaution, hasDanger, totalDistance,
+            result.add(FastestRouteResDTO.of(policy,
+                    fastestRouteResult.isHasCaution(),
+                    fastestRouteResult.isHasDanger(),
+                    fastestRouteResult.getTotalDistance(),
                     calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()
-                                + heightIncreaseWeight - heightDecreaseWeight),
+                                + fastestRouteResult.getHeightIncreaseWeight() - fastestRouteResult.getHeightDecreaseWeight()),
                     calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()
-                                + heightIncreaseWeight + heightDecreaseWeight),
+                            + fastestRouteResult.getHeightIncreaseWeight() + fastestRouteResult.getHeightDecreaseWeight()),
                     calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()),
-                    routeInfoDTOS, details));
+                    fastestRouteResult.getRouteInfoDTOS(),
+                    details));
         }
 
         if(result.isEmpty()) {
@@ -304,6 +272,48 @@ public class RouteCalculator {
         Collections.reverse(shortestRoutes);
 
         return shortestRoutes;
+    }
+
+    private FastestRouteResultDTO func(List<Route> shortestRoutes, Node startNode) {
+        boolean hasCaution = false;
+        boolean hasDanger = false;
+        double totalDistance = 0.0;
+        double heightIncreaseWeight = 0.0;
+        double heightDecreaseWeight = 0.0;
+
+        // 결과를 DTO로 정리
+        List<RouteInfoResDTO> routeInfoDTOS = new ArrayList<>();
+        Node currentNode = startNode;
+        // 외부 변수를 수정해야하기 때문에 for-loop문 사용
+        for (Route route : shortestRoutes) {
+            totalDistance += route.getDistance();
+            if (!route.getCautionFactors().isEmpty()) {
+                hasCaution = true;
+            }
+            if(!route.getDangerFactors().isEmpty()){
+                hasDanger = true;
+            }
+
+            Node firstNode = route.getNode1();
+            Node secondNode = route.getNode2();
+            if (currentNode.getId().equals(secondNode.getId())) {
+                Node temp = firstNode;
+                firstNode = secondNode;
+                secondNode = temp;
+            }
+            currentNode = secondNode;
+
+            double heightDiff = firstNode.getHeight() - secondNode.getHeight();
+            if(heightDiff > 0){
+                heightIncreaseWeight += Math.exp(heightDiff) - 1;
+            }
+            else{
+                heightDecreaseWeight += Math.exp(heightDiff) - 1;
+            }
+
+            routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
+        }
+        return FastestRouteResultDTO.of(hasCaution,hasDanger,totalDistance,heightIncreaseWeight,heightDecreaseWeight,routeInfoDTOS);
     }
 
     private boolean isBuildingRoute(Route route){
