@@ -2,18 +2,12 @@ import { Route, Routes } from "react-router";
 import "./App.css";
 import LandingPage from "./pages/landing";
 import UniversitySearchPage from "./pages/universitySearch";
-import MapPage from "./pages/map";
-import BuildingSearchPage from "./pages/buildingSearch";
-import NavigationResultPage from "./pages/navigationResult";
-import ReportRoutePage from "./pages/reportRoute";
-import ReportForm from "./pages/reportForm";
-import ReportRiskPage from "./pages/reportRisk";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDynamicSuspense } from "./hooks/useDynamicSuspense";
 import OfflinePage from "./pages/offline";
 import useNetworkStatus from "./hooks/useNetworkStatus";
 import ErrorPage from "./pages/error";
-import { Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ErrorBoundary from "./components/error/ErrorBoundary";
 import Errortest from "./pages/errorTest";
@@ -28,6 +22,13 @@ const queryClient = new QueryClient({
 		},
 	},
 });
+
+const BuildingSearchPage = lazy(() => import("./pages/buildingSearch"));
+const MapPage = lazy(() => import("./pages/map"));
+const ReportForm = lazy(() => import("./pages/reportForm"));
+const NavigationResultPage = lazy(() => import("./pages/navigationResult"));
+const ReportRoutePage = lazy(() => import("./pages/reportRoute"));
+const ReportRiskPage = lazy(() => import("./pages/reportRisk"));
 
 function App() {
 	const { location, fallback } = useDynamicSuspense();
