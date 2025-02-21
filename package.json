@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "vite-plugin-compression": "^0.5.1"
+  }
+}
