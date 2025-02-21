@@ -130,6 +130,7 @@ public class RouteCalculator {
 
             //길찾기 알고리즘 수행
             FastestRouteDTO fastestRouteDTO = findFastestRoute(startNode, endNode, adjMap, policy);
+            if(fastestRouteDTO==null) continue;
             Map<Long, Route> prevRoute = fastestRouteDTO.getPrevRoute();
 
 
@@ -155,7 +156,7 @@ public class RouteCalculator {
                 shortestRoutes.remove(shortestRoutes.size() - 1);
             }
 
-            FastestRouteResultDTO fastestRouteResult = func(shortestRoutes, startNode);
+            FastestRouteResultDTO fastestRouteResult = generateResult(shortestRoutes, startNode);
 
             //처음과 마지막을 제외한 구간에서 빌딩노드를 거쳐왔다면, 이는 유효한 길이 없는 것이므로 예외처리
             if (fastestRouteResult.getTotalDistance() > BUILDING_ROUTE_DISTANCE - 1) continue;
@@ -274,7 +275,7 @@ public class RouteCalculator {
         return shortestRoutes;
     }
 
-    private FastestRouteResultDTO func(List<Route> shortestRoutes, Node startNode) {
+    private FastestRouteResultDTO generateResult(List<Route> shortestRoutes, Node startNode) {
         boolean hasCaution = false;
         boolean hasDanger = false;
         double totalDistance = 0.0;
