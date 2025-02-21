@@ -16,6 +16,7 @@ import com.softeer5.uniro_backend.map.enums.CautionFactor;
 import com.softeer5.uniro_backend.map.enums.DangerFactor;
 import com.softeer5.uniro_backend.map.enums.DirectionType;
 import com.softeer5.uniro_backend.map.entity.Route;
+import com.softeer5.uniro_backend.map.service.vo.LightNode;
 import lombok.AllArgsConstructor;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -54,6 +55,7 @@ public class RouteCalculator {
         Map<Long, List<Route>> adjMap = new HashMap<>();
         Map<Long, Node> nodeMap = new HashMap<>();
         List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
+        List<Node> buildingNodes = new ArrayList<>();
 
         for (Route route : routes) {
 
@@ -61,6 +63,8 @@ public class RouteCalculator {
                 List<RouteCoordinatesInfoResDTO> routeCoordinates = new ArrayList<>();
                 routeCoordinates.add(RouteCoordinatesInfoResDTO.of(route.getId(), route.getNode1().getId(), route.getNode2().getId()));
                 buildingRoutes.add(BuildingRouteResDTO.of(route.getNode1().getId(), route.getNode2().getId(), routeCoordinates));
+                buildingNodes.add(route.getNode1());
+                buildingNodes.add(route.getNode2());
                 continue;
             }
 
@@ -72,13 +76,25 @@ public class RouteCalculator {
 
         }
 
-        List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
-                .map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getX(), entry.getValue().getY()))
-                .toList();
+//        List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
+//                .map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getX(), entry.getValue().getY()))
+//                .toList();
+
+        List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
+
+        for(Node node : nodeMap.values()) {
+            nodeInfos.add(NodeInfoResDTO.of(node.getId(), node.getX(), node.getY()));
+        }
 
         List<Node>startNode = determineStartNodes(adjMap, nodeMap);
 
-        return AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
+        AllRoutesInfo result = AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
+
+        for(Node node : buildingNodes) {
+            nodeInfos.add(NodeInfoResDTO.of(node.getId(), node.getX(), node.getY()));
+        }
+
+        return result;
     }
 
     private List<Node> determineStartNodes(Map<Long, List<Route>> adjMap,
