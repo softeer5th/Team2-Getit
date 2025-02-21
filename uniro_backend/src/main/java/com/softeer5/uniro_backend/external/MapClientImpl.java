@@ -45,13 +45,7 @@ public class MapClientImpl implements MapClient{
 
     @Override
     public void fetchHeights(List<Node> nodes) {
-        List<Node> nodesWithoutHeight = nodes.stream()
-                .filter(node -> node.getId() == null)
-                .toList();
-
-        if(nodesWithoutHeight.isEmpty()) return;
-
-        List<List<Node>> partitions = partitionNodes(nodesWithoutHeight, MAX_BATCH_SIZE);
+        List<List<Node>> partitions = partitionNodes(nodes, MAX_BATCH_SIZE);
 
         List<Mono<Void>> apiCalls = partitions.stream()
                 .map(batch -> fetchElevationAsync(batch)
