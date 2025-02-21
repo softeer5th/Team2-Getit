@@ -44,7 +44,6 @@ public class Node {
 	private LocalDateTime createdAt;
 
 	@NotNull
-	@NotNull
 	@Enumerated(EnumType.STRING)
 	private HeightStatus status;
 

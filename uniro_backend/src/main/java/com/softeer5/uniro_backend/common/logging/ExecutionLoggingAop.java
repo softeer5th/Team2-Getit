@@ -28,7 +28,6 @@ public class ExecutionLoggingAop {
 
 	@Around("execution(* com.softeer5.uniro_backend..*(..)) "
 		+ "&& !within(com.softeer5.uniro_backend.common..*)"
-			+ "&& !within(com.softeer5.uniro_backend.external..*)"
 	)
 	public Object logExecutionTrace(ProceedingJoinPoint pjp) throws Throwable {
 		String userId = userIdThreadLocal.get();
