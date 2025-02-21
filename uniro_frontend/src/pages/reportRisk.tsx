@@ -341,7 +341,7 @@ export default function ReportRiskPage() {
 	};
 
 	useEffect(() => {
-		if (reportedData?.routeId) {
+		if (reportedData?.routeId !== undefined) {
 			const foundRoute = findRouteById(routes.data, reportedData.routeId!);
 			if (!foundRoute) return;
 
@@ -373,7 +373,7 @@ export default function ReportRiskPage() {
 		}
 
 		if (map) {
-			if (reportedData) moveToMarker();
+			if (reportedData?.routeId !== undefined) moveToMarker();
 			else map.setCenter(university.centerPoint);
 
 			map.addListener("click", () => {
