@@ -80,7 +80,7 @@ export const RouteCard = ({
 					</div>
 					<div className="flex flex-row items-center justify-start ml-4 space-x-[14px] col-span-9">
 						<NumberIcon index={index} />
-						<div className="text-kor-body1 text-gray-900">급격한 우회전</div>
+						<div className="text-kor-body1 text-gray-900">우회전</div>
 					</div>
 				</div>
 			);
@@ -112,7 +112,7 @@ export const RouteCard = ({
 					</div>
 					<div className="flex flex-row items-center justify-start ml-4 space-x-[14px] col-span-9">
 						<NumberIcon index={index} />
-						<div className="text-kor-body1 text-gray-900">급격한 좌회전</div>
+						<div className="text-kor-body1 text-gray-900">좌회전</div>
 					</div>
 				</div>
 			);

@@ -20,6 +20,9 @@ export const getAllBuildings = (
 	});
 };
 
-export const getSearchBuildings = (univId: number, params: { name: string }): Promise<Building[]> => {
+export const getSearchBuildings = (
+	univId: number,
+	params: { name: string; "page-size": number },
+): Promise<Building[]> => {
 	return getFetch<GetBuildingListResponse>(`/${univId}/nodes/buildings/search`, params).then(transformGetBuildings);
 };

@@ -695,7 +695,7 @@ export default function ReportRoutePage() {
 	return (
 		<div className="relative w-full h-dvh">
 			{isTutorialShown && (
-				<TutorialModal onClose={closeTutorial} messages={["회색 선에서 시작할 점을 선택해주세요"]} />
+				<TutorialModal onClose={closeTutorial} messages={["파란선에서 시작할 점을 선택해주세요"]} />
 			)}
 			<BackButton className="absolute top-4 left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
