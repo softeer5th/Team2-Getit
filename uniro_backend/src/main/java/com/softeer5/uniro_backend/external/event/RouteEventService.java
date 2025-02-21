@@ -22,7 +22,6 @@ public class RouteEventService {
     @DisableAudit
     public void fetchHeight(){
         List<Node> readyNodes = nodeRepository.findAllByStatus(HeightStatus.READY);
-        setStatus(readyNodes,HeightStatus.PROGRESS);
         mapClient.fetchHeights(readyNodes);
         setStatus(readyNodes,HeightStatus.DONE);
     }
