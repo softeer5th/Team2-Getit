@@ -761,6 +761,7 @@ public class RouteCalculator {
             getNodeKey(distance1 <= distance2 ? coordinates[0] : coordinates[1]),
             Node.builder().coordinates(geometryFactory.createPoint(distance1 <= distance2 ? coordinates[0] : coordinates[1]))
                 .isCore(true)
+                .status(HeightStatus.READY)
                 .build()
         );
     }
