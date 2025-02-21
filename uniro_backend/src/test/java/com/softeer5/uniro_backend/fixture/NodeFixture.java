@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.fixture;
 
+import com.softeer5.uniro_backend.map.enums.HeightStatus;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 
@@ -14,6 +15,7 @@ public class NodeFixture {
 			.univId(1001L)
 			.isCore(false)
 			.coordinates(geometryFactory.createPoint(new Coordinate(x,y)))
+			.status(HeightStatus.READY)
 			.build();
 	}
 
@@ -22,6 +24,7 @@ public class NodeFixture {
 			.univId(1001L)
 			.isCore(true)
 			.coordinates(geometryFactory.createPoint(new Coordinate(x,y)))
+			.status(HeightStatus.READY)
 			.build();
 	}
 
@@ -31,6 +34,7 @@ public class NodeFixture {
 				.isCore(false)
 				.coordinates(geometryFactory.createPoint(new Coordinate(x,y)))
 				.height(height)
+				.status(HeightStatus.READY)
 				.build();
 	}
 }

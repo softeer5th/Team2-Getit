@@ -1,6 +1,7 @@
 package com.softeer5.uniro_backend.map.repository;
 
 import com.softeer5.uniro_backend.map.entity.Node;
+import com.softeer5.uniro_backend.map.enums.HeightStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +19,6 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     void deleteAllByCreatedAt(Long univId, LocalDateTime versionTimeStamp);
 
     List<Node> findAllByUnivId(Long univId);
+
+    List<Node> findAllByStatus(HeightStatus status);
 }
