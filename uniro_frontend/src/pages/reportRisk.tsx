@@ -1,13 +1,11 @@
-import { MouseEvent, useEffect, useState } from "react";
+import { MouseEvent, useContext, useEffect, useState } from "react";
 import useMap from "../hooks/useMap";
-import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
 import { CoreRoute, CoreRoutesList, RouteId } from "../data/types/route";
 import { Markers } from "../constant/enum/markerEnum";
 import { ClickEvent } from "../data/types/event";
 import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import centerCoordinate from "../utils/coordinates/centerCoordinate";
-import { MarkerTypesWithElement } from "../data/types/marker";
 import Button from "../components/customButton";
 import { Link } from "react-router";
 import { ReportRiskMessage } from "../constant/enum/messageEnum";
@@ -26,8 +24,12 @@ import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import TutorialModal from "../components/map/tutorialModal";
 import createMarkerElement from "../utils/markers/createMarkerElement";
+import MapContext from "../map/mapContext";
+import { CacheContext } from "../map/mapCacheContext";
+import removeAllListener from "../utils/map/removeAllListener";
 import useReportedRisk from "../hooks/useReportRiskResult";
 import { interpolate } from "../utils/interpolate";
+import { MarkerTypesWithElement, AdvancedMarker } from "../data/types/marker";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	route: RouteId;
@@ -35,7 +37,9 @@ interface reportMarkerTypes extends MarkerTypesWithElement {
 }
 
 export default function ReportRiskPage() {
-	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
+	const { cachedRouteRef, cachedMarkerRef, usedRouteRef, usedMarkerRef } = useContext(CacheContext);
+	const { createPolyline, createAdvancedMarker } = useContext(MapContext);
+	const { map, mapRef } = useMap({ zoom: 18, minZoom: 17 });
 
 	const [reportMarker, setReportMarker] = useState<reportMarkerTypes>();
 
@@ -101,105 +105,215 @@ export default function ReportRiskPage() {
 		return;
 	};
 
+	const onClickRiskMarker = (
+		self: AdvancedMarker,
+		type: Markers.DANGER | Markers.CAUTION,
+		routeId: RouteId,
+		factors: DangerIssueType[] | CautionIssueType[],
+	) => {
+		setReportMarker((prevMarker) => {
+			if (prevMarker) resetMarker(prevMarker);
+
+			return {
+				type: type,
+				element: self,
+				route: routeId,
+				factors: factors,
+			};
+		});
+	};
+
 	const addRiskMarker = () => {
-		if (AdvancedMarker === null || map === null) return;
+		if (!map) return;
+
+		console.log("----------RISK PAGE  | ADD RISK MARKER----------");
+		let isReDraw = false;
+
+		if (usedMarkerRef.current!.size !== 0) isReDraw = true;
+
+		const usedKeys = new Set();
+
 		const { dangerRoutes, cautionRoutes } = risks.data;
 
 		for (const route of dangerRoutes) {
 			const { routeId, node1, node2, dangerFactors } = route;
-			const type = Markers.DANGER;
+
+			const key = `DANGER_${routeId}`;
+
+			const cachedDangerMarker = cachedMarkerRef.current!.get(key);
+
+			if (cachedDangerMarker) {
+				if (!isReDraw) {
+					usedMarkerRef.current!.add(key);
+				} else {
+					usedKeys.add(key);
+				}
+
+				removeAllListener(cachedDangerMarker);
+				cachedDangerMarker.map = map;
+				cachedDangerMarker.addListener("click", () =>
+					onClickRiskMarker(cachedDangerMarker, Markers.DANGER, routeId, dangerFactors),
+				);
+
+				continue;
+			}
 
 			const dangerMarker = createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				dangerMarkerElement({}),
-				() => {
-					setReportMarker((prevMarker) => {
-						if (prevMarker) resetMarker(prevMarker);
-
-						return {
-							type: Markers.DANGER,
-							element: dangerMarker,
-							route: routeId,
-							factors: dangerFactors,
-						};
-					});
+				{
+					map: map,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: dangerMarkerElement({}),
 				},
+				(self) => onClickRiskMarker(self, Markers.DANGER, routeId, dangerFactors),
 			);
+			if (!dangerMarker) continue;
+
+			console.log(`RISK PAGE | NEW DANGER MARKER ${key}`);
+			cachedMarkerRef.current!.set(key, dangerMarker);
 		}
 
 		for (const route of cautionRoutes) {
 			const { routeId, node1, node2, cautionFactors } = route;
-			const type = Markers.CAUTION;
+
+			const key = `CAUTION_${routeId}`;
+
+			const cachedCautionMarker = cachedMarkerRef.current!.get(key);
+
+			if (cachedCautionMarker) {
+				if (!isReDraw) {
+					usedMarkerRef.current!.add(key);
+				} else {
+					usedKeys.add(key);
+				}
+
+				removeAllListener(cachedCautionMarker);
+				cachedCautionMarker.addListener("click", () =>
+					onClickRiskMarker(cachedCautionMarker, Markers.CAUTION, routeId, cautionFactors),
+				);
+				cachedCautionMarker.map = map;
+
+				continue;
+			}
 
 			const cautionMarker = createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				cautionMarkerElement({}),
-				() => {
-					setReportMarker((prevMarker) => {
-						if (prevMarker) resetMarker(prevMarker);
-
-						return {
-							type: Markers.CAUTION,
-							element: cautionMarker,
-							route: routeId,
-							factors: cautionFactors,
-						};
-					});
+				{
+					map: map,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: cautionMarkerElement({}),
 				},
+
+				(self) => onClickRiskMarker(self, Markers.CAUTION, routeId, cautionFactors),
 			);
+
+			if (!cautionMarker) continue;
+
+			console.log(`RISK PAGE | NEW CAUTION MARKER ${key}`);
+			cachedMarkerRef.current!.set(key, cautionMarker);
+		}
+
+		if (isReDraw) {
+			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
+
+			deleteKeys.forEach((key) => {
+				console.log("DELETED RISK MARKER", key);
+				cachedMarkerRef.current!.get(key)!.map = null;
+				cachedMarkerRef.current!.delete(key);
+			});
 		}
 	};
 
+	const onClickPolyline = (self: google.maps.Polyline, e: ClickEvent, edges: CoreRoute[]) => {
+		const point = LatLngToLiteral(e.latLng);
+		const { edge: nearestEdge } = findNearestSubEdge(edges, point);
+
+		const newReportMarker = createAdvancedMarker({
+			map: map,
+			position: centerCoordinate(nearestEdge.node1, nearestEdge.node2),
+			content: reportMarkerElement({}),
+		});
+
+		if (!newReportMarker) return;
+
+		setReportMarker((prevMarker) => {
+			if (prevMarker) resetMarker(prevMarker);
+
+			return {
+				type: Markers.REPORT,
+				element: newReportMarker,
+				route: nearestEdge.routeId,
+			};
+		});
+	};
+
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
-		if (!Polyline || !AdvancedMarker || !map) return;
+		if (!map || !cachedRouteRef.current) return;
+
+		console.log("----------RISK PAGE  | DRAW CORE ROUTES----------");
+
+		let isReDraw = false;
+
+		if (usedRouteRef.current!.size !== 0) isReDraw = true;
+
+		const usedKeys = new Set();
 
 		for (const coreRoutes of coreRouteList) {
-			const { routes: subRoutes } = coreRoutes;
+			const { coreNode1Id, coreNode2Id, routes: edges } = coreRoutes;
 
-			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
+			const subNodes = [edges[0].node1, ...edges.map((el) => el.node2)];
 
-			const routePolyLine = new Polyline({
-				map: map,
-				path: subNodes.map((el) => {
-					return { lat: el.lat, lng: el.lng };
-				}),
-				strokeColor: "#3585fc",
-			});
+			const key =
+				coreNode1Id < coreNode2Id
+					? `${edges[0].routeId}_${edges.slice(-1)[0].routeId}`
+					: `${edges.slice(-1)[0].routeId}_${edges[0].routeId}`;
 
-			routePolyLine.addListener("click", (e: ClickEvent) => {
-				const edges: CoreRoute[] = subRoutes.map(({ routeId, node1, node2 }) => {
-					return { routeId, node1, node2 };
-				});
+			const cachedPolyline = cachedRouteRef.current.get(key);
 
-				const point = LatLngToLiteral(e.latLng);
-				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
+			if (cachedPolyline) {
+				if (!isReDraw) {
+					usedRouteRef.current!.add(key);
+				} else {
+					usedKeys.add(key);
+				}
 
-				const newReportMarker = createAdvancedMarker(
-					AdvancedMarker,
-					map,
-					centerCoordinate(nearestEdge.node1, nearestEdge.node2),
-					reportMarkerElement({}),
-				);
+				removeAllListener(cachedPolyline);
+				cachedPolyline.setMap(map);
+				cachedPolyline.addListener("click", (e: ClickEvent) => onClickPolyline(cachedPolyline, e, edges));
+				continue;
+			}
 
-				setReportMarker((prevMarker) => {
-					if (prevMarker) resetMarker(prevMarker);
+			const routePolyLine = createPolyline(
+				{
+					map: map,
+					path: subNodes.map((el) => {
+						return { lat: el.lat, lng: el.lng };
+					}),
+					strokeColor: "#3585fc",
+				},
+				(self, e) => onClickPolyline(self, e, edges),
+			);
 
-					return {
-						type: Markers.REPORT,
-						element: newReportMarker,
-						route: nearestEdge.routeId,
-					};
-				});
+			if (!routePolyLine) continue;
+
+			if (cachedRouteRef.current) {
+				cachedRouteRef.current.set(key, routePolyLine);
+			}
+
+			console.log(`RISK PAGE | NEW CORE ROUTE ${key}`);
+		}
+
+		if (isReDraw) {
+			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;
+
+			deleteKeys.forEach((key) => {
+				console.log("DELETED CORE ROUTE", key);
+				cachedRouteRef.current!.get(key)?.setMap(null);
+				cachedRouteRef.current!.delete(key);
 			});
 		}
 	};
@@ -215,7 +329,7 @@ export default function ReportRiskPage() {
 	};
 
 	const moveToMarker = () => {
-		if (!map || !AdvancedMarker) return;
+		if (!map) return;
 		const { routeId } = reportedData;
 		const route = findRouteById(routes.data, routeId!);
 		if (!route) return;
@@ -227,7 +341,6 @@ export default function ReportRiskPage() {
 	};
 
 	useEffect(() => {
-		drawRoute(routes.data);
 		if (reportedData?.routeId !== undefined) {
 			const foundRoute = findRouteById(routes.data, reportedData.routeId!);
 			if (!foundRoute) return;
@@ -258,7 +371,6 @@ export default function ReportRiskPage() {
 				},
 			);
 		}
-		addRiskMarker();
 
 		if (map) {
 			if (reportedData?.routeId !== undefined) moveToMarker();
@@ -277,7 +389,7 @@ export default function ReportRiskPage() {
 				});
 			});
 		}
-	}, [map, AdvancedMarker, Polyline]);
+	}, [map]);
 
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: reportMarkerTypes | undefined, isSelect: boolean) => {
@@ -321,6 +433,24 @@ export default function ReportRiskPage() {
 			changeMarkerStyle(reportMarker, false);
 		};
 	}, [reportMarker]);
+
+	useEffect(() => {
+		drawRoute(routes.data);
+	}, [map, routes.data]);
+
+	useEffect(() => {
+		addRiskMarker();
+	}, [map, risks.data]);
+
+	useEffect(() => {
+		usedRouteRef.current?.clear();
+		usedMarkerRef.current?.clear();
+
+		return () => {
+			usedRouteRef.current?.clear();
+			usedMarkerRef.current?.clear();
+		};
+	}, []);
 
 	return (
 		<div className="relative w-full h-dvh">

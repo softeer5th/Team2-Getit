@@ -12,6 +12,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ErrorBoundary from "./components/error/ErrorBoundary";
 import Errortest from "./pages/errorTest";
 import NotFoundPage from "./pages/notFound";
+import { MapProvider } from "./map/mapContext";
+import CacheProvider from "./map/mapCacheContext";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -34,26 +36,30 @@ function App() {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<ErrorBoundary key={location.key} fallback={<ErrorPage />}>
-				<Suspense fallback={fallback}>
-					<Routes>
-						<Route path="/" element={<LandingPage />} />
-						<Route path="/university" element={<UniversitySearchPage />} />
-						<Route path="/building" element={<BuildingSearchPage />} />
-						<Route path="/map" element={<MapPage />} />
-						<Route path="/form" element={<ReportForm />} />
-						<Route path="/result" element={<NavigationResultPage />} />
-						<Route path="/report/route" element={<ReportRoutePage />} />
-						<Route path="/report/risk" element={<ReportRiskPage />} />
-						/** 에러 페이지 */
-						<Route path="/error" element={<ErrorPage />} />
-						<Route path="/error/offline" element={<OfflinePage />} />
-						<Route path="/error/test" element={<Errortest />} />
-						<Route path="*" element={<NotFoundPage />} />
-					</Routes>
-				</Suspense>
-			</ErrorBoundary>
-			<ReactQueryDevtools initialIsOpen={false} />
+			<MapProvider>
+				<CacheProvider>
+					<ErrorBoundary key={location.key} fallback={<ErrorPage />}>
+						<Suspense fallback={fallback}>
+							<Routes>
+								<Route path="/" element={<LandingPage />} />
+								<Route path="/university" element={<UniversitySearchPage />} />
+								<Route path="/building" element={<BuildingSearchPage />} />
+								<Route path="/map" element={<MapPage />} />
+								<Route path="/form" element={<ReportForm />} />
+								<Route path="/result" element={<NavigationResultPage />} />
+								<Route path="/report/route" element={<ReportRoutePage />} />
+								<Route path="/report/risk" element={<ReportRiskPage />} />
+								/** 에러 페이지 */
+								<Route path="/error" element={<ErrorPage />} />
+								<Route path="/error/offline" element={<OfflinePage />} />
+								<Route path="/error/test" element={<Errortest />} />
+								<Route path="*" element={<NotFoundPage />} />
+							</Routes>
+						</Suspense>
+					</ErrorBoundary>
+					<ReactQueryDevtools initialIsOpen={false} />
+				</CacheProvider>
+			</MapProvider>
 		</QueryClientProvider>
 	);
 }

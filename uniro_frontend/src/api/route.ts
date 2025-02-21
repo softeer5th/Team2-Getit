@@ -43,7 +43,7 @@ export const postReport = (
 	routeId: RouteId,
 	body: { dangerFactors: DangerIssueType[]; cautionFactors: CautionIssueType[] },
 ): Promise<boolean> => {
-	return postFetch<void, string>(`/${univId}/route/risk/${routeId}`, body);
+	return postFetch<boolean, string>(`/${univId}/route/risk/${routeId}`, body);
 };
 
 export const postReportRoute = (
@@ -53,6 +53,6 @@ export const postReportRoute = (
 		endNodeId: NodeId | null;
 		coordinates: Coord[];
 	},
-): Promise<boolean> => {
-	return postFetch<void, Coord[] | NodeId | null>(`/${univId}/route`, body);
+): Promise<GetAllRouteRepsonse> => {
+	return postFetch<GetAllRouteRepsonse, Coord[] | NodeId | null>(`/${univId}/route`, body);
 };
