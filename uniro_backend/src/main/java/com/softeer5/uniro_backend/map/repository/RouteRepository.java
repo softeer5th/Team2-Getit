@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.softeer5.uniro_backend.map.entity.Route;
+import com.softeer5.uniro_backend.map.service.vo.LightRoute;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.STREAM_FETCH_SIZE_AS_STRING;
 
@@ -24,6 +25,17 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     @Query("SELECT r FROM Route r WHERE r.univId = :univId")
     @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = STREAM_FETCH_SIZE_AS_STRING))
     Stream<Route> findAllRouteByUnivIdWithNodesStream(Long univId);
+
+    @Query("""
+    SELECT new com.softeer5.uniro_backend.map.service.vo.LightRoute(r.id, r.distance, n1, n2) 
+    FROM Route r 
+    JOIN r.node1 n1 
+    JOIN r.node2 n2
+    WHERE r.univId = :univId
+""")
+    @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = STREAM_FETCH_SIZE_AS_STRING))
+    Stream<LightRoute> findAllLightRoutesByUnivId(Long univId);
+
 
     @Query(value = "SELECT r.* FROM route r " +
             "WHERE r.univ_id = :univId " +

@@ -156,11 +156,10 @@ public class MapService {
 	}
 
 	private void processDatabaseData(Long univId, String redisKeyPrefix, int batchNumber, SseEmitter emitter) {
-		try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
+		try (Stream<LightRoute> routeStream = routeRepository.findAllLightRoutesByUnivId(univId)) {
 			List<LightRoute> batch = new ArrayList<>(STREAM_FETCH_SIZE);
-			for (Route route : (Iterable<Route>) routeStream::iterator) {
-				batch.add(new LightRoute(route));
-				entityManager.detach(route);
+			for (LightRoute route : (Iterable<LightRoute>) routeStream::iterator) {
+				batch.add(route);
 
 				if (batch.size() == STREAM_FETCH_SIZE) {
 					saveAndSendBatch(redisKeyPrefix, batchNumber++, batch, emitter);
