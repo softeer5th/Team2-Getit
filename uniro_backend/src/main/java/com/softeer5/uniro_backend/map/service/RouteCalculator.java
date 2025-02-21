@@ -157,6 +157,8 @@ public class RouteCalculator {
             boolean hasCaution = false;
             boolean hasDanger = false;
             double totalDistance = 0.0;
+            double heightIncreaseWeight = 0.0;
+            double heightDecreaseWeight = 0.0;
 
             // 결과를 DTO로 정리
             List<RouteInfoResDTO> routeInfoDTOS = new ArrayList<>();
@@ -180,6 +182,14 @@ public class RouteCalculator {
                 }
                 currentNode = secondNode;
 
+                double heightDiff = firstNode.getHeight() - secondNode.getHeight();
+                if(heightDiff > 0){
+                    heightIncreaseWeight += Math.exp(heightDiff) - 1;
+                }
+                else{
+                    heightDecreaseWeight += Math.exp(heightDiff) - 1;
+                }
+
                 routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
             }
 
@@ -189,8 +199,10 @@ public class RouteCalculator {
             List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
             result.add(FastestRouteResDTO.of(policy, hasCaution, hasDanger, totalDistance,
-                    calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()),
-                    calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()),
+                    calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()
+                                + heightIncreaseWeight - heightDecreaseWeight),
+                    calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()
+                                + heightIncreaseWeight + heightDecreaseWeight),
                     calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()),
                     routeInfoDTOS, details));
         }
