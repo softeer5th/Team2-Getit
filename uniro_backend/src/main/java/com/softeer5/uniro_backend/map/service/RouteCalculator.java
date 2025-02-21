@@ -16,6 +16,7 @@ import com.softeer5.uniro_backend.map.enums.CautionFactor;
 import com.softeer5.uniro_backend.map.enums.DangerFactor;
 import com.softeer5.uniro_backend.map.enums.DirectionType;
 import com.softeer5.uniro_backend.map.entity.Route;
+import com.softeer5.uniro_backend.map.enums.HeightStatus;
 import lombok.AllArgsConstructor;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -569,6 +570,8 @@ public class RouteCalculator {
         }
         createdNodes.add(startNode);
 
+        double nodeHeight = startNode.getHeight();
+
         // 기존에 저장된 노드와 일치하거나 or 새로운 노드와 겹칠 경우 -> 동일한 것으로 판단
         for (int i = 1; i < requests.size(); i++) {
             CreateRouteReqDTO cur = requests.get(i);
@@ -577,6 +580,7 @@ public class RouteCalculator {
             Node curNode = nodeMap.get(getNodeKey(new Coordinate(cur.getLng(), cur.getLat())));
             if(curNode != null){
                 createdNodes.add(curNode);
+                nodeHeight = (nodeHeight + curNode.getHeight()) / 2;
                 if(i == requests.size() - 1 && endNodeCount < CORE_NODE_CONDITION - 1){  // 마지막 노드일 경우, 해당 노드가 끝점일 경우
                     continue;
                 }
@@ -588,8 +592,10 @@ public class RouteCalculator {
             Coordinate coordinate = new Coordinate(cur.getLng(), cur.getLat());
             curNode = Node.builder()
                 .coordinates(geometryFactory.createPoint(coordinate))
+                .height(nodeHeight)
                 .isCore(false)
                 .univId(univId)
+                .status(HeightStatus.READY)
                 .build();
 
             createdNodes.add(curNode);
