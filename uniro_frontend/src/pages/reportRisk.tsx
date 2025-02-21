@@ -126,7 +126,6 @@ export default function ReportRiskPage() {
 	const addRiskMarker = () => {
 		if (!map) return;
 
-		console.log("----------RISK PAGE  | ADD RISK MARKER----------");
 		let isReDraw = false;
 
 		if (usedMarkerRef.current!.size !== 0) isReDraw = true;
@@ -171,7 +170,6 @@ export default function ReportRiskPage() {
 			);
 			if (!dangerMarker) continue;
 
-			console.log(`RISK PAGE | NEW DANGER MARKER ${key}`);
 			cachedMarkerRef.current!.set(key, dangerMarker);
 		}
 
@@ -213,7 +211,6 @@ export default function ReportRiskPage() {
 
 			if (!cautionMarker) continue;
 
-			console.log(`RISK PAGE | NEW CAUTION MARKER ${key}`);
 			cachedMarkerRef.current!.set(key, cautionMarker);
 		}
 
@@ -221,7 +218,6 @@ export default function ReportRiskPage() {
 			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
-				console.log("DELETED RISK MARKER", key);
 				cachedMarkerRef.current!.get(key)!.map = null;
 				cachedMarkerRef.current!.delete(key);
 			});
@@ -253,8 +249,6 @@ export default function ReportRiskPage() {
 
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
 		if (!map || !cachedRouteRef.current) return;
-
-		console.log("----------RISK PAGE  | DRAW CORE ROUTES----------");
 
 		let isReDraw = false;
 
@@ -303,15 +297,12 @@ export default function ReportRiskPage() {
 			if (cachedRouteRef.current) {
 				cachedRouteRef.current.set(key, routePolyLine);
 			}
-
-			console.log(`RISK PAGE | NEW CORE ROUTE ${key}`);
 		}
 
 		if (isReDraw) {
 			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
-				console.log("DELETED CORE ROUTE", key);
 				cachedRouteRef.current!.get(key)?.setMap(null);
 				cachedRouteRef.current!.delete(key);
 			});

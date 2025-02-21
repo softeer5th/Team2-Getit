@@ -3,7 +3,6 @@ import Button from "../customButton";
 import Call from "/public/icons/call-thick.svg?react";
 import Location from "/public/icons/location-thick.svg?react";
 import AnimatedContainer from "../../container/animatedContainer";
-import BottomSheetHandle from "../navigation/bottomSheet/bottomSheetHandle";
 import { useNavigationBottomSheet } from "../../hooks/useNavigationBottomSheet";
 import { RoutePointType } from "../../data/types/route";
 import { RoutePoint } from "../../constant/enum/routeEnum";
@@ -30,7 +29,7 @@ export default function MapBottomSheet({ isVisible, selectedMarker, selectRouteP
 			}}
 		>
 			<div ref={scrollRef} className="w-full overflow-y-auto h-fit" onScroll={preventScroll}>
-				<MapBottomSheetFromMarker
+				<BottomSheetContent
 					building={selectedMarker}
 					onClickLeft={() => selectRoutePoint(RoutePoint.ORIGIN)}
 					onClickRight={() => selectRoutePoint(RoutePoint.DESTINATION)}
@@ -40,13 +39,13 @@ export default function MapBottomSheet({ isVisible, selectedMarker, selectRouteP
 	);
 }
 
-interface MapBottomSheetFromMarkerProps {
+interface BottomSheetContentProps {
 	building: SelectedMarkerTypes | undefined;
 	onClickLeft: () => void;
 	onClickRight: () => void;
 }
 
-function MapBottomSheetFromMarker({ building, onClickLeft, onClickRight }: MapBottomSheetFromMarkerProps) {
+function BottomSheetContent({ building, onClickLeft, onClickRight }: BottomSheetContentProps) {
 	if (!building || building.property === undefined) return;
 
 	const { buildingName, buildingImageUrl, phoneNumber, address } = building.property;
@@ -54,14 +53,14 @@ function MapBottomSheetFromMarker({ building, onClickLeft, onClickRight }: MapBo
 	const { setSearchMode } = useSearchBuilding();
 
 	const handlLeftClick = () => {
-		setSearchMode('ORIGIN');
+		setSearchMode("ORIGIN");
 		onClickLeft();
-	}
+	};
 
 	const handleRightClick = () => {
-		setSearchMode('DESTINATION');
+		setSearchMode("DESTINATION");
 		onClickRight();
-	}
+	};
 
 	return (
 		<div className="h-full px-5 pt-3 pb-6 flex flex-col items-between">
