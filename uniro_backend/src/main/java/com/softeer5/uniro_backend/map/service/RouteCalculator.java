@@ -9,6 +9,7 @@ import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
+import com.softeer5.uniro_backend.map.dto.FastestRouteDTO;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.*;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
@@ -127,7 +128,9 @@ public class RouteCalculator {
             }
 
             //길찾기 알고리즘 수행
-            Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap, policy);
+            FastestRouteDTO fastestRouteDTO = findFastestRoute(startNode, endNode, adjMap, policy);
+            Map<Long, Route> prevRoute = fastestRouteDTO.getPrevRoute();
+
 
             //길찾기 결과가 null인 경우 continue
             if(prevRoute == null) continue;
@@ -186,9 +189,9 @@ public class RouteCalculator {
             List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
             result.add(FastestRouteResDTO.of(policy, hasCaution, hasDanger, totalDistance,
-                    calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER, totalDistance),
-                    calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER,totalDistance),
-                    calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER,totalDistance),
+                    calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()),
+                    calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()),
+                    calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER, fastestRouteDTO.getTotalWeightDistance()),
                     routeInfoDTOS, details));
         }
 
@@ -206,7 +209,7 @@ public class RouteCalculator {
         nodeMap.putIfAbsent(route.getNode2().getId(), route.getNode2());
     }
 
-    private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap, RoadExclusionPolicy policy){
+    private FastestRouteDTO findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap, RoadExclusionPolicy policy){
         //key : nodeId, value : 최단거리 중 해당 노드를 향한 route
         Map<Long, Route> prevRoute = new HashMap<>();
         // startNode로부터 각 노드까지 걸리는 cost를 저장하는 자료구조
@@ -250,7 +253,7 @@ public class RouteCalculator {
             return null;
         }
 
-        return prevRoute;
+        return FastestRouteDTO.of(prevRoute, costMap.get(endNode.getId()));
     }
 
     // A* 알고리즘의 휴리스틱 중 지나온 위험요소의 개수에 따른 가중치 부여
