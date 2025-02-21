@@ -109,7 +109,7 @@ const NavigationResultPage = () => {
 		setCurrentRouteIdx(index);
 		setTimeout(() => {
 			setCautionRouteIdx(index);
-		}, 700);
+		}, 800);
 	};
 
 	return (
