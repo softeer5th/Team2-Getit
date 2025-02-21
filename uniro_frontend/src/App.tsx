@@ -24,7 +24,7 @@ import CacheProvider from "./map/mapCacheContext";
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
-			staleTime: 30000,
+			staleTime: 300000,
 		},
 	},
 });
