@@ -55,11 +55,7 @@ export default function Input({ onChangeDebounce, placeholder, handleVoiceInput,
 				onFocus={onFoucs}
 				onBlur={onBlur}
 			/>
-			{value.length === 0 ? (
-				<button onClick={handleVoiceInput} className="cursor-pointer">
-					<Mic stroke="#161616" />
-				</button>
-			) : (
+			{value.length !== 0 && (
 				<button onClick={resetInput} className="cursor-pointer">
 					<Close />
 				</button>

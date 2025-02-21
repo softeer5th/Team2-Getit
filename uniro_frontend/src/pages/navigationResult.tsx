@@ -197,7 +197,7 @@ const NavigationResultPage = () => {
 					<BottomSheetHandle resetCurrentIdx={resetCurrentIndex} dragControls={dragControls} />
 					<div
 						ref={scrollRef}
-						className="w-full overflow-y-auto"
+						className="w-full overflow-y-scroll overflow-x-hidden"
 						style={{
 							height: MAX_SHEET_HEIGHT - BOTTOM_SHEET_HANDLE_HEIGHT,
 						}}
