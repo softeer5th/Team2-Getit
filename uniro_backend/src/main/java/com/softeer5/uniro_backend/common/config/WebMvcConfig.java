@@ -33,26 +33,26 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		this.jwtInterceptor = jwtInterceptor;
 	}
 
-	@Override
-	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-		//custom configuration...
-		FastJsonConfig config = new FastJsonConfig();
-		config.setDateFormat("yyyy-MM-dd HH:mm:ss");
-		config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
-		config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
-		converter.setFastJsonConfig(config);
-		converter.setDefaultCharset(StandardCharsets.UTF_8);
-
-		converter.setSupportedMediaTypes(List.of(
-			MediaType.APPLICATION_JSON, // application/json 지원
-			new MediaType("application", "json", StandardCharsets.UTF_8),
-			new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)
-		));
-
-		converters.add(0, converter);
-		converters.forEach(c -> log.info("✔ {}", c.getClass().getName()));
-	}
+	// @Override
+	// public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	// 	FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+	// 	//custom configuration...
+	// 	FastJsonConfig config = new FastJsonConfig();
+	// 	config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+	// 	config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
+	// 	config.setWriterFeatures(JSONWriter.Feature.WriteMapNullValue, JSONWriter.Feature.PrettyFormat);
+	// 	converter.setFastJsonConfig(config);
+	// 	converter.setDefaultCharset(StandardCharsets.UTF_8);
+	//
+	// 	converter.setSupportedMediaTypes(List.of(
+	// 		MediaType.APPLICATION_JSON, // application/json 지원
+	// 		new MediaType("application", "json", StandardCharsets.UTF_8),
+	// 		new MediaType("application", "openmetrics-text", StandardCharsets.UTF_8)
+	// 	));
+	//
+	// 	converters.add(0, converter);
+	// 	converters.forEach(c -> log.info("✔ {}", c.getClass().getName()));
+	// }
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {

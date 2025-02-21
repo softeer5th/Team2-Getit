@@ -1,4 +1,4 @@
-package com.softeer5.uniro_backend.common.redis;
+package com.softeer5.uniro_backend.external.redis;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -47,6 +47,15 @@ public class RedisService {
 
 	public void deleteData(String key) {
 		redisTemplate.delete(key);
+		cacheMap.remove(key);
+	}
+
+	public void deleteRoutesData(String key, int batchNumber) {
+		String redisKeyPrefix = key + ":";
+
+		for(int i=1; i<=batchNumber; i++){
+			redisTemplate.delete(redisKeyPrefix + i);
+		}
 		cacheMap.remove(key);
 	}
 }

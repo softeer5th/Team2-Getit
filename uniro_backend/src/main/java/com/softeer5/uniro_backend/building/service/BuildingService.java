@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.enums.RevisionOperationType;
-import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.external.elevation.MapClient;
 import com.softeer5.uniro_backend.building.dto.request.CreateBuildingNodeReqDTO;
 import com.softeer5.uniro_backend.building.entity.Building;
 import com.softeer5.uniro_backend.map.entity.Node;
@@ -13,7 +13,6 @@ import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.softeer5.uniro_backend.common.CursorPage;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;

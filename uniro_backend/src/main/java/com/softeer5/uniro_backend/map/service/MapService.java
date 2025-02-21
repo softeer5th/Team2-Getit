@@ -17,8 +17,8 @@ import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
-import com.softeer5.uniro_backend.common.redis.RedisService;
-import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.external.redis.RedisService;
+import com.softeer5.uniro_backend.external.elevation.MapClient;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
 import com.softeer5.uniro_backend.map.entity.Node;
 
@@ -119,37 +119,76 @@ public class MapService {
 
 	@Async
 	public void getAllRoutesByStream(Long univId, SseEmitter emitter) {
-		int batchSize = routeRepository.countByUnivId(univId);
-		batchSize = batchSize % STREAM_FETCH_SIZE == 0 ? batchSize / STREAM_FETCH_SIZE : batchSize / STREAM_FETCH_SIZE + 1;
+		String redisKeyPrefix = univId + ":";
+		int batchNumber = 1;
 
-		try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
-			List<Route> batch = new ArrayList<>(STREAM_FETCH_SIZE);
-			Iterator<Route> iterator = routeStream.iterator();
-			while (iterator.hasNext()) {
-				Route route = iterator.next();
-				batch.add(route);
-				entityManager.detach(route);
+		try {
+			// 1️⃣ Redis 데이터가 있다면 우선 처리
+			if (processRedisData(redisKeyPrefix, batchNumber, emitter)) {
+				return;
+			}
 
-				if (batch.size() == STREAM_FETCH_SIZE) {
-					processBatch(batch, emitter, batchSize);
-				}
-			}
-			// 남은 배치 처리
-			if (!batch.isEmpty()) {
-				processBatch(batch, emitter, batchSize);
-			}
-			emitter.complete();
-			log.info("[SSE emitter complete] " + Thread.currentThread().getName());
-		}
-		catch (Exception e) {
+			// 2️⃣ Redis에 데이터가 없으면 기존 DB 조회 방식 사용
+			processDatabaseData(univId, redisKeyPrefix, batchNumber, emitter);
+		} catch (Exception e) {
 			emitter.completeWithError(e);
-			log.error(e.getMessage());
+			log.error("SSE error: {}", e.getMessage(), e);
 		}
 	}
 
-	private void processBatch(List<Route> batch, SseEmitter emitter, int size) throws Exception {
+	private boolean processRedisData(String redisKeyPrefix, int batchNumber, SseEmitter emitter) throws Exception {
+		while (redisService.hasData(redisKeyPrefix + batchNumber)) {
+			LightRoutes lightRoutes = (LightRoutes) redisService.getData(redisKeyPrefix + batchNumber);
+			if (lightRoutes == null) {
+				break;
+			}
+
+			processBatch(lightRoutes.getLightRoutes(), emitter, lightRoutes.getLightRoutes().size());
+			batchNumber++;
+		}
+
+		if (batchNumber > 1) {
+			emitter.complete();
+			log.info("[SSE emitter complete] Redis data used.");
+			return true;
+		}
+		return false;
+	}
+
+	private void processDatabaseData(Long univId, String redisKeyPrefix, int batchNumber, SseEmitter emitter) {
+		try (Stream<LightRoute> routeStream = routeRepository.findAllLightRoutesByUnivId(univId)) {
+			List<LightRoute> batch = new ArrayList<>(STREAM_FETCH_SIZE);
+			for (LightRoute route : (Iterable<LightRoute>) routeStream::iterator) {
+				batch.add(route);
+
+				if (batch.size() == STREAM_FETCH_SIZE) {
+					saveAndSendBatch(redisKeyPrefix, batchNumber++, batch, emitter);
+				}
+			}
+
+			// 남은 배치 처리
+			if (!batch.isEmpty()) {
+				saveAndSendBatch(redisKeyPrefix, batchNumber, batch, emitter);
+			}
+
+			emitter.complete();
+			log.info("[SSE emitter complete] DB data used.");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void saveAndSendBatch(String redisKeyPrefix, int batchNumber, List<LightRoute> batch, SseEmitter emitter)
+		throws Exception {
+		LightRoutes value = new LightRoutes(batch);
+		redisService.saveData(redisKeyPrefix + batchNumber, value);
+		processBatch(batch, emitter, batch.size());
+		batch.clear();
+	}
+
+	private void processBatch(List<LightRoute> batch, SseEmitter emitter, int size) throws Exception {
 		if (!batch.isEmpty()) {
-			AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+			AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(batch);
 			allRoutesInfo.setBatchSize(size);
 			emitter.send(allRoutesInfo);
 			batch.clear();
@@ -195,11 +234,11 @@ public class MapService {
 	@Transactional
 	public void updateRisk(Long univId, Long routeId, PostRiskReqDTO postRiskReqDTO) {
 		Route route = routeRepository.findByIdAndUnivId(routeId, univId)
-				.orElseThrow(() -> new RouteException("Route not Found", ROUTE_NOT_FOUND));
+			.orElseThrow(() -> new RouteException("Route not Found", ROUTE_NOT_FOUND));
 
 		if(!postRiskReqDTO.getCautionFactors().isEmpty() && !postRiskReqDTO.getDangerFactors().isEmpty()){
 			throw new RouteException("DangerFactors and CautionFactors can't exist simultaneously.",
-					ErrorCode.CAUTION_DANGER_CANT_EXIST_SIMULTANEOUSLY);
+				ErrorCode.CAUTION_DANGER_CANT_EXIST_SIMULTANEOUSLY);
 		}
 
 		route.setCautionFactorsByList(postRiskReqDTO.getCautionFactors());
@@ -218,10 +257,10 @@ public class MapService {
 		}
 
 		Node buildingNode = nodeRepository.findById(buildingNodeId)
-				.orElseThrow(()-> new NodeException("Node not found", NODE_NOT_FOUND));
+			.orElseThrow(()-> new NodeException("Node not found", NODE_NOT_FOUND));
 
 		Node connectedNode = nodeRepository.findById(nodeId)
-				.orElseThrow(()-> new NodeException("Node not found", NODE_NOT_FOUND));
+			.orElseThrow(()-> new NodeException("Node not found", NODE_NOT_FOUND));
 
 		int connectedRouteCount = routeRepository.countByUnivIdAndNodeId(univId, nodeId);
 		if(connectedRouteCount>= CORE_NODE_CONDITION - 1){
@@ -234,15 +273,15 @@ public class MapService {
 		}
 
 		Route route = Route.builder()
-				.distance(BUILDING_ROUTE_DISTANCE)
-				.path(geometryFactory.createLineString(
-						new Coordinate[] {buildingNode.getCoordinates().getCoordinate(),
-								connectedNode.getCoordinates().getCoordinate()}))
-				.node1(buildingNode)
-				.node2(connectedNode)
-				.cautionFactors(Collections.EMPTY_SET)
-				.dangerFactors(Collections.EMPTY_SET)
-				.univId(univId).build();
+			.distance(BUILDING_ROUTE_DISTANCE)
+			.path(geometryFactory.createLineString(
+				new Coordinate[] {buildingNode.getCoordinates().getCoordinate(),
+					connectedNode.getCoordinates().getCoordinate()}))
+			.node1(buildingNode)
+			.node2(connectedNode)
+			.cautionFactors(Collections.EMPTY_SET)
+			.dangerFactors(Collections.EMPTY_SET)
+			.univId(univId).build();
 
 		routeRepository.save(route);
 	}
@@ -268,7 +307,9 @@ public class MapService {
 		nodeRepository.saveAll(nodesForSave);
 		routeRepository.saveAll(routes);
 
-		redisService.deleteData(univId.toString());
+		int routeCount = routeRepository.countByUnivId(univId);
+
+		redisService.deleteRoutesData(univId.toString(), routeCount / STREAM_FETCH_SIZE + 1);
 
 		return routeCalculator.assembleRoutes(routes);
 	}
