@@ -32,6 +32,7 @@ public class RouteCacheCalculator {
 		Map<Long, List<LightRoute>> adjMap = new HashMap<>();
 		Map<Long, LightNode> nodeMap = new HashMap<>();
 		List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
+		List<LightNode> buildingNodes = new ArrayList<>();
 
 		for (LightRoute route : routes) {
 
@@ -39,6 +40,8 @@ public class RouteCacheCalculator {
 				List<RouteCoordinatesInfoResDTO> routeCoordinates = new ArrayList<>();
 				routeCoordinates.add(RouteCoordinatesInfoResDTO.of(route.getId(), route.getNode1().getId(), route.getNode2().getId()));
 				buildingRoutes.add(BuildingRouteResDTO.of(route.getNode1().getId(), route.getNode2().getId(), routeCoordinates));
+				buildingNodes.add(route.getNode1());
+				buildingNodes.add(route.getNode2());
 				continue;
 			}
 
@@ -50,13 +53,25 @@ public class RouteCacheCalculator {
 
 		}
 
-		List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
-			.map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getLng(), entry.getValue().getLat()))
-			.toList();
+//		List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
+//				.map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getLng(), entry.getValue().getLat()))
+//				.toList();
+
+		List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
+
+		for(LightNode node : nodeMap.values()) {
+			nodeInfos.add(NodeInfoResDTO.of(node.getId(), node.getLng(), node.getLat()));
+		}
 
 		List<LightNode>startNode = determineStartNodes(adjMap, nodeMap);
 
-		return AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
+		AllRoutesInfo result = AllRoutesInfo.of(nodeInfos, getCoreRoutes(adjMap, startNode), buildingRoutes);
+
+		for(LightNode node : buildingNodes) {
+			nodeInfos.add(NodeInfoResDTO.of(node.getId(), node.getLng(), node.getLat()));
+		}
+
+		return result;
 	}
 
 	private boolean isBuildingRoute(LightRoute route){
