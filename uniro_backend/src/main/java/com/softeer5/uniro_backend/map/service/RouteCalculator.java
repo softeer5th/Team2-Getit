@@ -395,6 +395,7 @@ public class RouteCalculator {
                 checkPointNodeCoordinates = getCenter(now, nxt);
                 checkPointType = DirectionType.CAUTION;
                 checkPointCautionFactors = nowRoute.getCautionFactorsByList();
+                checkPointDangerFactors = Collections.emptyList();
             }
 
             if(!nowRoute.getDangerFactors().isEmpty()){
@@ -405,6 +406,7 @@ public class RouteCalculator {
                 checkPointNodeCoordinates = getCenter(now, nxt);
                 checkPointType = DirectionType.DANGER;
                 checkPointDangerFactors = nowRoute.getDangerFactorsByList();
+                checkPointCautionFactors = Collections.emptyList();
             }
 
             if(nxt.equals(endNode)){
