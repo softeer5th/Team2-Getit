@@ -15,11 +15,19 @@ const useRoutePoint = create(
 	persist<RouteStore>(
 		(set) => ({
 			origin: undefined,
-			setOrigin: (newOrigin: Building | undefined) => set(() => ({ origin: newOrigin })),
+			setOrigin: (newOrigin: Building | undefined) =>
+				set((prev) =>
+					prev.destination?.nodeId === newOrigin?.nodeId
+						? { origin: newOrigin, destination: undefined }
+						: { origin: newOrigin },
+				),
 			destination: undefined,
-			setDemoBuildingInfo: (building: Building) => set(() => ({ origin: building, destination: building })),
-
-			setDestination: (newDestination: Building | undefined) => set(() => ({ destination: newDestination })),
+			setDestination: (newDestination: Building | undefined) =>
+				set((prev) =>
+					prev.origin?.nodeId === newDestination?.nodeId
+						? { origin: undefined, destination: newDestination }
+						: { destination: newDestination },
+				),
 			switchBuilding: () => set(({ origin, destination }) => ({ origin: destination, destination: origin })),
 		}),
 		{
