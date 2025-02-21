@@ -1,12 +1,11 @@
 package com.softeer5.uniro_backend.external.event;
 
 import com.softeer5.uniro_backend.admin.annotation.DisableAudit;
-import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.external.elevation.MapClient;
 import com.softeer5.uniro_backend.map.entity.Node;
 import com.softeer5.uniro_backend.map.enums.HeightStatus;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
