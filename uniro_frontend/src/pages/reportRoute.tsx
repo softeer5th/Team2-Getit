@@ -20,7 +20,7 @@ import { Node, NodeId } from "../data/types/node";
 import { Coord } from "../data/types/coord";
 import useModal from "../hooks/useModal";
 import { getAllRisks } from "../api/routes";
-import { CautionIssueType, DangerIssueType, MarkerTypes } from "../data/types/enum";
+import { CautionIssueType, DangerIssueType } from "../data/types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import removeMarkers from "../utils/markers/removeMarkers";
 import useMutationError from "../hooks/useMutationError";
@@ -214,11 +214,12 @@ export default function ReportRoutePage() {
 					usedKeys.add(key);
 				}
 
-				removeAllListener(cachedDangerMarker.element);
-				cachedDangerMarker.element.map = null;
-				cachedDangerMarker.element.addListener("click", () =>
-					onClickRiskMarker(cachedDangerMarker.element, routeId, Markers.DANGER, dangerFactors),
+				removeAllListener(cachedDangerMarker);
+				cachedDangerMarker.map = null;
+				cachedDangerMarker.addListener("click", () =>
+					onClickRiskMarker(cachedDangerMarker, routeId, Markers.DANGER, dangerFactors),
 				);
+				dangerMarkersWithId.push({ routeId, element: cachedDangerMarker });
 
 				continue;
 			}
@@ -237,7 +238,7 @@ export default function ReportRoutePage() {
 			if (!dangerMarker) continue;
 
 			console.log(`ROUTE PAGE | NEW DANGER MARKER ${key}`);
-			cachedMarkerRef.current!.set(key, { type: Markers.DANGER, element: dangerMarker });
+			cachedMarkerRef.current!.set(key, dangerMarker);
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
 		setDangerMarkers(dangerMarkersWithId);
@@ -259,11 +260,12 @@ export default function ReportRoutePage() {
 					usedKeys.add(key);
 				}
 
-				removeAllListener(cachedCautionMarker.element);
-				cachedCautionMarker.element.addListener("click", () =>
-					onClickRiskMarker(cachedCautionMarker.element, routeId, Markers.CAUTION, cautionFactors),
+				removeAllListener(cachedCautionMarker);
+				cachedCautionMarker.addListener("click", () =>
+					onClickRiskMarker(cachedCautionMarker, routeId, Markers.CAUTION, cautionFactors),
 				);
-				cachedCautionMarker.element.map = null;
+				cachedCautionMarker.map = null;
+				cautionMarkersWithId.push({ routeId, element: cachedCautionMarker });
 
 				continue;
 			}
@@ -283,7 +285,7 @@ export default function ReportRoutePage() {
 			if (!cautionMarker) continue;
 
 			console.log(`ROUTE PAGE | NEW CAUTION MARKER ${key}`);
-			cachedMarkerRef.current!.set(key, { type: Markers.CAUTION, element: cautionMarker });
+			cachedMarkerRef.current!.set(key, cautionMarker);
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
 		setCautionMarkers(cautionMarkersWithId);
@@ -293,7 +295,7 @@ export default function ReportRoutePage() {
 
 			deleteKeys.forEach((key) => {
 				console.log("DELETED RISK MARKER", key);
-				cachedMarkerRef.current!.get(key)!.element.map = null;
+				cachedMarkerRef.current!.get(key)!.map = null;
 				cachedMarkerRef.current!.delete(key);
 			});
 		}
@@ -418,7 +420,10 @@ export default function ReportRoutePage() {
 
 			const subNodes = [edges[0].node1, ...edges.map((el) => el.node2)];
 
-            const key = coreNode1Id < coreNode2Id ?`${edges[0].routeId}_${edges.slice(-1)[0].routeId}` :`${edges.slice(-1)[0].routeId}_${edges[0].routeId}`
+			const key =
+				coreNode1Id < coreNode2Id
+					? `${edges[0].routeId}_${edges.slice(-1)[0].routeId}`
+					: `${edges.slice(-1)[0].routeId}_${edges[0].routeId}`;
 
 			const cachedPolyline = cachedRouteRef.current.get(key);
 

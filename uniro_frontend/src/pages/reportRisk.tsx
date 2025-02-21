@@ -149,10 +149,10 @@ export default function ReportRiskPage() {
 					usedKeys.add(key);
 				}
 
-				removeAllListener(cachedDangerMarker.element);
-				cachedDangerMarker.element.map = map;
-				cachedDangerMarker.element.addListener("click", () =>
-					onClickRiskMarker(cachedDangerMarker.element, Markers.DANGER, routeId, dangerFactors),
+				removeAllListener(cachedDangerMarker);
+				cachedDangerMarker.map = map;
+				cachedDangerMarker.addListener("click", () =>
+					onClickRiskMarker(cachedDangerMarker, Markers.DANGER, routeId, dangerFactors),
 				);
 
 				continue;
@@ -172,7 +172,7 @@ export default function ReportRiskPage() {
 			if (!dangerMarker) continue;
 
 			console.log(`RISK PAGE | NEW DANGER MARKER ${key}`);
-			cachedMarkerRef.current!.set(key, { type: Markers.DANGER, element: dangerMarker });
+			cachedMarkerRef.current!.set(key, dangerMarker);
 		}
 
 		for (const route of cautionRoutes) {
@@ -189,11 +189,11 @@ export default function ReportRiskPage() {
 					usedKeys.add(key);
 				}
 
-				removeAllListener(cachedCautionMarker.element);
-				cachedCautionMarker.element.addListener("click", () =>
-					onClickRiskMarker(cachedCautionMarker.element, Markers.CAUTION, routeId, cautionFactors),
+				removeAllListener(cachedCautionMarker);
+				cachedCautionMarker.addListener("click", () =>
+					onClickRiskMarker(cachedCautionMarker, Markers.CAUTION, routeId, cautionFactors),
 				);
-				cachedCautionMarker.element.map = map;
+				cachedCautionMarker.map = map;
 
 				continue;
 			}
@@ -214,7 +214,7 @@ export default function ReportRiskPage() {
 			if (!cautionMarker) continue;
 
 			console.log(`RISK PAGE | NEW CAUTION MARKER ${key}`);
-			cachedMarkerRef.current!.set(key, { type: Markers.CAUTION, element: cautionMarker });
+			cachedMarkerRef.current!.set(key, cautionMarker);
 		}
 
 		if (isReDraw) {
@@ -222,7 +222,7 @@ export default function ReportRiskPage() {
 
 			deleteKeys.forEach((key) => {
 				console.log("DELETED RISK MARKER", key);
-				cachedMarkerRef.current!.get(key)!.element.map = null;
+				cachedMarkerRef.current!.get(key)!.map = null;
 				cachedMarkerRef.current!.delete(key);
 			});
 		}
@@ -267,8 +267,11 @@ export default function ReportRiskPage() {
 
 			const subNodes = [edges[0].node1, ...edges.map((el) => el.node2)];
 
-			const key = coreNode1Id < coreNode2Id ?`${edges[0].routeId}_${edges.slice(-1)[0].routeId}` :`${edges.slice(-1)[0].routeId}_${edges[0].routeId}`
-            
+			const key =
+				coreNode1Id < coreNode2Id
+					? `${edges[0].routeId}_${edges.slice(-1)[0].routeId}`
+					: `${edges.slice(-1)[0].routeId}_${edges[0].routeId}`;
+
 			const cachedPolyline = cachedRouteRef.current.get(key);
 
 			if (cachedPolyline) {
