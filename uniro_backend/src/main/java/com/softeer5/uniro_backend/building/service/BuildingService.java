@@ -9,6 +9,7 @@ import com.softeer5.uniro_backend.external.elevation.MapClient;
 import com.softeer5.uniro_backend.building.dto.request.CreateBuildingNodeReqDTO;
 import com.softeer5.uniro_backend.building.entity.Building;
 import com.softeer5.uniro_backend.map.entity.Node;
+import com.softeer5.uniro_backend.map.enums.HeightStatus;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,6 +72,7 @@ public class BuildingService {
 		Node node = Node.builder()
 				.coordinates(convertDoubleToPoint(createBuildingNodeReqDTO.getLng(), createBuildingNodeReqDTO.getLat()))
 				.isCore(false)
+				.status(HeightStatus.READY)
 				.univId(univId).build();
 		mapClient.fetchHeights(List.of(node));
 		nodeRepository.save(node);
