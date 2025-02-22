@@ -55,7 +55,6 @@ const NavigationNavBar = ({ route, dataLength, buttonType, setButtonState }: Pro
 
 	const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, buttonKey: NavigationButtonRouteType) => {
 		setButtonState(buttonKey);
-		// scrollIntoView로 클릭된 요소가 화면에 노출되도록
 		e.currentTarget.scrollIntoView({
 			behavior: "smooth",
 			inline: "center",

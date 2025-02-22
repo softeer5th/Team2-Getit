@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Cancel from "../../assets/icon/close.svg?react";
 import CautionIcon from "../../assets/icon/cautionText.svg?react";
 import SafeIcon from "../../assets/icon/safeText.svg?react";

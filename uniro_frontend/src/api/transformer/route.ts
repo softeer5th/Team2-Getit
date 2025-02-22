@@ -1,5 +1,6 @@
 import {
 	CoreRoutesList,
+	NavigationButtonRouteType,
 	NavigationRouteListRecord,
 	NavigationRouteListRecordWithMetaData,
 } from "../../data/types/route";
@@ -51,7 +52,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 	// data의 길이가 3 : 모두 온 거
 
 	const record: NavigationRouteListRecord = {};
-
+	let defaultMode: NavigationButtonRouteType = "PEDES & SAFE";
 	data.forEach((route) => {
 		switch (route.routeType) {
 			case "PEDES":
@@ -67,6 +68,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				break;
 			case "WHEEL_FAST":
 				if (route.manualTotalCost && route.hasCaution) {
+					defaultMode = "MANUAL & CAUTION";
 					record[`MANUAL & CAUTION`] = {
 						hasCaution: route.hasCaution,
 						hasDanger: route.hasDanger,
@@ -77,6 +79,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 					};
 				}
 				if (route.electricTotalCost && route.hasCaution) {
+					defaultMode = "MANUAL & CAUTION";
 					record[`ELECTRIC & CAUTION`] = {
 						hasCaution: route.hasCaution,
 						hasDanger: route.hasDanger,
@@ -89,6 +92,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 				break;
 			case "WHEEL_SAFE":
 				if (route.manualTotalCost && !route.hasCaution) {
+					defaultMode = "MANUAL & SAFE";
 					record[`MANUAL & SAFE`] = {
 						hasCaution: route.hasCaution,
 						hasDanger: route.hasDanger,
@@ -99,6 +103,7 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 					};
 				}
 				if (route.electricTotalCost && !route.hasCaution) {
+					defaultMode = "MANUAL & SAFE";
 					record[`ELECTRIC & SAFE`] = {
 						hasCaution: route.hasCaution,
 						hasDanger: route.hasDanger,
@@ -115,5 +120,6 @@ export const transformFastRoute = (data: GetFastestRouteResponse): NavigationRou
 	return {
 		...record,
 		dataLength: data.length,
+		defaultMode,
 	};
 };

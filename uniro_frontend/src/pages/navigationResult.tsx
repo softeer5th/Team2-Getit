@@ -41,7 +41,6 @@ const NavigationResultPage = () => {
 
 	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
 
-	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>("PEDES & SAFE");
 	const [currentRouteIdx, setCurrentRouteIdx] = useState(-1);
 	// Caution 마커를 위한 routeIdx state
 	const [cautionRouteIdx, setCautionRouteIdx] = useState(-1);
@@ -71,6 +70,10 @@ const NavigationResultPage = () => {
 			},
 		],
 	});
+
+	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>(
+		routeList.data?.defaultMode ?? "PEDES & SAFE",
+	);
 
 	const resetCurrentIndex = () => {
 		setCautionRouteIdx(-1);
