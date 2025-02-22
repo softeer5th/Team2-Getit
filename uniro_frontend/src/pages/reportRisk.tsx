@@ -386,6 +386,8 @@ export default function ReportRiskPage() {
 	const changeMarkerStyle = (marker: reportMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
+		marker.element.zIndex = isSelect ? 100 : 1;
+
 		switch (marker.type) {
 			case Markers.DANGER:
 				if (isSelect) {

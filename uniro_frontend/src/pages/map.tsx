@@ -409,6 +409,9 @@ export default function MapPage() {
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
+
+		marker.element.zIndex = isSelect ? 100 : 1;
+
 		switch (marker.type) {
 			case Markers.CAUTION:
 				if (isSelect) {
