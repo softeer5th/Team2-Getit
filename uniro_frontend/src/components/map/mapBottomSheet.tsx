@@ -30,7 +30,7 @@ export default function MapBottomSheet({ isVisible, selectedMarker, selectRouteP
 			}}
 		>
 			<div ref={scrollRef} className="w-full overflow-y-auto h-fit" onScroll={preventScroll}>
-				<MapBottomSheetFromMarker
+				<BottomSheetContent
 					building={selectedMarker}
 					onClickLeft={() => selectRoutePoint(RoutePoint.ORIGIN)}
 					onClickRight={() => selectRoutePoint(RoutePoint.DESTINATION)}
@@ -40,13 +40,13 @@ export default function MapBottomSheet({ isVisible, selectedMarker, selectRouteP
 	);
 }
 
-interface MapBottomSheetFromMarkerProps {
+interface BottomSheetContentProps {
 	building: SelectedMarkerTypes | undefined;
 	onClickLeft: () => void;
 	onClickRight: () => void;
 }
 
-function MapBottomSheetFromMarker({ building, onClickLeft, onClickRight }: MapBottomSheetFromMarkerProps) {
+function BottomSheetContent({ building, onClickLeft, onClickRight }: BottomSheetContentProps) {
 	if (!building || building.property === undefined) return;
 
 	const [imageLoaded, setImageLoaded] = useState(false);

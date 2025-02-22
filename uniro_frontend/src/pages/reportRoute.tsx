@@ -122,7 +122,6 @@ export default function ReportRoutePage() {
 				queryClient.setQueryData(["routes", university.id], (prev: CoreRoutesList) => {
 					return [...prev, ...routes];
 				});
-				console.log(status);
 				setIsActive(false);
 			},
 			onError: () => {
@@ -188,7 +187,6 @@ export default function ReportRoutePage() {
 	const addRiskMarker = () => {
 		if (!map) return;
 
-		console.log("----------ROUTE PAGE | ADD RISK MARKER----------");
 		let isReDraw = false;
 
 		if (usedMarkerRef.current!.size !== 0) isReDraw = true;
@@ -237,7 +235,6 @@ export default function ReportRoutePage() {
 			);
 			if (!dangerMarker) continue;
 
-			console.log(`ROUTE PAGE | NEW DANGER MARKER ${key}`);
 			cachedMarkerRef.current!.set(key, dangerMarker);
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
@@ -284,7 +281,6 @@ export default function ReportRoutePage() {
 
 			if (!cautionMarker) continue;
 
-			console.log(`ROUTE PAGE | NEW CAUTION MARKER ${key}`);
 			cachedMarkerRef.current!.set(key, cautionMarker);
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
@@ -294,7 +290,6 @@ export default function ReportRoutePage() {
 			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
-				console.log("DELETED RISK MARKER", key);
 				cachedMarkerRef.current!.get(key)!.map = null;
 				cachedMarkerRef.current!.delete(key);
 			});
@@ -407,8 +402,6 @@ export default function ReportRoutePage() {
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
 		if (!map || !cachedRouteRef.current) return;
 
-		console.log("----------ROUTE PAGE | DRAW CORE ROUTES----------");
-
 		let isReDraw = false;
 
 		if (usedRouteRef.current!.size !== 0) isReDraw = true;
@@ -505,15 +498,12 @@ export default function ReportRoutePage() {
 			if (cachedRouteRef.current && routePolyline) {
 				cachedRouteRef.current.set(key, routePolyline);
 			}
-
-			console.log(`ROUTE PAGE | NEW CORE ROUTE ${key}`);
 		}
 
 		if (isReDraw) {
 			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
-				console.log("DELETED CORE ROUTE", key);
 				cachedRouteRef.current!.get(key)?.setMap(null);
 				cachedRouteRef.current!.delete(key);
 			});
@@ -642,6 +632,9 @@ export default function ReportRoutePage() {
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
+
+		marker.element.zIndex = isSelect ? 100 : 1;
+
 		if (marker.type === Markers.DANGER) {
 			if (isSelect) {
 				marker.element.content = dangerMarkerElement({

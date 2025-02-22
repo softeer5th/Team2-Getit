@@ -35,7 +35,6 @@ import { getAllRoutes, getNavigationResult } from "../api/route";
 import useQueryError from "../hooks/useQueryError";
 import { CacheContext } from "../map/mapCacheContext";
 import removeAllListener from "../utils/map/removeAllListener";
-import { i } from "framer-motion/client";
 
 export type SelectedMarkerTypes = {
 	type: MarkerTypes;
@@ -43,7 +42,6 @@ export type SelectedMarkerTypes = {
 	element: AdvancedMarker;
 	property?: Building;
 	factors?: DangerIssueType[] | CautionIssueType[];
-	from: "Marker" | "List";
 };
 
 const BOTTOM_SHEET_HEIGHT = 377;
@@ -207,7 +205,6 @@ export default function MapPage() {
 						type: Markers.BUILDING,
 						element: self,
 						property: building,
-						from: "Marker",
 					});
 				},
 			);
@@ -234,7 +231,6 @@ export default function MapPage() {
 				type: type,
 				element: self,
 				factors: factors,
-				from: "Marker",
 			};
 		});
 	};
@@ -242,7 +238,6 @@ export default function MapPage() {
 	const addRiskMarker = () => {
 		if (!map) return;
 
-		console.log("----------MAIN PAGE  | ADD RISK MARKER----------");
 		let isReDraw = false;
 
 		if (usedMarkerRef.current!.size !== 0) isReDraw = true;
@@ -291,7 +286,6 @@ export default function MapPage() {
 			);
 			if (!dangerMarker) continue;
 
-			console.log(`MAIN PAGE | NEW DANGER MARKER ${key}`);
 			cachedMarkerRef.current!.set(key, dangerMarker);
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
@@ -338,7 +332,6 @@ export default function MapPage() {
 
 			if (!cautionMarker) continue;
 
-			console.log(`MAIN PAGE | NEW CAUTION MARKER ${key}`);
 			cachedMarkerRef.current!.set(key, cautionMarker);
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
@@ -348,7 +341,6 @@ export default function MapPage() {
 			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
-				console.log("DELETED RISK MARKER", key);
 				cachedMarkerRef.current!.get(key)!.map = null;
 				cachedMarkerRef.current!.delete(key);
 			});
@@ -394,7 +386,7 @@ export default function MapPage() {
 	const selectRoutePoint = (type?: RoutePointType) => {
 		if (!selectedMarker || !selectedMarker.property || selectedMarker.type !== Markers.BUILDING) return;
 
-		if (selectedMarker.from === "Marker" && type) {
+		if (type) {
 			switch (type) {
 				case RoutePoint.ORIGIN:
 					if (selectedMarker.id === destination?.nodeId) setDestination(undefined);
@@ -417,6 +409,9 @@ export default function MapPage() {
 	/** isSelect(Marker 선택 시) Marker Content 변경, 지도 이동, BottomSheet 열기 */
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
+
+		marker.element.zIndex = isSelect ? 100 : 1;
+
 		switch (marker.type) {
 			case Markers.CAUTION:
 				if (isSelect) {
@@ -494,7 +489,6 @@ export default function MapPage() {
 	/** 빌딩 리스트에서 넘어온 경우, 일치하는 BuildingMarkerElement를 탐색 */
 	useEffect(() => {
 		if (buildingMarkers.length === 0 || !selectedBuilding || !selectedBuilding.nodeId) return;
-
 		if (!selectedMarker) {
 			const matchedMarker = findBuildingMarker(selectedBuilding.nodeId);
 
@@ -504,7 +498,6 @@ export default function MapPage() {
 					id: selectedBuilding.nodeId,
 					type: Markers.BUILDING,
 					element: matchedMarker,
-					from: "List",
 					property: selectedBuilding,
 				});
 				return;
@@ -526,7 +519,9 @@ export default function MapPage() {
 		if (!origin || !origin.nodeId) return;
 
 		const originMarker = findBuildingMarker(origin.nodeId);
+
 		if (!originMarker) return;
+		if (searchMode === "BUILDING") setSearchMode("ORIGIN");
 
 		originMarker.map = map;
 
@@ -555,7 +550,9 @@ export default function MapPage() {
 		if (!destination || !destination.nodeId) return;
 
 		const destinationMarker = findBuildingMarker(destination.nodeId);
+
 		if (!destinationMarker) return;
+		if (searchMode === "BUILDING") setSearchMode("DESTINATION");
 
 		destinationMarker.map = map;
 
@@ -696,8 +693,6 @@ export default function MapPage() {
 	const drawRoute = (coreRouteList: CoreRoutesList) => {
 		if (!map || !cachedRouteRef.current) return;
 
-		console.log("----------MAIN PAGE  | DRAW CORE ROUTES----------");
-
 		let isReDraw = false;
 
 		if (usedRouteRef.current!.size !== 0) isReDraw = true;
@@ -745,14 +740,11 @@ export default function MapPage() {
 			if (cachedRouteRef.current) {
 				cachedRouteRef.current.set(key, routePolyLine);
 			}
-
-			console.log(`MAIN PAGE | NEW CORE ROUTE ${key}`);
 		}
 		if (isReDraw) {
 			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
-				console.log("DELETED CORE ROUTE", key);
 				cachedRouteRef.current!.get(key)?.setMap(null);
 				cachedRouteRef.current!.delete(key);
 			});
@@ -770,11 +762,6 @@ export default function MapPage() {
 	}, [routes.data, map]);
 
 	useEffect(() => {
-		if (!origin || !destination) {
-			setOrigin(undefined);
-			setDestination(undefined);
-		}
-
 		usedRouteRef.current?.clear();
 		usedMarkerRef.current?.clear();
 
