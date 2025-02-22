@@ -2,6 +2,7 @@ import React from "react";
 
 import ElectricIcon from "../../../assets/route/detail/electric.svg?react";
 import WheelChairIcon from "../../../assets/route/detail/wheelchair.svg?react";
+import WalkIcon from "../../../assets/route/detail/walkIcon.svg?react";
 import { NavigationButtonRouteType, NavigationRouteListRecord } from "../../../data/types/route";
 
 type Props = {
@@ -77,7 +78,7 @@ const NavigationNavBar = ({ route, dataLength, buttonType, setButtonState }: Pro
 				onClick={() => setButtonState("PEDES & SAFE")}
 				className={`scroll-snap-x mandatory flex flex-row min-w-max items-center justify-center ${buttonType === "PEDES & SAFE" ? "bg-blue-600" : "bg-blue-300"} active:bg-blue-800 transition-colors rounded-xl py-2 px-4 text-gray-100 text-kor-body3 font-light`}
 			>
-				<ElectricIcon className="w-5 h-5 mr-1" />
+				<WalkIcon className="w-5 h-5 mr-1" />
 				{`도보 ${calculatedTimes.pedestrian}분`}
 			</div>
 		</div>
