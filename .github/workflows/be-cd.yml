@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - be
+      - test/UNI-255-v5
 
 jobs:
   uniro-ci:
