@@ -63,6 +63,168 @@ public class MapService {
 
 	private final Map<Long, List<LightRoute>> cache = new HashMap<>();
 
+
+
+	public GetAllRoutesResDTO getAllRoutesTestExisting(Long univId) {
+		List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
+
+		// 맵이 존재하지 않을 경우 예외
+		if(routes.isEmpty()) {
+			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
+		}
+
+		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
+				.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
+
+		AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(routes);
+
+		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
+				allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
+	}
+
+
+	public GetAllRoutesResDTO getAllRoutesTestStream(Long univId) {
+		List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
+		List<CoreRouteResDTO> coreRoutes = new ArrayList<>();
+		List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
+
+		try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
+			List<Route> batch = new ArrayList<>(STREAM_FETCH_SIZE);
+			Iterator<Route> iterator = routeStream.iterator();
+			while (iterator.hasNext()) {
+				Route route = iterator.next();
+				batch.add(route);
+				entityManager.detach(route);
+
+				// 100건 모이면 배치 처리
+				if (batch.size() == STREAM_FETCH_SIZE) {
+					AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+					nodeInfos.addAll(allRoutesInfo.getNodeInfos());
+					coreRoutes.addAll(allRoutesInfo.getCoreRoutes());
+					buildingRoutes.addAll(allRoutesInfo.getBuildingRoutes());
+					batch.clear();
+					entityManager.clear();
+				}
+			}
+
+			// 남은 배치 처리
+			if (!batch.isEmpty()) {
+				AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+				nodeInfos.addAll(allRoutesInfo.getNodeInfos());
+				coreRoutes.addAll(allRoutesInfo.getCoreRoutes());
+				buildingRoutes.addAll(allRoutesInfo.getBuildingRoutes());
+				batch.clear();
+				entityManager.clear();
+			}
+
+		}
+
+		return GetAllRoutesResDTO.of(nodeInfos,coreRoutes,buildingRoutes,1L);
+	}
+
+	@Async
+	public void getAllRoutesByStreamTestSSE(Long univId, SseEmitter emitter) {
+		try (Stream<Route> routeStream = routeRepository.findAllRouteByUnivIdWithNodesStream(univId)) {
+			List<Route> batch = new ArrayList<>(STREAM_FETCH_SIZE);
+			Iterator<Route> iterator = routeStream.iterator();
+			while (iterator.hasNext()) {
+				Route route = iterator.next();
+				batch.add(route);
+				entityManager.detach(route);
+
+				// 500건 모이면 배치 처리
+				if (batch.size() == STREAM_FETCH_SIZE) {
+					AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+					emitter.send(allRoutesInfo);
+					batch.clear();
+					entityManager.clear();
+				}
+			}
+
+			// 남은 배치 처리
+			if (!batch.isEmpty()) {
+				AllRoutesInfo allRoutesInfo = routeCalculator.assembleRoutes(batch);
+				emitter.send(allRoutesInfo);
+				batch.clear();
+				entityManager.clear();
+			}
+
+			emitter.complete();
+		}
+		catch (Exception e) {
+			emitter.completeWithError(e);
+		}
+	}
+
+
+	public GetAllRoutesResDTO getAllRoutesTestStreamLight(Long univId) {
+		List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
+		List<CoreRouteResDTO> coreRoutes = new ArrayList<>();
+		List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
+
+		try (Stream<LightRoute> routeStream = routeRepository.findAllLightRoutesByUnivId(univId)) {
+			List<LightRoute> batch = new ArrayList<>(STREAM_FETCH_SIZE);
+			Iterator<LightRoute> iterator = routeStream.iterator();
+			while (iterator.hasNext()) {
+				LightRoute route = iterator.next();
+				batch.add(route);
+
+				// 100건 모이면 배치 처리
+				if (batch.size() == STREAM_FETCH_SIZE) {
+					AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(batch);
+					nodeInfos.addAll(allRoutesInfo.getNodeInfos());
+					coreRoutes.addAll(allRoutesInfo.getCoreRoutes());
+					buildingRoutes.addAll(allRoutesInfo.getBuildingRoutes());
+					batch.clear();
+					entityManager.clear();
+				}
+			}
+
+			// 남은 배치 처리
+			if (!batch.isEmpty()) {
+				AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(batch);
+				nodeInfos.addAll(allRoutesInfo.getNodeInfos());
+				coreRoutes.addAll(allRoutesInfo.getCoreRoutes());
+				buildingRoutes.addAll(allRoutesInfo.getBuildingRoutes());
+				batch.clear();
+				entityManager.clear();
+			}
+
+		}
+
+		return GetAllRoutesResDTO.of(nodeInfos,coreRoutes,buildingRoutes,1L);
+	}
+
+	@Async
+	public void getAllRoutesByStreamTestSSELight(Long univId, SseEmitter emitter) {
+		try (Stream<LightRoute> routeStream = routeRepository.findAllLightRoutesByUnivId(univId)) {
+			List<LightRoute> batch = new ArrayList<>(STREAM_FETCH_SIZE);
+			for (LightRoute route : (Iterable<LightRoute>) routeStream::iterator) {
+				batch.add(route);
+
+				if (batch.size() == STREAM_FETCH_SIZE) {
+					AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(batch);
+					emitter.send(allRoutesInfo);
+					batch.clear();
+					entityManager.clear();
+				}
+			}
+
+			// 남은 배치 처리
+			if (!batch.isEmpty()) {
+				AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(batch);
+				emitter.send(allRoutesInfo);
+				batch.clear();
+				entityManager.clear();
+			}
+
+			emitter.complete();
+			log.info("[SSE emitter complete] DB data used.");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public GetAllRoutesResDTO getAllRoutesByLocalCache(Long univId) {
 
 		if(!cache.containsKey(univId)){

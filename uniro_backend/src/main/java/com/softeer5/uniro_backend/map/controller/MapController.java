@@ -25,6 +25,40 @@ public class MapController implements MapApi {
 	private final MapService mapService;
 	private final AdminService adminService;
 
+
+	@GetMapping("/{univId}/routes/test/existing")
+	public ResponseEntity<GetAllRoutesResDTO> testExisting(@PathVariable("univId") Long univId){
+		GetAllRoutesResDTO allRoutes = mapService.getAllRoutesTestExisting(univId);
+		return ResponseEntity.ok().body(allRoutes);
+	}
+
+	@GetMapping("/{univId}/routes/test/stream")
+	public ResponseEntity<GetAllRoutesResDTO> testStream(@PathVariable("univId") Long univId){
+		GetAllRoutesResDTO allRoutes = mapService.getAllRoutesTestStream(univId);
+		return ResponseEntity.ok().body(allRoutes);
+	}
+
+	@GetMapping("/{univId}/routes/test/sse")
+	public SseEmitter testSSE(@PathVariable("univId") Long univId){
+		SseEmitter emitter = new SseEmitter(60 * 1000L); // timeout 1분
+		mapService.getAllRoutesByStreamTestSSE(univId, emitter);
+		return emitter;
+	}
+
+	@GetMapping("/{univId}/routes/test/light/stream")
+	public ResponseEntity<GetAllRoutesResDTO> testStreamLight(@PathVariable("univId") Long univId) {
+		GetAllRoutesResDTO allRoutes = mapService.getAllRoutesTestStreamLight(univId);
+		return ResponseEntity.ok().body(allRoutes);
+	}
+
+	@GetMapping("/{univId}/routes/test/light/sse")
+	public SseEmitter testSSELight(@PathVariable("univId") Long univId){
+		SseEmitter emitter = new SseEmitter(60 * 1000L); // timeout 1분
+		mapService.getAllRoutesByStreamTestSSELight(univId, emitter);
+		return emitter;
+	}
+
+
 	@GetMapping("/{univId}/routes-local")
 	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodesByLocalCache(@PathVariable("univId") Long univId){
 		GetAllRoutesResDTO allRoutes = mapService.getAllRoutesByLocalCache(univId);
