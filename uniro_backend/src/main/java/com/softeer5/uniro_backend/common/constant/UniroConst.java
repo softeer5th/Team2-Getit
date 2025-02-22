@@ -16,4 +16,8 @@ public final class UniroConst {
 	public static final String STREAM_FETCH_SIZE_AS_STRING = "" + STREAM_FETCH_SIZE;
 
 	public static final int CREATE_ROUTE_LIMIT_COUNT = 2000;
+
+
+	public static final Integer MAX_GOOGLE_API_BATCH_SIZE = 300;
+	public static final String SUCCESS_STATUS = "OK";
 }
