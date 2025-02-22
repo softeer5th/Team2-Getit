@@ -90,7 +90,7 @@ const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, rese
 			<div className="mt-4"></div>
 			<div className="w-full flex flex-row items-center justify-between ml-4">
 				<div
-					className={`w-full grid grid-cols-[14.2857%_auto_14.2857%_auto_71.4286%] items-center gap-x-2 ${navigationRoute?.totalCost / 60 >= 100 && "max-sm:ml-3"}`}
+					className={`w-full grid grid-cols-[14.2857%_auto_14.2857%_auto_1fr] items-center gap-x-2 ${navigationRoute?.totalCost / 60 >= 100 && "max-sm:ml-3"}`}
 				>
 					<div className="flex items-center justify-end">
 						<AnimatedValue
@@ -123,7 +123,7 @@ const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, rese
 						<span className="ml-1 text-kor-body3 text-gray-700 max-sm:text-xs">
 							{navigationRoute
 								? `가는 길${returnTitleText(navigationRoute?.hasCaution, navigationRoute?.hasDanger)}`
-								: "  배리어프리 경로가 존재하지 않습니다."}
+								: "  배리어프리경로가 존재하지 않습니다."}
 						</span>
 					</div>
 				</div>
