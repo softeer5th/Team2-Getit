@@ -1,16 +1,14 @@
 import { ChangeEvent, InputHTMLAttributes, useRef, useState } from "react";
 import Search from "../../public/icons/search.svg?react";
 import ChevronLeft from "../../public/icons/chevron-left.svg?react";
-import Mic from "../../public/icons/mic.svg?react";
 import Close from "../../public/icons/close-circle.svg?react";
 
 interface CustomInputProps extends InputHTMLAttributes<HTMLInputElement> {
 	onChangeDebounce: (e: string) => void;
 	placeholder: string;
-	handleVoiceInput: () => void;
 }
 
-export default function Input({ onChangeDebounce, placeholder, handleVoiceInput, ...rest }: CustomInputProps) {
+export default function Input({ onChangeDebounce, placeholder, ...rest }: CustomInputProps) {
 	const [isFocus, setIsFocus] = useState<boolean>();
 	const [value, setValue] = useState<string>("");
 	const timeOutRef = useRef<number>();

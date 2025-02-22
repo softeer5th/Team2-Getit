@@ -2,6 +2,7 @@ import { Building } from "../../data/types/node";
 import { Link } from "react-router";
 import CallIcon from "../../assets/call-thin.svg?react";
 import LocationIcon from "../../assets/location-thin.svg?react";
+import { useState } from "react";
 
 interface BuildingListProps {
 	building: Building;
@@ -10,6 +11,8 @@ interface BuildingListProps {
 
 export default function BuildingCard({ building, onClick }: BuildingListProps) {
 	const { buildingName, buildingImageUrl, address, phoneNumber } = building;
+
+	const [imageLoaded, setImageLoaded] = useState(false);
 	return (
 		<li>
 			<Link
@@ -28,8 +31,16 @@ export default function BuildingCard({ building, onClick }: BuildingListProps) {
 						{phoneNumber}
 					</p>
 				</div>
-				<div>
-					<img src={building.buildingImageUrl} className="w-[66px] h-[66px] object-cover rounded-100" />
+				<div className="relative w-[66px] h-[66px]">
+					{!imageLoaded && (
+						<div className="absolute inset-0 w-full h-full bg-gray-300 rounded-100 animate-pulse" />
+					)}
+					<img
+						src={buildingImageUrl}
+						onLoad={() => setImageLoaded(true)}
+						onError={() => setImageLoaded(true)}
+						className="w-[66px] h-[66px] object-cover rounded-100"
+					/>
 				</div>
 			</Link>
 		</li>

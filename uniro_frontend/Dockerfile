@@ -11,7 +11,11 @@ COPY ./uniro_frontend .
 
 RUN npm run build
 
-FROM nginx:alpine
+RUN cd dist && find . -type f -exec brotli --best {} \;
+
+FROM alpine
+
+RUN apk update && apk add nginx-mod-http-brotli
 
 COPY uniro_frontend/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY --from=build /app/dist /usr/share/nginx/html

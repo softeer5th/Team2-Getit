@@ -161,9 +161,10 @@ const NavigationMap = ({
 		if (!routeResult) return {};
 		if (!origin || !destination) return {};
 		const record: CompositeRoutesRecord = {};
+
 		Object.entries(routeResult).forEach(([key, routeData]) => {
 			// key는 NavigationButtonRouteType 형식으로 가정
-			if (typeof routeData !== "number" && routeData.routes.length > 0) {
+			if (typeof routeData === "object" && "routes" in routeData && routeData.routes.length > 0) {
 				const composite = createCompositeRoute(routeData);
 				if (composite) record[key as NavigationButtonRouteType] = composite;
 			}

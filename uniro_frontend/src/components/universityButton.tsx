@@ -8,7 +8,7 @@ interface UniversityButtonProps {
 	onClick: () => void;
 }
 
-export default function UniversityButton({ name, img, selected, loading, onClick }: UniversityButtonProps) {
+export default function UniversityButton({ name, img, selected, onClick }: UniversityButtonProps) {
 	const [imageLoaded, setImageLoaded] = useState(false);
 	const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
