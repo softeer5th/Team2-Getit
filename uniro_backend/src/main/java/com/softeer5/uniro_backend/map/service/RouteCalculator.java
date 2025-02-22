@@ -9,6 +9,8 @@ import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
+import com.softeer5.uniro_backend.map.dto.FastestRouteDTO;
+import com.softeer5.uniro_backend.map.dto.FastestRouteResultDTO;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.*;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
@@ -127,7 +129,10 @@ public class RouteCalculator {
             }
 
             //길찾기 알고리즘 수행
-            Map<Long, Route> prevRoute = findFastestRoute(startNode, endNode, adjMap, policy);
+            FastestRouteDTO fastestRouteDTO = findFastestRoute(startNode, endNode, adjMap, policy);
+            if(fastestRouteDTO==null) continue;
+            Map<Long, Route> prevRoute = fastestRouteDTO.getPrevRoute();
+
 
             //길찾기 결과가 null인 경우 continue
             if(prevRoute == null) continue;
@@ -151,45 +156,27 @@ public class RouteCalculator {
                 shortestRoutes.remove(shortestRoutes.size() - 1);
             }
 
-            boolean hasCaution = false;
-            boolean hasDanger = false;
-            double totalDistance = 0.0;
-
-            // 결과를 DTO로 정리
-            List<RouteInfoResDTO> routeInfoDTOS = new ArrayList<>();
-            Node currentNode = startNode;
-            // 외부 변수를 수정해야하기 때문에 for-loop문 사용
-            for (Route route : shortestRoutes) {
-                totalDistance += route.getDistance();
-                if (!route.getCautionFactors().isEmpty()) {
-                    hasCaution = true;
-                }
-                if(!route.getDangerFactors().isEmpty()){
-                    hasDanger = true;
-                }
-
-                Node firstNode = route.getNode1();
-                Node secondNode = route.getNode2();
-                if (currentNode.getId().equals(secondNode.getId())) {
-                    Node temp = firstNode;
-                    firstNode = secondNode;
-                    secondNode = temp;
-                }
-                currentNode = secondNode;
-
-                routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
-            }
+            FastestRouteResultDTO fastestRouteResult = generateResult(shortestRoutes, startNode);
 
             //처음과 마지막을 제외한 구간에서 빌딩노드를 거쳐왔다면, 이는 유효한 길이 없는 것이므로 예외처리
-            if (totalDistance > BUILDING_ROUTE_DISTANCE - 1) continue;
+            if (fastestRouteResult.getTotalDistance() > BUILDING_ROUTE_DISTANCE - 1) continue;
 
             List<RouteDetailResDTO> details = getRouteDetail(startNode, endNode, shortestRoutes);
 
-            result.add(FastestRouteResDTO.of(policy, hasCaution, hasDanger, totalDistance,
-                    calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER, totalDistance),
-                    calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER,totalDistance),
-                    calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER,totalDistance),
-                    routeInfoDTOS, details));
+            result.add(FastestRouteResDTO.of(policy,
+                    fastestRouteResult.isHasCaution(),
+                    fastestRouteResult.isHasDanger(),
+                    fastestRouteResult.getTotalDistance(),
+                    calculateCost(policy, PEDESTRIAN_SECONDS_PER_MITER,
+                            fastestRouteDTO.getTotalWeightDistance() % BUILDING_ROUTE_DISTANCE
+                                + fastestRouteResult.getHeightIncreaseWeight() - fastestRouteResult.getHeightDecreaseWeight()),
+                    calculateCost(policy, MANUAL_WHEELCHAIR_SECONDS_PER_MITER,
+                            fastestRouteDTO.getTotalWeightDistance() % BUILDING_ROUTE_DISTANCE
+                            + fastestRouteResult.getHeightIncreaseWeight() + fastestRouteResult.getHeightDecreaseWeight()),
+                    calculateCost(policy, ELECTRIC_WHEELCHAIR_SECONDS_PER_MITER,
+                            fastestRouteDTO.getTotalWeightDistance() % BUILDING_ROUTE_DISTANCE),
+                    fastestRouteResult.getRouteInfoDTOS(),
+                    details));
         }
 
         if(result.isEmpty()) {
@@ -206,7 +193,7 @@ public class RouteCalculator {
         nodeMap.putIfAbsent(route.getNode2().getId(), route.getNode2());
     }
 
-    private Map<Long, Route> findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap, RoadExclusionPolicy policy){
+    private FastestRouteDTO findFastestRoute(Node startNode, Node endNode, Map<Long, List<Route>> adjMap, RoadExclusionPolicy policy){
         //key : nodeId, value : 최단거리 중 해당 노드를 향한 route
         Map<Long, Route> prevRoute = new HashMap<>();
         // startNode로부터 각 노드까지 걸리는 cost를 저장하는 자료구조
@@ -230,8 +217,7 @@ public class RouteCalculator {
 
             for(Route route : adjMap.getOrDefault(currentNode.getId(), Collections.emptyList())){
                 Node nextNode = route.getNode1().getId().equals(currentNode.getId())?route.getNode2():route.getNode1();
-                double newDistance = currentDistance + route.getDistance()
-                                                + getHeightHeuristicWeight(maxHeight,minHeight,nextNode, route.getDistance(), policy);
+                double newDistance = currentDistance + route.getDistance();
 
                 if(policy==RoadExclusionPolicy.WHEEL_FAST && !route.getCautionFactors().isEmpty()){
                     currentCautionCount++;
@@ -250,7 +236,7 @@ public class RouteCalculator {
             return null;
         }
 
-        return prevRoute;
+        return FastestRouteDTO.of(prevRoute, costMap.get(endNode.getId()));
     }
 
     // A* 알고리즘의 휴리스틱 중 지나온 위험요소의 개수에 따른 가중치 부여
@@ -270,7 +256,8 @@ public class RouteCalculator {
 
     // 차이에 따른 가중치를 계산하는 메서드
     private double calculateWeight(double diff, double routeDistance){
-        return (Math.pow(diff,2) * routeDistance) / HEURISTIC_WEIGHT_NORMALIZATION_FACTOR;
+        double result = (Math.pow(diff,2) * routeDistance) / HEURISTIC_WEIGHT_NORMALIZATION_FACTOR;
+        return result > LIMIT_RANGE ? 0 : result;
     }
 
     // 길찾기 결과를 파싱하여 출발지 -> 도착지 형태로 재배열하는 메서드
@@ -289,6 +276,50 @@ public class RouteCalculator {
         Collections.reverse(shortestRoutes);
 
         return shortestRoutes;
+    }
+
+    private FastestRouteResultDTO generateResult(List<Route> shortestRoutes, Node startNode) {
+        boolean hasCaution = false;
+        boolean hasDanger = false;
+        double totalDistance = 0.0;
+        double heightIncreaseWeight = 0.0;
+        double heightDecreaseWeight = 0.0;
+
+        // 결과를 DTO로 정리
+        List<RouteInfoResDTO> routeInfoDTOS = new ArrayList<>();
+        Node currentNode = startNode;
+        // 외부 변수를 수정해야하기 때문에 for-loop문 사용
+        for (Route route : shortestRoutes) {
+            totalDistance += route.getDistance();
+            if (!route.getCautionFactors().isEmpty()) {
+                hasCaution = true;
+            }
+            if(!route.getDangerFactors().isEmpty()){
+                hasDanger = true;
+            }
+
+            Node firstNode = route.getNode1();
+            Node secondNode = route.getNode2();
+            if (currentNode.getId().equals(secondNode.getId())) {
+                Node temp = firstNode;
+                firstNode = secondNode;
+                secondNode = temp;
+            }
+            currentNode = secondNode;
+
+            double heightDiff = firstNode.getHeight() - secondNode.getHeight();
+            if(heightDiff > 0){
+                heightIncreaseWeight += Math.exp(heightDiff) - 1;
+            }
+            else{
+                heightDecreaseWeight += Math.exp(-heightDiff) - 1;
+            }
+
+            routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
+        }
+        if(Math.abs(heightDecreaseWeight) > LIMIT_RANGE) heightDecreaseWeight = 0.0;
+        if(Math.abs(heightIncreaseWeight) > LIMIT_RANGE) heightIncreaseWeight = 0.0;
+        return FastestRouteResultDTO.of(hasCaution,hasDanger,totalDistance,heightIncreaseWeight,heightDecreaseWeight,routeInfoDTOS);
     }
 
     private boolean isBuildingRoute(Route route){
