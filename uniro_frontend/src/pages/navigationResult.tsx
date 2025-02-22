@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSuspenseQueries } from "@tanstack/react-query";
 
 import RouteList from "../components/navigation/route/routeList";
@@ -41,7 +41,6 @@ const NavigationResultPage = () => {
 
 	useRedirectUndefined<University | Building | undefined>([university, origin, destination]);
 
-	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>("PEDES & SAFE");
 	const [currentRouteIdx, setCurrentRouteIdx] = useState(-1);
 	// Caution 마커를 위한 routeIdx state
 	const [cautionRouteIdx, setCautionRouteIdx] = useState(-1);
@@ -71,6 +70,10 @@ const NavigationResultPage = () => {
 			},
 		],
 	});
+
+	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>(
+		routeList.data?.defaultMode ?? "PEDES & SAFE",
+	);
 
 	const resetCurrentIndex = () => {
 		setCautionRouteIdx(-1);
@@ -115,7 +118,6 @@ const NavigationResultPage = () => {
 	return (
 		routeList.data && (
 			<div className="relative h-dvh w-full max-w-[450px] mx-auto">
-				{/* 지도 영역 */}
 				<NavigationMap
 					style={{ width: "100%", height: "100%" }}
 					routeResult={routeList.data!}
@@ -153,7 +155,7 @@ const NavigationResultPage = () => {
 
 				<AnimatedContainer
 					isVisible={!isDetailView}
-					className="absolute bottom-0 left-0 w-full mb-[30px] px-4"
+					className="absolute bottom-0 left-0 w-full mb-[30px]"
 					positionDelta={88}
 				>
 					<BottomCardList
@@ -162,6 +164,12 @@ const NavigationResultPage = () => {
 						showDetailView={showDetailView}
 						setButtonState={setButtonState}
 					></BottomCardList>
+					<div
+						onClick={showDetailView}
+						className="w-full h-15 bg-primary-600 hover:bg-primary-700 active:bg-primary-700 transition-color duration-200 flex flex-col items-center justify-center -mb-[30px] mt-4"
+					>
+						<div className="text-white font-bold">상세경로 보기 </div>
+					</div>
 				</AnimatedContainer>
 
 				<AnimatedContainer

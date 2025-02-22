@@ -63,4 +63,7 @@ export type NavigationRouteList = {
 };
 
 export type NavigationRouteListRecord = Record<NavigationButtonRouteType, NavigationRouteList>;
-export type NavigationRouteListRecordWithMetaData = NavigationRouteListRecord & { dataLength: number };
+export type NavigationRouteListRecordWithMetaData = NavigationRouteListRecord & {
+	dataLength: number;
+	defaultMode: NavigationButtonRouteType;
+};
