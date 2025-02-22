@@ -14,7 +14,7 @@ const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView
 		const routeInfo = routeList[buttonType];
 		const { totalCost, totalDistance } = routeInfo;
 		return (
-			<div className="w-full flex flex-row items-center justify-center gap-4">
+			<div className="w-full flex flex-row items-center justify-center gap-4 px-4">
 				<BottomCard
 					type="normal"
 					onClick={showDetailView}
@@ -30,7 +30,7 @@ const BottomCardList = ({ routeList, buttonType = "PEDES & SAFE", showDetailView
 	};
 
 	return (
-		<div className="w-full flex flex-row items-center justify-center gap-4">
+		<div className="w-full flex flex-row items-center justify-center gap-4 px-4">
 			<BottomCard
 				type="caution"
 				selected={buttonType.includes("CAUTION")}
