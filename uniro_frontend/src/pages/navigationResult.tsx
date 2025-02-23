@@ -165,7 +165,7 @@ const NavigationResultPage = () => {
 						setButtonState={setButtonState}
 					></BottomCardList>
 					<div
-						onClick={showDetailView}
+						onClick={routeList?.data[buttonState] ? showDetailView : () => {}}
 						className="w-full h-15 bg-primary-600 hover:bg-primary-700 active:bg-primary-700 transition-color duration-200 flex flex-col items-center justify-center -mb-[30px] mt-4"
 					>
 						<div className="text-white font-bold">상세경로 보기 </div>
