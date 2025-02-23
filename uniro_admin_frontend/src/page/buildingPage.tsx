@@ -6,7 +6,6 @@ import BuildingAddContainer from "../container/building/buildingAddContainer";
 import useMap from "../hooks/useMap";
 import { Coord } from "../data/types/coord";
 
-import createMarkerElement from "../components/map/mapMarkers";
 import { QueryClient, useQueries } from "@tanstack/react-query";
 import { getAllRoutes } from "../api/route";
 import { CoreRoute, CoreRoutesList } from "../data/types/route";
@@ -16,6 +15,7 @@ import { Node, NodeId } from "../data/types/node";
 import { Markers } from "../constant/enum/markerEnum";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import useUniversity from "../hooks/useUniversity";
+import createMarkerElement from "../utils/markers/createMarkerElement";
 
 const BuildingPage = () => {
 	const { university } = useUniversity();
@@ -86,6 +86,8 @@ const BuildingPage = () => {
 		[map, AdvancedMarker],
 	);
 
+	const { waypointMarkerElement, buildingMarkerElement } = createMarkerElement();
+
 	const handleMapClick = (e: google.maps.MapMouseEvent) => {
 		if (!e.latLng) return;
 
@@ -140,20 +142,14 @@ const BuildingPage = () => {
 					const marker1 = new AdvancedMarker({
 						map: map,
 						position: { lat: node1.lat, lng: node1.lng },
-						content: createMarkerElement({
-							type: "waypoint_red",
-							className: "translate-waypoint",
-						}),
+						content: waypointMarkerElement({ color: "red" }),
 						zIndex: 100,
 					});
 
 					const marker2 = new AdvancedMarker({
 						map: map,
 						position: { lat: node2.lat, lng: node2.lng },
-						content: createMarkerElement({
-							type: "waypoint_blue",
-							className: "translate-waypoint",
-						}),
+						content: waypointMarkerElement({ color: "blue" }),
 						zIndex: 100,
 					});
 					setSelectedEdge({
@@ -209,7 +205,7 @@ const BuildingPage = () => {
 		const buildingList = buildings.data;
 
 		if (buildingList === undefined) return;
-		console.log(buildingList);
+
 		for (const building of buildingList) {
 			const { nodeId, lat, lng } = building;
 
@@ -217,17 +213,14 @@ const BuildingPage = () => {
 				google.maps.marker.AdvancedMarkerElement,
 				map,
 				new google.maps.LatLng(lat, lng),
-				createMarkerElement({
-					type: Markers.BUILDING,
-					className: "translate-marker",
-				}),
+				buildingMarkerElement({}),
 			);
 
 			buildingMarker.addListener("click", () => {
 				setSelectedBuildingId(nodeId);
 				map.setCenter({ lat, lng });
 				map.setZoom(18);
-				console.log("click", mode);
+
 				if (mode === "view" || mode === "add") {
 					setMode("view");
 				}

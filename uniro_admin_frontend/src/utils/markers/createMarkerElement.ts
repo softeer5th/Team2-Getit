@@ -9,6 +9,10 @@ interface MarkerProps {
 	hasAnimation?: boolean;
 }
 
+interface WayPointMarkerProps extends MarkerProps {
+    color ?: "red" | "blue" | "black"
+}
+
 interface RiskMarkerProps extends MarkerProps {
 	factors?: CautionIssue[] | DangerIssue[];
 }
@@ -91,11 +95,34 @@ export default function createMarkerElement() {
 		return attachAnimation(containerElement, hasAnimation);
 	};
 
+    const waypointMarkerElement = ({ className, color='black' }: WayPointMarkerProps) => {
+        const containerElement = createContainerElement(`translate-waypoint ${className}`);
+        
+        //@ts-expect-error waypoint마커 색상 지정
+		const imageElement = createImageElement(`${Markers.WAYPOINT}_${color}`);
+
+		containerElement.appendChild(imageElement);
+
+		return containerElement;
+    }
+
+    const buildingMarkerElement = ({ className, hasAnimation = false }:MarkerProps): HTMLElement => {
+		const containerElement = createContainerElement(`translate-y-[10px] ${className}`);
+
+		const imageElement = createImageElement(Markers.BUILDING);
+
+		containerElement.appendChild(imageElement);
+
+		return attachAnimation(containerElement, hasAnimation);
+	};
+
 	return {
 		dangerMarkerElement,
 		cautionMarkerElement,
 		changedMarkerElement,
 		removedMarkerElement,
-		createdMarkerElement,
+        createdMarkerElement,
+        waypointMarkerElement,
+        buildingMarkerElement
 	};
 }
