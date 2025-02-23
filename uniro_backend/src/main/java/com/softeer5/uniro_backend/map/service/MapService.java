@@ -156,19 +156,23 @@ public class MapService {
 	}
 
 	private void processDatabaseData(Long univId, String redisKeyPrefix, int batchNumber, SseEmitter emitter) {
+		int fetchSize = routeRepository.countByUnivId(univId);
+		int remain = fetchSize%STREAM_FETCH_SIZE;
+		fetchSize = fetchSize/STREAM_FETCH_SIZE + (remain > 0 ? 1 : 0);
+
 		try (Stream<LightRoute> routeStream = routeRepository.findAllLightRoutesByUnivId(univId)) {
 			List<LightRoute> batch = new ArrayList<>(STREAM_FETCH_SIZE);
 			for (LightRoute route : (Iterable<LightRoute>) routeStream::iterator) {
 				batch.add(route);
 
 				if (batch.size() == STREAM_FETCH_SIZE) {
-					saveAndSendBatch(redisKeyPrefix, batchNumber++, batch, emitter);
+					saveAndSendBatch(redisKeyPrefix, batchNumber++, batch, emitter, fetchSize);
 				}
 			}
 
 			// 남은 배치 처리
 			if (!batch.isEmpty()) {
-				saveAndSendBatch(redisKeyPrefix, batchNumber, batch, emitter);
+				saveAndSendBatch(redisKeyPrefix, batchNumber, batch, emitter, fetchSize);
 			}
 
 			emitter.complete();
@@ -178,18 +182,18 @@ public class MapService {
 		}
 	}
 
-	private void saveAndSendBatch(String redisKeyPrefix, int batchNumber, List<LightRoute> batch, SseEmitter emitter)
+	private void saveAndSendBatch(String redisKeyPrefix, int batchNumber, List<LightRoute> batch, SseEmitter emitter, int fetchSize)
 		throws Exception {
 		LightRoutes value = new LightRoutes(batch);
 		redisService.saveData(redisKeyPrefix + batchNumber, value);
-		processBatch(batch, emitter, batch.size());
+		processBatch(batch, emitter, fetchSize);
 		batch.clear();
 	}
 
-	private void processBatch(List<LightRoute> batch, SseEmitter emitter, int size) throws Exception {
+	private void processBatch(List<LightRoute> batch, SseEmitter emitter, int fetchSize) throws Exception {
 		if (!batch.isEmpty()) {
 			AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(batch);
-			allRoutesInfo.setBatchSize(size);
+			allRoutesInfo.setBatchSize(fetchSize);
 			emitter.send(allRoutesInfo);
 			batch.clear();
 			entityManager.clear();

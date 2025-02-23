@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.service.vo.LightRoute;
 
-import static com.softeer5.uniro_backend.common.constant.UniroConst.STREAM_FETCH_SIZE_AS_STRING;
-
 public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = {"node1", "node2"})
@@ -23,7 +21,10 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = {"node1", "node2"})
     @Query("SELECT r FROM Route r WHERE r.univId = :univId")
-    @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = STREAM_FETCH_SIZE_AS_STRING))
+    @QueryHints(value = {
+            @QueryHint(name = "org.hibernate.fetchSize", value = Integer.MIN_VALUE + ""),
+            @QueryHint(name = "org.hibernate.cacheable", value = "false")
+    })
     Stream<Route> findAllRouteByUnivIdWithNodesStream(Long univId);
 
     @Query("""
@@ -33,7 +34,10 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     JOIN r.node2 n2
     WHERE r.univId = :univId
 """)
-    @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = STREAM_FETCH_SIZE_AS_STRING))
+    @QueryHints(value = {
+            @QueryHint(name = "org.hibernate.fetchSize", value = Integer.MIN_VALUE + ""),
+            @QueryHint(name = "org.hibernate.cacheable", value = "false")
+    })
     Stream<LightRoute> findAllLightRoutesByUnivId(Long univId);
 
 
