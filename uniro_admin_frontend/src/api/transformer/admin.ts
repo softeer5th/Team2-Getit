@@ -4,7 +4,15 @@ import { GetRevisionResponse } from "../type/response/admin";
 import { NodeId } from "../../data/types/node";
 
 export const transformAllRevisions = (data: RevisionType[]): RevisionType[] => {
-	return data.reverse();
+    const padStart = (time: number | string) => String(time).padStart(2, '0');
+
+    return data.map(el => {
+        const revTime = el.revTime;
+        return {
+            ...el,
+            revTime: `${padStart(revTime[0])}-${padStart(revTime[1])}-${padStart(revTime[2])} / ${padStart(revTime[3])}:${padStart(revTime[4])}:${padStart(revTime[5])}.${padStart(revTime[6])}`,
+        }
+    }).reverse();
 };
 
 export const transformGetRevision = (res: GetRevisionResponse, versionId: number): RevisionDataType => {
