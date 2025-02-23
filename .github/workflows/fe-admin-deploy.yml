@@ -5,8 +5,8 @@ on:
     branches:
       - fe
       - feat/UNI-368
-    paths:
-      - "uniro_admin_frontend/**"
+    # paths:
+    #   - "uniro_admin_frontend/**"
 
 jobs:
   CI:
