@@ -124,7 +124,7 @@ public class MapService {
 
 		try {
 			// 1️⃣ Redis 데이터가 있다면 우선 처리
-			if (processRedisData(redisKeyPrefix, batchNumber, emitter)) {
+			if (processRedisData(univId, redisKeyPrefix, batchNumber, emitter)) {
 				return;
 			}
 
@@ -136,14 +136,16 @@ public class MapService {
 		}
 	}
 
-	private boolean processRedisData(String redisKeyPrefix, int batchNumber, SseEmitter emitter) throws Exception {
+	private boolean processRedisData(Long univId, String redisKeyPrefix, int batchNumber, SseEmitter emitter) throws Exception {
 		while (redisService.hasData(redisKeyPrefix + batchNumber)) {
 			LightRoutes lightRoutes = (LightRoutes) redisService.getData(redisKeyPrefix + batchNumber);
 			if (lightRoutes == null) {
 				break;
 			}
 
-			processBatch(lightRoutes.getLightRoutes(), emitter, lightRoutes.getLightRoutes().size());
+			Integer fetchSize = Integer.parseInt(redisService.getDataToString(univId.toString()));
+
+			processBatch(lightRoutes.getLightRoutes(), emitter, fetchSize);
 			batchNumber++;
 		}
 
@@ -166,13 +168,13 @@ public class MapService {
 				batch.add(route);
 
 				if (batch.size() == STREAM_FETCH_SIZE) {
-					saveAndSendBatch(redisKeyPrefix, batchNumber++, batch, emitter, fetchSize);
+					saveAndSendBatch(univId, redisKeyPrefix, batchNumber++, batch, emitter, fetchSize);
 				}
 			}
 
 			// 남은 배치 처리
 			if (!batch.isEmpty()) {
-				saveAndSendBatch(redisKeyPrefix, batchNumber, batch, emitter, fetchSize);
+				saveAndSendBatch(univId, redisKeyPrefix, batchNumber, batch, emitter, fetchSize);
 			}
 
 			emitter.complete();
@@ -182,10 +184,11 @@ public class MapService {
 		}
 	}
 
-	private void saveAndSendBatch(String redisKeyPrefix, int batchNumber, List<LightRoute> batch, SseEmitter emitter, int fetchSize)
+	private void saveAndSendBatch(Long univId, String redisKeyPrefix, int batchNumber, List<LightRoute> batch, SseEmitter emitter, Integer fetchSize)
 		throws Exception {
 		LightRoutes value = new LightRoutes(batch);
 		redisService.saveData(redisKeyPrefix + batchNumber, value);
+		redisService.saveDataToString(univId.toString(), fetchSize.toString());
 		processBatch(batch, emitter, fetchSize);
 		batch.clear();
 	}
