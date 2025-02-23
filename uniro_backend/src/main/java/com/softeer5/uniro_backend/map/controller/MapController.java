@@ -25,10 +25,11 @@ public class MapController implements MapApi {
 	private final MapService mapService;
 	private final AdminService adminService;
 
-	@GetMapping("/{univId}/routes-local")
-	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodesByLocalCache(@PathVariable("univId") Long univId){
-		GetAllRoutesResDTO allRoutes = mapService.getAllRoutesByLocalCache(univId);
-		return ResponseEntity.ok().body(allRoutes);
+	@GetMapping("/{univId}/routes-test")
+	public SseEmitter getAllRoutesAndNodesTest(@PathVariable("univId") Long univId){
+		SseEmitter emitter = new SseEmitter(60 * 1000L); // timeout 1분
+		mapService.getAllRoutesTest(univId, emitter);
+		return emitter;
 	}
 
 	@Override

@@ -63,29 +63,17 @@ public class MapService {
 
 	private final Map<Long, List<LightRoute>> cache = new HashMap<>();
 
-	public GetAllRoutesResDTO getAllRoutesByLocalCache(Long univId) {
+	public void getAllRoutesTest(Long univId, SseEmitter emitter) {
 
-		if(!cache.containsKey(univId)){
-			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
-			List<LightRoute> lightRoutes = routes.stream().map(LightRoute::new).toList();
-			cache.put(univId, lightRoutes);
+		String redisKeyPrefix = univId + ":";
+		int batchNumber = 1;
+
+		try {
+			processDatabaseData(univId, redisKeyPrefix, batchNumber, emitter);
+		} catch (Exception e) {
+			emitter.completeWithError(e);
+			log.error("SSE error: {}", e.getMessage(), e);
 		}
-
-		List<LightRoute> routes = cache.get(univId);
-
-		// 맵이 존재하지 않을 경우 예외
-		if(routes.isEmpty()) {
-			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
-		}
-
-		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
-			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
-
-		AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(routes);
-		GetAllRoutesResDTO response = GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
-			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
-
-		return response;
 	}
 
 	public GetAllRoutesResDTO getAllRoutes(Long univId) {
