@@ -14,6 +14,7 @@ import Errortest from "./pages/errorTest";
 import NotFoundPage from "./pages/notFound";
 import { MapProvider } from "./map/mapContext";
 import CacheProvider from "./map/mapCacheContext";
+import MapSSEPage from "./pages/mapSSE";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -45,6 +46,7 @@ function App() {
 								<Route path="/university" element={<UniversitySearchPage />} />
 								<Route path="/building" element={<BuildingSearchPage />} />
 								<Route path="/map" element={<MapPage />} />
+								<Route path="/map/sse" element={<MapSSEPage />} />
 								<Route path="/form" element={<ReportForm />} />
 								<Route path="/result" element={<NavigationResultPage />} />
 								<Route path="/report/route" element={<ReportRoutePage />} />
