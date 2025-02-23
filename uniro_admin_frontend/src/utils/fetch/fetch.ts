@@ -1,3 +1,5 @@
+import { BadRequestError, ForbiddenError } from "../../constant/error";
+
 export default function Fetch() {
 	const baseURL = import.meta.env.VITE_REACT_SERVER_BASE_URL;
 
@@ -32,8 +34,10 @@ export default function Fetch() {
 			},
 		});
 
-		if (!response.ok) {
-			throw new Error(`${response.status}-${response.statusText}`);
+        if (!response.ok) {
+            if (response.status === 400) throw new BadRequestError('');
+            else if (response.status === 403) throw new ForbiddenError('');
+            throw new Error(`${response.status}`);
 		}
 
 		try {

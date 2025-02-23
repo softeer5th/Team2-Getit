@@ -1,6 +1,5 @@
-import { DangerIssueType } from "../../constant/enum/reportEnum";
 import { CoreRoutesList } from "../../data/types/route";
-import { GetAllRouteRepsonse, GetSingleRouteRiskResponse } from "../type/response/route";
+import { GetAllRouteRepsonse } from "../type/response/route";
 
 export const transformAllRoutes = (data: GetAllRouteRepsonse): CoreRoutesList => {
 	const { nodeInfos, coreRoutes } = data;

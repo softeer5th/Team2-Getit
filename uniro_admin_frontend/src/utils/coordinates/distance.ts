@@ -1,16 +1,26 @@
+import { Coord } from "../../data/types/coord";
+
 /** 하버사인 공식 */
-export default function distance(point1: google.maps.LatLngLiteral, point2: google.maps.LatLngLiteral): number {
-	const { lat: lat1, lng: lng1 } = point1;
-	const { lat: lat2, lng: lng2 } = point2;
+export default function distance(point1: Coord, point2: Coord): number {
+	const R = 6378137;
+	const { lat: lat_a, lng: lng_a } = point1;
+	const { lat: lat_b, lng: lng_b } = point2;
 
-	const R = 6371000;
-	const toRad = (angle: number) => (angle * Math.PI) / 180;
+	const rad_lat_a = toRad(lat_a);
+	const rad_lng_a = toRad(lng_a);
+	const rad_lat_b = toRad(lat_b);
+	const rad_lng_b = toRad(lng_b);
 
-	const dLat = toRad(lat2 - lat1);
-	const dLon = toRad(lng2 - lng1);
-
-	const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-	return R * c;
+	return (
+		R *
+		2 *
+		Math.asin(
+			Math.sqrt(
+				Math.pow(Math.sin((rad_lat_a - rad_lat_b) / 2), 2) +
+					Math.cos(rad_lat_a) * Math.cos(rad_lat_b) * Math.pow(Math.sin((rad_lng_a - rad_lng_b) / 2), 2),
+			),
+		)
+	);
 }
+
+const toRad = (angle: number) => (angle * Math.PI) / 180;

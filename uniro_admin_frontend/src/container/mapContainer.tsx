@@ -74,8 +74,9 @@ const MapContainer = ({ rev, data, freshRev }: MapContainerProps) => {
 	return (
 		<div className="flex flex-col w-4/5 h-full pb-4 px-1">
 			<div className="flex flex-row items-center justify-between w-full h-[50px] px-2">
-				<div className="text-kor-heading2">
-					VERSION : {data?.rev} / {rev.revTime.slice(0, 10)} {rev.revTime.slice(11, -1)}
+				<div className="flex-1 text-kor-body2 flex flex-row space-x-10">
+					<p className="text-start font-bold">버전 : {data?.rev}</p>
+					<p className="text-start font-bold">수정일자 : {rev.revTime}</p>
 				</div>
 				<button
 					onClick={openModal}
