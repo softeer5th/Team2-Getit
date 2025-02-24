@@ -11,7 +11,7 @@ const Loading = ({ isLoading, loadingContent }: Props) => {
 
 	return (
 		<div
-			className="fixed inset-0 flex flex-col items-center justify-center w-full max-w-[450px] mx-auto bg-white 
+			className="fixed inset-0 flex flex-col items-center justify-center w-full mx-auto bg-white 
 					bg-[url(/public/loading/background.svg)] bg-no-repeat bg-center bg-contain z-50"
 		>
 			{university && (

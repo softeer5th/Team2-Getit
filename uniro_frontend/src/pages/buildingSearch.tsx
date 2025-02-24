@@ -22,8 +22,8 @@ export default function BuildingSearchPage() {
 	useRedirectUndefined([university]);
 
 	return (
-		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
-			<div className="flex flex-row px-[14px] py-4 border-b-[1px] border-gray-400 ">
+		<div className="relative flex flex-col h-dvh w-full mx-auto justify-center">
+			<div className="flex flex-row px-[14px] py-4 border-b-[1px] border-gray-400 gap-2">
 				<Input onChangeDebounce={(e) => setInput(e)} placeholder="" />
 				<button onClick={handleBack} className="cursor-pointer p-1 rounded-[8px] active:bg-gray-200">
 					<CloseIcon />

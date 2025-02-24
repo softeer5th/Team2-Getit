@@ -23,7 +23,7 @@ export default function LandingPage() {
 
 	return (
 		<div
-			className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center bg-[url(/public/background.webp)] bg-cover"
+			className="relative flex flex-col h-dvh w-full mx-auto justify-center bg-[url(/public/background.webp)] bg-contain"
 			onClick={() => navigate("/university")}
 		>
 			<motion.p
@@ -42,7 +42,7 @@ export default function LandingPage() {
 			>
 				쉽고 빠르게 이동하세요.
 			</motion.p>
-			<div className="w-full absolute bottom-6 left-[50%] px-[14px] translate-x-[-50%] flex flex-col items-start">
+			<div className="w-full max-w-[450px] absolute bottom-6 left-[50%] px-[14px] translate-x-[-50%] flex flex-col items-start">
 				<div className="flex flex-row items-center space-x-[7px] mb-5">
 					<img src="/logo.webp" className="w-8 h-8"></img>
 					<UNIRO />

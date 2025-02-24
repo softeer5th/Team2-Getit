@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSuspenseQueries } from "@tanstack/react-query";
 
 import RouteList from "../components/navigation/route/routeList";
@@ -23,15 +23,15 @@ import { NavigationButtonRouteType } from "../data/types/route";
 import NavigationNavBar from "../components/navigation/navBar/navigationNavBar";
 import { useAnimationControls } from "framer-motion";
 
-const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
-const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
-const CLOSED_SHEET_HEIGHT = 0;
-
-const INITIAL_TOP_BAR_HEIGHT = 143;
-const BOTTOM_SHEET_HANDLE_HEIGHT = 40;
-const PADDING_FOR_MAP_BOUNDARY = 50;
-
 const NavigationResultPage = () => {
+	const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
+	const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
+	const CLOSED_SHEET_HEIGHT = 0;
+
+	const INITIAL_TOP_BAR_HEIGHT = 143;
+	const BOTTOM_SHEET_HANDLE_HEIGHT = 100;
+	const PADDING_FOR_MAP_BOUNDARY = 70;
+
 	const [isDetailView, setIsDetailView] = useState(false);
 	const [topBarHeight, setTopBarHeight] = useState(INITIAL_TOP_BAR_HEIGHT);
 
@@ -131,9 +131,16 @@ const NavigationResultPage = () => {
 		}, 800);
 	};
 
+	useEffect(() => {
+		window.addEventListener("resize", hideDetailView);
+		return () => {
+			window.removeEventListener("resize", hideDetailView);
+		};
+	}, []);
+
 	return (
 		routeList.data && (
-			<div className="relative h-dvh w-full max-w-[450px] mx-auto">
+			<div className="relative h-dvh w-full  mx-auto">
 				<NavigationMap
 					style={{ width: "100%", height: "100%" }}
 					routeResult={routeList.data!}
@@ -150,11 +157,11 @@ const NavigationResultPage = () => {
 				<AnimatedContainer
 					isVisible={!isDetailView}
 					positionDelta={286}
-					className="absolute top-0 left-0 w-full flex flex-col space-y-2"
+					className="absolute top-0 left-1/2 translate-x-[-50%] w-full max-w-[450px] flex flex-col space-y-2"
 					isTop={true}
 					transition={{ type: "spring", damping: 20, duration: 0.3 }}
 				>
-					<div className="max-w-[450px] w-full min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
+					<div className="w-full  min-h-[143px] bg-gray-100 flex flex-col items-center justify-center rounded-b-4xl shadow-lg">
 						<NavigationDescription
 							isDetailView={false}
 							navigationRoute={routeList.data![buttonState]}
@@ -200,7 +207,7 @@ const NavigationResultPage = () => {
 
 				<AnimatedContainer
 					isVisible={isDetailView}
-					className="absolute bottom-0 w-full left-0 bg-white rounded-t-2xl shadow-xl overflow-auto"
+					className="absolute bottom-0 w-full left-1/2 translate-x-[-50%] bg-white rounded-t-2xl shadow-xl overflow-auto flex items-center flex-col"
 					positionDelta={MAX_SHEET_HEIGHT}
 					transition={{ type: "spring", damping: 20, duration: 0.7 }}
 					motionProps={{

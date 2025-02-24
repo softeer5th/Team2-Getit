@@ -190,7 +190,8 @@ const NavigationMap = ({
 			activeComposite.paths.setOptions(polylineConfig[buttonState as keyof typeof polylineConfig]);
 			map.fitBounds(activeComposite.bounds, {
 				top: topPadding,
-				right: 30,
+				left: 150,
+				right: 150,
 				bottom: bottomPadding,
 			});
 		}
@@ -395,9 +396,9 @@ const NavigationMap = ({
 		const activeBounds = compositeRoutes[buttonState]?.bounds;
 		map.fitBounds(activeBounds!, {
 			top: topPadding,
-			right: 50,
+			right: 150,
 			bottom: bottomPadding,
-			left: 50,
+			left: 150,
 		});
 	}, [map, bottomPadding, topPadding, currentRouteIdx]);
 
@@ -439,9 +440,9 @@ const NavigationMap = ({
 		boundsRef.current = bounds;
 		map.fitBounds(bounds, {
 			top: topPadding,
-			right: 50,
+			right: 150,
 			bottom: bottomPadding,
-			left: 50,
+			left: 150,
 		});
 	}, [map, currentRouteIdx, buttonState, routeResult]);
 

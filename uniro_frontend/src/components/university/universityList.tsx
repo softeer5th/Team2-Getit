@@ -32,7 +32,7 @@ export default function UniversityList({ query, selectedUniv, setSelectedUniv }:
 	};
 
 	return (
-		<ul className="w-full h-full px-[14px] py-[6px]">
+		<ul className="w-full h-full py-[6px]">
 			{universityList.length === 0 ? (
 				<UniversityNotFound />
 			) : (

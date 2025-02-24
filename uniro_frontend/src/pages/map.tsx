@@ -772,7 +772,7 @@ export default function MapPage() {
 	}, []);
 
 	return (
-		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
+		<div className="relative flex flex-col h-dvh w-full mx-auto justify-center">
 			<MapTopBuildingSheet
 				isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode === "BUILDING"}
 			/>
@@ -796,7 +796,10 @@ export default function MapPage() {
 				}}
 				className=""
 			>
-				<div onClick={() => findFastRoute()} className="absolute bottom-6 space-y-2 w-full px-4">
+				<div
+					onClick={() => findFastRoute()}
+					className="max-w-[450px] absolute left-1/2 translate-x-[-50%] bottom-6 space-y-2 w-full px-4"
+				>
 					<Button variant="primary">길찾기</Button>
 				</div>
 			</AnimatedContainer>

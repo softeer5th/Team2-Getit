@@ -41,7 +41,7 @@ export default function Input({ onChangeDebounce, placeholder, ...rest }: Custom
 
 	return (
 		<div
-			className={`h-[60px] flex-1 min-w-0 flex flex-row max-w-[450px] px-[14px] items-center justify-between border ${isFocus ? "border-gray-700" : "border-gray-400"} rounded-200`}
+			className={`h-[60px] flex-1 min-w-0 mx-auto flex flex-row max-w-[450px] px-[14px] items-center justify-between border ${isFocus ? "border-gray-700" : "border-gray-400"} rounded-200`}
 		>
 			{isFocus ? <ChevronLeft stroke="#161616" /> : <Search stroke="#161616" />}
 			<input

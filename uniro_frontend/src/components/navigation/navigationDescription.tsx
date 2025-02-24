@@ -75,8 +75,10 @@ const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, rese
 	};
 
 	return (
-		<div className="w-full p-5" onClick={resetCurrentRouteIdx ? resetCurrentRouteIdx : () => {}}>
-			<div className={`w-full flex flex-row items-center ${isDetailView ? "justify-start" : "justify-between"}`}>
+		<div className="w-full p-5 max-w-[450px]" onClick={resetCurrentRouteIdx ? resetCurrentRouteIdx : () => {}}>
+			<div
+				className={`w-full flex flex-row items-center bo0r ${isDetailView ? "justify-start" : "justify-between"}`}
+			>
 				<AnimatedValue
 					className="text-left text-kor-body3 text-primary-500 flex-1 font-semibold"
 					value={createTitle(buttonType) ?? "전동 휠체어 예상소요시간"}

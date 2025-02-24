@@ -21,7 +21,7 @@ export function MapTopBuildingSheet({ isVisible }: MapTopSheetProps) {
 	return (
 		<AnimatedContainer
 			isVisible={isVisible}
-			className="absolute top-0 w-full left-0  py-[18px] px-2  rounded-b-2xl overflow-auto z-20"
+			className="absolute top-0 w-full max-w-[450px] left-1/2 translate-x-[-50%] py-[18px] px-2  rounded-b-2xl overflow-auto z-20"
 			positionDelta={300}
 			transition={{
 				type: "spring",
@@ -60,7 +60,7 @@ export function MapTopRouteSheet({ isVisible }: MapTopSheetProps) {
 	return (
 		<AnimatedContainer
 			isVisible={isVisible}
-			className="absolute top-0 w-full left-0  py-[18px] px-2  rounded-b-2xl overflow-auto z-20 bg-gray-100"
+			className="absolute top-0 max-w-[450px] w-full left-1/2 translate-x-[-50%]  py-[18px] px-2  rounded-b-2xl overflow-auto z-20 bg-gray-100"
 			positionDelta={300}
 			transition={{
 				type: "spring",
