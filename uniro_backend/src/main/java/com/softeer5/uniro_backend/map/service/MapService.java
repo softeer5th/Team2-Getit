@@ -63,7 +63,7 @@ public class MapService {
 
 	private final Map<Long, List<LightRoute>> cache = new HashMap<>();
 
-	public GetAllRoutesResDTO getAllRoutesByLocalCache(Long univId) {
+	public AllRoutesInfo getAllRoutesByLocalCache(Long univId) {
 
 		if(!cache.containsKey(univId)){
 			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
@@ -78,17 +78,10 @@ public class MapService {
 			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
 		}
 
-		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
-			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
-
-		AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(routes);
-		GetAllRoutesResDTO response = GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
-			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
-
-		return response;
+		return routeCacheCalculator.assembleRoutes(routes);
 	}
 
-	public GetAllRoutesResDTO getAllRoutes(Long univId) {
+	public AllRoutesInfo getAllRoutes(Long univId) {
 
 		if(!redisService.hasData(univId.toString())){
 			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
@@ -108,17 +101,96 @@ public class MapService {
 			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
 		}
 
-		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
-			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
+		return routeCacheCalculator.assembleRoutes(routes);
+	}
 
-		AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(routes);
+	public AllRoutesInfo getAllRoutesByStream(Long univId) {
+		List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
+		List<CoreRouteResDTO> coreRoutes = new ArrayList<>();
+		List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
 
-		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
-			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
+		String redisKeyPrefix = univId + ":";
+		int batchNumber = 1;
+
+		if (!processRedisDataByStream(redisKeyPrefix, batchNumber, nodeInfos, coreRoutes, buildingRoutes)) {
+			processDatabaseDataByStream(univId, redisKeyPrefix, batchNumber, nodeInfos, coreRoutes, buildingRoutes);
+		}
+
+		return AllRoutesInfo.of(nodeInfos, coreRoutes, buildingRoutes);
+	}
+
+	private boolean processRedisDataByStream(String redisKeyPrefix,
+											 int batchNumber,
+											 List<NodeInfoResDTO> nodeInfos,
+											 List<CoreRouteResDTO> coreRoutes,
+											 List<BuildingRouteResDTO> buildingRoutes){
+		while (redisService.hasData(redisKeyPrefix + batchNumber)) {
+			LightRoutes lightRoutes = (LightRoutes) redisService.getData(redisKeyPrefix + batchNumber);
+			if (lightRoutes == null) {
+				break;
+			}
+
+			processBatchByStream(lightRoutes.getLightRoutes(), nodeInfos, coreRoutes, buildingRoutes);
+			batchNumber++;
+		}
+
+        return batchNumber > 1;
+    }
+
+	private void processDatabaseDataByStream(Long univId, String redisKeyPrefix, int batchNumber,
+											 List<NodeInfoResDTO> nodeInfos,
+											 List<CoreRouteResDTO> coreRoutes,
+											 List<BuildingRouteResDTO> buildingRoutes) {
+		int fetchSize = routeRepository.countByUnivId(univId);
+		int remain = fetchSize%STREAM_FETCH_SIZE;
+		fetchSize = fetchSize/STREAM_FETCH_SIZE + (remain > 0 ? 1 : 0);
+
+		try (Stream<LightRoute> routeStream = routeRepository.findAllLightRoutesByUnivId(univId)) {
+			List<LightRoute> batch = new ArrayList<>(STREAM_FETCH_SIZE);
+			for (LightRoute route : (Iterable<LightRoute>) routeStream::iterator) {
+				batch.add(route);
+
+				if (batch.size() == STREAM_FETCH_SIZE) {
+					saveAndSendBatchByStream(redisKeyPrefix, batchNumber++, batch, nodeInfos, coreRoutes, buildingRoutes);
+				}
+			}
+
+			// 남은 배치 처리
+			if (!batch.isEmpty()) {
+				saveAndSendBatchByStream(redisKeyPrefix, batchNumber, batch, nodeInfos, coreRoutes, buildingRoutes);
+			}
+
+			redisService.saveDataToString(univId.toString() + ":fetch", String.valueOf(fetchSize));
+		}
+
+	}
+
+	private void saveAndSendBatchByStream(String redisKeyPrefix, int batchNumber, List<LightRoute> batch,
+										  List<NodeInfoResDTO> nodeInfos,
+										  List<CoreRouteResDTO> coreRoutes,
+										  List<BuildingRouteResDTO> buildingRoutes) {
+		LightRoutes value = new LightRoutes(batch);
+		redisService.saveData(redisKeyPrefix + batchNumber, value);
+		processBatchByStream(batch, nodeInfos, coreRoutes, buildingRoutes);
+		batch.clear();
+	}
+
+	private void processBatchByStream(List<LightRoute> batch,
+									  List<NodeInfoResDTO> nodeInfos,
+									  List<CoreRouteResDTO> coreRoutes,
+									  List<BuildingRouteResDTO> buildingRoutes) {
+		if (!batch.isEmpty()) {
+			AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(batch);
+			nodeInfos.addAll(allRoutesInfo.getNodeInfos());
+			coreRoutes.addAll(allRoutesInfo.getCoreRoutes());
+			buildingRoutes.addAll(allRoutesInfo.getBuildingRoutes());
+			batch.clear();
+			entityManager.clear();
+		}
 	}
 
 	@Async
-	public void getAllRoutesByStream(Long univId, SseEmitter emitter) {
+	public void getAllRoutesBySSE(Long univId, SseEmitter emitter) {
 		String redisKeyPrefix = univId + ":";
 		int batchNumber = 1;
 

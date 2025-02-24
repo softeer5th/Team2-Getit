@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.softeer5.uniro_backend.common.constant.UniroConst.MAX_CACHE_SIZE;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -39,7 +41,7 @@ public class RedisService {
 	public void deleteRoutesData(String key, int batchNumber) {
 		String redisKeyPrefix = key + ":";
 
-		for(int i=1; i<=batchNumber; i++){
+		for(int i=1; i<= Math.max(MAX_CACHE_SIZE,batchNumber); i++){
 			redisTemplate.delete(redisKeyPrefix + i);
 		}
 	}
