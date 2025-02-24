@@ -28,7 +28,7 @@ type MapProps = {
 	topPadding?: number;
 	bottomPadding?: number;
 	currentRouteIdx: number;
-	handleCautionMarkerClick: (index: number) => void;
+	handleCautionMarkerClick: (index: number, isDetailView: boolean) => void;
 	setCautionRouteIdx: Dispatch<SetStateAction<number>>;
 };
 
@@ -71,7 +71,13 @@ const NavigationMap = ({
 }: MapProps) => {
 	const { createAdvancedMarker, createPolyline } = useContext(MapContext);
 	const { mapRef, map } = useMap();
+
 	const buttonStateRef = useRef(buttonState);
+	const isDetailViewRef = useRef(isDetailView);
+
+	useEffect(() => {
+		isDetailViewRef.current = isDetailView;
+	}, [isDetailView]);
 
 	// Listener들이 항상 최신 buttonStateRef를 참조하도록 ref 사용
 	useEffect(() => {
@@ -214,7 +220,7 @@ const NavigationMap = ({
 				content: originMarkerElement,
 			},
 			() => {
-				handleCautionMarkerClick(0);
+				handleCautionMarkerClick(0, isDetailViewRef.current);
 			},
 		);
 
@@ -232,7 +238,10 @@ const NavigationMap = ({
 				content: destinationMarkerElement,
 			},
 			() => {
-				handleCautionMarkerClick(routeResult[buttonStateRef.current].routeDetails.length);
+				handleCautionMarkerClick(
+					routeResult[buttonStateRef.current].routeDetails.length,
+					isDetailViewRef.current,
+				);
 			},
 		);
 
@@ -295,7 +304,7 @@ const NavigationMap = ({
 						content: markerElement,
 					},
 					() => {
-						handleCautionMarkerClick(index + 1);
+						handleCautionMarkerClick(index + 1, isDetailViewRef.current);
 					},
 				);
 				if (marker) markers.push(marker);
@@ -348,11 +357,16 @@ const NavigationMap = ({
 					hasAnimation: true,
 				});
 
-				const marker = createAdvancedMarker({
-					map: map,
-					position: coordinates,
-					content: markerElement,
-				});
+				const marker = createAdvancedMarker(
+					{
+						map: map,
+						position: coordinates,
+						content: markerElement,
+					},
+					() => {
+						handleCautionMarkerClick(index + 1, isDetailViewRef.current);
+					},
+				);
 
 				if (marker) dyamicMarkersRef.current.push(marker);
 			});
