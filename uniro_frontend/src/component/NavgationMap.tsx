@@ -72,6 +72,8 @@ const NavigationMap = ({
 	const { createAdvancedMarker, createPolyline } = useContext(MapContext);
 	const { mapRef, map } = useMap();
 
+	const PADDING_FOR_MAP_BOUNDARY = window.innerWidth * 0.1;
+
 	const {
 		originMarkerElementWithName,
 		destinationMarkerElementWithName,
@@ -215,16 +217,16 @@ const NavigationMap = ({
 
 		map.fitBounds(activeBounds!, {
 			top: topPadding,
-			right: 150,
+			right: PADDING_FOR_MAP_BOUNDARY,
 			bottom: bottomPadding,
-			left: 150,
+			left: PADDING_FOR_MAP_BOUNDARY,
 		});
 		return () => {
 			map.fitBounds(activeBounds!, {
 				top: topPadding,
-				right: 150,
+				right: PADDING_FOR_MAP_BOUNDARY,
 				bottom: bottomPadding,
-				left: 150,
+				left: PADDING_FOR_MAP_BOUNDARY,
 			});
 		};
 	}, [map, bottomPadding, topPadding, currentRouteIdx, buttonState, compositeRoutes]);
@@ -453,9 +455,9 @@ const NavigationMap = ({
 		boundsRef.current = bounds;
 		map.fitBounds(bounds, {
 			top: topPadding,
-			right: 150,
+			right: PADDING_FOR_MAP_BOUNDARY,
 			bottom: bottomPadding,
-			left: 150,
+			left: PADDING_FOR_MAP_BOUNDARY,
 		});
 	}, [map, currentRouteIdx, buttonState, routeResult]);
 

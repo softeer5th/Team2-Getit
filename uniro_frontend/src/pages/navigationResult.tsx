@@ -24,9 +24,9 @@ import NavigationNavBar from "../components/navigation/navBar/navigationNavBar";
 import { useAnimationControls } from "framer-motion";
 
 const NavigationResultPage = () => {
-	const CLOSED_SHEET_HEIGHT = 0;
+	const CLOSED_SHEET_HEIGHT = window.innerHeight * 0.2;
 
-	const INITIAL_TOP_BAR_HEIGHT = 143;
+	const INITIAL_TOP_BAR_HEIGHT = 200;
 	const BOTTOM_SHEET_HANDLE_HEIGHT = 100;
 	const PADDING_FOR_MAP_BOUNDARY = 70;
 

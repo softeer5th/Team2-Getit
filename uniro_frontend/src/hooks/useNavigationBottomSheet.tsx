@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
 const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
-const CLOSED_SHEET_HEIGHT = 0;
+const CLOSED_SHEET_HEIGHT = window.innerHeight * 0.2;
 const ERROR_MARGIN_OF_DRAG = 0.7;
 
 export const useNavigationBottomSheet = () => {
