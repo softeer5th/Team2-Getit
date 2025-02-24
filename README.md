@@ -157,6 +157,14 @@
 
 - **사용 기술**: React, TypeScript, Zustand, TanStack-Query, Tailwind CSS, Frame
 
+## FrontEnd 배포 과정
+![Deploy](https://github.com/user-attachments/assets/4d87f404-d92f-4af4-803c-be8e5b30d1cd)
+
+### Github Action Flow
+1. Multi Stage Build
+2. GCR Push -> VM Pull
+3. Deploy New Container
+
 ---
 
 # 🛠 백엔드
