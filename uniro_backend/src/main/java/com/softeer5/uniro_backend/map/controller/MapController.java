@@ -39,10 +39,17 @@ public class MapController implements MapApi {
 	}
 
 	@Override
+	@GetMapping("/{univId}/routes/stream")
+	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodesStream(@PathVariable("univId") Long univId){
+		GetAllRoutesResDTO allRoutes = mapService.getAllRoutesByStream(univId);
+		return ResponseEntity.ok().body(allRoutes);
+	}
+
+	@Override
 	@GetMapping("/{univId}/routes/sse")
 	public SseEmitter getAllRoutes(@PathVariable("univId") Long univId){
 		SseEmitter emitter = new SseEmitter(60 * 1000L); // timeout 1분
-		mapService.getAllRoutesByStream(univId, emitter);
+		mapService.getAllRoutesBySSE(univId, emitter);
 		return emitter;
 	}
 
