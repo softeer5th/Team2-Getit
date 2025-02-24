@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.service.vo.LightRoute;
 
-import static com.softeer5.uniro_backend.common.constant.UniroConst.STREAM_FETCH_SIZE_AS_STRING;
-
 public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = {"node1", "node2"})
