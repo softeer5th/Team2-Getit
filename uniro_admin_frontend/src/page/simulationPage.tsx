@@ -14,7 +14,14 @@ type Polyline = google.maps.Polyline;
 const SimulationPage = () => {
 	const { university } = useUniversity();
 	const result = useQueries({
-		queries: [{ queryKey: [university?.id, "routes"], queryFn: () => getAllRoutes(university?.id ?? -1) }],
+		queries: [
+			{
+				queryKey: [university?.id, "routes"],
+				queryFn: () => getAllRoutes(university?.id ?? -1),
+				gcTime: 0,
+				staleTime: 0,
+			},
+		],
 	});
 
 	const { waypointMarkerElement } = createMarkerElement();
