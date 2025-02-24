@@ -37,7 +37,7 @@ export default function LogMap({ center, revisionData, setInfo }: LogMapProps) {
 	} = createMarkerElement();
 
 	const addRiskMarkers = (type: Markers.DANGER | Markers.CAUTION, routes: DangerRoute[] | CautionRoute[]) => {
-		if (!AdvancedMarker) return;
+		if (!AdvancedMarker || !map) return;
 
 		if (type === Markers.DANGER) {
 			(routes as DangerRoute[]).forEach((route) => {
@@ -171,7 +171,7 @@ export default function LogMap({ center, revisionData, setInfo }: LogMapProps) {
 	};
 
 	const findCachedCoreRoute = (coreRouteList: CoreRoutes[]) => {
-		if (!Polyline) return;
+		if (!Polyline || !map) return;
 
 		for (const coreRoutes of coreRouteList) {
 			const { coreNode1Id, coreNode2Id, routes } = coreRoutes;
