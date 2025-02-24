@@ -244,22 +244,6 @@ public class RouteCalculator {
         return Math.pow(currentCautionCount,2);
     }
 
-    // A* 알고리즘의 휴리스틱 중 max,min 해발고도를 벗어나는 경우 가중치를 부여
-    private double getHeightHeuristicWeight(double maxHeight, double minHeight, Node nextNode, double routeDistance, RoadExclusionPolicy policy) {
-        if(policy==RoadExclusionPolicy.PEDES)return 0.0;
-        double currentHeight = nextNode.getHeight();
-        double diff = 0.0;
-        if(currentHeight > maxHeight) diff = currentHeight - maxHeight;
-        if(currentHeight < minHeight) diff = minHeight - currentHeight;
-        return calculateWeight(diff, routeDistance);
-    }
-
-    // 차이에 따른 가중치를 계산하는 메서드
-    private double calculateWeight(double diff, double routeDistance){
-        double result = (Math.pow(diff,2) * routeDistance) / HEURISTIC_WEIGHT_NORMALIZATION_FACTOR;
-        return result > LIMIT_RANGE ? 0 : result;
-    }
-
     // 길찾기 결과를 파싱하여 출발지 -> 도착지 형태로 재배열하는 메서드
     private List<Route> reorderRoute(Node startNode, Node endNode, Map<Long, Route> prevRoute){
         List<Route> shortestRoutes = new ArrayList<>();
@@ -309,16 +293,14 @@ public class RouteCalculator {
 
             double heightDiff = firstNode.getHeight() - secondNode.getHeight();
             if(heightDiff > 0){
-                heightIncreaseWeight += Math.exp(heightDiff) - 1;
+                heightIncreaseWeight += Math.max(LIMIT_RANGE ,Math.exp(heightDiff) - 1);
             }
             else{
-                heightDecreaseWeight += Math.exp(-heightDiff) - 1;
+                heightDecreaseWeight += Math.max(LIMIT_RANGE, Math.exp(-heightDiff) - 1);
             }
 
             routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
         }
-        if(Math.abs(heightDecreaseWeight) > LIMIT_RANGE) heightDecreaseWeight = 0.0;
-        if(Math.abs(heightIncreaseWeight) > LIMIT_RANGE) heightIncreaseWeight = 0.0;
         return FastestRouteResultDTO.of(hasCaution,hasDanger,totalDistance,heightIncreaseWeight,heightDecreaseWeight,routeInfoDTOS);
     }
 
