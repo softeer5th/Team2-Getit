@@ -768,6 +768,10 @@ export default function MapSSEPage() {
 			}
 		};
 
+		eventSource.onerror = () => {
+			sseCounter.current = 0;
+		};
+
 		return () => {
 			eventSource.close();
 		};
