@@ -14,8 +14,10 @@ import java.util.List;
 public class FastestRouteResDTO {
     @Schema(description = "길찾기 타입 (PEDES-도보, WHEEL_FAST-휠체어빠른, WHEEL_SAFE-휠체어안전)", example = "PEDES")
     private final RoadExclusionPolicy routeType;
-    @Schema(description = "길 찾기 결과에 위험요소가 포함되어있는지 여부", example = "true")
+    @Schema(description = "길 찾기 결과에 주의요소가 포함되어있는지 여부", example = "true")
     private final boolean hasCaution;
+    @Schema(description = "길 찾기 결과에 위험요소가 포함되어있는지 여부", example = "true")
+    private final boolean hasDanger;
     @Schema(description = "총 이동거리", example = "150.3421234")
     private final double totalDistance;
     @Schema(description = "총 걸리는 시간(초) - 도보", example = "1050.32198432")
@@ -31,6 +33,7 @@ public class FastestRouteResDTO {
 
     public static FastestRouteResDTO of(RoadExclusionPolicy routeType,
                                         boolean hasCaution,
+                                        boolean hasDanger,
                                         double totalDistance,
                                         Double pedestrianTotalCost,
                                         Double manualTotalCost,
@@ -39,6 +42,7 @@ public class FastestRouteResDTO {
                                         List<RouteDetailResDTO> routeDetails) {
         return new FastestRouteResDTO(routeType,
                 hasCaution,
+                hasDanger,
                 totalDistance,
                 pedestrianTotalCost,
                 manualTotalCost,

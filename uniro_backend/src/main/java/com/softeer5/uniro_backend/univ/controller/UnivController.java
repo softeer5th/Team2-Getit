@@ -16,10 +16,9 @@ public class UnivController implements UnivApi {
     @Override
     @GetMapping("/univ/search")
     public ResponseEntity<SearchUnivResDTO> searchUniv(
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "cursor-id", required = false) Long cursorId,
-            @RequestParam(value = "page-size", required = false, defaultValue = "6") Integer pageSize){
-        SearchUnivResDTO searchResult = univService.searchUniv(name, cursorId, pageSize);
+        @RequestParam(value = "name", required = false) String name,
+        @RequestParam(value = "page-size", required = false, defaultValue = "10") Integer pageSize){
+        SearchUnivResDTO searchResult = univService.searchUniv(name, pageSize);
         return ResponseEntity.ok().body(searchResult);
     }
 }

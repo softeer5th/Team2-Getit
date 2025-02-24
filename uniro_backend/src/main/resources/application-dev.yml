@@ -2,6 +2,8 @@ spring:
   config:
     import: application.properties
   datasource:
+    hikari:
+      maximum-pool-size: 30
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
@@ -16,10 +18,11 @@ spring:
         show_sql: true
     open-in-view: false
     defer-datasource-initialization: true
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  data:
+    redis:
+      host: redis
+      password: ${REDIS_PASSWORD}
+      port: 6379
 map:
   api:
     key: ${google.api.key}

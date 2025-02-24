@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,11 +15,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.softeer5.uniro_backend.common.exception.custom.RouteCalculationException;
-import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.external.elevation.MapClient;
 import com.softeer5.uniro_backend.fixture.NodeFixture;
 import com.softeer5.uniro_backend.fixture.RouteFixture;
 import com.softeer5.uniro_backend.map.dto.request.CreateRoutesReqDTO;
@@ -36,8 +40,21 @@ import com.softeer5.uniro_backend.map.repository.RouteRepository;
 @Transactional
 class MapServiceTest {
 
-	@Autowired
-	private RouteCalculator routeCalculator;
+	@Container
+	static final GenericContainer<?> redis = new GenericContainer<>("redis:7.0.8-alpine")
+		.withExposedPorts(6379);
+
+	@BeforeAll
+	static void setup() {
+		redis.start();
+	}
+
+	@DynamicPropertySource
+	static void configureProperties(DynamicPropertyRegistry registry) {
+		registry.add("spring.data.redis.host", redis::getHost);
+		registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
+	}
+
 	@Autowired
 	private MapService mapService;
 	@Autowired

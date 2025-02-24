@@ -16,6 +16,8 @@ ALTER TABLE `uniro-test`.node AUTO_INCREMENT = 1;
 ALTER TABLE `uniro-test`.rev_info AUTO_INCREMENT = 1;
 ALTER TABLE `uniro-test`.route AUTO_INCREMENT = 1;
 ALTER TABLE `uniro-test`.univ AUTO_INCREMENT = 1;
+ALTER TABLE `uniro-test`.route_aud AUTO_INCREMENT = 1;
+ALTER TABLE `uniro-test`.node_aud AUTO_INCREMENT = 1;
 
 -- 외래 키 제약 조건 활성화
 SET FOREIGN_KEY_CHECKS = 1;

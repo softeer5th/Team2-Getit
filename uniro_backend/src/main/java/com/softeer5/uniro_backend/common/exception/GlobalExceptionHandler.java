@@ -27,5 +27,11 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(INVALID_INPUT_VALUE);
         return new ResponseEntity<>(response, HttpStatus.valueOf(INVALID_INPUT_VALUE.getHttpStatus()));
     }
-    
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(Exception ex) {
+        log.error(ex.getMessage());
+        ErrorResponse response = new ErrorResponse(INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(INTERNAL_SERVER_ERROR.getHttpStatus()));
+    }
 }

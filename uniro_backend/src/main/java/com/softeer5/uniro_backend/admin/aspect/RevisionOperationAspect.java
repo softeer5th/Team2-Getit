@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 
+import java.time.LocalDateTime;
+
 @Aspect
 @Component
 @Order(BEFORE_DEFAULT_ORDER)
@@ -22,6 +24,7 @@ public class RevisionOperationAspect {
     @Around("@annotation(revisionOperation)")
     public Object around(ProceedingJoinPoint joinPoint, RevisionOperation revisionOperation) throws Throwable {
         RevisionOperationType opType = revisionOperation.value();
+        RevisionContext.setTimeStamp(LocalDateTime.now());
 
         Object result;
         switch (opType) {

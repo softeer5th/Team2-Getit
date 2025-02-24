@@ -14,9 +14,9 @@ public class ChangedRouteDTO {
     @Schema(description = "현재", example = "")
     private final RouteDifferInfo current;
     @Schema(description = "해당 버전 (과거)", example = "")
-    private final RouteDifferInfo revision;
+    private final RouteDifferInfo difference;
 
-    public static ChangedRouteDTO of(Long id, RouteDifferInfo current, RouteDifferInfo revision) {
-        return new ChangedRouteDTO(id, current, revision);
+    public static ChangedRouteDTO of(Long id, RouteDifferInfo current, RouteDifferInfo difference) {
+        return new ChangedRouteDTO(id, current, difference);
     }
 }

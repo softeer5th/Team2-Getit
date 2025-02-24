@@ -27,7 +27,7 @@ public class ExecutionLoggingAop {
 	private static final ThreadLocal<String> userIdThreadLocal = new ThreadLocal<>();
 
 	@Around("execution(* com.softeer5.uniro_backend..*(..)) "
-		+ "&& !within(com.softeer5.uniro_backend.common..*) "
+		+ "&& !within(com.softeer5.uniro_backend.common..*)"
 	)
 	public Object logExecutionTrace(ProceedingJoinPoint pjp) throws Throwable {
 		String userId = userIdThreadLocal.get();
@@ -46,7 +46,14 @@ public class ExecutionLoggingAop {
 		if (isController) {
 			logHttpRequest(userId);
 		}
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		HttpServletRequest request = null;
+		if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes) {
+			request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		}
+
+		if(request==null){
+			return pjp.proceed();
+		}
 		log.info("✅ [ userId = {} Start] [Call Method] {}: {}", userId, request.getMethod(), task);
 
 		try{

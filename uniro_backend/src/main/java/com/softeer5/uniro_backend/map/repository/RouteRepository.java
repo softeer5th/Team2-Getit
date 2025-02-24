@@ -3,21 +3,43 @@ package com.softeer5.uniro_backend.map.repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import jakarta.persistence.QueryHint;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.softeer5.uniro_backend.map.entity.Route;
+import com.softeer5.uniro_backend.map.service.vo.LightRoute;
 
 public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = {"node1", "node2"})
     @Query("SELECT r FROM Route r WHERE r.univId = :univId")
     List<Route> findAllRouteByUnivIdWithNodes(Long univId);
+
+    @EntityGraph(attributePaths = {"node1", "node2"})
+    @Query("SELECT r FROM Route r WHERE r.univId = :univId")
+    @QueryHints(value = {
+            @QueryHint(name = "org.hibernate.fetchSize", value = Integer.MIN_VALUE + ""),
+            @QueryHint(name = "org.hibernate.cacheable", value = "false")
+    })
+    Stream<Route> findAllRouteByUnivIdWithNodesStream(Long univId);
+
+    @Query("""
+    SELECT new com.softeer5.uniro_backend.map.service.vo.LightRoute(r.id, r.distance, n1, n2) 
+    FROM Route r 
+    JOIN r.node1 n1 
+    JOIN r.node2 n2
+    WHERE r.univId = :univId
+""")
+    @QueryHints(value = {
+            @QueryHint(name = "org.hibernate.fetchSize", value = Integer.MIN_VALUE + ""),
+            @QueryHint(name = "org.hibernate.cacheable", value = "false")
+    })
+    Stream<LightRoute> findAllLightRoutesByUnivId(Long univId);
+
 
     @Query(value = "SELECT r.* FROM route r " +
             "WHERE r.univ_id = :univId " +
@@ -75,4 +97,5 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
             """)
     int countByUnivIdAndNodeId(Long univId, Long nodeId);
 
+    int countByUnivId(Long univId);
 }

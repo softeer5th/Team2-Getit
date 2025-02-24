@@ -1,5 +1,6 @@
 package com.softeer5.uniro_backend.admin.service;
 
+import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
 
 import com.softeer5.uniro_backend.admin.annotation.DisableAudit;
@@ -11,7 +12,10 @@ import com.softeer5.uniro_backend.admin.repository.RouteAuditRepository;
 import com.softeer5.uniro_backend.building.repository.BuildingRepository;
 import com.softeer5.uniro_backend.common.exception.custom.AdminException;
 import com.softeer5.uniro_backend.common.exception.custom.RouteException;
-import com.softeer5.uniro_backend.map.dto.response.GetAllRoutesResDTO;
+import com.softeer5.uniro_backend.common.exception.custom.UnivException;
+import com.softeer5.uniro_backend.external.redis.RedisService;
+import com.softeer5.uniro_backend.map.dto.response.AllRoutesInfo;
+import com.softeer5.uniro_backend.map.dto.response.GetChangedRoutesByRevisionResDTO;
 import com.softeer5.uniro_backend.map.dto.response.GetRiskRoutesResDTO;
 import com.softeer5.uniro_backend.map.dto.response.NodeInfoResDTO;
 import com.softeer5.uniro_backend.map.entity.Node;
@@ -19,14 +23,13 @@ import com.softeer5.uniro_backend.map.entity.Route;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import com.softeer5.uniro_backend.map.repository.RouteRepository;
 import com.softeer5.uniro_backend.map.service.RouteCalculator;
+import com.softeer5.uniro_backend.univ.entity.Univ;
+import com.softeer5.uniro_backend.univ.repository.UnivRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,14 +40,22 @@ public class AdminService {
     private final RouteRepository routeRepository;
     private final NodeRepository nodeRepository;
     private final BuildingRepository buildingRepository;
+    private final UnivRepository univRepository;
 
     private final RouteAuditRepository routeAuditRepository;
     private final NodeAuditRepository nodeAuditRepository;
 
     private final RouteCalculator routeCalculator;
 
+    private final RedisService redisService;
+
     public List<RevInfoDTO> getAllRevInfo(Long univId){
-        return revInfoRepository.findAllByUnivId(univId).stream().map(r -> RevInfoDTO.of(r.getRev(),
+
+        Univ univ = univRepository.findById(univId)
+                .orElseThrow(()-> new UnivException("Univ not found", UNIV_NOT_FOUND));
+        long limitVersion = univ.getLimitVersion();
+
+        return revInfoRepository.findAllByUnivIdAfterVersionId(univId, limitVersion).stream().map(r -> RevInfoDTO.of(r.getRev(),
                 r.getRevTimeStamp(),
                 r.getUnivId(),
                 r.getAction())).toList();
@@ -53,8 +64,16 @@ public class AdminService {
     @Transactional
     @DisableAudit
     public void rollbackRev(Long univId, Long versionId){
-        RevInfo revInfo = revInfoRepository.findById(versionId)
-            .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
+
+        Univ univ = univRepository.findById(univId)
+                .orElseThrow(()-> new UnivException("Univ not found", UNIV_NOT_FOUND));
+        long limitVersion = univ.getLimitVersion();
+        if(limitVersion > versionId){
+            throw new AdminException("version is too low", CANT_ROLLBACK_BELOW_MINIMUM_VERSION);
+        }
+
+        RevInfo revInfo = revInfoRepository.findFirstByUnivIdAndRevAfter(univId, versionId)
+            .orElseThrow(() -> new AdminException("Already the latest version id", ALREADY_LATEST_VERSION_ID));
 
         List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
         List<Node> revNodes = nodeAuditRepository.getAllNodesAtRevision(univId, versionId);
@@ -95,18 +114,15 @@ public class AdminService {
             }
         }
 
+        int routeCount = routes.size();
+        redisService.deleteRoutesData(univId.toString(), routeCount / STREAM_FETCH_SIZE + 1);
     }
 
     public GetAllRoutesByRevisionResDTO getAllRoutesByRevision(Long univId, Long versionId){
-        revInfoRepository.findById(versionId)
-                .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
-
-        List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
-
-        if(revRoutes.isEmpty()) {
-            throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
-        }
-        GetAllRoutesResDTO routesInfo = routeCalculator.assembleRoutes(revRoutes);
+        List<Route> revRoutes = getRevRoutes(univId,versionId);
+        List<Node> revNodes = nodeAuditRepository.getAllNodesAtRevision(univId, versionId);
+        fetchNodes(revRoutes,revNodes);
+        AllRoutesInfo routesInfo = routeCalculator.assembleRoutes(revRoutes);
 
         Map<Long, Route> revRouteMap = new HashMap<>();
         for(Route revRoute : revRoutes){
@@ -134,18 +150,72 @@ public class AdminService {
 
         //시작점이 1개인 nodeList 생성
         List<Node> endNodes = determineEndNodes(lostAdjMap, lostNodeMap);
-
-        List<NodeInfoResDTO> lostNodeInfos = lostNodeMap.entrySet().stream()
-                .map(entry -> {
-                    Node node = entry.getValue();
-                    return NodeInfoResDTO.of(entry.getKey(), node.getX(), node.getY());
-                })
-                .toList();
-
-        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(lostNodeInfos, routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
+        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(mapNodeInfo(lostNodeMap), routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
 
         return GetAllRoutesByRevisionResDTO.of(routesInfo, getRiskRoutesResDTO, lostRouteDTO, changedRoutes);
     }
+
+    public GetChangedRoutesByRevisionResDTO getChangedRoutesByRevision(Long univId, Long versionId) {
+        List<Route> revRoutes = getRevRoutes(univId, versionId);
+
+        RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
+            .orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
+
+        Map<Long, Route> revRouteMap = new HashMap<>();
+        for(Route revRoute : revRoutes){
+            revRouteMap.put(revRoute.getId(), revRoute);
+        }
+
+        List<Route> changedRoutes = routeAuditRepository.findUpdatedRouteByUnivIdWithNodes(univId,versionId);
+        List<Node> nodes = nodeRepository.findAllByUnivId(univId);
+        fetchNodes(changedRoutes,nodes);
+
+
+        Map<Long, List<Route>> lostAdjMap = new HashMap<>();
+        Map<Long, Node> lostNodeMap = new HashMap<>();
+        List<ChangedRouteDTO> changedRoutesDto = new ArrayList<>();
+
+        for(Route route : changedRoutes){
+            if(revRouteMap.containsKey(route.getId())){
+                Route revRoute = revRouteMap.get(route.getId());
+                handleRevisionRoute(revRoute, route, changedRoutesDto);
+                continue;
+            }
+            //해당 시점 이후에 생성된 루트들 (과거 시점엔 보이지 않는 루트)
+            handleLostRoute(route, lostAdjMap, lostNodeMap);
+        }
+
+        //시작점이 1개인 nodeList 생성
+        List<Node> endNodes = determineEndNodes(lostAdjMap, lostNodeMap);
+        LostRoutesDTO lostRouteDTO = LostRoutesDTO.of(mapNodeInfo(lostNodeMap), routeCalculator.getCoreRoutes(lostAdjMap, endNodes));
+
+        return GetChangedRoutesByRevisionResDTO.of(lostRouteDTO, changedRoutesDto, revInfo.getRev());
+    }
+
+    private void fetchNodes(List<Route> routes, List<Node> nodes) {
+        Map<Long, Node> nodeMap = new HashMap<>();
+        for(Node revNode : nodes){
+            nodeMap.put(revNode.getId(), revNode);
+        }
+        for(Route revRoute : routes){
+            revRoute.setNode1(nodeMap.get(revRoute.getNode1().getId()));
+            revRoute.setNode2(nodeMap.get(revRoute.getNode2().getId()));
+        }
+    }
+
+
+    private List<Route> getRevRoutes(Long univId, Long versionId) {
+        revInfoRepository.findById(versionId)
+                .orElseThrow(() -> new AdminException("invalid version id", INVALID_VERSION_ID));
+
+        List<Route> revRoutes = routeAuditRepository.getAllRoutesAtRevision(univId, versionId);
+
+        if(revRoutes.isEmpty()) {
+            throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
+        }
+        return revRoutes;
+    }
+
 
     private void handleRevisionRoute(Route revRoute, Route route, List<ChangedRouteDTO> changedRoutes, List<Route> riskRoutes) {
         //변경사항이 있는 경우
@@ -155,6 +225,13 @@ public class AdminService {
         //변경사항이 없으면서 risk가 존재하는 route의 경우 riskRoutes에 추가
         else if(!route.getCautionFactors().isEmpty() || !route.getDangerFactors().isEmpty()){
             riskRoutes.add(route);
+        }
+    }
+
+    private void handleRevisionRoute(Route revRoute, Route route, List<ChangedRouteDTO> changedRoutes) {
+        //변경사항이 있는 경우
+        if(!route.isEqualRoute(revRoute)){
+            changedRoutes.add(ChangedRouteDTO.of(route.getId(), RouteDifferInfo.of(route), RouteDifferInfo.of(revRoute)));
         }
     }
 
@@ -172,6 +249,15 @@ public class AdminService {
                 .map(Map.Entry::getKey)
                 .map(lostNodeMap::get)
                 .collect(Collectors.toList());
+    }
+
+    private List<NodeInfoResDTO> mapNodeInfo(Map<Long, Node> lostNodeMap){
+        return lostNodeMap.entrySet().stream()
+                .map(entry -> {
+                    Node node = entry.getValue();
+                    return NodeInfoResDTO.of(entry.getKey(), node.getX(), node.getY());
+                })
+                .toList();
     }
 
 }

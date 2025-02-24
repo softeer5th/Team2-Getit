@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.external;
 
-import com.softeer5.uniro_backend.external.MapClientImpl;
+import com.softeer5.uniro_backend.external.elevation.MapClientImpl;
 import com.softeer5.uniro_backend.common.exception.custom.ElevationApiException;
 import com.softeer5.uniro_backend.map.entity.Node;
 import org.junit.jupiter.api.Assertions;
