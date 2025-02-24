@@ -1,7 +1,7 @@
 import React from "react";
 import { getThemeByPassableStatus } from "../../utils/report/getThemeByPassableStatus";
 import { CautionIssue, DangerIssue, IssueTypeKey, PassableStatus } from "../../constant/enum/reportEnum";
-import { CautionIssueType, DangerIssueType } from "../../data/types/enum";
+import { CautionIssueType, DangerIssueType } from "../../types/enum";
 
 export const SecondaryFormButton = ({
 	onClick,

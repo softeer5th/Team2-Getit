@@ -1,32 +1,35 @@
-import { useEffect, useRef, useState } from "react";
-import createMarkerElement from "../components/map/mapMarkers";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Markers } from "../constant/enum/markerEnum";
 import useMap from "../hooks/useMap";
-import createAdvancedMarker from "../utils/markers/createAdvanedMarker";
-import { ClickEvent } from "../data/types/event";
+import { ClickEvent } from "../types/event";
 import createSubNodes from "../utils/polylines/createSubnodes";
 import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
-import { AdvancedMarker } from "../data/types/marker";
+import { AdvancedMarker } from "../types/marker";
 import Button from "../components/customButton";
-import { CautionToggleButton, DangerToggleButton, UndoButton } from "../components/map/floatingButtons";
+import { CautionToggleButton, DangerToggleButton, ResetButton, UndoButton } from "../components/map/floatingButtons";
 import toggleMarkers from "../utils/markers/toggleMarkers";
 import BackButton from "../components/map/backButton";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-import { University } from "../data/types/university";
+import { University } from "../types/university";
 import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import { getAllRoutes, postReportRoute } from "../api/route";
-import { CoreRoute, CoreRoutesList, Route, RouteId } from "../data/types/route";
-import { Node, NodeId } from "../data/types/node";
-import { Coord } from "../data/types/coord";
+import { CoreRoute, CoreRoutesList, RouteId } from "../types/route";
+import { Node, NodeId } from "../types/node";
+import { Coord } from "../types/coord";
 import useModal from "../hooks/useModal";
-import { useNavigate } from "react-router";
 import { getAllRisks } from "../api/routes";
-import { CautionIssueType, DangerIssueType } from "../data/types/enum";
+import { CautionIssueType, DangerIssueType } from "../types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import removeMarkers from "../utils/markers/removeMarkers";
 import useMutationError from "../hooks/useMutationError";
+import TutorialModal from "../components/map/tutorialModal";
+import createMarkerElement from "../utils/markers/createMarkerElement";
+import MapContext from "../map/mapContext";
+import { CacheContext } from "../map/mapCacheContext";
+import removeAllListener from "../utils/map/removeAllListener";
+import { transformAllRoutes } from "../api/transformer/route";
 
 type SelectedMarkerTypes = {
 	type: Markers.CAUTION | Markers.DANGER;
@@ -36,9 +39,10 @@ type SelectedMarkerTypes = {
 };
 
 export default function ReportRoutePage() {
-	const navigate = useNavigate();
+	const { usedRouteRef, cachedMarkerRef, cachedRouteRef, usedMarkerRef } = useContext(CacheContext);
 	const queryClient = useQueryClient();
-	const { map, mapRef, AdvancedMarker, Polyline } = useMap({ zoom: 18, minZoom: 17 });
+	const { createAdvancedMarker, createPolyline } = useContext(MapContext);
+	const { map, mapRef } = useMap({ zoom: 18, minZoom: 17 });
 	const originPoint = useRef<{ point: Node; element: AdvancedMarker } | undefined>();
 	const [newPoints, setNewPoints] = useState<{ element: AdvancedMarker | null; coords: (Coord | Node)[] }>({
 		element: null,
@@ -58,9 +62,18 @@ export default function ReportRoutePage() {
 
 	const [selectedMarker, setSelectedMarker] = useState<SelectedMarkerTypes>();
 	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(() => {
-		navigate("/map");
+		// navigate("/map");
 	});
 	const [tempWaypoints, setTempWayPoints] = useState<AdvancedMarker[]>([]);
+	const [isTutorialShown, setIsTutorialShown] = useState<boolean>(true);
+
+	const {
+		cautionMarkerElement,
+		dangerMarkerElement,
+		waypointMarkerElement,
+		originMarkerElement,
+		destinationMarkerElement,
+	} = createMarkerElement();
 
 	if (!university) return;
 
@@ -76,7 +89,7 @@ export default function ReportRoutePage() {
 
 	const [routes, risks] = result;
 
-	const [ErrorModal, { mutate, status }] = useMutationError(
+	const [ErrorModal, { data: reportedRoute, mutate, status }] = useMutationError(
 		{
 			mutationFn: ({
 				startNodeId,
@@ -87,7 +100,7 @@ export default function ReportRoutePage() {
 				endNodeId: NodeId | null;
 				coordinates: Coord[];
 			}) => postReportRoute(university.id, { startNodeId, endNodeId, coordinates }),
-			onSuccess: () => {
+			onSuccess: (data) => {
 				openSuccess();
 				if (newPoints.element) newPoints.element.map = null;
 				if (originPoint.current) {
@@ -103,7 +116,13 @@ export default function ReportRoutePage() {
 					return [];
 				});
 				if (newPolyLine.current) newPolyLine.current.setPath([]);
-				queryClient.invalidateQueries({ queryKey: ["routes", university.id] });
+
+				const routes = transformAllRoutes(data);
+
+				queryClient.setQueryData(["routes", university.id], (prev: CoreRoutesList) => {
+					return [...prev, ...routes];
+				});
+				setIsActive(false);
 			},
 			onError: () => {
 				if (newPoints.element) newPoints.element.map = null;
@@ -140,8 +159,40 @@ export default function ReportRoutePage() {
 		},
 	);
 
+	const closeTutorial = () => {
+		setIsTutorialShown(false);
+	};
+
+	const openTutorial = () => {
+		setIsTutorialShown(true);
+	};
+
+	const onClickRiskMarker = (
+		self: AdvancedMarker,
+		routeId: RouteId,
+		type: Markers.DANGER | Markers.CAUTION,
+		factors: DangerIssueType[] | CautionIssueType[],
+	) => {
+		setSelectedMarker((prevMarker) => {
+			if (prevMarker?.id === routeId) return undefined;
+			return {
+				type: type,
+				element: self,
+				factors: factors,
+				id: routeId,
+			};
+		});
+	};
+
 	const addRiskMarker = () => {
-		if (AdvancedMarker === null || map === null) return;
+		if (!map) return;
+
+		let isReDraw = false;
+
+		if (usedMarkerRef.current!.size !== 0) isReDraw = true;
+
+		const usedKeys = new Set();
+
 		const { dangerRoutes, cautionRoutes } = risks.data;
 
 		/** 위험 마커 생성 */
@@ -149,29 +200,42 @@ export default function ReportRoutePage() {
 
 		for (const route of dangerRoutes) {
 			const { routeId, node1, node2, dangerFactors } = route;
-			const type = Markers.DANGER;
+
+			const key = `DANGER_${routeId}`;
+
+			const cachedDangerMarker = cachedMarkerRef.current!.get(key);
+
+			if (cachedDangerMarker) {
+				if (!isReDraw) {
+					usedMarkerRef.current!.add(key);
+				} else {
+					usedKeys.add(key);
+				}
+
+				removeAllListener(cachedDangerMarker);
+				cachedDangerMarker.map = null;
+				cachedDangerMarker.addListener("click", () =>
+					onClickRiskMarker(cachedDangerMarker, routeId, Markers.DANGER, dangerFactors),
+				);
+				dangerMarkersWithId.push({ routeId, element: cachedDangerMarker });
+
+				continue;
+			}
 
 			const dangerMarker = createAdvancedMarker(
-				AdvancedMarker,
-				null,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				createMarkerElement({ type }),
-				() => {
-					setSelectedMarker((prevMarker) => {
-						if (prevMarker?.id === routeId) return undefined;
-						return {
-							type: Markers.DANGER,
-							element: dangerMarker,
-							factors: dangerFactors,
-							id: routeId,
-						};
-					});
+				{
+					map: null,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: dangerMarkerElement({}),
 				},
+				(self) => onClickRiskMarker(self, routeId, Markers.DANGER, dangerFactors),
 			);
+			if (!dangerMarker) continue;
 
+			cachedMarkerRef.current!.set(key, dangerMarker);
 			dangerMarkersWithId.push({ routeId, element: dangerMarker });
 		}
 		setDangerMarkers(dangerMarkersWithId);
@@ -181,32 +245,56 @@ export default function ReportRoutePage() {
 
 		for (const route of cautionRoutes) {
 			const { routeId, node1, node2, cautionFactors } = route;
-			const type = Markers.CAUTION;
+
+			const key = `CAUTION_${routeId}`;
+
+			const cachedCautionMarker = cachedMarkerRef.current!.get(key);
+
+			if (cachedCautionMarker) {
+				if (!isReDraw) {
+					usedMarkerRef.current!.add(key);
+				} else {
+					usedKeys.add(key);
+				}
+
+				removeAllListener(cachedCautionMarker);
+				cachedCautionMarker.addListener("click", () =>
+					onClickRiskMarker(cachedCautionMarker, routeId, Markers.CAUTION, cautionFactors),
+				);
+				cachedCautionMarker.map = null;
+				cautionMarkersWithId.push({ routeId, element: cachedCautionMarker });
+
+				continue;
+			}
 
 			const cautionMarker = createAdvancedMarker(
-				AdvancedMarker,
-				null,
-				new google.maps.LatLng({
-					lat: (node1.lat + node2.lat) / 2,
-					lng: (node1.lng + node2.lng) / 2,
-				}),
-				createMarkerElement({ type }),
-				() => {
-					setSelectedMarker((prevMarker) => {
-						if (prevMarker?.id === routeId) return undefined;
-						return {
-							type: Markers.CAUTION,
-							element: cautionMarker,
-							factors: cautionFactors,
-							id: routeId,
-						};
-					});
+				{
+					map: null,
+					position: {
+						lat: (node1.lat + node2.lat) / 2,
+						lng: (node1.lng + node2.lng) / 2,
+					},
+					content: cautionMarkerElement({}),
 				},
+				(self) => onClickRiskMarker(self, routeId, Markers.CAUTION, cautionFactors),
 			);
+
+			if (!cautionMarker) continue;
+
+			cachedMarkerRef.current!.set(key, cautionMarker);
 			cautionMarkersWithId.push({ routeId, element: cautionMarker });
 		}
-
 		setCautionMarkers(cautionMarkersWithId);
+
+		if (isReDraw) {
+			// @ts-expect-error : Difference Method need Polyfill
+			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
+
+			deleteKeys.forEach((key) => {
+				cachedMarkerRef.current!.get(key)!.map = null;
+				cachedMarkerRef.current!.delete(key);
+			});
+		}
 	};
 
 	const toggleCautionButton = () => {
@@ -233,7 +321,7 @@ export default function ReportRoutePage() {
 	};
 
 	const reportNewRoute = () => {
-		if (!newPolyLine.current || !Polyline) return;
+		if (!newPolyLine.current) return;
 
 		const subNodes = [];
 		const edges = newPoints.coords.map((node, idx) => [node, newPoints.coords[idx + 1]]).slice(0, -1);
@@ -241,7 +329,10 @@ export default function ReportRoutePage() {
 		const lastPoint = newPoints.coords[newPoints.coords.length - 1] as Node | Coord;
 
 		for (const edge of edges) {
-			const subNode = createSubNodes(new Polyline({ path: edge })).slice(0, -1);
+			const tempPolyline = createPolyline({ path: edge });
+			if (!tempPolyline) continue;
+
+			const subNode = createSubNodes(tempPolyline).slice(0, -1);
 			subNodes.push(...subNode);
 		}
 
@@ -256,99 +347,168 @@ export default function ReportRoutePage() {
 		});
 	};
 
-	const drawRoute = (coreRouteList: CoreRoutesList) => {
-		if (!Polyline || !AdvancedMarker || !map) return;
+	const onClickPolyline = (self: google.maps.Polyline, e: ClickEvent, edges: CoreRoute[]) => {
+		const point = LatLngToLiteral(e.latLng);
+		const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
 
-		for (const coreRoutes of coreRouteList) {
-			const { coreNode1Id, coreNode2Id, routes: subRoutes } = coreRoutes;
+		setSelectedMarker(undefined);
 
-			// 가장 끝쪽 Core Node 그리기
-			const endNode = subRoutes[subRoutes.length - 1].node2;
+		const tempWaypointMarker = createAdvancedMarker({
+			map: map,
+			position: nearestPoint,
+			content: waypointMarkerElement({}),
+		});
 
-			createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				endNode,
-				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
-			);
+		if (tempWaypointMarker) setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker]);
 
-			const subNodes = [subRoutes[0].node1, ...subRoutes.map((el) => el.node2)];
-
-			const routePolyLine = new Polyline({
-				map: map,
-				path: subNodes.map((el) => {
-					return { lat: el.lat, lng: el.lng };
-				}),
-				strokeColor: "#808080",
-			});
-
-			routePolyLine.addListener("click", (e: ClickEvent) => {
-				const edges: CoreRoute[] = subRoutes.map(({ routeId, node1, node2 }) => {
-					return { routeId, node1, node2 };
-				});
-
-				const point = LatLngToLiteral(e.latLng);
-				const { edge: nearestEdge, point: nearestPoint } = findNearestSubEdge(edges, point);
-
-				const tempWaypointMarker = createAdvancedMarker(
-					AdvancedMarker,
-					map,
-					nearestPoint,
-					createMarkerElement({
-						type: Markers.WAYPOINT,
-						className: "translate-waypoint",
-					}),
-				);
-
-				setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker]);
-
-				if (originPoint.current) {
-					setNewPoints((prevPoints) => {
-						if (prevPoints.element) {
-							prevPoints.element.position = nearestPoint;
-							return {
-								...prevPoints,
-								coords: [...prevPoints.coords, nearestPoint],
-							};
-						} else {
-							setIsActive(true);
-							return {
-								element: new AdvancedMarker({
-									map: map,
-									position: nearestPoint,
-									content: createMarkerElement({
-										type: Markers.DESTINATION,
-									}),
-								}),
-								coords: [...prevPoints.coords, nearestPoint],
-							};
-						}
-					});
-				} else {
-					const originMarker = new AdvancedMarker({
-						map: map,
-						position: nearestPoint,
-						content: createMarkerElement({ type: Markers.ORIGIN }),
-					});
-					originPoint.current = {
-						point: nearestPoint,
-						element: originMarker,
+		if (originPoint.current) {
+			setNewPoints((prevPoints) => {
+				if (prevPoints.element) {
+					prevPoints.element.position = nearestPoint;
+					return {
+						...prevPoints,
+						coords: [...prevPoints.coords, nearestPoint],
 					};
-					setNewPoints({
-						element: null,
-						coords: [nearestPoint],
-					});
+				} else {
+					setIsActive(true);
+					return {
+						element: createAdvancedMarker({
+							map: map,
+							position: nearestPoint,
+							content: destinationMarkerElement({ hasAnimation: true }),
+						})!,
+						coords: [...prevPoints.coords, nearestPoint],
+					};
 				}
 			});
+		} else {
+			const originMarker = createAdvancedMarker({
+				map: map,
+				position: nearestPoint,
+				content: originMarkerElement({ hasAnimation: true }),
+			});
 
-			const startNode = subRoutes[0].node1;
+			if (originMarker)
+				originPoint.current = {
+					point: nearestPoint,
+					element: originMarker,
+				};
+			setNewPoints({
+				element: null,
+				coords: [nearestPoint],
+			});
+		}
+	};
 
-			createAdvancedMarker(
-				AdvancedMarker,
-				map,
-				startNode,
-				createMarkerElement({ type: Markers.WAYPOINT, className: "translate-waypoint" }),
+	const drawRoute = (coreRouteList: CoreRoutesList) => {
+		if (!map || !cachedRouteRef.current) return;
+
+		let isReDraw = false;
+
+		if (usedRouteRef.current!.size !== 0) isReDraw = true;
+
+		const usedKeys = new Set();
+
+		for (const coreRoutes of coreRouteList) {
+			const { coreNode1Id, coreNode2Id, routes: edges } = coreRoutes;
+
+			const subNodes = [edges[0].node1, ...edges.map((el) => el.node2)];
+
+			const key =
+				coreNode1Id < coreNode2Id
+					? `${edges[0].routeId}_${edges.slice(-1)[0].routeId}`
+					: `${edges.slice(-1)[0].routeId}_${edges[0].routeId}`;
+
+			const cachedPolyline = cachedRouteRef.current.get(key);
+
+			if (cachedPolyline) {
+				if (!isReDraw) {
+					usedRouteRef.current!.add(key);
+				} else {
+					usedKeys.add(key);
+				}
+
+				removeAllListener(cachedPolyline);
+				cachedPolyline.addListener("click", (e: ClickEvent) => onClickPolyline(cachedPolyline, e, edges));
+				cachedPolyline.setMap(map);
+				continue;
+			}
+
+			const routePolyline = createPolyline(
+				{
+					map: map,
+					path: subNodes.map((el) => {
+						return { lat: el.lat, lng: el.lng };
+					}),
+					strokeColor: "#3585fc",
+				},
+				(self, e) => {
+					const point = LatLngToLiteral(e.latLng);
+					const { point: nearestPoint } = findNearestSubEdge(edges, point);
+
+					setSelectedMarker(undefined);
+
+					const tempWaypointMarker = createAdvancedMarker({
+						map: map,
+						position: nearestPoint,
+						content: waypointMarkerElement({}),
+					});
+
+					if (tempWaypointMarker) setTempWayPoints((prevMarkers) => [...prevMarkers, tempWaypointMarker]);
+
+					if (originPoint.current) {
+						setNewPoints((prevPoints) => {
+							if (prevPoints.element) {
+								prevPoints.element.position = nearestPoint;
+								return {
+									...prevPoints,
+									coords: [...prevPoints.coords, nearestPoint],
+								};
+							} else {
+								setIsActive(true);
+								return {
+									element: createAdvancedMarker({
+										map: map,
+										position: nearestPoint,
+										content: destinationMarkerElement({ hasAnimation: true }),
+									})!,
+									coords: [...prevPoints.coords, nearestPoint],
+								};
+							}
+						});
+					} else {
+						const originMarker = createAdvancedMarker({
+							map: map,
+							position: nearestPoint,
+							content: originMarkerElement({ hasAnimation: true }),
+						});
+
+						if (originMarker)
+							originPoint.current = {
+								point: nearestPoint,
+								element: originMarker,
+							};
+						setNewPoints({
+							element: null,
+							coords: [nearestPoint],
+						});
+					}
+				},
 			);
+
+			if (cachedRouteRef.current && routePolyline) {
+				cachedRouteRef.current.set(key, routePolyline);
+			}
+		}
+
+		if (isReDraw) {
+			// @ts-expect-error : Difference Method need Polyfill
+			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;
+
+			deleteKeys.forEach((key) => {
+				cachedRouteRef.current!.get(key)?.setMap(null);
+				cachedRouteRef.current!.delete(key);
+			});
 		}
 	};
 
@@ -379,6 +539,7 @@ export default function ReportRoutePage() {
 					coords: [prevPoints.coords[0]],
 				};
 			});
+			setIsActive(false);
 			return;
 		} else if (newPoints.coords.length === 1) {
 			if (originPoint.current) {
@@ -403,6 +564,32 @@ export default function ReportRoutePage() {
 		});
 	};
 
+	/** Reset 함수
+	 * 모든 새로운 점 초기화, 시작점 초기화, waypoint 마커 초기화
+	 */
+	const resetPoints = () => {
+		setTempWayPoints((prevPoints) => {
+			prevPoints.forEach((el) => (el.map = null));
+
+			return [];
+		});
+
+		setNewPoints((prev) => {
+			if (prev.element) {
+				prev.element.map = null;
+			}
+			return {
+				element: null,
+				coords: [],
+			};
+		});
+		if (originPoint.current) {
+			originPoint.current.element.map = null;
+		}
+		setIsActive(false);
+		originPoint.current = undefined;
+	};
+
 	useEffect(() => {
 		if (newPolyLine.current) {
 			newPolyLine.current.setPath(newPoints.coords);
@@ -410,13 +597,10 @@ export default function ReportRoutePage() {
 	}, [newPoints]);
 
 	useEffect(() => {
-		drawRoute(routes.data);
-		addRiskMarker();
-		if (Polyline) {
-			newPolyLine.current = new Polyline({ map: map, path: [], strokeColor: "#0367FB" });
-		}
+		newPolyLine.current = createPolyline({ map: map, path: [], strokeColor: "#0367FB" });
 
-		if (map && AdvancedMarker) {
+		if (map) {
+			map.setCenter(university.centerPoint);
 			map.addListener("click", (e: ClickEvent) => {
 				setSelectedMarker(undefined);
 				if (originPoint.current) {
@@ -431,17 +615,17 @@ export default function ReportRoutePage() {
 						} else {
 							setIsActive(true);
 							return {
-								element: new AdvancedMarker({
+								element: createAdvancedMarker({
 									map: map,
 									position: point,
-									content: createMarkerElement({
-										type: Markers.DESTINATION,
-									}),
-								}),
+									content: destinationMarkerElement({}),
+								})!,
 								coords: [...prevPoints.coords, point],
 							};
 						}
 					});
+				} else {
+					openTutorial();
 				}
 			});
 		}
@@ -451,28 +635,30 @@ export default function ReportRoutePage() {
 	const changeMarkerStyle = (marker: SelectedMarkerTypes | undefined, isSelect: boolean) => {
 		if (!map || !marker) return;
 
-		if (isSelect) {
-			if (marker.type === Markers.DANGER) {
-				const key = marker.factors[0] as DangerIssueType;
-				marker.element.content = createMarkerElement({
-					type: marker.type,
-					title: key && DangerIssue[key],
-					hasTopContent: true,
+		marker.element.zIndex = isSelect ? 100 : 1;
+
+		if (marker.type === Markers.DANGER) {
+			if (isSelect) {
+				marker.element.content = dangerMarkerElement({
+					factors: (marker.factors as DangerIssueType[]).map((key) => DangerIssue[key]),
 				});
-			} else if (marker.type === Markers.CAUTION) {
-				const key = marker.factors[0] as CautionIssueType;
-				marker.element.content = createMarkerElement({
-					type: marker.type,
-					title: key && CautionIssue[key],
-					hasTopContent: true,
-				});
+				return;
 			}
+
+			marker.element.content = dangerMarkerElement({});
 			return;
 		}
+		if (marker.type === Markers.CAUTION) {
+			if (isSelect) {
+				marker.element.content = cautionMarkerElement({
+					factors: (marker.factors as CautionIssueType[]).map((key) => CautionIssue[key]),
+				});
+				return;
+			}
 
-		marker.element.content = createMarkerElement({
-			type: marker.type,
-		});
+			marker.element.content = cautionMarkerElement({});
+			return;
+		}
 	};
 
 	/** 선택된 마커가 있는 경우 */
@@ -483,26 +669,40 @@ export default function ReportRoutePage() {
 		};
 	}, [selectedMarker]);
 
+	useEffect(() => {
+		drawRoute(routes.data);
+	}, [map, routes.data]);
+
+	useEffect(() => {
+		addRiskMarker();
+	}, [map, risks.data]);
+
+	useEffect(() => {
+		usedRouteRef.current?.clear();
+		usedMarkerRef.current?.clear();
+
+		return () => {
+			usedRouteRef.current?.clear();
+			usedMarkerRef.current?.clear();
+		};
+	}, []);
+
 	return (
 		<div className="relative w-full h-dvh">
-			<div className="w-full h-[57px] flex items-center justify-center absolute top-0 bg-black opacity-50 z-10 py-3 px-4">
-				<p className="text-gray-100 text-kor-body2 font-medium text-center">
-					선 위 또는 기존 지점을 선택하세요
-				</p>
-			</div>
-			<BackButton className="absolute top-[73px] left-4 z-5" />
+			{isTutorialShown && (
+				<TutorialModal onClose={closeTutorial} messages={["파란선에서 시작할 점을 선택해주세요"]} />
+			)}
+			<BackButton className="absolute top-4 left-4 z-5" />
 			<div ref={mapRef} className="w-full h-full" />
 			{isActive && (
 				<div className="absolute w-full bottom-6 px-4">
-					<Button
-						onClick={reportNewRoute}
-						variant={status === "pending" || status === "success" ? "disabled" : "primary"}
-					>
+					<Button onClick={reportNewRoute} variant={status === "pending" ? "disabled" : "primary"}>
 						{status === "pending" ? "제보하는 중.." : "제보하기"}
 					</Button>
 				</div>
 			)}
 			<div className="absolute right-4 bottom-[90px] space-y-2">
+				<ResetButton disabled={newPoints.coords.length === 0} onClick={resetPoints} />
 				<UndoButton disabled={newPoints.coords.length === 0} onClick={undoPoints} />
 				<CautionToggleButton isActive={isCautionAcitve} onClick={toggleCautionButton} />
 				<DangerToggleButton isActive={isDangerAcitve} onClick={toggleDangerButton} />

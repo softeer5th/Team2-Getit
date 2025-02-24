@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { PassableStatus, IssueTypeKey } from "../constant/enum/reportEnum";
-import { ReportModeType, ReportFormData } from "../data/types/report";
+import { ReportModeType, ReportFormData } from "../types/report";
 
 import { ReportTitle } from "../components/report/reportTitle";
 import { ReportDivider } from "../components/report/reportDivider";
@@ -15,11 +15,12 @@ import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getSingleRouteRisk, postReport } from "../api/route";
-import { University } from "../data/types/university";
+import { University } from "../types/university";
 import { useNavigate } from "react-router";
 import useReportRisk from "../hooks/useReportRisk";
-import { RouteId } from "../data/types/route";
+import { RouteId } from "../types/route";
 import useMutationError from "../hooks/useMutationError";
+import useReportedRisk from "../hooks/useReportRiskResult";
 
 const ReportForm = () => {
 	useScrollControl();
@@ -30,8 +31,6 @@ const ReportForm = () => {
 
 	const [disabled, setDisabled] = useState<boolean>(true);
 
-	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(redirectToMap);
-
 	const [errorTitle, setErrorTitle] = useState<string>("");
 
 	const { university } = useUniversityInfo();
@@ -39,6 +38,8 @@ const ReportForm = () => {
 
 	useRedirectUndefined<University | RouteId | undefined>([university, routeId]);
 	if (!routeId) return;
+
+	const { setReportedRouteData } = useReportedRisk();
 
 	const { data } = useSuspenseQuery({
 		queryKey: ["report", university?.id ?? 1001, routeId],
@@ -55,6 +56,7 @@ const ReportForm = () => {
 			}
 		},
 		retry: 1,
+		gcTime: 0,
 	});
 
 	const [reportMode, setReportMode] = useState<ReportModeType | null>(
@@ -118,6 +120,12 @@ const ReportForm = () => {
 					cautionFactors: formData.cautionIssues,
 				}),
 			onSuccess: () => {
+				setReportedRouteData({
+					universityId: university!.id,
+					routeId: routeId,
+					dangerFactors: formData.dangerIssues,
+					cautionFactors: formData.cautionIssues,
+				});
 				queryClient.removeQueries({ queryKey: [university?.id ?? 1001, "risks"] });
 				openSuccess();
 			},
@@ -140,6 +148,10 @@ const ReportForm = () => {
 			onClose: redirectToMap,
 		},
 	);
+
+	const [SuccessModal, isSuccessOpen, openSuccess, closeSuccess] = useModal(() => {
+		navigate("/report/risk");
+	});
 
 	return (
 		<div className="flex flex-col h-dvh w-full max-w-[450px] mx-auto relative">

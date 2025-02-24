@@ -1,4 +1,4 @@
-import { Coord } from "../../data/types/coord";
+import { Coord } from "../../types/coord";
 import { interpolate } from "../interpolate";
 
 export default function centerCoordinate(point1: Coord, point2: Coord): Coord {

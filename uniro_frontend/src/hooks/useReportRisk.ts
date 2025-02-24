@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { RouteId } from "../data/types/route";
+import { RouteId } from "../types/route";
 
 interface ReportedRiskRoute {
 	reportRouteId: RouteId | undefined;
