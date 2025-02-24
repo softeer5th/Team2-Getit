@@ -24,8 +24,6 @@ import NavigationNavBar from "../components/navigation/navBar/navigationNavBar";
 import { useAnimationControls } from "framer-motion";
 
 const NavigationResultPage = () => {
-	const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
-	const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
 	const CLOSED_SHEET_HEIGHT = 0;
 
 	const INITIAL_TOP_BAR_HEIGHT = 143;
@@ -89,7 +87,7 @@ const NavigationResultPage = () => {
 
 	const showDetailView = () => {
 		setIsDetailView(true);
-		setSheetHeight(MAX_SHEET_HEIGHT);
+		setSheetHeight(window.innerHeight * 0.7);
 		setTopBarHeight(PADDING_FOR_MAP_BOUNDARY);
 		resetCurrentIndex();
 	};
@@ -110,7 +108,7 @@ const NavigationResultPage = () => {
 			controls.start({ y: 0, transition: { duration: 0.5 } });
 			resolve();
 		}).then(() => {
-			setSheetHeight(MAX_SHEET_HEIGHT);
+			setSheetHeight(window.innerHeight * 0.7);
 			setTopBarHeight(PADDING_FOR_MAP_BOUNDARY);
 		});
 	}, [controls]);
@@ -208,7 +206,7 @@ const NavigationResultPage = () => {
 				<AnimatedContainer
 					isVisible={isDetailView}
 					className="absolute bottom-0 w-full left-1/2 translate-x-[-50%] bg-white rounded-t-2xl shadow-xl overflow-auto flex items-center flex-col"
-					positionDelta={MAX_SHEET_HEIGHT}
+					positionDelta={window.innerHeight * 0.7}
 					transition={{ type: "spring", damping: 20, duration: 0.7 }}
 					motionProps={{
 						drag: "y",
@@ -220,7 +218,7 @@ const NavigationResultPage = () => {
 						},
 						dragConstraints: {
 							top: 0,
-							bottom: MIN_SHEET_HEIGHT,
+							bottom: window.innerHeight * 0.35,
 						},
 						onDrag: handleDrag,
 						onDragEnd: handleDragEnd,
@@ -232,7 +230,7 @@ const NavigationResultPage = () => {
 						ref={scrollRef}
 						className="w-full overflow-y-scroll overflow-x-hidden"
 						style={{
-							height: MAX_SHEET_HEIGHT - BOTTOM_SHEET_HANDLE_HEIGHT,
+							height: window.innerHeight * 0.7 - BOTTOM_SHEET_HANDLE_HEIGHT,
 						}}
 						onScroll={preventScroll}
 					>

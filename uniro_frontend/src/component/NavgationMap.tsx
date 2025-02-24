@@ -176,7 +176,7 @@ const NavigationMap = ({
 			}
 		});
 		return record;
-	}, [routeResult, createCompositeRoute]);
+	}, [routeResult]);
 
 	useEffect(() => {
 		if (!map || !compositeRoutes) return;
@@ -188,12 +188,6 @@ const NavigationMap = ({
 			activeComposite.endingBuildingPath.setMap(map);
 			activeComposite.paths.setMap(map);
 			activeComposite.paths.setOptions(polylineConfig[buttonState as keyof typeof polylineConfig]);
-			map.fitBounds(activeComposite.bounds, {
-				top: topPadding,
-				left: 150,
-				right: 150,
-				bottom: bottomPadding,
-			});
 		}
 
 		return () => {
@@ -203,7 +197,29 @@ const NavigationMap = ({
 				composite!.paths.setMap(null);
 			});
 		};
-	}, [map, buttonState, compositeRoutes, topPadding, bottomPadding]);
+	}, [map, buttonState, compositeRoutes]);
+
+	useEffect(() => {
+		if (!map) return;
+		const activeBounds = compositeRoutes[buttonState]?.bounds;
+
+		if (!activeBounds) return;
+
+		map.fitBounds(activeBounds!, {
+			top: topPadding,
+			right: 150,
+			bottom: bottomPadding,
+			left: 150,
+		});
+		return () => {
+			map.fitBounds(activeBounds!, {
+				top: topPadding,
+				right: 150,
+				bottom: bottomPadding,
+				left: 150,
+			});
+		};
+	}, [map, bottomPadding, topPadding, currentRouteIdx, buttonState, compositeRoutes]);
 
 	const createStartEndMarkers = () => {
 		if (!map || !origin || !destination) return;
@@ -390,19 +406,6 @@ const NavigationMap = ({
 	};
 
 	useEffect(() => {
-		if (currentRouteIdx !== -1) return;
-		if (!map || !boundsRef.current) return;
-
-		const activeBounds = compositeRoutes[buttonState]?.bounds;
-		map.fitBounds(activeBounds!, {
-			top: topPadding,
-			right: 150,
-			bottom: bottomPadding,
-			left: 150,
-		});
-	}, [map, bottomPadding, topPadding, currentRouteIdx]);
-
-	useEffect(() => {
 		if (!map) return;
 		if (currentRouteIdx === -1) return;
 		const currentRoute = routeResult[buttonState];
@@ -451,7 +454,6 @@ const NavigationMap = ({
 		drawDynamicMarker(routeResult[buttonState]);
 		return fadeOutDynamicMarker;
 	}, [isDetailView, map, routeResult, buttonState]);
-
 	return <div id="map" ref={mapRef} style={style} />;
 };
 
