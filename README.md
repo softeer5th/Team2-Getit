@@ -65,10 +65,10 @@
 <th> BE </th>
 <tr>
     <td>
-    - Jpa Stream API와 SSE를 사용하여 메모리 80% 최적화 <br>
-    - 길찾기 알고리즘(A*) 개발 및 개선<br>
+    - OOM 문제를 Jpa Stream API + SSE로 데이터를 분할 처리하여 해결 <br>
+    - 길찾기 알고리즘(A* 알고리즘) 개발 및 개선<br>
     - Hibernate envers를 활용한 DB버전화 & 특정 버전 조회 로직 구현<br>
-    - Google Map Elevation API 연동 & 비동기, 배치처리 구현
+    - Google Map Elevation API 연동 및 이벤트 기반 비동기 배치 처리 구현
     </td>
     <td>
     - Redis 및 FastJson을 활용한 조회속도 1,500 ms -> 160ms 개선  <br>
