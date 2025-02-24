@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - be
+      - refactor/UNI-205
 
 jobs:
   uniro-ci:
