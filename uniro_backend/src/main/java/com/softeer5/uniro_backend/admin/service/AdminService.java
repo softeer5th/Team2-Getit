@@ -50,7 +50,12 @@ public class AdminService {
     private final RedisService redisService;
 
     public List<RevInfoDTO> getAllRevInfo(Long univId){
-        return revInfoRepository.findAllByUnivId(univId).stream().map(r -> RevInfoDTO.of(r.getRev(),
+
+        Univ univ = univRepository.findById(univId)
+                .orElseThrow(()-> new UnivException("Univ not found", UNIV_NOT_FOUND));
+        long limitVersion = univ.getLimitVersion();
+
+        return revInfoRepository.findAllByUnivIdAfterVersionId(univId, limitVersion).stream().map(r -> RevInfoDTO.of(r.getRev(),
                 r.getRevTimeStamp(),
                 r.getUnivId(),
                 r.getAction())).toList();
