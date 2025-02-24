@@ -22,7 +22,12 @@ const BuildingPage = () => {
 	const queryClient = new QueryClient();
 	const result = useQueries({
 		queries: [
-			{ queryKey: [university?.id, "routes"], queryFn: () => getAllRoutes(university?.id ?? -1) },
+			{
+				queryKey: [university?.id, "routes"],
+				queryFn: () => getAllRoutes(university?.id ?? -1),
+				gcTime: 0,
+				staleTime: 0,
+			},
 			{
 				queryKey: [university?.id, "buildings"],
 				queryFn: () =>
@@ -32,6 +37,8 @@ const BuildingPage = () => {
 						rightDownLat: 35,
 						rightDownLng: 130,
 					}),
+				gcTime: 0,
+				staleTime: 0,
 			},
 		],
 	});
