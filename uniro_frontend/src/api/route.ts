@@ -20,7 +20,7 @@ export const getNavigationResult = (
 };
 
 export const getAllRoutes = (univId: number): Promise<CoreRoutesList> => {
-	return getFetch<GetAllRouteRepsonse>(`/${univId}/routes`).then((data) => transformAllRoutes(data));
+	return getFetch<GetAllRouteRepsonse>(`/${univId}/routes/stream`).then((data) => transformAllRoutes(data));
 };
 
 export const getSingleRouteRisk = (
