@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useSuspenseQueries } from "@tanstack/react-query";
 
 import RouteList from "../components/navigation/route/routeList";
@@ -21,6 +21,7 @@ import { useNavigationBottomSheet } from "../hooks/useNavigationBottomSheet";
 import BottomCardList from "../components/navigation/card/bottomCardList";
 import { NavigationButtonRouteType } from "../data/types/route";
 import NavigationNavBar from "../components/navigation/navBar/navigationNavBar";
+import { useAnimationControls } from "framer-motion";
 
 const MAX_SHEET_HEIGHT = window.innerHeight * 0.7;
 const MIN_SHEET_HEIGHT = window.innerHeight * 0.35;
@@ -71,6 +72,8 @@ const NavigationResultPage = () => {
 		],
 	});
 
+	const controls = useAnimationControls();
+
 	const [buttonState, setButtonState] = useState<NavigationButtonRouteType>(
 		routeList.data?.defaultMode ?? "PEDES & SAFE",
 	);
@@ -102,13 +105,26 @@ const NavigationResultPage = () => {
 		setButtonState(buttonType);
 	};
 
-	const handleCautionMarkerClick = (index: number) => {
-		showDetailView();
+	const raiseSheet = useCallback(() => {
+		new Promise<void>((resolve) => {
+			controls.start({ y: 0, transition: { duration: 0.5 } });
+			resolve();
+		}).then(() => {
+			setSheetHeight(MAX_SHEET_HEIGHT);
+			setTopBarHeight(PADDING_FOR_MAP_BOUNDARY);
+		});
+	}, [controls]);
+
+	const handleCautionMarkerClick = async (index: number, isDetailView: boolean) => {
 		if (isDetailView) {
-			setCautionRouteIdx(index);
-			setCurrentRouteIdx(index);
+			await raiseSheet();
+			setTimeout(() => {
+				setCurrentRouteIdx(index);
+				setCautionRouteIdx(index);
+			}, 500);
 			return;
 		}
+		showDetailView();
 		setCurrentRouteIdx(index);
 		setTimeout(() => {
 			setCautionRouteIdx(index);
@@ -166,9 +182,10 @@ const NavigationResultPage = () => {
 					></BottomCardList>
 					<div
 						onClick={routeList?.data[buttonState] ? showDetailView : () => {}}
-						className="w-full h-15 bg-primary-600 hover:bg-primary-700 active:bg-primary-700 transition-color duration-200 flex flex-col items-center justify-center -mb-[30px] mt-4"
+						aria-disabled={routeList?.data[buttonState] ? false : true}
+						className={`w-full h-15 ${routeList?.data[buttonState] ? "bg-primary-600 hover:bg-primary-700 active:bg-primary-700" : "bg-gray-500"} transition-color duration-200 flex flex-col items-center justify-center -mb-[30px] mt-4`}
 					>
-						<div className="text-white font-bold">상세경로 보기 </div>
+						<div className="text-white font-bold">상세경로 보기</div>
 					</div>
 				</AnimatedContainer>
 
@@ -201,6 +218,7 @@ const NavigationResultPage = () => {
 						onDrag: handleDrag,
 						onDragEnd: handleDragEnd,
 					}}
+					controls={controls}
 				>
 					<BottomSheetHandle resetCurrentIdx={resetCurrentIndex} dragControls={dragControls} />
 					<div
