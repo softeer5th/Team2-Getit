@@ -4,7 +4,7 @@ import SafeIcon from "../../../assets/icon/safeText.svg?react";
 
 import CautionIconWhite from "../../../assets/icon/cautionTextWhite.svg?react";
 import SafeIconWhite from "../../../assets/icon/safeTextWhite.svg?react";
-import { RouteType } from "../../../data/types/route";
+import { RouteType } from "../../../types/route";
 import { formatDistance } from "../../../utils/navigation/formatDistance";
 
 interface BottomCardProps {

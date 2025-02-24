@@ -1,5 +1,5 @@
 import { EDGE_LENGTH } from "../../constant/edge";
-import { Coord } from "../../data/types/coord";
+import { Coord } from "../../types/coord";
 import { LatLngToLiteral } from "../coordinates/coordinateTransform";
 import distance from "../coordinates/distance";
 import { interpolate } from "../interpolate";

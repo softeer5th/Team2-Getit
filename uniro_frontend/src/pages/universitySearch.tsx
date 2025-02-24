@@ -3,7 +3,7 @@ import Input from "../components/customInput";
 import Button from "../components/customButton";
 import { Link } from "react-router";
 import useUniversityInfo from "../hooks/useUniversityInfo";
-import { University } from "../data/types/university";
+import { University } from "../types/university";
 import useRoutePoint from "../hooks/useRoutePoint";
 import UniversityList from "../components/university/universityList";
 import InnerLoading from "../components/loading/innerLoading";

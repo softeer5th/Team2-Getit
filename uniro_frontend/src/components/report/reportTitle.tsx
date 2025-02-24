@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ReportModeType } from "../../data/types/report";
+import { ReportModeType } from "../../types/report";
 import CloseIcon from "../../assets/icon/close.svg?react";
 export const ReportTitle = ({ reportMode }: { reportMode: ReportModeType }) => {
 	const CREATE_TITLE = "불편한 길을 알려주세요.";

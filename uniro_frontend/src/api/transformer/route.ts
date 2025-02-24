@@ -3,7 +3,7 @@ import {
 	NavigationButtonRouteType,
 	NavigationRouteListRecord,
 	NavigationRouteListRecordWithMetaData,
-} from "../../data/types/route";
+} from "../../types/route";
 import { GetAllRouteRepsonse, GetFastestRouteResponse } from "../type/response/route";
 
 export const transformAllRoutes = (data: GetAllRouteRepsonse): CoreRoutesList => {

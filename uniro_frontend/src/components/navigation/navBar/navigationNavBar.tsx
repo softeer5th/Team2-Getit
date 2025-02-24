@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 import ElectricIcon from "../../../assets/route/detail/electric.svg?react";
 import WheelChairIcon from "../../../assets/route/detail/wheelchair.svg?react";
 import WalkIcon from "../../../assets/route/detail/walkIcon.svg?react";
-import { NavigationButtonRouteType, NavigationRouteListRecord } from "../../../data/types/route";
+import { NavigationButtonRouteType, NavigationRouteListRecord } from "../../../types/route";
 
 type Props = {
 	route: NavigationRouteListRecord;

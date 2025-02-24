@@ -1,4 +1,4 @@
-import { Building } from "../../data/types/node";
+import { Building } from "../../types/node";
 import { Link } from "react-router";
 import CallIcon from "../../assets/call-thin.svg?react";
 import LocationIcon from "../../assets/location-thin.svg?react";

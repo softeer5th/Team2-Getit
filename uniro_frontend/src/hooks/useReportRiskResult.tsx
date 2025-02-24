@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { RouteId } from "../data/types/route";
-import { CautionFactor, DangerFactor } from "../data/types/factor";
+import { RouteId } from "../types/route";
+import { CautionFactor, DangerFactor } from "../types/factor";
 
 interface ReportedRiskResult {
 	reportedData: {

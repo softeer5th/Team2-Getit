@@ -7,11 +7,11 @@ import {
 	NavigationRouteList,
 	NavigationRouteListRecordWithMetaData,
 	RouteDetail,
-} from "../data/types/route";
+} from "../types/route";
 import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enum/markerEnum";
 import useRoutePoint from "../hooks/useRoutePoint";
-import { AdvancedMarker } from "../data/types/marker";
+import { AdvancedMarker } from "../types/marker";
 import { Direction } from "framer-motion";
 import { createRiskMarkers } from "../utils/markers/createRiskMarker";
 import MapContext from "../map/mapContext";

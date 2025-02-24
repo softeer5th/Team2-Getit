@@ -1,6 +1,6 @@
 import useMutationError from "../hooks/useMutationError";
-import { RouteId } from "../data/types/route";
-import { CautionIssueType, DangerIssueType } from "../data/types/enum";
+import { RouteId } from "../types/route";
+import { CautionIssueType, DangerIssueType } from "../types/enum";
 import { postFetch } from "../utils/fetch/fetch";
 import { postReportRoute } from "../api/route";
 
@@ -24,8 +24,10 @@ export default function Errortest() {
 				400: { mainTitle: "400 제목", subTitle: ["400 부제목"] },
 				404: { mainTitle: "404 제목", subTitle: ["404 부제목"] },
 			},
-			onClose: () => { alert('close callback') }
-		}
+			onClose: () => {
+				alert("close callback");
+			},
+		},
 	);
 
 	const [Modal404, { mutate: mutate404 }] = useMutationError(
@@ -38,8 +40,8 @@ export default function Errortest() {
 				400: { mainTitle: "400 제목", subTitle: ["400 부제목"] },
 				404: { mainTitle: "404 제목", subTitle: ["404 부제목"] },
 			},
-			onClose: () => { }
-		}
+			onClose: () => {},
+		},
 	);
 
 	const [Modal500, { mutate: mutate500 }] = useMutationError(
@@ -53,8 +55,8 @@ export default function Errortest() {
 				400: { mainTitle: "400 제목", subTitle: ["400 부제목"] },
 				404: { mainTitle: "404 제목", subTitle: ["404 부제목"] },
 			},
-			onClose: () => { }
-		}
+			onClose: () => {},
+		},
 	);
 
 	return (

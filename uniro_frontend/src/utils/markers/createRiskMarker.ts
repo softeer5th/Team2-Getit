@@ -1,15 +1,15 @@
 import createMarkerElement, { createAnimatedTextElement } from "../../components/map/mapMarkers";
 import { Markers } from "../../constant/enum/markerEnum";
 import { DangerIssue } from "../../constant/enum/reportEnum";
-import { DangerIssueType } from "../../data/types/enum";
-import { AdvancedMarker } from "../../data/types/marker";
-import { DangerRoute } from "../../data/types/route";
+import { DangerIssueType } from "../../types/enum";
+import { AdvancedMarker } from "../../types/marker";
+import { DangerRoute } from "../../types/route";
 import centerCoordinate from "../coordinates/centerCoordinate";
 
 export const createRiskMarkers = (
 	riskData: DangerRoute[],
 	map: google.maps.Map,
-	createAdvancedMarker: (opts:google.maps.marker.AdvancedMarkerElementOptions)=> AdvancedMarker | undefined,
+	createAdvancedMarker: (opts: google.maps.marker.AdvancedMarkerElementOptions) => AdvancedMarker | undefined,
 ): AdvancedMarker[] => {
 	const markers: AdvancedMarker[] = [];
 	riskData.forEach((route) => {
@@ -19,12 +19,11 @@ export const createRiskMarkers = (
 			hasAnimation: true,
 		});
 
-        const marker = createAdvancedMarker({
-            
+		const marker = createAdvancedMarker({
 			map: map,
 			position: centerCoordinate(route.node1, route.node2),
-			content: markerElement,   
-        });
+			content: markerElement,
+		});
 
 		const markerEl = marker.content as HTMLElement;
 		const innerEl = markerEl.querySelector("div");

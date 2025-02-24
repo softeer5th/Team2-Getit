@@ -1,4 +1,4 @@
-import { Building } from "../data/types/node";
+import { Building } from "../types/node";
 import { getFetch } from "../utils/fetch/fetch";
 import { transformGetBuildings } from "./transformer/nodes";
 import { GetBuildingListResponse } from "./type/response/nodes";

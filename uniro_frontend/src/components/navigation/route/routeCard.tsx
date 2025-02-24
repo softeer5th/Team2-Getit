@@ -5,7 +5,7 @@ import RightIcon from "../../../assets/route/right.svg?react";
 import LeftIcon from "../../../assets/route/left.svg?react";
 import CautionText from "../../../assets/icon/cautionText.svg?react";
 import DangerText from "../../../assets/icon/dangerText.svg?react";
-import { RouteDetail } from "../../../data/types/route";
+import { RouteDetail } from "../../../types/route";
 import useRoutePoint from "../../../hooks/useRoutePoint";
 import { formatDistance } from "../../../utils/navigation/formatDistance";
 import { CautionIssue, DangerIssue } from "../../../constant/enum/reportEnum";

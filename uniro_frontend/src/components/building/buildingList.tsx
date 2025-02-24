@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getSearchBuildings } from "../../api/nodes";
-import { University } from "../../data/types/university";
+import { University } from "../../types/university";
 import useSearchBuilding from "../../hooks/useSearchBuilding";
 import BuildingCard from "./buildingCard";
 import BuildingNotFound from "./buildingNotFound";

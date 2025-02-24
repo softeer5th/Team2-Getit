@@ -1,4 +1,4 @@
-import { Building } from "../../data/types/node";
+import { Building } from "../../types/node";
 import { GetBuildingListResponse } from "../type/response/nodes";
 
 export const transformGetBuildings = (res: GetBuildingListResponse): Building[] => {

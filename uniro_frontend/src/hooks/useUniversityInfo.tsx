@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { University } from "../data/types/university";
+import { University } from "../types/university";
 
 interface UniversityInfoStore {
 	university: University | undefined;

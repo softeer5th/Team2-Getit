@@ -1,9 +1,9 @@
 import { IssueTypeKey } from "../constant/enum/reportEnum";
-import { Coord } from "../data/types/coord";
-import { CautionIssueType, DangerIssueType } from "../data/types/enum";
-import { NodeId } from "../data/types/node";
+import { Coord } from "../types/coord";
+import { CautionIssueType, DangerIssueType } from "../types/enum";
+import { NodeId } from "../types/node";
 
-import { CoreRoutesList, NavigationRouteListRecordWithMetaData, RouteId } from "../data/types/route";
+import { CoreRoutesList, NavigationRouteListRecordWithMetaData, RouteId } from "../types/route";
 import { getFetch, postFetch } from "../utils/fetch/fetch";
 import { transformAllRoutes, transformFastRoute } from "./transformer/route";
 import { GetAllRouteRepsonse, GetFastestRouteResponse } from "./type/response/route";

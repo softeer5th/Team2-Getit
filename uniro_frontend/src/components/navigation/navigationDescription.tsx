@@ -6,7 +6,7 @@ import DestinationIcon from "../../assets/icon/destination.svg?react";
 import DangerIcon from "../../assets/icon/dangerText.svg?react";
 import OriginIcon from "../../assets/icon/start.svg?react";
 import ResultDivider from "../../assets/icon/resultDivider.svg?react";
-import { NavigationButtonRouteType, NavigationRouteList } from "../../data/types/route";
+import { NavigationButtonRouteType, NavigationRouteList } from "../../types/route";
 import useRoutePoint from "../../hooks/useRoutePoint";
 import { formatDistance } from "../../utils/navigation/formatDistance";
 import { Link } from "react-router";

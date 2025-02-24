@@ -11,15 +11,15 @@ import AnimatedContainer from "../container/animatedContainer";
 import useScrollControl from "../hooks/useScrollControl";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-import { University } from "../data/types/university";
+import { University } from "../types/university";
 import { getNavigationResult } from "../api/route";
 import { getAllRisks } from "../api/routes";
 import useRoutePoint from "../hooks/useRoutePoint";
-import { Building } from "../data/types/node";
+import { Building } from "../types/node";
 import { useNavigationBottomSheet } from "../hooks/useNavigationBottomSheet";
 
 import BottomCardList from "../components/navigation/card/bottomCardList";
-import { NavigationButtonRouteType } from "../data/types/route";
+import { NavigationButtonRouteType } from "../types/route";
 import NavigationNavBar from "../components/navigation/navBar/navigationNavBar";
 import { useAnimationControls } from "framer-motion";
 

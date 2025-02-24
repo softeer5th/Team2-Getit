@@ -1,6 +1,6 @@
 import { IssueTypeKey } from "../../../constant/enum/reportEnum";
-import { Node, NodeId } from "../../../data/types/node";
-import { NavigationRouteType } from "../../../data/types/route";
+import { Node, NodeId } from "../../../types/node";
+import { NavigationRouteType } from "../../../types/route";
 
 type CoreRoutesResponse = {
 	coreNode1Id: NodeId;
