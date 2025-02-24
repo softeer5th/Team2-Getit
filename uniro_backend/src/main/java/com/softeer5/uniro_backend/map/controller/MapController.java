@@ -25,6 +25,11 @@ public class MapController implements MapApi {
 	private final MapService mapService;
 	private final AdminService adminService;
 
+	@GetMapping("/test")
+	public Void test(){
+		System.gc();
+		return null;
+	}
 
 	@GetMapping("/{univId}/routes/test/existing")
 	public ResponseEntity<GetAllRoutesResDTO> testExisting(@PathVariable("univId") Long univId){
