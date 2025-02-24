@@ -26,22 +26,22 @@ public class MapController implements MapApi {
 	private final AdminService adminService;
 
 	@GetMapping("/{univId}/routes-local")
-	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodesByLocalCache(@PathVariable("univId") Long univId){
-		GetAllRoutesResDTO allRoutes = mapService.getAllRoutesByLocalCache(univId);
+	public ResponseEntity<AllRoutesInfo> getAllRoutesAndNodesByLocalCache(@PathVariable("univId") Long univId){
+		AllRoutesInfo allRoutes = mapService.getAllRoutesByLocalCache(univId);
 		return ResponseEntity.ok().body(allRoutes);
 	}
 
 	@Override
 	@GetMapping("/{univId}/routes")
-	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
-		GetAllRoutesResDTO allRoutes = mapService.getAllRoutes(univId);
+	public ResponseEntity<AllRoutesInfo> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
+		AllRoutesInfo allRoutes = mapService.getAllRoutes(univId);
 		return ResponseEntity.ok().body(allRoutes);
 	}
 
 	@Override
 	@GetMapping("/{univId}/routes/stream")
-	public ResponseEntity<GetAllRoutesResDTO> getAllRoutesAndNodesStream(@PathVariable("univId") Long univId){
-		GetAllRoutesResDTO allRoutes = mapService.getAllRoutesByStream(univId);
+	public ResponseEntity<AllRoutesInfo> getAllRoutesAndNodesStream(@PathVariable("univId") Long univId){
+		AllRoutesInfo allRoutes = mapService.getAllRoutesByStream(univId);
 		return ResponseEntity.ok().body(allRoutes);
 	}
 

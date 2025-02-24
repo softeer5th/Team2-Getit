@@ -63,7 +63,7 @@ public class MapService {
 
 	private final Map<Long, List<LightRoute>> cache = new HashMap<>();
 
-	public GetAllRoutesResDTO getAllRoutesByLocalCache(Long univId) {
+	public AllRoutesInfo getAllRoutesByLocalCache(Long univId) {
 
 		if(!cache.containsKey(univId)){
 			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
@@ -78,16 +78,10 @@ public class MapService {
 			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
 		}
 
-		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
-			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
-
-		AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(routes);
-
-		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
-				allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
+		return routeCacheCalculator.assembleRoutes(routes);
 	}
 
-	public GetAllRoutesResDTO getAllRoutes(Long univId) {
+	public AllRoutesInfo getAllRoutes(Long univId) {
 
 		if(!redisService.hasData(univId.toString())){
 			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
@@ -107,32 +101,22 @@ public class MapService {
 			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
 		}
 
-		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
-			.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
-
-		AllRoutesInfo allRoutesInfo = routeCacheCalculator.assembleRoutes(routes);
-
-		return GetAllRoutesResDTO.of(allRoutesInfo.getNodeInfos(), allRoutesInfo.getCoreRoutes(),
-			allRoutesInfo.getBuildingRoutes(), revInfo.getRev());
+		return routeCacheCalculator.assembleRoutes(routes);
 	}
 
-	public GetAllRoutesResDTO getAllRoutesByStream(Long univId) {
+	public AllRoutesInfo getAllRoutesByStream(Long univId) {
 		List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
 		List<CoreRouteResDTO> coreRoutes = new ArrayList<>();
 		List<BuildingRouteResDTO> buildingRoutes = new ArrayList<>();
 
-		RevInfo revInfo = revInfoRepository.findFirstByUnivIdOrderByRevDesc(univId)
-				.orElseThrow(() -> new RouteException("Revision not found", RECENT_REVISION_NOT_FOUND));
-
 		String redisKeyPrefix = univId + ":";
 		int batchNumber = 1;
 
-		if (processRedisDataByStream(redisKeyPrefix, batchNumber, nodeInfos, coreRoutes, buildingRoutes)) {
-			return GetAllRoutesResDTO.of(nodeInfos, coreRoutes, buildingRoutes, revInfo.getRev());
+		if (!processRedisDataByStream(redisKeyPrefix, batchNumber, nodeInfos, coreRoutes, buildingRoutes)) {
+			processDatabaseDataByStream(univId, redisKeyPrefix, batchNumber, nodeInfos, coreRoutes, buildingRoutes);
 		}
-		processDatabaseDataByStream(univId, redisKeyPrefix, batchNumber, nodeInfos, coreRoutes, buildingRoutes);
 
-		return GetAllRoutesResDTO.of(nodeInfos, coreRoutes, buildingRoutes, revInfo.getRev());
+		return AllRoutesInfo.of(nodeInfos, coreRoutes, buildingRoutes);
 	}
 
 	private boolean processRedisDataByStream(String redisKeyPrefix,
@@ -177,9 +161,8 @@ public class MapService {
 			}
 
 			redisService.saveDataToString(univId.toString() + ":fetch", String.valueOf(fetchSize));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
 		}
+
 	}
 
 	private void saveAndSendBatchByStream(String redisKeyPrefix, int batchNumber, List<LightRoute> batch,
