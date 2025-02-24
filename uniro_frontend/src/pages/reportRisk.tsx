@@ -215,6 +215,7 @@ export default function ReportRiskPage() {
 		}
 
 		if (isReDraw) {
+			// @ts-expect-error : Difference Method need Polyfill
 			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
@@ -300,6 +301,7 @@ export default function ReportRiskPage() {
 		}
 
 		if (isReDraw) {
+			// @ts-expect-error : Difference Method need Polyfill
 			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {

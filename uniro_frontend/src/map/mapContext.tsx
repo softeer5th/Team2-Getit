@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useCallback, useEffect, useState } from "react";
-import loadGoogleMapsLibraries from "./loader/googleMapLoader";
+import loadGoogleMapsLibraries from "./googleMapLoader";
 import { ClickEvent } from "../types/event";
 interface MapContextType {
 	Map: typeof google.maps.Map | null;

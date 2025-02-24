@@ -8,13 +8,13 @@ import {
 	NavigationRouteListRecordWithMetaData,
 	RouteDetail,
 } from "../types/route";
-import createMarkerElement from "../components/map/mapMarkers";
 import { Markers } from "../constant/enum/markerEnum";
 import useRoutePoint from "../hooks/useRoutePoint";
 import { AdvancedMarker } from "../types/marker";
 import { Direction } from "framer-motion";
 import { createRiskMarkers } from "../utils/markers/createRiskMarker";
 import MapContext from "../map/mapContext";
+import createMarkerElement from "../utils/markers/createMarkerElement";
 
 type MapProps = {
 	style?: React.CSSProperties;
@@ -71,6 +71,14 @@ const NavigationMap = ({
 }: MapProps) => {
 	const { createAdvancedMarker, createPolyline } = useContext(MapContext);
 	const { mapRef, map } = useMap();
+
+	const {
+		originMarkerElementWithName,
+		destinationMarkerElementWithName,
+		waypointMarkerElement,
+		numberedWaypointMarkerElement,
+		cautionMarkerElement,
+	} = createMarkerElement();
 
 	const buttonStateRef = useRef(buttonState);
 	const isDetailViewRef = useRef(isDetailView);
@@ -224,12 +232,11 @@ const NavigationMap = ({
 	const createStartEndMarkers = () => {
 		if (!map || !origin || !destination) return;
 		// 출발지 마커
-		const originMarkerElement = createMarkerElement({
-			type: Markers.ORIGIN,
-			title: origin?.buildingName,
-			className: "translate-namedmarker",
+		const originMarkerElement = originMarkerElementWithName({
+			name: origin?.buildingName,
 			hasAnimation: true,
 		});
+
 		const originMarker = createAdvancedMarker(
 			{
 				map: map,
@@ -242,10 +249,8 @@ const NavigationMap = ({
 		);
 
 		// 도착지 마커
-		const destinationMarkerElement = createMarkerElement({
-			type: Markers.DESTINATION,
-			title: destination?.buildingName,
-			className: "translate-namedmarker",
+		const destinationMarkerElement = destinationMarkerElementWithName({
+			name: destination?.buildingName,
 			hasAnimation: true,
 		});
 		const destinationMarker = createAdvancedMarker(
@@ -269,7 +274,10 @@ const NavigationMap = ({
 		return [originMarker, destinationMarker];
 	};
 
-	const areCoordinatesEqual = (coord1: google.maps.LatLngLiteral, coord2: google.maps.LatLngLiteral) => {
+	const areCoordinatesEqual = (
+		coord1: google.maps.LatLng | google.maps.LatLngLiteral | google.maps.LatLngAltitudeLiteral,
+		coord2: google.maps.LatLng | google.maps.LatLngLiteral | google.maps.LatLngAltitudeLiteral,
+	) => {
 		return coord1.lat === coord2.lat && coord1.lng === coord2.lng;
 	};
 
@@ -308,11 +316,14 @@ const NavigationMap = ({
 				markers.push(existingMarker);
 			} else {
 				// 3. 기존 마커가 없거나 일치하지 않으면 새로 생성
-				const markerElement = createMarkerElement({
-					type: markerType,
-					className: "translate-waypoint",
-					hasAnimation,
-				});
+				const markerElement =
+					markerType === Markers.WAYPOINT
+						? waypointMarkerElement({
+								hasAnimation: true,
+							})
+						: cautionMarkerElement({
+								hasAnimation: true,
+							});
 
 				const marker = createAdvancedMarker(
 					{
@@ -368,8 +379,7 @@ const NavigationMap = ({
 			routeDetails.forEach((routeDetail, index) => {
 				if (index === routeDetails.length - 1) return;
 				const { coordinates } = routeDetail;
-				const markerElement = createMarkerElement({
-					type: Markers.NUMBERED_WAYPOINT,
+				const markerElement = numberedWaypointMarkerElement({
 					number: index + 1,
 					hasAnimation: true,
 				});

@@ -25,6 +25,8 @@ export const createRiskMarkers = (
 			content: markerElement,
 		});
 
+		if (marker === undefined) return;
+
 		const markerEl = marker.content as HTMLElement;
 		const innerEl = markerEl.querySelector("div");
 		const factors = (route.dangerFactors as DangerIssueType[]).map((key) => DangerIssue[key]);

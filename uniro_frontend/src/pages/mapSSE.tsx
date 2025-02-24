@@ -340,6 +340,7 @@ export default function MapSSEPage() {
 		setCautionMarkers(cautionMarkersWithId);
 
 		if (isReDraw) {
+			// @ts-expect-error : Difference Method need Polyfill
 			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {

@@ -54,5 +54,8 @@ export const postReportRoute = (
 		coordinates: Coord[];
 	},
 ): Promise<GetAllRouteRepsonse> => {
-	return postFetch<GetAllRouteRepsonse, Coord[] | NodeId | null>(`/${univId}/route`, body);
+	return postFetch<GetAllRouteRepsonse, Coord[] | NodeId | null>(
+		`/${univId}/route`,
+		body,
+	) as Promise<GetAllRouteRepsonse>;
 };

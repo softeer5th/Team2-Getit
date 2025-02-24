@@ -285,14 +285,37 @@ export default function createMarkerElement() {
 		return attachAnimation(containerElement, hasAnimation);
 	};
 
-	const waypointMarkerElement = ({ className }: MarkerProps) => {
+	const waypointMarkerElement = ({ className, hasAnimation = false }: MarkerProps) => {
 		const containerElement = createContainerElement(`translate-waypoint ${className}`);
 
 		const imageElement = createImageElement(Markers.WAYPOINT);
 
 		containerElement.appendChild(imageElement);
 
-		return containerElement;
+		return attachAnimation(containerElement, hasAnimation);
+	};
+	const numberedWaypointMarkerElement = ({
+		number,
+		className,
+		hasAnimation = false,
+	}: {
+		number: number | string;
+		className?: string;
+		hasAnimation?: boolean;
+	}): HTMLElement => {
+		const container = createContainerElement(className);
+		const numberText = document.createElement("p");
+		numberText.innerText = `${number}`;
+		numberText.className =
+			"h-[17px] w-[17px] flex items-center justify-center text-white text-kor-body3 text-[10.25px] font-bold bg-[#161616] rounded-full";
+		const markerWrapper = document.createElement("div");
+		markerWrapper.className = "relative flex items-center justify-center";
+		markerWrapper.style.transform = "translateY(8.5px)";
+		markerWrapper.appendChild(numberText);
+
+		container.appendChild(markerWrapper);
+
+		return attachAnimation(container, hasAnimation);
 	};
 
 	return {
@@ -306,5 +329,6 @@ export default function createMarkerElement() {
 		destinationMarkerElement,
 		reportMarkerElement,
 		waypointMarkerElement,
+		numberedWaypointMarkerElement,
 	};
 }
