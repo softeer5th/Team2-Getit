@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - fe
-    paths:
-      - "uniro_admin_frontend/**"
+      - hotfix/QA
+    # paths:
+    #   - "uniro_admin_frontend/**"
 
 jobs:
   CI:
