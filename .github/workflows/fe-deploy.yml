@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - fe
-    paths:
-      - "uniro_frontend/**"
+      - chore/UNI-372
+    # paths:
+    #   - "uniro_frontend/**"
 
 jobs:
   CI:
