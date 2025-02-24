@@ -10,13 +10,6 @@
 4. [프론트엔드](#-프론트엔드)
 5. [백엔드](#-백엔드)
 
-# 📝 아티클
-
-| 파트 | 제목                                                                                                                                                                        | 기여자                         |
-| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| 공통 | [UT와 이후 개선까지의 여정](https://github.com/softeer5th/Team2-Getit/wiki/UT%EC%99%80-%EC%9D%B4%ED%9B%84-%EA%B0%9C%EC%84%A0%EA%B9%8C%EC%A7%80%EC%9D%98-%EC%97%AC%EC%A0%95) | 윤동현, 박준혁, 송현성, 송민규 |
-| BE   | [협업을 위한 테스트 DB](https://github.com/softeer5th/Team2-Getit/wiki/%5BBE%5D-%ED%98%91%EC%97%85%EC%9D%84-%EC%9C%84%ED%95%9C-%ED%85%8C%EC%8A%A4%ED%8A%B8-DB)              | 송민규                         |
-
 ---
 
 # 🚀 서비스 소개
@@ -34,7 +27,7 @@
 	<th><a href="https://github.com/thdgustjd1"> 박준혁 </th>
     <th><a href="https://github.com/dgfh0450"> 윤동현 </th>
     <tr>
-		<td style="text-align: center;"><img width="100" alt="박준혁" src="https://avatars.githubusercontent.com/u/45231740?v=4"></td>
+	<td style="text-align: center;"><img width="100" alt="박준혁" src="https://avatars.githubusercontent.com/u/45231740?v=4"></td>
         <td style="text-align: center;"><img width="100" alt="윤동현" src="https://avatars.githubusercontent.com/u/114418121?v=4"></td>
 	</tr>
 <th> FE </th>
@@ -65,7 +58,7 @@
 	<th><a href="https://github.com/thdgustjd1"> 👑 송현성 </th>
     <th><a href="https://github.com/mikekks"> 송민규 </th>
     <tr>
-		<td style="text-align: center;"><img width="100" alt="송현성" src="https://avatars.githubusercontent.com/u/129783824?v=4"></td>
+	<td style="text-align: center;"><img width="100" alt="송현성" src="https://avatars.githubusercontent.com/u/129783824?v=4"></td>
         <td style="text-align: center;"><img width="100" alt="송민규" src="https://avatars.githubusercontent.com/u/100754581?v=4"></td>
 	</tr>
 <th> BE, 팀장 </th>
@@ -113,7 +106,18 @@
 
 ## Jira를 이용한 프로젝트 관리
 
-- TODO : 해당 내용 + 이미지 첨부
+### 스프린트 1
+<img width="1105" alt="스크린샷 2025-02-24 오후 11 25 51" src="https://github.com/user-attachments/assets/a572939b-3f77-438e-a13b-84e4c62c716e" />
+
+### 스프린트 2
+<img width="1102" alt="스크린샷 2025-02-24 오후 11 27 52" src="https://github.com/user-attachments/assets/c2937906-42d2-4842-982a-d60fd3724196" />
+
+### 스프린트 3
+<img width="1117" alt="스크린샷 2025-02-24 오후 11 26 35" src="https://github.com/user-attachments/assets/165ab359-0c85-47d6-b3bf-9244ab9d9eea" />
+
+### 스프린트 4
+<img width="1107" alt="스크린샷 2025-02-24 오후 11 26 58" src="https://github.com/user-attachments/assets/17ea6527-3735-4042-9049-f8a0cf832c37" />
+
 
 ## 배포 방식
 
