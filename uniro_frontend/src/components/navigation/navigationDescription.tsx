@@ -75,7 +75,10 @@ const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, rese
 	};
 
 	return (
-		<div className="w-full p-5 max-w-[450px]" onClick={resetCurrentRouteIdx ? resetCurrentRouteIdx : () => {}}>
+		<div
+			className={`w-full p-5 max-w-[450px] ${isDetailView ? "sm:ml-10" : ""}`}
+			onClick={resetCurrentRouteIdx ? resetCurrentRouteIdx : () => {}}
+		>
 			<div
 				className={`w-full flex flex-row items-center bo0r ${isDetailView ? "justify-start" : "justify-between"}`}
 			>
