@@ -168,15 +168,16 @@ public class MapService {
 				batch.add(route);
 
 				if (batch.size() == STREAM_FETCH_SIZE) {
-					saveAndSendBatch(univId, redisKeyPrefix, batchNumber++, batch, emitter, fetchSize);
+					saveAndSendBatch(redisKeyPrefix, batchNumber++, batch, emitter, fetchSize);
 				}
 			}
 
 			// 남은 배치 처리
 			if (!batch.isEmpty()) {
-				saveAndSendBatch(univId, redisKeyPrefix, batchNumber, batch, emitter, fetchSize);
+				saveAndSendBatch(redisKeyPrefix, batchNumber, batch, emitter, fetchSize);
 			}
 
+			redisService.saveDataToString(univId.toString(), String.valueOf(fetchSize));
 			emitter.complete();
 			log.info("[SSE emitter complete] DB data used.");
 		} catch (Exception e) {
@@ -184,11 +185,10 @@ public class MapService {
 		}
 	}
 
-	private void saveAndSendBatch(Long univId, String redisKeyPrefix, int batchNumber, List<LightRoute> batch, SseEmitter emitter, Integer fetchSize)
+	private void saveAndSendBatch(String redisKeyPrefix, int batchNumber, List<LightRoute> batch, SseEmitter emitter, Integer fetchSize)
 		throws Exception {
 		LightRoutes value = new LightRoutes(batch);
 		redisService.saveData(redisKeyPrefix + batchNumber, value);
-		redisService.saveDataToString(univId.toString(), fetchSize.toString());
 		processBatch(batch, emitter, fetchSize);
 		batch.clear();
 	}
