@@ -27,10 +27,10 @@
 <div align="center">
 	<table>
 	<th><a href="https://github.com/thdgustjd1"> 박준혁 </th>
-    <th><a href="https://github.com/mikekks"> 윤동현 </th>
+    <th><a href="https://github.com/dgfh0450"> 윤동현 </th>
     <tr>
 		<td style="text-align: center;"><img width="100" alt="박준혁" src="https://avatars.githubusercontent.com/u/45231740?v=4"></td>
-        <td style="text-align: center;"><img width="100" alt="윤동현" src="https://avatars.githubusercontent.com/u/129783824?v=4"></td>
+        <td style="text-align: center;"><img width="100" alt="윤동현" src="https://avatars.githubusercontent.com/u/114418121?v=4"></td>
 	</tr>
 <th> FE </th>
 <th> FE </th>
@@ -42,10 +42,10 @@
     - 작성예정 <br>
     </td>
     <td>
-    - 작성예정 <br>
-    - 작성예정 <br>
-    - 작성예정 <br>
-    - 작성예정 <br>
+    - 메인 / 불편한 길 / 새로운 길 지도 제작 <br>
+    - API 에러 핸들 로직 구현 <br>
+    - 길 선택 알고리즘 + 새로운 길 생성 알고리즘 구현 <br>
+    - 지도 페이지 최적화 진행 <br>
     </td>
 </tr>
 	</table>
@@ -140,7 +140,7 @@
 # 🎨 프론트엔드
 프론트엔드에서 구현한 기능과 기술 스택을 정리합니다.
 
-- **사용 기술**: React, TypeScript, Redux, Styled-Components
+- **사용 기술**: React, TypeScript, Zustand, TanStack-Query, Tailwind CSS, Frame
 - **구현한 기능**
   - UI/UX 디자인 및 반응형 웹 개발
   - API 연동 및 상태 관리
