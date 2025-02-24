@@ -162,6 +162,12 @@
 
 백엔드에서 구현한 기능과 기술 스택을 정리합니다.
 
+## 아키텍처
+![uniro drawio](https://github.com/user-attachments/assets/803df1bc-a077-47c1-b941-32d6d5a70fa5)
+
+## ERD
+<img width="690" alt="스크린샷 2025-02-24 오후 12 27 19" src="https://github.com/user-attachments/assets/414c313c-9a6d-485c-973b-4afab34366b4" />
+
 - **사용 기술**: Java, Spring Boot, JPA, MySQL, Redis
 - **구현한 기능**
   - 사용자 인증 및 권한 관리
