@@ -72,10 +72,10 @@
 <th> BE </th>
 <tr>
     <td>
-    - 길찾기 알고리즘 개발 및 개선<br>
-    - 길 추가 로직 80% 개선 <br>
-    - 구글 Map API 연동<br>
-    - 작성예정
+    - Jpa Stream API와 SSE를 사용하여 메모리 80% 최적화 <br>
+    - 길찾기 알고리즘(A*) 개발 및 개선<br>
+    - Hibernate envers를 활용한 DB버전화 & 특정 버전 조회 로직 구현<br>
+    - Google Map Elevation API 연동 & 비동기, 배치처리 구현
     </td>
     <td>
     - Dockerizing 및 배포 자동화 인프라 구축 <br>
