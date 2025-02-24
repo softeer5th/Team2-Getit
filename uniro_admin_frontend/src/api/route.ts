@@ -6,19 +6,17 @@ import { GetAllRouteRepsonse } from "./type/response/route";
 import { CautionRoute, DangerRoute } from "../data/types/route";
 
 export const getAllRoutes = (univId: number): Promise<CoreRoutesList> => {
-  return getFetch<GetAllRouteRepsonse>(`/${univId}/routes`).then((data) =>
-    transformAllRoutes(data)
-  );
+	return getFetch<GetAllRouteRepsonse>(`/${univId}/routes/stream`).then((data) => transformAllRoutes(data));
 };
 
 export const postBuildingRoute = (
-  univId: number,
-  body: {
-    buildingNodeId: NodeId;
-    nodeId: NodeId;
-  }
+	univId: number,
+	body: {
+		buildingNodeId: NodeId;
+		nodeId: NodeId;
+	},
 ): Promise<boolean> => {
-  return postFetch(`/${univId}/routes/building`, body);
+	return postFetch(`/${univId}/routes/building`, body);
 };
 
 export const getAllRisks = (
