@@ -1,6 +1,6 @@
 import React, { Dispatch } from "react";
 import BottomCard from "./bottomCard";
-import { NavigationButtonRouteType, NavigationRouteListRecord } from "../../../data/types/route";
+import { NavigationButtonRouteType, NavigationRouteListRecord } from "../../../types/route";
 
 type Props = {
 	routeList: NavigationRouteListRecord;

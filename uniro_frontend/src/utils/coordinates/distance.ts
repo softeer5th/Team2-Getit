@@ -1,4 +1,4 @@
-import { Coord } from "../../data/types/coord";
+import { Coord } from "../../types/coord";
 
 /** 하버사인 공식 */
 export default function distance(point1: Coord, point2: Coord): number {

@@ -10,7 +10,7 @@ const InnerLoading = ({ isLoading, loadingContent = "로딩중입니다." }: Pro
 
 	return (
 		<div
-			className="flex flex-col items-center justify-center h-full w-full max-w-[450px] mx-auto bg-white 
+			className="flex flex-col items-center justify-center h-full w-full  mx-auto bg-white 
 					z-5"
 		>
 			<p className="text-kor-body2 mt-3">{loadingContent}</p>

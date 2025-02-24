@@ -1,8 +1,8 @@
 import { Fragment, useEffect, useRef } from "react";
 import { RouteCard } from "./routeCard";
 import useRoutePoint from "../../../hooks/useRoutePoint";
-import { RouteDetail } from "../../../data/types/route";
-import { Direction } from "../../../data/types/route";
+import { RouteDetail } from "../../../types/route";
+import { Direction } from "../../../types/route";
 
 type RouteListProps = {
 	changeCurrentRouteIdx: (index: number) => void;

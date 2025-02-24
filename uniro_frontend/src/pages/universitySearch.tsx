@@ -3,7 +3,7 @@ import Input from "../components/customInput";
 import Button from "../components/customButton";
 import { Link } from "react-router";
 import useUniversityInfo from "../hooks/useUniversityInfo";
-import { University } from "../data/types/university";
+import { University } from "../types/university";
 import useRoutePoint from "../hooks/useRoutePoint";
 import UniversityList from "../components/university/universityList";
 import InnerLoading from "../components/loading/innerLoading";
@@ -29,18 +29,18 @@ export default function UniversitySearchPage() {
 
 	return (
 		<div className="h-full w-full" onClick={() => setSelectedUniv(undefined)}>
-			<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto py-5">
+			<div className="relative flex flex-col h-dvh w-full  mx-auto py-5">
 				<div className="w-full px-[14px] pb-[17px] border-b-[1px] border-gray-400">
 					<Input onChangeDebounce={(e) => setInput(e)} placeholder="우리 학교를 검색해보세요" />
 				</div>
-				<div className="overflow-y-scroll flex-1">
+				<div className="overflow-y-scroll flex-1 max-w-[450px] w-full mx-auto px-[14px]">
 					<Suspense
 						fallback={<InnerLoading isLoading={true} loadingContent="학교 목록을 불러오고 있습니다." />}
 					>
 						<UniversityList query={input} selectedUniv={selectedUniv} setSelectedUniv={setSelectedUniv} />
 					</Suspense>
 				</div>
-				<div className="px-[14px]">
+				<div className="max-w-[450px] mx-auto w-full px-[14px]">
 					{selectedUniv && (
 						<Link to="/map" onClick={() => setUniversity(selectedUniv)}>
 							<Button variant="primary">다음</Button>

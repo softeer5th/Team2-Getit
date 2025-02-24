@@ -1,5 +1,5 @@
 import { IssueTypeKey, PassableStatus } from "../../constant/enum/reportEnum";
-import { IssueQuestionButtons, ReportFormData, ReportModeType } from "../../data/types/report";
+import { IssueQuestionButtons, ReportFormData, ReportModeType } from "../../types/report";
 
 import { FormTitle } from "./formTitle";
 import { SecondaryFormButton } from "./secondaryButton";
@@ -20,8 +20,8 @@ export const SecondaryForm = ({ formData, handleSecondarySelect, reportMode }: S
 		<>
 			{(formData.passableStatus === PassableStatus.CAUTION ||
 				formData.passableStatus === PassableStatus.DANGER) && (
-					<FormTitle isPrimary={false} reportMode={reportMode} passableStatus={formData.passableStatus} />
-				)}
+				<FormTitle isPrimary={false} reportMode={reportMode} passableStatus={formData.passableStatus} />
+			)}
 			<div className="flex flex-wrap w-full pt-5 pl-6 pr-4">
 				{formData.passableStatus === PassableStatus.CAUTION &&
 					buttonConfig.caution.map((button, index) => {

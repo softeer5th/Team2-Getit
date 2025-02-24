@@ -6,7 +6,7 @@ import DestinationIcon from "../../assets/icon/destination.svg?react";
 import DangerIcon from "../../assets/icon/dangerText.svg?react";
 import OriginIcon from "../../assets/icon/start.svg?react";
 import ResultDivider from "../../assets/icon/resultDivider.svg?react";
-import { NavigationButtonRouteType, NavigationRouteList } from "../../data/types/route";
+import { NavigationButtonRouteType, NavigationRouteList } from "../../types/route";
 import useRoutePoint from "../../hooks/useRoutePoint";
 import { formatDistance } from "../../utils/navigation/formatDistance";
 import { Link } from "react-router";
@@ -75,8 +75,13 @@ const NavigationDescription = ({ isDetailView, navigationRoute, buttonType, rese
 	};
 
 	return (
-		<div className="w-full p-5" onClick={resetCurrentRouteIdx ? resetCurrentRouteIdx : () => {}}>
-			<div className={`w-full flex flex-row items-center ${isDetailView ? "justify-start" : "justify-between"}`}>
+		<div
+			className={`w-full p-5 max-w-[450px] ${isDetailView ? "sm:ml-10" : ""}`}
+			onClick={resetCurrentRouteIdx ? resetCurrentRouteIdx : () => {}}
+		>
+			<div
+				className={`w-full flex flex-row items-center bo0r ${isDetailView ? "justify-start" : "justify-between"}`}
+			>
 				<AnimatedValue
 					className="text-left text-kor-body3 text-primary-500 flex-1 font-semibold"
 					value={createTitle(buttonType) ?? "전동 휠체어 예상소요시간"}

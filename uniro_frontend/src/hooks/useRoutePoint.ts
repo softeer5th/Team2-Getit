@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Building } from "../data/types/node";
+import { Building } from "../types/node";
 import { persist } from "zustand/middleware";
 
 interface RouteStore {

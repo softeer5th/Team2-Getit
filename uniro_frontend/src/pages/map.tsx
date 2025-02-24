@@ -1,14 +1,14 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import useMap from "../hooks/useMap";
-import { Building, NodeId } from "../data/types/node";
+import { Building, NodeId } from "../types/node";
 import MapBottomSheet from "../components/map/mapBottomSheet";
 import { MapTopBuildingSheet, MapTopRouteSheet } from "../components/map/TopSheet";
 import { CautionToggleButton, DangerToggleButton, ReportButton } from "../components/map/floatingButtons";
 import useRoutePoint from "../hooks/useRoutePoint";
 import useSearchBuilding from "../hooks/useSearchBuilding";
 import Button from "../components/customButton";
-import { AdvancedMarker } from "../data/types/marker";
-import { CoreRoutesList, RouteId, RoutePointType } from "../data/types/route";
+import { AdvancedMarker } from "../types/marker";
+import { CoreRoutesList, RouteId, RoutePointType } from "../types/route";
 import { RoutePoint } from "../constant/enum/routeEnum";
 import { Markers } from "../constant/enum/markerEnum";
 import { createUniversityMarker } from "../utils/markers/createAdvanedMarker";
@@ -18,10 +18,10 @@ import useModal from "../hooks/useModal";
 import ReportModal from "../components/map/reportModal";
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-import { University } from "../data/types/university";
-import { CautionIssueType, DangerIssueType, MarkerTypes } from "../data/types/enum";
+import { University } from "../types/university";
+import { CautionIssueType, DangerIssueType, MarkerTypes } from "../types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
-import { Coord } from "../data/types/coord";
+import { Coord } from "../types/coord";
 import AnimatedContainer from "../container/animatedContainer";
 import Loading from "../components/loading/loading";
 import createMarkerElement from "../utils/markers/createMarkerElement";
@@ -338,6 +338,7 @@ export default function MapPage() {
 		setCautionMarkers(cautionMarkersWithId);
 
 		if (isReDraw) {
+			// @ts-expect-error : Difference Method need Polyfill
 			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
@@ -742,6 +743,7 @@ export default function MapPage() {
 			}
 		}
 		if (isReDraw) {
+			// @ts-expect-error : Difference Method need Polyfill
 			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
@@ -772,7 +774,7 @@ export default function MapPage() {
 	}, []);
 
 	return (
-		<div className="relative flex flex-col h-dvh w-full max-w-[450px] mx-auto justify-center">
+		<div className="relative flex flex-col h-dvh w-full mx-auto justify-center">
 			<MapTopBuildingSheet
 				isVisible={(selectedMarker?.type === Markers.BUILDING ? false : true) && searchMode === "BUILDING"}
 			/>
@@ -796,7 +798,10 @@ export default function MapPage() {
 				}}
 				className=""
 			>
-				<div onClick={() => findFastRoute()} className="absolute bottom-6 space-y-2 w-full px-4">
+				<div
+					onClick={() => findFastRoute()}
+					className="max-w-[450px] absolute left-1/2 translate-x-[-50%] bottom-6 space-y-2 w-full px-4"
+				>
 					<Button variant="primary">길찾기</Button>
 				</div>
 			</AnimatedContainer>

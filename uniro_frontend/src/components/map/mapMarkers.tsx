@@ -1,5 +1,5 @@
 import { Markers } from "../../constant/enum/markerEnum";
-import { MarkerTypes } from "../../data/types/enum";
+import { MarkerTypes } from "../../types/enum";
 import { animate } from "framer-motion";
 
 const markerImages = import.meta.glob("/src/assets/markers/*.svg", { eager: true });

@@ -6,11 +6,7 @@ export default function ErrorPage() {
 	const navigate = useNavigate();
 
 	const handleGoBack = () => {
-		if (window.history.length > 1) {
-			navigate(-1);
-		} else {
-			navigate("/");
-		}
+		navigate("/");
 	};
 
 	return (

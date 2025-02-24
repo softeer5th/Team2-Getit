@@ -1,4 +1,4 @@
-import { AdvancedMarker } from "../../data/types/marker";
+import { AdvancedMarker } from "../../types/marker";
 import removeMarkers from "./removeMarkers";
 
 /** Marker 보이기 안보이기 토글 */

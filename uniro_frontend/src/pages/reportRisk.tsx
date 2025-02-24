@@ -1,8 +1,8 @@
 import { MouseEvent, useContext, useEffect, useState } from "react";
 import useMap from "../hooks/useMap";
-import { CoreRoute, CoreRoutesList, RouteId } from "../data/types/route";
+import { CoreRoute, CoreRoutesList, RouteId } from "../types/route";
 import { Markers } from "../constant/enum/markerEnum";
-import { ClickEvent } from "../data/types/event";
+import { ClickEvent } from "../types/event";
 import { LatLngToLiteral } from "../utils/coordinates/coordinateTransform";
 import findNearestSubEdge from "../utils/polylines/findNearestEdge";
 import centerCoordinate from "../utils/coordinates/centerCoordinate";
@@ -15,12 +15,12 @@ import BackButton from "../components/map/backButton";
 
 import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
-import { University } from "../data/types/university";
+import { University } from "../types/university";
 import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import { getAllRoutes } from "../api/route";
 import { getAllRisks } from "../api/routes";
 import useReportRisk from "../hooks/useReportRisk";
-import { CautionIssueType, DangerIssueType } from "../data/types/enum";
+import { CautionIssueType, DangerIssueType } from "../types/enum";
 import { CautionIssue, DangerIssue } from "../constant/enum/reportEnum";
 import TutorialModal from "../components/map/tutorialModal";
 import createMarkerElement from "../utils/markers/createMarkerElement";
@@ -29,7 +29,7 @@ import { CacheContext } from "../map/mapCacheContext";
 import removeAllListener from "../utils/map/removeAllListener";
 import useReportedRisk from "../hooks/useReportRiskResult";
 import { interpolate } from "../utils/interpolate";
-import { MarkerTypesWithElement, AdvancedMarker } from "../data/types/marker";
+import { MarkerTypesWithElement, AdvancedMarker } from "../types/marker";
 
 interface reportMarkerTypes extends MarkerTypesWithElement {
 	route: RouteId;
@@ -215,6 +215,7 @@ export default function ReportRiskPage() {
 		}
 
 		if (isReDraw) {
+			// @ts-expect-error : Difference Method need Polyfill
 			const deleteKeys = usedMarkerRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {
@@ -300,6 +301,7 @@ export default function ReportRiskPage() {
 		}
 
 		if (isReDraw) {
+			// @ts-expect-error : Difference Method need Polyfill
 			const deleteKeys = usedRouteRef.current!.difference(usedKeys) as Set<string>;
 
 			deleteKeys.forEach((key) => {

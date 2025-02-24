@@ -1,5 +1,5 @@
 import { MouseEvent, useState } from "react";
-import { University } from "../data/types/university";
+import { University } from "../types/university";
 
 interface UniversityButtonProps {
 	university: University;

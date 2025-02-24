@@ -7,14 +7,14 @@ import {
 	NavigationRouteList,
 	NavigationRouteListRecordWithMetaData,
 	RouteDetail,
-} from "../data/types/route";
-import createMarkerElement from "../components/map/mapMarkers";
+} from "../types/route";
 import { Markers } from "../constant/enum/markerEnum";
 import useRoutePoint from "../hooks/useRoutePoint";
-import { AdvancedMarker } from "../data/types/marker";
+import { AdvancedMarker } from "../types/marker";
 import { Direction } from "framer-motion";
 import { createRiskMarkers } from "../utils/markers/createRiskMarker";
 import MapContext from "../map/mapContext";
+import createMarkerElement from "../utils/markers/createMarkerElement";
 
 type MapProps = {
 	style?: React.CSSProperties;
@@ -71,6 +71,14 @@ const NavigationMap = ({
 }: MapProps) => {
 	const { createAdvancedMarker, createPolyline } = useContext(MapContext);
 	const { mapRef, map } = useMap();
+
+	const {
+		originMarkerElementWithName,
+		destinationMarkerElementWithName,
+		waypointMarkerElement,
+		numberedWaypointMarkerElement,
+		cautionMarkerElement,
+	} = createMarkerElement();
 
 	const buttonStateRef = useRef(buttonState);
 	const isDetailViewRef = useRef(isDetailView);
@@ -176,7 +184,7 @@ const NavigationMap = ({
 			}
 		});
 		return record;
-	}, [routeResult, createCompositeRoute]);
+	}, [routeResult]);
 
 	useEffect(() => {
 		if (!map || !compositeRoutes) return;
@@ -188,11 +196,6 @@ const NavigationMap = ({
 			activeComposite.endingBuildingPath.setMap(map);
 			activeComposite.paths.setMap(map);
 			activeComposite.paths.setOptions(polylineConfig[buttonState as keyof typeof polylineConfig]);
-			map.fitBounds(activeComposite.bounds, {
-				top: topPadding,
-				right: 30,
-				bottom: bottomPadding,
-			});
 		}
 
 		return () => {
@@ -202,17 +205,38 @@ const NavigationMap = ({
 				composite!.paths.setMap(null);
 			});
 		};
-	}, [map, buttonState, compositeRoutes, topPadding, bottomPadding]);
+	}, [map, buttonState, compositeRoutes]);
+
+	useEffect(() => {
+		if (!map) return;
+		const activeBounds = compositeRoutes[buttonState]?.bounds;
+
+		if (!activeBounds) return;
+
+		map.fitBounds(activeBounds!, {
+			top: topPadding,
+			right: 150,
+			bottom: bottomPadding,
+			left: 150,
+		});
+		return () => {
+			map.fitBounds(activeBounds!, {
+				top: topPadding,
+				right: 150,
+				bottom: bottomPadding,
+				left: 150,
+			});
+		};
+	}, [map, bottomPadding, topPadding, currentRouteIdx, buttonState, compositeRoutes]);
 
 	const createStartEndMarkers = () => {
 		if (!map || !origin || !destination) return;
 		// 출발지 마커
-		const originMarkerElement = createMarkerElement({
-			type: Markers.ORIGIN,
-			title: origin?.buildingName,
-			className: "translate-namedmarker",
+		const originMarkerElement = originMarkerElementWithName({
+			name: origin?.buildingName,
 			hasAnimation: true,
 		});
+
 		const originMarker = createAdvancedMarker(
 			{
 				map: map,
@@ -225,10 +249,8 @@ const NavigationMap = ({
 		);
 
 		// 도착지 마커
-		const destinationMarkerElement = createMarkerElement({
-			type: Markers.DESTINATION,
-			title: destination?.buildingName,
-			className: "translate-namedmarker",
+		const destinationMarkerElement = destinationMarkerElementWithName({
+			name: destination?.buildingName,
 			hasAnimation: true,
 		});
 		const destinationMarker = createAdvancedMarker(
@@ -252,7 +274,10 @@ const NavigationMap = ({
 		return [originMarker, destinationMarker];
 	};
 
-	const areCoordinatesEqual = (coord1: google.maps.LatLngLiteral, coord2: google.maps.LatLngLiteral) => {
+	const areCoordinatesEqual = (
+		coord1: google.maps.LatLng | google.maps.LatLngLiteral | google.maps.LatLngAltitudeLiteral,
+		coord2: google.maps.LatLng | google.maps.LatLngLiteral | google.maps.LatLngAltitudeLiteral,
+	) => {
 		return coord1.lat === coord2.lat && coord1.lng === coord2.lng;
 	};
 
@@ -291,11 +316,14 @@ const NavigationMap = ({
 				markers.push(existingMarker);
 			} else {
 				// 3. 기존 마커가 없거나 일치하지 않으면 새로 생성
-				const markerElement = createMarkerElement({
-					type: markerType,
-					className: "translate-waypoint",
-					hasAnimation,
-				});
+				const markerElement =
+					markerType === Markers.WAYPOINT
+						? waypointMarkerElement({
+								hasAnimation: true,
+							})
+						: cautionMarkerElement({
+								hasAnimation: true,
+							});
 
 				const marker = createAdvancedMarker(
 					{
@@ -351,8 +379,7 @@ const NavigationMap = ({
 			routeDetails.forEach((routeDetail, index) => {
 				if (index === routeDetails.length - 1) return;
 				const { coordinates } = routeDetail;
-				const markerElement = createMarkerElement({
-					type: Markers.NUMBERED_WAYPOINT,
+				const markerElement = numberedWaypointMarkerElement({
 					number: index + 1,
 					hasAnimation: true,
 				});
@@ -387,19 +414,6 @@ const NavigationMap = ({
 		});
 		dyamicMarkersRef.current = [];
 	};
-
-	useEffect(() => {
-		if (currentRouteIdx !== -1) return;
-		if (!map || !boundsRef.current) return;
-
-		const activeBounds = compositeRoutes[buttonState]?.bounds;
-		map.fitBounds(activeBounds!, {
-			top: topPadding,
-			right: 50,
-			bottom: bottomPadding,
-			left: 50,
-		});
-	}, [map, bottomPadding, topPadding, currentRouteIdx]);
 
 	useEffect(() => {
 		if (!map) return;
@@ -439,9 +453,9 @@ const NavigationMap = ({
 		boundsRef.current = bounds;
 		map.fitBounds(bounds, {
 			top: topPadding,
-			right: 50,
+			right: 150,
 			bottom: bottomPadding,
-			left: 50,
+			left: 150,
 		});
 	}, [map, currentRouteIdx, buttonState, routeResult]);
 
@@ -450,7 +464,6 @@ const NavigationMap = ({
 		drawDynamicMarker(routeResult[buttonState]);
 		return fadeOutDynamicMarker;
 	}, [isDetailView, map, routeResult, buttonState]);
-
 	return <div id="map" ref={mapRef} style={style} />;
 };
 

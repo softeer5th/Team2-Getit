@@ -2,7 +2,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import React, { MouseEvent, Dispatch, SetStateAction } from "react";
 import { getUniversityList } from "../../api/search";
 import UniversityButton from "../universityButton";
-import { University } from "../../data/types/university";
+import { University } from "../../types/university";
 import { useNavigate } from "react-router";
 import useUniversityInfo from "../../hooks/useUniversityInfo";
 import UniversityNotFound from "./universityNotFound";
@@ -32,7 +32,7 @@ export default function UniversityList({ query, selectedUniv, setSelectedUniv }:
 	};
 
 	return (
-		<ul className="w-full h-full px-[14px] py-[6px]">
+		<ul className="w-full h-full py-[6px]">
 			{universityList.length === 0 ? (
 				<UniversityNotFound />
 			) : (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { PassableStatus, IssueTypeKey } from "../constant/enum/reportEnum";
-import { ReportModeType, ReportFormData } from "../data/types/report";
+import { ReportModeType, ReportFormData } from "../types/report";
 
 import { ReportTitle } from "../components/report/reportTitle";
 import { ReportDivider } from "../components/report/reportDivider";
@@ -15,10 +15,10 @@ import useUniversityInfo from "../hooks/useUniversityInfo";
 import useRedirectUndefined from "../hooks/useRedirectUndefined";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getSingleRouteRisk, postReport } from "../api/route";
-import { University } from "../data/types/university";
+import { University } from "../types/university";
 import { useNavigate } from "react-router";
 import useReportRisk from "../hooks/useReportRisk";
-import { RouteId } from "../data/types/route";
+import { RouteId } from "../types/route";
 import useMutationError from "../hooks/useMutationError";
 import useReportedRisk from "../hooks/useReportRiskResult";
 

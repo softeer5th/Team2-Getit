@@ -29,7 +29,10 @@ export default function Fetch() {
 		return response.json();
 	};
 
-	const post = async <T = boolean, K = unknown>(url: string, body?: Record<string, K | K[]>): Promise<T> => {
+	const post = async <T = boolean, K = unknown>(
+		url: string,
+		body?: Record<string, K | K[]>,
+	): Promise<T | boolean> => {
 		console.log("POST : ", url);
 
 		const response = await fetch(`${baseURL}${url}`, {
@@ -48,11 +51,11 @@ export default function Fetch() {
 			} else {
 				throw new Error("UnExpected Error");
 			}
-        }
-        
-        const text = await response.text();
+		}
 
-        return text.length > 0 ? (JSON.parse(text) as T) : response.ok;
+		const text = await response.text();
+
+		return text.length > 0 ? (JSON.parse(text) as T) : response.ok;
 	};
 
 	const put = async <T, K>(url: string, body?: Record<string, K>): Promise<T> => {

@@ -1,9 +1,9 @@
 import { IssueTypeKey } from "../constant/enum/reportEnum";
-import { Coord } from "../data/types/coord";
-import { CautionIssueType, DangerIssueType } from "../data/types/enum";
-import { NodeId } from "../data/types/node";
+import { Coord } from "../types/coord";
+import { CautionIssueType, DangerIssueType } from "../types/enum";
+import { NodeId } from "../types/node";
 
-import { CoreRoutesList, NavigationRouteListRecordWithMetaData, RouteId } from "../data/types/route";
+import { CoreRoutesList, NavigationRouteListRecordWithMetaData, RouteId } from "../types/route";
 import { getFetch, postFetch } from "../utils/fetch/fetch";
 import { transformAllRoutes, transformFastRoute } from "./transformer/route";
 import { GetAllRouteRepsonse, GetFastestRouteResponse } from "./type/response/route";
@@ -20,7 +20,7 @@ export const getNavigationResult = (
 };
 
 export const getAllRoutes = (univId: number): Promise<CoreRoutesList> => {
-	return getFetch<GetAllRouteRepsonse>(`/${univId}/routes`).then((data) => transformAllRoutes(data));
+	return getFetch<GetAllRouteRepsonse>(`/${univId}/routes/stream`).then((data) => transformAllRoutes(data));
 };
 
 export const getSingleRouteRisk = (
@@ -54,5 +54,8 @@ export const postReportRoute = (
 		coordinates: Coord[];
 	},
 ): Promise<GetAllRouteRepsonse> => {
-	return postFetch<GetAllRouteRepsonse, Coord[] | NodeId | null>(`/${univId}/route`, body);
+	return postFetch<GetAllRouteRepsonse, Coord[] | NodeId | null>(
+		`/${univId}/route`,
+		body,
+	) as Promise<GetAllRouteRepsonse>;
 };

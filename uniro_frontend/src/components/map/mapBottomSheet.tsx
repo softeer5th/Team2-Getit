@@ -4,7 +4,7 @@ import Call from "/public/icons/call-thick.svg?react";
 import Location from "/public/icons/location-thick.svg?react";
 import AnimatedContainer from "../../container/animatedContainer";
 import { useNavigationBottomSheet } from "../../hooks/useNavigationBottomSheet";
-import { RoutePointType } from "../../data/types/route";
+import { RoutePointType } from "../../types/route";
 import { RoutePoint } from "../../constant/enum/routeEnum";
 import useSearchBuilding from "../../hooks/useSearchBuilding";
 import { useEffect, useState } from "react";

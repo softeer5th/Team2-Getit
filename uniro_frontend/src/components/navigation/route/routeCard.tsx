@@ -5,7 +5,7 @@ import RightIcon from "../../../assets/route/right.svg?react";
 import LeftIcon from "../../../assets/route/left.svg?react";
 import CautionText from "../../../assets/icon/cautionText.svg?react";
 import DangerText from "../../../assets/icon/dangerText.svg?react";
-import { RouteDetail } from "../../../data/types/route";
+import { RouteDetail } from "../../../types/route";
 import useRoutePoint from "../../../hooks/useRoutePoint";
 import { formatDistance } from "../../../utils/navigation/formatDistance";
 import { CautionIssue, DangerIssue } from "../../../constant/enum/reportEnum";
@@ -136,13 +136,13 @@ export const RouteCard = ({
 			return (
 				<div
 					onClick={onClick}
-					className={`flex flex-row items-centerjustify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+					className={`grid grid-cols-10 w-full items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
 					<div className="flex flex-col min-w-10 flex-shrink-0 items-center justify-start space-y-1">
 						<OriginIcon />
 						<div className="text-[#5F5F5F] text-kor-body3 text-[12px]">출발</div>
 					</div>
-					<div className="flex flex-col items-start justify-center ml-4">
+					<div className="flex flex-col items-start justify-center ml-4 w-full col-span-9">
 						<div className="text-kor-body1 text-gray-900">{origin?.buildingName}</div>
 						<div className="text-kor-body3 text-gray-700">{origin?.address}</div>
 					</div>
@@ -152,13 +152,13 @@ export const RouteCard = ({
 			return (
 				<div
 					onClick={onClick}
-					className={`flex flex-row items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
+					className={`grid grid-cols-10 w-full items-center justify-start pl-8 py-5 transition-colors ${currentRouteIdx === index ? "bg-primary-100" : ""}`}
 				>
 					<div className="flex flex-col min-w-10 flex-shrink-0 items-center justify-start space-y-1 col-span-1">
 						<DestinationIcon />
 						<div className="text-[#5F5F5F] text-kor-body3 text-[12px]">도착</div>
 					</div>
-					<div className="flex flex-col items-start justify-center ml-4">
+					<div className="flex flex-col items-start justify-center ml-4 col-span-9">
 						<div className="text-kor-body1 text-gray-900">{destination?.buildingName}</div>
 						<div className="text-kor-body3 text-gray-700">{destination?.address}</div>
 					</div>

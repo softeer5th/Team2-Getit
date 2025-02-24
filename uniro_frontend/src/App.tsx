@@ -10,7 +10,6 @@ import ErrorPage from "./pages/error";
 import { lazy, Suspense } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ErrorBoundary from "./components/error/ErrorBoundary";
-import Errortest from "./pages/errorTest";
 import NotFoundPage from "./pages/notFound";
 import { MapProvider } from "./map/mapContext";
 import CacheProvider from "./map/mapCacheContext";
@@ -54,7 +53,6 @@ function App() {
 								/** 에러 페이지 */
 								<Route path="/error" element={<ErrorPage />} />
 								<Route path="/error/offline" element={<OfflinePage />} />
-								<Route path="/error/test" element={<Errortest />} />
 								<Route path="*" element={<NotFoundPage />} />
 							</Routes>
 						</Suspense>
