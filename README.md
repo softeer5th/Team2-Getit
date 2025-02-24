@@ -78,10 +78,11 @@
     - Google Map Elevation API 연동 & 비동기, 배치처리 구현
     </td>
     <td>
-    - Dockerizing 및 배포 자동화 인프라 구축 <br>
+    - Redis 및 FastJson을 활용한 조회속도 1,500 ms -> 160ms 개선  <br>
+    - Dockerizing 및 blue-green 무중단 배포 자동화 인프라 구축 <br>
+    - R-tree를 활용한 길 추가 로직 개발, 10,000 ms -> 200ms 개선 <br>
     - 테스트 컨테이너 구축<br>
     - 어드민 로그인 구현 <br>
-    - 작성예정<br>
     </td>
 </tr>
 	</table>
@@ -151,10 +152,6 @@
 프론트엔드에서 구현한 기능과 기술 스택을 정리합니다.
 
 - **사용 기술**: React, TypeScript, Zustand, TanStack-Query, Tailwind CSS, Frame
-- **구현한 기능**
-  - UI/UX 디자인 및 반응형 웹 개발
-  - API 연동 및 상태 관리
-  - 퍼포먼스 최적화 및 코드 분할
 
 ---
 
@@ -168,8 +165,6 @@
 ## ERD
 <img width="690" alt="스크린샷 2025-02-24 오후 12 27 19" src="https://github.com/user-attachments/assets/414c313c-9a6d-485c-973b-4afab34366b4" />
 
-- **사용 기술**: Java, Spring Boot, JPA, MySQL, Redis
-- **구현한 기능**
-  - 사용자 인증 및 권한 관리
-  - API 설계 및 데이터베이스 모델링
-  - 성능 최적화 및 캐싱 적용
+<br>
+
+- **사용 기술**: Java, Spring Boot, JPA, MySQL, Redis, Hibernate envers, FastJson, Querydsl
