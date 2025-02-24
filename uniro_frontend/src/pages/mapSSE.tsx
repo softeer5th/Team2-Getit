@@ -762,14 +762,10 @@ export default function MapSSEPage() {
 				const routes = transformAllRoutes({ coreRoutes, nodeInfos });
 				drawRoute(routes);
 				sseCounter.current += 1;
-				if (sseCounter.current === 11) {
+				if (sseCounter.current === batchSize) {
 					eventSource.close();
 				}
 			}
-		};
-
-		eventSource.onerror = (err) => {
-			console.log("ERROR");
 		};
 
 		return () => {
