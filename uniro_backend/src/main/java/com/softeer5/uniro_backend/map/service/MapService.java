@@ -143,7 +143,7 @@ public class MapService {
 				break;
 			}
 
-			Integer fetchSize = Integer.parseInt(redisService.getDataToString(univId.toString()));
+			Integer fetchSize = Integer.parseInt(redisService.getDataToString(univId.toString() + ":fetch"));
 
 			processBatch(lightRoutes.getLightRoutes(), emitter, fetchSize);
 			batchNumber++;
@@ -177,7 +177,7 @@ public class MapService {
 				saveAndSendBatch(redisKeyPrefix, batchNumber, batch, emitter, fetchSize);
 			}
 
-			redisService.saveDataToString(univId.toString(), String.valueOf(fetchSize));
+			redisService.saveDataToString(univId.toString() + ":fetch", String.valueOf(fetchSize));
 			emitter.complete();
 			log.info("[SSE emitter complete] DB data used.");
 		} catch (Exception e) {
