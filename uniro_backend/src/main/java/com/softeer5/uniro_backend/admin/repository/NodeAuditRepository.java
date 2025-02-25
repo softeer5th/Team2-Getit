@@ -1,6 +1,9 @@
 package com.softeer5.uniro_backend.admin.repository;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -21,10 +24,18 @@ public class NodeAuditRepository {
 
 	public List<Node> getAllNodesAtRevision(Long univId, Long versionId) {
 		AuditReader auditReader = AuditReaderFactory.get(entityManager);
-		return auditReader.createQuery()
-			.forEntitiesAtRevision(Node.class, versionId)
-			.add(AuditEntity.property("univId").eq(univId))
-			.getResultList();
+		List<Node> allRevisions = auditReader.createQuery()
+				.forRevisionsOfEntity(Node.class, true, true)
+				.add(AuditEntity.revisionNumber().le(versionId))
+				.add(AuditEntity.property("univId").eq(univId))
+				.addOrder(AuditEntity.revisionNumber().asc())
+				.getResultList();
+
+		Map<Long, Node> uniqueNodesMap = new HashMap<>();
+		for (Node node : allRevisions) {
+			uniqueNodesMap.put(node.getId(), node);
+		}
+		return new ArrayList<>(uniqueNodesMap.values());
 	}
 
 	public void deleteAllAfterVersionId(Long univId, Long versionId) {

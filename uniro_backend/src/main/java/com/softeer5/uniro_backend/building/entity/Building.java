@@ -35,6 +35,9 @@ public class Building {
 	@Column(length = 30)
 	private String name;
 
+	@Column(length = 30)
+	private String trimmedName;
+
 	@Column(length = 200)
 	private String imageUrl;
 

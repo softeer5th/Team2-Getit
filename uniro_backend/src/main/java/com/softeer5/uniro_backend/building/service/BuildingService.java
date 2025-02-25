@@ -5,15 +5,15 @@ import java.util.Optional;
 
 import com.softeer5.uniro_backend.admin.annotation.RevisionOperation;
 import com.softeer5.uniro_backend.admin.enums.RevisionOperationType;
-import com.softeer5.uniro_backend.external.MapClient;
+import com.softeer5.uniro_backend.external.elevation.MapClient;
 import com.softeer5.uniro_backend.building.dto.request.CreateBuildingNodeReqDTO;
 import com.softeer5.uniro_backend.building.entity.Building;
 import com.softeer5.uniro_backend.map.entity.Node;
+import com.softeer5.uniro_backend.map.enums.HeightStatus;
 import com.softeer5.uniro_backend.map.repository.NodeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.softeer5.uniro_backend.common.CursorPage;
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.BuildingException;
 import com.softeer5.uniro_backend.common.utils.GeoUtils;
@@ -46,15 +46,15 @@ public class BuildingService {
 			.toList();
 	}
 
-	public SearchBuildingResDTO searchBuildings(Long univId, String name, Long cursorId, Integer pageSize){
+	public SearchBuildingResDTO searchBuildings(Long univId, String trimmedName, Integer pageSize){
 
-		CursorPage<List<BuildingNode>> buildingNodes = buildingRepository.searchBuildings(univId, name, cursorId, pageSize);
+		List<BuildingNode> buildingNodes = buildingRepository.searchBuildings(univId, trimmedName, pageSize);
 
-		List<GetBuildingResDTO> data = buildingNodes.getData().stream()
+		List<GetBuildingResDTO> data = buildingNodes.stream()
 			.map(buildingNode -> GetBuildingResDTO.of(buildingNode.getBuilding(), buildingNode.getNode()))
 			.toList();
 
-		return SearchBuildingResDTO.of(data, buildingNodes.getNextCursor(), buildingNodes.isHasNext());
+		return SearchBuildingResDTO.of(data);
 	}
 
 	public GetBuildingResDTO getBuilding(Long nodeId){
@@ -72,6 +72,7 @@ public class BuildingService {
 		Node node = Node.builder()
 				.coordinates(convertDoubleToPoint(createBuildingNodeReqDTO.getLng(), createBuildingNodeReqDTO.getLat()))
 				.isCore(false)
+				.status(HeightStatus.READY)
 				.univId(univId).build();
 		mapClient.fetchHeights(List.of(node));
 		nodeRepository.save(node);
@@ -80,6 +81,7 @@ public class BuildingService {
 				.phoneNumber(createBuildingNodeReqDTO.getPhoneNumber())
 				.address(createBuildingNodeReqDTO.getAddress())
 				.name(createBuildingNodeReqDTO.getBuildingName())
+				.trimmedName(createBuildingNodeReqDTO.getBuildingName().replaceAll("\\s+", ""))
 				.imageUrl(createBuildingNodeReqDTO.getBuildingImageUrl())
 				.level(createBuildingNodeReqDTO.getLevel())
 				.nodeId(node.getId())
