@@ -281,7 +281,7 @@ public class RouteCalculator {
             }
             currentNode = secondNode;
 
-            double heightDiff = firstNode.getHeight() - secondNode.getHeight();
+            double heightDiff = secondNode.getHeight() - firstNode.getHeight();
             if(heightDiff > 0){
                 heightIncreaseWeight += Math.min(LIMIT_RANGE ,Math.exp(heightDiff) - 1);
             }
