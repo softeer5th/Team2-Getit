@@ -1,4 +1,6 @@
-package com.softeer5.uniro_backend.map.entity;
+package com.softeer5.uniro_backend.map.enums;
+
+import com.softeer5.uniro_backend.map.entity.Route;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.PEDESTRIAN_SECONDS_PER_MITER;
 
