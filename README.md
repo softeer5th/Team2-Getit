@@ -10,6 +10,8 @@
 4. [프론트엔드](#-프론트엔드)
 5. [백엔드](#-백엔드)
 
+**저희 프로젝트의 기술 아티클은  [📝 UNIRO-Wiki](https://github.com/softeer5th/Team2-Getit/wiki) 페이지에서 보실 수 있어요.**
+
 ---
 
 # 🚀 서비스 소개
@@ -17,15 +19,6 @@
 - 캠퍼스 내 이동이 더 이상 불편하지 않도록!
 - 휠체어를 사용하는 대학생이 보다 안전하고 편리하게 캠퍼스를 이동할 수 있도록 돕는 길찾기 서비스입니다.
 - 정보 기술을 활용하여 이동 과정에서의 물리적·정보적 장벽을 해소하고, 모두가 함께하는 포용적인 캠퍼스 환경을 만들어갑니다.
-
-# 기술 스택
-
-| 구분            | 기술 스택 |
-|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| **FE**      | ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff) ![React](https://img.shields.io/badge/React-%2361DAFB.svg?style=flat&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-%23646CFF.svg?style=flat&logo=vite&logoColor=white) ![Tanstack Query](https://img.shields.io/badge/Tanstack%20Query-FF4154?logo=reactquery&logoColor=fff) ![React Router](https://img.shields.io/badge/-React%20Router-CA4245?logo=react-router) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-grey?style=flat&logo=tailwind-css&logoColor=38B2AC) ![Google Maps Badge](https://img.shields.io/badge/Google%20Maps-4285F4?logo=googlemaps&logoColor=fff&style=flat) |
-| **BE**       | <img src="https://img.shields.io/badge/Java-007396?style=flat-square&logo=Java&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=flat-square&logo=Spring Boot&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=flat-square&logo=Spring Data JPA&logoColor=white"/> ![MySQL](https://img.shields.io/badge/MySQL-%234479A1.svg?style=flat&logo=mysql&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-%23DD0031.svg?logo=redis&logoColor=white) <img src="https://img.shields.io/badge/QueryDsl-007396?style=flat-square&logo=Java&logoColor=white"/> <img src="https://img.shields.io/badge/Hibernate envers-59666C?style=flat-square&logo=Java&logoColor=white"/> <img src="https://img.shields.io/badge/FastJson-FF3300?style=flat-square&logo=Java&logoColor=white"/> <img src="https://img.shields.io/badge/GoogleMap API-4285F4?style=flat-square&logo=Java&logoColor=white"/> ![Test Container](https://img.shields.io/badge/Test%20Container-%2348c9b0.svg?style=flat&logo=testcontainers&logoColor=white)|
-| **인프라**     | ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?logo=amazon-web-services&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-%232088FF.svg?style=flat&logo=github-actions&logoColor=white)  ![Docker](https://img.shields.io/badge/Docker-%232496ED.svg?style=flat&logo=docker&logoColor=white) ![Nginx](https://img.shields.io/badge/Nginx-%23009639.svg?style=flat&logo=nginx&logoColor=white) ![Google Cloud Platform](https://img.shields.io/badge/-Google%20Cloud%20Platform-4285F4?style=flat&logo=google%20cloud&logoColor=white) |
-| **소통** | ![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=flat&logo=swagger&logoColor=white) ![Jira Badge](https://img.shields.io/badge/Jira-0052CC?logo=jira&logoColor=fff&style=flat)|
 
 # 👥 팀원 소개
 
@@ -90,6 +83,16 @@
 	</table>
 </div>
 
+
+## 우리팀의 기술 스택
+
+| 구분            | 기술 스택 |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| **FE**      | ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff) ![React](https://img.shields.io/badge/React-%2361DAFB.svg?style=flat&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-%23646CFF.svg?style=flat&logo=vite&logoColor=white) ![Tanstack Query](https://img.shields.io/badge/Tanstack%20Query-FF4154?logo=reactquery&logoColor=fff) ![React Router](https://img.shields.io/badge/-React%20Router-CA4245?logo=react-router) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-grey?style=flat&logo=tailwind-css&logoColor=38B2AC) ![Google Maps Badge](https://img.shields.io/badge/Google%20Maps-4285F4?logo=googlemaps&logoColor=fff&style=flat) |
+| **BE**       | <img src="https://img.shields.io/badge/Java-007396?style=flat-square&logo=Java&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=flat-square&logo=Spring Boot&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=flat-square&logo=Spring Data JPA&logoColor=white"/> ![MySQL](https://img.shields.io/badge/MySQL-%234479A1.svg?style=flat&logo=mysql&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-%23DD0031.svg?logo=redis&logoColor=white) <img src="https://img.shields.io/badge/QueryDsl-007396?style=flat-square&logo=Java&logoColor=white"/> <img src="https://img.shields.io/badge/Hibernate envers-59666C?style=flat-square&logo=Java&logoColor=white"/> <img src="https://img.shields.io/badge/FastJson-FF3300?style=flat-square&logo=Java&logoColor=white"/> <img src="https://img.shields.io/badge/GoogleMap API-4285F4?style=flat-square&logo=Java&logoColor=white"/> ![Test Container](https://img.shields.io/badge/Test%20Container-%2348c9b0.svg?style=flat&logo=testcontainers&logoColor=white)|
+| **인프라**     | ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?logo=amazon-web-services&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-%232088FF.svg?style=flat&logo=github-actions&logoColor=white)  ![Docker](https://img.shields.io/badge/Docker-%232496ED.svg?style=flat&logo=docker&logoColor=white) ![Nginx](https://img.shields.io/badge/Nginx-%23009639.svg?style=flat&logo=nginx&logoColor=white) ![Google Cloud Platform](https://img.shields.io/badge/-Google%20Cloud%20Platform-4285F4?style=flat&logo=google%20cloud&logoColor=white) |
+| **소통** | ![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=flat&logo=swagger&logoColor=white) ![Jira Badge](https://img.shields.io/badge/Jira-0052CC?logo=jira&logoColor=fff&style=flat)|
+
 <br>
 
 # 🤝 협업 방식
@@ -111,7 +114,7 @@
 | v1.0.0      | 1주차 스프린트 | [1주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.0.0) | [v1.0.0](https://github.com/softeer5th/Team2-Getit/pull/27)  |
 | v1.1.0      | 2주차 스프린트 | [2주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.1.0) | [v1.1.0](https://github.com/softeer5th/Team2-Getit/pull/76)  |
 | v1.2.0      | 3주차 스프린트 | [3주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.2.0) | [v1.2.0](https://github.com/softeer5th/Team2-Getit/pull/141) |
-| v1.3.0      | 4주차 스프린트 | [4주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.3.0) | [v1.3.0]()                                                   |
+| v1.3.0      | 4주차 스프린트 | [4주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.3.0) | [v1.3.0](https://github.com/softeer5th/Team2-Getit/pull/238)                                                   |
 
 ## Jira를 이용한 프로젝트 관리
 
