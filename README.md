@@ -10,7 +10,16 @@
 4. [프론트엔드](#-프론트엔드)
 5. [백엔드](#-백엔드)
 
-**저희 프로젝트의 기술 아티클은  [📝 UNIRO-Wiki](https://github.com/softeer5th/Team2-Getit/wiki) 페이지에서 보실 수 있어요.**
+### 아티클 미리보기
+| 파트 | 제목                                                                                                                                                                        | 기여자                         |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| 공통 | [완벽한 길을 그리기 위한 노력](https://github.com/softeer5th/Team2-Getit/wiki/%5BBE-FE%5D-%EC%99%84%EB%B2%BD%ED%95%9C-%EA%B8%B8%EC%9D%84-%EA%B7%B8%EB%A6%AC%EA%B8%B0-%EC%9C%84%ED%95%9C-%EB%85%B8%EB%A0%A5) | 모두 |
+| FE   | [완벽한(?) 페이지를 위한 LightHouse 점수 개선기](https://github.com/softeer5th/Team2-Getit/wiki/%5BFE%5D-%EC%99%84%EB%B2%BD%ED%95%9C(%3F)-%ED%8E%98%EC%9D%B4%EC%A7%80%EB%A5%BC-%EC%9C%84%ED%95%9C-LightHouse-%EC%A0%90%EC%88%98-%EA%B0%9C%EC%84%A0%EA%B8%B0)              | 박준혁             |
+| FE   | [오브젝트 (Polyline, Marker) 캐싱](https://github.com/softeer5th/Team2-Getit/wiki/%5BFE%5D-%EC%98%A4%EB%B8%8C%EC%A0%9D%ED%8A%B8-(Polyline,-Marker)-%EC%BA%90%EC%8B%B1)              | 윤동현             |
+| BE   | [대량의 데이터로 인한 OOM 해결과정](https://github.com/softeer5th/Team2-Getit/wiki/%5BBE%5D-%EB%8C%80%EB%9F%89%EC%9D%98-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A1%9C-%EC%9D%B8%ED%95%9C-OOM-%ED%95%B4%EA%B2%B0%EA%B3%BC%EC%A0%95)              | 송현성             |
+| BE   | [핵심 조회 로직 1,500ms 에서 160ms 개선](https://github.com/softeer5th/Team2-Getit/wiki/%ED%95%B5%EC%8B%AC-%EC%A1%B0%ED%9A%8C-%EB%A1%9C%EC%A7%81-1,500ms-%EC%97%90%EC%84%9C-160ms-%EA%B0%9C%EC%84%A0)              | 송민규             |
+
+**더 자세한 기술 아티클은  [📝 UNIRO-Wiki](https://github.com/softeer5th/Team2-Getit/wiki) 페이지에서 보실 수 있어요.**
 
 ---
 
