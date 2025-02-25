@@ -2,8 +2,8 @@ package com.softeer5.uniro_backend.map.service;
 
 import static com.softeer5.uniro_backend.common.constant.UniroConst.*;
 import static com.softeer5.uniro_backend.common.error.ErrorCode.*;
-import static com.softeer5.uniro_backend.map.entity.RoadExclusionPolicy.calculateCost;
-import static com.softeer5.uniro_backend.map.entity.RoadExclusionPolicy.isAvailableRoute;
+import static com.softeer5.uniro_backend.map.enums.RoadExclusionPolicy.calculateCost;
+import static com.softeer5.uniro_backend.map.enums.RoadExclusionPolicy.isAvailableRoute;
 
 import com.softeer5.uniro_backend.common.error.ErrorCode;
 import com.softeer5.uniro_backend.common.exception.custom.NodeException;
@@ -14,11 +14,8 @@ import com.softeer5.uniro_backend.map.dto.FastestRouteResultDTO;
 import com.softeer5.uniro_backend.map.dto.response.*;
 import com.softeer5.uniro_backend.map.entity.*;
 import com.softeer5.uniro_backend.map.dto.request.CreateRouteReqDTO;
-import com.softeer5.uniro_backend.map.enums.CautionFactor;
-import com.softeer5.uniro_backend.map.enums.DangerFactor;
-import com.softeer5.uniro_backend.map.enums.DirectionType;
+import com.softeer5.uniro_backend.map.enums.*;
 import com.softeer5.uniro_backend.map.entity.Route;
-import com.softeer5.uniro_backend.map.enums.HeightStatus;
 import lombok.AllArgsConstructor;
 
 import org.locationtech.jts.geom.Coordinate;

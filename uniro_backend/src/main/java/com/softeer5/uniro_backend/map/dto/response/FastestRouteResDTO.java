@@ -1,6 +1,6 @@
 package com.softeer5.uniro_backend.map.dto.response;
 
-import com.softeer5.uniro_backend.map.entity.RoadExclusionPolicy;
+import com.softeer5.uniro_backend.map.enums.RoadExclusionPolicy;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;

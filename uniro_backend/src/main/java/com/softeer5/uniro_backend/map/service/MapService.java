@@ -53,7 +53,6 @@ public class MapService {
 	private final EntityManager entityManager;
 	private final NodeRepository nodeRepository;
 	private final BuildingRepository buildingRepository;
-	private final RevInfoRepository revInfoRepository;
 	private final ApplicationEventPublisher eventPublisher;
 
 	private final RouteCalculator routeCalculator;
