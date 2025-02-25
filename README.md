@@ -119,7 +119,7 @@
 ## Jira를 이용한 프로젝트 관리
 
 <img width="1587" alt="image" src="https://github.com/user-attachments/assets/d9d89b42-3efb-42bf-9857-d12a789cae4b" />
-진척도를 시각화하여 진행상황을 파악할 수 있었습니다.
+- 진척도를 시각화하여 진행상황을 파악할 수 있었습니다.
 
 
 ## 배포 방식
