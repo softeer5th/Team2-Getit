@@ -158,6 +158,26 @@
 
 - **사용 기술**: React, TypeScript, Zustand, TanStack-Query, Tailwind CSS, Frame
 
+## 디렉토리 구성
+
+```bash
+├── src
+    ├── api (API 통신 함수)
+        ├── transformer  (API 통신 변환기)
+        ├── type (API 통신 타입 선언)
+            ├── request
+            ├── response
+    ├── assets
+    ├── components (페이지 별 컴포넌트)
+    ├── constant (상수, Enum
+    ├── hooks (커스텀 훅)
+    ├── map (지도 세팅)
+    ├── pages (페이지 컴포넌트)
+    ├── types (타입)
+    └── utils (기타 함수)
+```
+
+
 ## FrontEnd 배포 과정
 ![Deploy](https://github.com/user-attachments/assets/4d87f404-d92f-4af4-803c-be8e5b30d1cd)
 
