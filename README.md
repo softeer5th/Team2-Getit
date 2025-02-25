@@ -18,6 +18,15 @@
 - 휠체어를 사용하는 대학생이 보다 안전하고 편리하게 캠퍼스를 이동할 수 있도록 돕는 길찾기 서비스입니다.
 - 정보 기술을 활용하여 이동 과정에서의 물리적·정보적 장벽을 해소하고, 모두가 함께하는 포용적인 캠퍼스 환경을 만들어갑니다.
 
+# 기술 스택
+
+| 구분            | 기술 스택 |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| **FE**      | ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff) ![React](https://img.shields.io/badge/React-%2361DAFB.svg?style=flat&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-%23646CFF.svg?style=flat&logo=vite&logoColor=white) ![Tanstack Query](https://img.shields.io/badge/Tanstack%20Query-FF4154?logo=reactquery&logoColor=fff) ![React Router](https://img.shields.io/badge/-React%20Router-CA4245?logo=react-router) |
+| **BE**       | ![Java](https://img.shields.io/badge/Java-%23ED8B00.svg?logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-%236DB33F.svg?style=flat&logo=springboot&logoColor=white) ![MySQL](https://img.shields.io/badge/MySQL-%234479A1.svg?style=flat&logo=mysql&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-%23DD0031.svg?logo=redis&logoColor=white) ![JPA](https://img.shields.io/badge/JPA-%232C3E50.svg?style=flat) ![Test Container](https://img.shields.io/badge/Test%20Container-%2348c9b0.svg?style=flat&logo=testcontainers&logoColor=white) ![Google Calendar API](https://img.shields.io/badge/Google%20Calendar%20API-4285F4?logo=googleapi&logoColor=fff)|
+| **인프라**     | ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?logo=amazon-web-services&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-%232088FF.svg?style=flat&logo=github-actions&logoColor=white)  ![Docker](https://img.shields.io/badge/Docker-%232496ED.svg?style=flat&logo=docker&logoColor=white) ![Nginx](https://img.shields.io/badge/Nginx-%23009639.svg?style=flat&logo=nginx&logoColor=white) |
+| **소통** | ![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=flat&logo=swagger&logoColor=white) ![GitHub Project](https://img.shields.io/badge/GitHub%20Project-121013?logo=github&logoColor=white)|
+
 # 👥 팀원 소개
 
 ## FE 팀
