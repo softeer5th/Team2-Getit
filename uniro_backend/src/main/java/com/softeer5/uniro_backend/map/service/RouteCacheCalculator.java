@@ -26,8 +26,6 @@ import com.softeer5.uniro_backend.map.service.vo.LightRoute;
 @Component
 public class RouteCacheCalculator {
 
-	private final GeometryFactory geometryFactory = GeoUtils.getInstance();
-
 	public AllRoutesInfo assembleRoutes(List<LightRoute> routes) {
 		Map<Long, List<LightRoute>> adjMap = new HashMap<>();
 		Map<Long, LightNode> nodeMap = new HashMap<>();
@@ -52,10 +50,6 @@ public class RouteCacheCalculator {
 			adjMap.computeIfAbsent(route.getNode2().getId(), k -> new ArrayList<>()).add(route);
 
 		}
-
-//		List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
-//				.map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getLng(), entry.getValue().getLat()))
-//				.toList();
 
 		List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
 
