@@ -148,6 +148,15 @@
 - 이를 개선하기 위해 서버에서 무중단 배포를 구축하여, 프론트엔드가 서버의 배포 시점을 신경 쓰지 않아도 개발에 불편함이 없도록 만들었습니다.
 - [관련 구현 wiki 페이지](https://github.com/softeer5th/Team2-Getit/wiki/%5BBE%5D-ci%E2%80%90cd-%EB%AC%B4%EC%A4%91%EB%8B%A8-%EB%B0%B0%ED%8F%AC-%EA%B5%AC%EC%B6%95)
 
+## 🧭 협업을 위한 어드민 기능 개발
+- 초기 데이터를 만들거나 가설의 검증을 위해 일일히 찾아봐야 하는 불편한 과정들이 있었습니다.
+- 이를 개선하기 위해 프론트측에서 어드민을 개발하였고, 이를 통해 백엔드에서 기술스택에 있어 의사결정 시간을 상당히 단축할 수 있었습니다.
+- [관련 wiki 페이지](https://github.com/softeer5th/Team2-Getit/wiki/%5B%EA%B3%B5%ED%86%B5%5D-%EC%96%B4%EB%93%9C%EB%AF%BC-%ED%8E%98%EC%9D%B4%EC%A7%80)
+
+| 건물 노드 생성 | 노드 및 간선 정보 확인 |
+|-------------|-------------------|
+| <img width="1728" alt="image" src="https://github.com/user-attachments/assets/a522c216-c16e-4bd7-939f-606f92f0b733" /> | <img width="1728" alt="image" src="https://github.com/user-attachments/assets/1fad620a-e33e-4a67-91a3-3a7082abe8d8" /> |
+
 ## Jira를 이용한 프로젝트 관리
 
 <img width="1587" alt="image" src="https://github.com/user-attachments/assets/d9d89b42-3efb-42bf-9857-d12a789cae4b" />
