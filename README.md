@@ -124,37 +124,6 @@
 - 각 주차마다 각 파트 브랜치에서 작업하며 금요일마다 Main 브랜치에 merge 합니다.
   <img width="547" alt="스크린샷 2025-02-15 오후 10 51 41" src="https://github.com/user-attachments/assets/9b7d0505-6288-43e4-88cb-cd09e45592ba" />
 
----
-
-# 🎨 프론트엔드
-
-프론트엔드에서 구현한 기능과 기술 스택을 정리합니다.
-
-- **사용 기술**: React, TypeScript, Zustand, TanStack-Query, Tailwind CSS, Frame
-
-## FrontEnd 배포 과정
-![Deploy](https://github.com/user-attachments/assets/4d87f404-d92f-4af4-803c-be8e5b30d1cd)
-
-### Github Action Flow
-1. Multi Stage Build
-2. GCR Push -> VM Pull
-3. Deploy New Container
-
----
-
-# 🛠 백엔드
-
-백엔드에서 구현한 기능과 기술 스택을 정리합니다.
-
-## 아키텍처
-![uniro drawio](https://github.com/user-attachments/assets/803df1bc-a077-47c1-b941-32d6d5a70fa5)
-
-## ERD
-<img width="690" alt="스크린샷 2025-02-24 오후 12 27 19" src="https://github.com/user-attachments/assets/414c313c-9a6d-485c-973b-4afab34366b4" />
-
-
----
-
 ## 🙌 그라운드 룰
 
 ### 📞 일정 및 연락
@@ -180,6 +149,37 @@
 1. 모든 머지는 반드시 1명의 승인을 받아야 가능해요.
 2. 피드백은 건전하고 건강하게 주고받아요. 근데 이제 따뜻함을 잊지 말아주세요.
 
-<br>
+
+---
+
+# 🎨 프론트엔드
+
+프론트엔드에서 구현한 기능과 기술 스택을 정리합니다.
+
+- **사용 기술**: React, TypeScript, Zustand, TanStack-Query, Tailwind CSS, Frame
+
+## FrontEnd 배포 과정
+![Deploy](https://github.com/user-attachments/assets/4d87f404-d92f-4af4-803c-be8e5b30d1cd)
+
+### Github Action Flow
+1. Multi Stage Build
+2. GCR Push -> VM Pull
+3. Deploy New Container
+
+---
+
+# 🛠 백엔드
+
+백엔드에서 구현한 기능과 기술 스택을 정리합니다.
 
 - **사용 기술**: Java, Spring Boot, JPA, MySQL, Redis, Hibernate envers, FastJson, Querydsl
+
+## 아키텍처
+![uniro drawio](https://github.com/user-attachments/assets/803df1bc-a077-47c1-b941-32d6d5a70fa5)
+
+## ERD
+<img width="690" alt="스크린샷 2025-02-24 오후 12 27 19" src="https://github.com/user-attachments/assets/414c313c-9a6d-485c-973b-4afab34366b4" />
+
+
+---
+
