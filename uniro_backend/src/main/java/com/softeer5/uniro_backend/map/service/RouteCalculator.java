@@ -78,10 +78,6 @@ public class RouteCalculator {
 
         }
 
-//        List<NodeInfoResDTO> nodeInfos = nodeMap.entrySet().stream()
-//                .map(entry -> NodeInfoResDTO.of(entry.getKey(), entry.getValue().getX(), entry.getValue().getY()))
-//                .toList();
-
         List<NodeInfoResDTO> nodeInfos = new ArrayList<>();
 
         for(Node node : nodeMap.values()) {
@@ -201,9 +197,6 @@ public class RouteCalculator {
         PriorityQueue<CostToNextNode> pq = new PriorityQueue<>();
         pq.add(new CostToNextNode(0.0, startNode,0));
         costMap.put(startNode.getId(), 0.0);
-        // A* 알고리즘 중 출발점과 도착점의 해발고도를 크게 벗어나지 않도록 하기 위한 변수 설정
-        final double minHeight = Math.min(startNode.getHeight(),endNode.getHeight());
-        final double maxHeight = Math.max(startNode.getHeight(),endNode.getHeight());
 
         // 길찾기 알고리즘
         while(!pq.isEmpty()){
@@ -293,10 +286,10 @@ public class RouteCalculator {
 
             double heightDiff = firstNode.getHeight() - secondNode.getHeight();
             if(heightDiff > 0){
-                heightIncreaseWeight += Math.max(LIMIT_RANGE ,Math.exp(heightDiff) - 1);
+                heightIncreaseWeight += Math.min(LIMIT_RANGE ,Math.exp(heightDiff) - 1);
             }
             else{
-                heightDecreaseWeight += Math.max(LIMIT_RANGE, Math.exp(-heightDiff) - 1);
+                heightDecreaseWeight += Math.min(LIMIT_RANGE, Math.exp(-heightDiff) - 1);
             }
 
             routeInfoDTOS.add(RouteInfoResDTO.of(route, firstNode, secondNode));
@@ -549,8 +542,7 @@ public class RouteCalculator {
     }
 
 
-    // TODO: 모든 점이 아니라 request 값의 MBR 영역만 불러오면 좋을 것 같다.  <- 추가 검증 필요
-    // TODO: 캐시 사용 검토
+
     public List<Node> createValidRouteNodes(Long univId, Long startNodeId, Long endNodeId, List<CreateRouteReqDTO> requests, List<Route> routes) {
         LinkedList<Node> createdNodes = new LinkedList<>();
 
