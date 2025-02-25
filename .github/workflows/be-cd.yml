@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - be
+      - test/4
 
 jobs:
   uniro-ci:
