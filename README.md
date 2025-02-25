@@ -122,6 +122,22 @@
 
 # 🤝 협업 방식
 
+## 빠른 개발과 QA로 완성도 높은 서비스 제작
+- 저희 팀은 **완성도 높고 버그 없는 서비스 제작**을 최종 목표로 삼았습니다.
+- 4주라는 길지 않은 개발 기간동안, 이를 위해 핵심 기능을 빠르게 개발·배포하고, 반복적인 QA와 고도화를 통해 완성도를 높이고자 했습니다.
+
+- 그 결과, 2주 차에 핵심 기능을 성공적으로 배포했으며, 세 차례의 내부 QA와 두 차례의 외부 QA를 진행했습니다.
+
+| 날짜 | QA   |
+| ----------- | -------------- |
+| 2/5| [1차 자체QA](https://github.com/softeer5th/Team2-Getit/wiki/%5B%EA%B3%B5%ED%86%B5%5D-2%EC%9B%94-5%EC%9D%BC-%E2%80%90-1%EC%B0%A8-%EC%9E%90%EC%B2%B4-QA)| 
+| 2/8 | [2차 자체QA](https://github.com/softeer5th/Team2-Getit/wiki/%5B%EA%B3%B5%ED%86%B5%5D-2%EC%9B%94-8%EC%9D%BC-%E2%80%90-2%EC%B0%A8-%EC%9E%90%EC%B2%B4-QA)| 
+| 2/11 | [3차 자체QA](https://github.com/softeer5th/Team2-Getit/wiki/%5B%EA%B3%B5%ED%86%B5%5D-2%EC%9B%94-11%EC%9D%BC-%E2%80%90-3%EC%B0%A8-%EC%9E%90%EC%B2%B4-QA)| 
+| 2/14 | [소프티어 버그데이QA](https://github.com/softeer5th/Team2-Getit/wiki/%5B%EA%B3%B5%ED%86%B5%5D-2%EC%9B%94-14%EC%9D%BC-%E2%80%90-%EC%86%8C%ED%94%84%ED%8B%B0%EC%96%B4-%EB%B2%84%EA%B7%B8%EB%8D%B0%EC%9D%B4-QA)| 
+| 2/21 |  [소프티어 데모데이QA](https://github.com/softeer5th/Team2-Getit/wiki/%5B%EA%B3%B5%ED%86%B5%5D-2%EC%9B%94-21%EC%9D%BC-%E2%80%90-%EC%86%8C%ED%94%84%ED%8B%B0%EC%96%B4-%EB%8D%B0%EB%AA%A8%EB%8D%B0%EC%9D%B4-QA)| 
+
+
+
 ## 스프린트 단위 개발
 
 - 저희 팀에서는 일주일 단위의 스프린트를 가지고 개발하고 있습니다. 해당 방식을 통해 아래와 같은 장점을 갖게 되었습니다.
