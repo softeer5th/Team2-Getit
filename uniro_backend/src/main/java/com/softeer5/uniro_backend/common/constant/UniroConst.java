@@ -11,11 +11,7 @@ public final class UniroConst {
 	public static final double BUILDING_ROUTE_DISTANCE = 1e8;
 	public static final double LIMIT_RANGE = 10;
 	public static final int STREAM_FETCH_SIZE = 2500;
-	//컴파일 상수를 보장하기 위한 코드
-	public static final String STREAM_FETCH_SIZE_AS_STRING = "" + STREAM_FETCH_SIZE;
-
 	public static final int CREATE_ROUTE_LIMIT_COUNT = 2000;
-
 	public static final int MAX_CACHE_SIZE = 20;
 	public static final Integer MAX_GOOGLE_API_BATCH_SIZE = 300;
 	public static final String SUCCESS_STATUS = "OK";
