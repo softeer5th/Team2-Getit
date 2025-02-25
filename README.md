@@ -106,17 +106,8 @@
 
 ## Jira를 이용한 프로젝트 관리
 
-### 스프린트 1
-<img width="1105" alt="스크린샷 2025-02-24 오후 11 25 51" src="https://github.com/user-attachments/assets/a572939b-3f77-438e-a13b-84e4c62c716e" />
-
-### 스프린트 2
-<img width="1102" alt="스크린샷 2025-02-24 오후 11 27 52" src="https://github.com/user-attachments/assets/c2937906-42d2-4842-982a-d60fd3724196" />
-
-### 스프린트 3
-<img width="1117" alt="스크린샷 2025-02-24 오후 11 26 35" src="https://github.com/user-attachments/assets/165ab359-0c85-47d6-b3bf-9244ab9d9eea" />
-
-### 스프린트 4
-<img width="1107" alt="스크린샷 2025-02-24 오후 11 26 58" src="https://github.com/user-attachments/assets/17ea6527-3735-4042-9049-f8a0cf832c37" />
+<img width="1587" alt="image" src="https://github.com/user-attachments/assets/d9d89b42-3efb-42bf-9857-d12a789cae4b" />
+진척도를 시각화하여 진행상황을 파악할 수 있었습니다.
 
 
 ## 배포 방식
