@@ -81,7 +81,7 @@ public class BuildingService {
 				.phoneNumber(createBuildingNodeReqDTO.getPhoneNumber())
 				.address(createBuildingNodeReqDTO.getAddress())
 				.name(createBuildingNodeReqDTO.getBuildingName())
-				.trimmedName(createBuildingNodeReqDTO.getBuildingName().strip())
+				.trimmedName(createBuildingNodeReqDTO.getBuildingName().replaceAll("\\s+", ""))
 				.imageUrl(createBuildingNodeReqDTO.getBuildingImageUrl())
 				.level(createBuildingNodeReqDTO.getLevel())
 				.nodeId(node.getId())

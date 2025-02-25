@@ -53,7 +53,6 @@ public class MapService {
 	private final EntityManager entityManager;
 	private final NodeRepository nodeRepository;
 	private final BuildingRepository buildingRepository;
-	private final RevInfoRepository revInfoRepository;
 	private final ApplicationEventPublisher eventPublisher;
 
 	private final RouteCalculator routeCalculator;
@@ -63,23 +62,6 @@ public class MapService {
 
 	private final Map<Long, List<LightRoute>> cache = new HashMap<>();
 
-	public AllRoutesInfo getAllRoutesByLocalCache(Long univId) {
-
-		if(!cache.containsKey(univId)){
-			List<Route> routes = routeRepository.findAllRouteByUnivIdWithNodes(univId);
-			List<LightRoute> lightRoutes = routes.stream().map(LightRoute::new).toList();
-			cache.put(univId, lightRoutes);
-		}
-
-		List<LightRoute> routes = cache.get(univId);
-
-		// 맵이 존재하지 않을 경우 예외
-		if(routes.isEmpty()) {
-			throw new RouteException("Route Not Found", ROUTE_NOT_FOUND);
-		}
-
-		return routeCacheCalculator.assembleRoutes(routes);
-	}
 
 	public AllRoutesInfo getAllRoutes(Long univId) {
 

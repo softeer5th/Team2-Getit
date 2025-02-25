@@ -25,12 +25,6 @@ public class MapController implements MapApi {
 	private final MapService mapService;
 	private final AdminService adminService;
 
-	@GetMapping("/{univId}/routes-local")
-	public ResponseEntity<AllRoutesInfo> getAllRoutesAndNodesByLocalCache(@PathVariable("univId") Long univId){
-		AllRoutesInfo allRoutes = mapService.getAllRoutesByLocalCache(univId);
-		return ResponseEntity.ok().body(allRoutes);
-	}
-
 	@Override
 	@GetMapping("/{univId}/routes")
 	public ResponseEntity<AllRoutesInfo> getAllRoutesAndNodes(@PathVariable("univId") Long univId){
