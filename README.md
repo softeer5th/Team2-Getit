@@ -139,7 +139,14 @@
 | v1.0.0      | 1주차 스프린트 | [1주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.0.0) | [v1.0.0](https://github.com/softeer5th/Team2-Getit/pull/27)  |
 | v1.1.0      | 2주차 스프린트 | [2주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.1.0) | [v1.1.0](https://github.com/softeer5th/Team2-Getit/pull/76)  |
 | v1.2.0      | 3주차 스프린트 | [3주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.2.0) | [v1.2.0](https://github.com/softeer5th/Team2-Getit/pull/141) |
-| v1.3.0      | 4주차 스프린트 | [4주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.3.0) | [v1.3.0](https://github.com/softeer5th/Team2-Getit/pull/238)                                                   |
+| v1.3.0      | 4주차 스프린트 | [4주차 릴리즈 노트](https://github.com/softeer5th/Team2-Getit/releases/tag/v1.3.0) | [v1.3.0](https://github.com/softeer5th/Team2-Getit/pull/238) |
+
+## 🐳 협업을 위한 무중단 배포 구축
+- 소프티어 활동에서는 함께 개발하는 시간이 많습니다.
+- 하지만 서버를 배포할 때마다 프론트엔드가 이를 인지하고 대응해야 하는 과정이 불필요한 비용처럼 느껴졌습니다.
+- 배포로 인한 소통 비용은 약 5분 정도이지만, 저희는 빠른 배포를 목표로 개발했기에 이러한 시간이 쌓이면 협업에 큰 불편이 될 것이라 생각했습니다.
+- 이를 개선하기 위해 서버에서 무중단 배포를 구축하여, 프론트엔드가 서버의 배포 시점을 신경 쓰지 않아도 개발에 불편함이 없도록 만들었습니다.
+- [관련 구현 wiki 페이지](https://github.com/softeer5th/Team2-Getit/wiki/%5BBE%5D-ci%E2%80%90cd-%EB%AC%B4%EC%A4%91%EB%8B%A8-%EB%B0%B0%ED%8F%AC-%EA%B5%AC%EC%B6%95)
 
 ## Jira를 이용한 프로젝트 관리
 
