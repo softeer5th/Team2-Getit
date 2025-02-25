@@ -1,4 +1,4 @@
-import { Building } from "../../../data/types/node";
+import { Building } from "../../../types/node";
 
 export type GetBuildingListResponse = {
 	data: Building[];

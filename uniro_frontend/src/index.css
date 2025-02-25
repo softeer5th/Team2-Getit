@@ -1,46 +1,7 @@
 @import "tailwindcss";
 
-@font-face {
-	font-family: "AppleSDGothicNeo";
-	font-style: normal;
-	font-weight: 700;
-	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoB.woff") format("woff");
-	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
-}
-
-@font-face {
-	font-family: "AppleSDGothicNeo";
-	font-style: normal;
-	font-weight: 500;
-	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoM.woff") format("woff");
-	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
-}
-
-@font-face {
-	font-family: "AppleSDGothicNeo";
-	font-style: normal;
-	font-weight: 400;
-	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoR.woff") format("woff");
-	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
-}
-
-@font-face {
-	font-family: "AppleSDGothicNeo";
-	font-style: normal;
-	font-weight: 600;
-	src: url("/fonts/AppleSDGothicNeo/AppleSDGothicNeoSB.woff") format("woff");
-	unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3, U+D7B0-D7FF;
-}
-
-@font-face {
-	font-family: "SF Pro Display";
-	font-style: normal;
-	font-weight: 400;
-	src: url("/fonts/SF_Pro_Display/SF-Pro-Display-Regular.woff") format("woff");
-}
-
 * {
-	font-family: "SF Pro Display", "AppleSDGothicNeo" !important;
+	font-family: -apple-system, BlinkMacSystemFont;
 	outline: none;
 	--webkit-scrollbar-width: none;
 	box-sizing: border-box;
@@ -74,6 +35,8 @@
 	--color-gray-700: #808080;
 	--color-gray-800: #4d4d4d;
 	--color-gray-900: #161616;
+
+	--color-mint-500: #00c5b8;
 
 	--color-system-black: #000000;
 	--color-system-red: #ff2d55;
@@ -125,16 +88,20 @@
 	--text-eng-caption--line-height: 160%;
 }
 
-@utility translate-marker {
-	transform: translateY(calc(100% - 10px));
+@utility translate-namedmarker {
+	transform: translateY(40px);
 }
 
-@utility translate-routemarker {
-	transform: translateY(calc(100% - 40px));
+@utility translate-shadowmarker {
+	transform: translateY(2px);
 }
 
 @utility translate-waypoint {
 	transform: translateY(+4px);
+}
+
+@utility translate-building {
+	transform: translateY(10px);
 }
 
 @keyframes markerAppear {
@@ -164,4 +131,16 @@
 		opacity: 0;
 		transform: scale(0);
 	}
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+.spinner {
+	animation: spin 1s linear infinite;
 }

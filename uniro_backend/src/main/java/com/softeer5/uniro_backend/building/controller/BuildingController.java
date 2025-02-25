@@ -39,10 +39,9 @@ public class BuildingController implements BuildingApi {
 	public ResponseEntity<SearchBuildingResDTO> searchBuildings(
 		@PathVariable("univId") Long univId,
 		@RequestParam(value = "name", required = false) String name,
-		@RequestParam(value = "cursor-id", required = false) Long cursorId,
-		@RequestParam(value = "page-size", required = false, defaultValue = "6") Integer pageSize
+		@RequestParam(value = "page-size", required = false, defaultValue = "10") Integer pageSize
 	) {
-		SearchBuildingResDTO searchBuildingResDTO = buildingService.searchBuildings(univId, name, cursorId, pageSize);
+		SearchBuildingResDTO searchBuildingResDTO = buildingService.searchBuildings(univId, name, pageSize);
 		return ResponseEntity.ok().body(searchBuildingResDTO);
 	}
 

@@ -1,5 +1,7 @@
 spring:
   datasource:
+    hikari:
+      maximum-pool-size: 30
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/uniro?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
@@ -14,13 +16,14 @@ spring:
         show_sql: true
     open-in-view: false
     #defer-datasource-initialization: true
-  sql:
-    init:
-      mode: always
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+#  sql:
+#    init:
+#      mode: always
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      port: 6379
 map:
   api:
     key: ${google.api.key}

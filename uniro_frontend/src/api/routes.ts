@@ -1,4 +1,4 @@
-import { CautionRoute, DangerRoute } from "../data/types/route";
+import { CautionRoute, DangerRoute } from "../types/route";
 import { getFetch } from "../utils/fetch/fetch";
 
 export const getAllRisks = (

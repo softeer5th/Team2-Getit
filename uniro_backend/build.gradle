@@ -72,6 +72,10 @@ dependencies {
 	// actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+	// prometheus
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+
 	// test container
 	testImplementation 'org.testcontainers:testcontainers:1.19.5'
 	testImplementation 'org.testcontainers:junit-jupiter:1.19.5'
@@ -84,6 +88,12 @@ dependencies {
 	implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
 	implementation 'com.auth0:java-jwt:4.4.0'
 
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate6'
+	implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.55'
 }
 
 tasks.named('test') {

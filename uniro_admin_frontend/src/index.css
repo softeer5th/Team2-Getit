@@ -82,6 +82,9 @@
   --color-system-lightred: #fff5f7;
   --color-system-lightorange: #fff7ef;
 
+  --color-mint-500: #00c5b8;
+
+
   --radius-100: 10px;
   --radius-200: 16px;
   --radius-300: 18px;
@@ -125,12 +128,12 @@
   --text-eng-caption--line-height: 160%;
 }
 
-@utility translate-marker {
-  transform: translateY(calc(100% - 10px));
+@utility translate-namedmarker {
+	transform: translateY(40px);
 }
 
-@utility translate-routemarker {
-  transform: translateY(calc(100% - 40px));
+@utility translate-shadowmarker {
+	transform: translateY(2px);
 }
 
 @utility translate-waypoint {

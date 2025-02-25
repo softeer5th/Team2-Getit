@@ -1,5 +1,5 @@
 import { Markers } from "../../constant/enum/markerEnum";
-import { MarkerTypes } from "../../data/types/enum";
+import { MarkerTypes } from "../../types/enum";
 import { animate } from "framer-motion";
 
 const markerImages = import.meta.glob("/src/assets/markers/*.svg", { eager: true });
@@ -19,26 +19,26 @@ function createTextElement(type: MarkerTypes, title: string): HTMLElement {
 			return markerTitle;
 		case Markers.BUILDING:
 			markerTitle.className =
-				"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-gray-900 text-center rounded-200";
+				"h-[22px] py-1 px-3 text-kor-caption font-medium text-gray-100 bg-gray-900 text-center rounded-200";
 			return markerTitle;
 		case Markers.SELECTED_BUILDING:
 			markerTitle.className =
-				"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
+				"h-[22px] py-1 px-3 text-kor-caption font-medium text-gray-100 bg-gray-900 text-center rounded-200";
 			return markerTitle;
 		case Markers.ORIGIN:
 			markerTitle.className =
-				"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
+				"h-[22px] py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
 			return markerTitle;
 		case Markers.DESTINATION:
 			markerTitle.className =
-				"py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
+				"h-[22px] py-1 px-3 text-kor-caption font-medium text-gray-100 bg-primary-500 text-center rounded-200";
 			return markerTitle;
 		default:
 			return markerTitle;
 	}
 }
 
-function createAnimatedTextElement(type: MarkerTypes, titles: string[]): HTMLElement {
+export function createAnimatedTextElement(type: MarkerTypes, titles: string[]): HTMLElement {
 	const titleContainer = document.createElement("div");
 
 	const elements = [];
@@ -114,7 +114,7 @@ function createImageElement(type: MarkerTypes): HTMLElement {
 
 function createContainerElement(className?: string) {
 	const container = document.createElement("div");
-	container.className = `flex flex-col items-center space-y-[7px] ${className}`;
+	container.className = `flex flex-col items-center space-y-[8px] ${className}`;
 
 	return container;
 }

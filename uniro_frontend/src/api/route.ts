@@ -1,26 +1,26 @@
 import { IssueTypeKey } from "../constant/enum/reportEnum";
-import { Coord } from "../data/types/coord";
-import { CautionIssueType, DangerIssueType } from "../data/types/enum";
-import { NodeId } from "../data/types/node";
+import { Coord } from "../types/coord";
+import { CautionIssueType, DangerIssueType } from "../types/enum";
+import { NodeId } from "../types/node";
 
-import { CoreRoutesList, NavigationRouteList, RouteId } from "../data/types/route";
+import { CoreRoutesList, NavigationRouteListRecordWithMetaData, RouteId } from "../types/route";
 import { getFetch, postFetch } from "../utils/fetch/fetch";
-import { transformAllRoutes } from "./transformer/route";
-import { GetAllRouteRepsonse } from "./type/response/route";
+import { transformAllRoutes, transformFastRoute } from "./transformer/route";
+import { GetAllRouteRepsonse, GetFastestRouteResponse } from "./type/response/route";
 
 export const getNavigationResult = (
 	univId: number,
 	startNodeId: NodeId,
 	endNodeId: NodeId,
-): Promise<NavigationRouteList> => {
-	return getFetch<NavigationRouteList>(`/${univId}/routes/fastest`, {
+): Promise<NavigationRouteListRecordWithMetaData> => {
+	return getFetch<GetFastestRouteResponse>(`/${univId}/routes/fastest`, {
 		"start-node-id": startNodeId,
 		"end-node-id": endNodeId,
-	});
+	}).then((data) => transformFastRoute(data));
 };
 
 export const getAllRoutes = (univId: number): Promise<CoreRoutesList> => {
-	return getFetch<GetAllRouteRepsonse>(`/${univId}/routes`).then((data) => transformAllRoutes(data));
+	return getFetch<GetAllRouteRepsonse>(`/${univId}/routes/stream`).then((data) => transformAllRoutes(data));
 };
 
 export const getSingleRouteRisk = (
@@ -43,7 +43,7 @@ export const postReport = (
 	routeId: RouteId,
 	body: { dangerFactors: DangerIssueType[]; cautionFactors: CautionIssueType[] },
 ): Promise<boolean> => {
-	return postFetch<void, string>(`/${univId}/route/risk/${routeId}`, body);
+	return postFetch<boolean, string>(`/${univId}/route/risk/${routeId}`, body);
 };
 
 export const postReportRoute = (
@@ -53,6 +53,9 @@ export const postReportRoute = (
 		endNodeId: NodeId | null;
 		coordinates: Coord[];
 	},
-): Promise<boolean> => {
-	return postFetch<void, Coord[] | NodeId | null>(`/${univId}/route`, body);
+): Promise<GetAllRouteRepsonse> => {
+	return postFetch<GetAllRouteRepsonse, Coord[] | NodeId | null>(
+		`/${univId}/route`,
+		body,
+	) as Promise<GetAllRouteRepsonse>;
 };

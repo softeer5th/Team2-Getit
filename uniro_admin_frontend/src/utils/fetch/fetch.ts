@@ -1,23 +1,31 @@
+import { BadRequestError, ForbiddenError } from "../../constant/error";
+
 export default function Fetch() {
 	const baseURL = import.meta.env.VITE_REACT_SERVER_BASE_URL;
 
-	const get = async <T>(url: string, params?: Record<string, string | number | boolean>): Promise<T> => {
+	const get = async <T>(
+		url: string,
+		params?: Record<string, string | number | boolean>,
+		token?: string,
+	): Promise<T> => {
 		const paramsURL = new URLSearchParams(
 			Object.entries(params || {}).map(([key, value]) => [key, String(value)]),
 		).toString();
 
+		const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+
 		const response = await fetch(`${baseURL}${url}?${paramsURL}`, {
 			method: "GET",
+			headers: headers,
 		});
 
 		if (!response.ok) {
 			throw new Error(`${response.status}-${response.statusText}`);
 		}
-
 		return response.json();
 	};
 
-	const post = async <T, K>(url: string, body?: Record<string, K | K[]>): Promise<boolean> => {
+	const post = async <T, K>(url: string, body?: Record<string, K | K[]>): Promise<T> => {
 		const response = await fetch(`${baseURL}${url}`, {
 			method: "POST",
 			body: JSON.stringify(body),
@@ -26,11 +34,23 @@ export default function Fetch() {
 			},
 		});
 
-		if (!response.ok) {
-			throw new Error(`${response.status}-${response.statusText}`);
+        if (!response.ok) {
+            if (response.status === 400) throw new BadRequestError('');
+            else if (response.status === 403) throw new ForbiddenError('');
+            throw new Error(`${response.status}`);
 		}
 
-		return response.ok;
+		try {
+			const res = await response.json();
+
+			return res;
+		} catch (err) {
+			if (err instanceof SyntaxError) {
+				return true as T;
+			}
+		}
+
+		return response.json();
 	};
 
 	const put = async <T, K>(url: string, body?: Record<string, K>): Promise<T> => {
@@ -46,12 +66,30 @@ export default function Fetch() {
 		return response.json();
 	};
 
+	const patch = async <T, K>(url: string, body?: Record<string, K>, token?: string): Promise<boolean> => {
+		const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+
+		const response = await fetch(`${baseURL}${url}`, {
+			method: "PATCH",
+			body: JSON.stringify(body),
+			headers: headers,
+		});
+
+		if (!response.ok) {
+			const res = await response.json();
+			throw new Error(`${response.status}-${response.statusText}`);
+		}
+
+		return true;
+	};
+
 	return {
 		get,
 		post,
 		put,
+		patch,
 	};
 }
 
-const { get, post, put } = Fetch();
-export { get as getFetch, post as postFetch, put as putFetch };
+const { get, post, put, patch } = Fetch();
+export { get as getFetch, post as postFetch, put as putFetch, patch as patchFetch };

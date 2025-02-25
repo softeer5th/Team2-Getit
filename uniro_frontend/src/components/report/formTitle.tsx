@@ -1,5 +1,5 @@
 import { PassableStatus } from "../../constant/enum/reportEnum";
-import { ReportModeType } from "../../data/types/report";
+import { ReportModeType } from "../../types/report";
 
 type FormTitleProps = {
 	isPrimary: boolean;

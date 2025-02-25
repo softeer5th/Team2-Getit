@@ -1,6 +1,6 @@
-import { Coord } from "../../data/types/coord";
-import { Node } from "../../data/types/node";
-import { CoreRoute } from "../../data/types/route";
+import { Coord } from "../../types/coord";
+import { Node } from "../../types/node";
+import { CoreRoute } from "../../types/route";
 import centerCoordinate from "../coordinates/centerCoordinate";
 import distance from "../coordinates/distance";
 

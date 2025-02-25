@@ -1,43 +1,35 @@
-import { useEffect, useRef, useState } from "react";
-import { initializeMap } from "../map/initializer/googleMapInitializer";
+import { useContext, useEffect, useRef, useState } from "react";
+import MapContext from "../map/mapContext";
+import useUniversityInfo from "./useUniversityInfo";
 
 const useMap = (mapOptions?: google.maps.MapOptions) => {
+	const { Map } = useContext(MapContext);
+	const { university } = useUniversityInfo();
 	const mapRef = useRef<HTMLDivElement>(null);
-	const [map, setMap] = useState<google.maps.Map | null>(null);
-	const [overlay, setOverlay] = useState<google.maps.OverlayView | null>(null);
-	const [AdvancedMarker, setAdvancedMarker] = useState<typeof google.maps.marker.AdvancedMarkerElement | null>(null);
-	const [Polyline, setPolyline] = useState<typeof google.maps.Polyline | null>(null);
-	const [mapLoaded, setMapLoaded] = useState<boolean>(false);
+	const [map, setMap] = useState<google.maps.Map>();
 
 	useEffect(() => {
-		if (!mapRef.current) return;
+		if (Map === null || mapRef.current === null || !university) return;
 
-		const initMap = async () => {
-			try {
-				const { map, overlay, AdvancedMarkerElement, Polyline } = await initializeMap(
-					mapRef.current,
-					mapOptions,
-				);
-				setMap(map);
-				setOverlay(overlay);
-				setAdvancedMarker(() => AdvancedMarkerElement);
-				setPolyline(() => Polyline);
-				setMapLoaded(true);
-			} catch (e) {
-				alert("Error while initializing map: " + e);
-			}
-		};
+		const _map = new Map(mapRef.current, {
+			center: university.centerPoint,
+			zoom: 16,
+			minZoom: 13,
+			maxZoom: 19,
+			draggable: true,
+			scrollwheel: true,
+			disableDoubleClickZoom: false,
+			gestureHandling: "greedy",
+			clickableIcons: false,
+			disableDefaultUI: true,
+			mapId: import.meta.env.VITE_REACT_APP_GOOGLE_MAP_ID,
+			...mapOptions,
+		});
 
-		initMap();
+		setMap(_map);
+	}, [Map, university]);
 
-		return () => {
-			if (map) {
-				map.unbindAll();
-			}
-		};
-	}, []);
-
-	return { mapRef, map, overlay, AdvancedMarker, Polyline, mapLoaded };
+	return { mapRef, map };
 };
 
 export default useMap;

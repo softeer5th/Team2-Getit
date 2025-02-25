@@ -1,4 +1,4 @@
-import { Coord } from "../data/types/coord";
+import { Coord } from "../types/coord";
 
 function toRad(deg: number) {
 	return (deg * Math.PI) / 180;

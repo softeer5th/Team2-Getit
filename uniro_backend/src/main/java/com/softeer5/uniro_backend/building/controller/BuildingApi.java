@@ -41,7 +41,6 @@ public interface BuildingApi {
 	ResponseEntity<SearchBuildingResDTO> searchBuildings(
 		@PathVariable("univId") Long univId,
 		@RequestParam(value = "name", required = false) String name,
-		@RequestParam(value = "cursor-id", required = false) Long cursorId,
 		@RequestParam(value = "page-size", required = false) Integer pageSize
 	);
 
