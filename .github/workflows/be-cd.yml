@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - be
+      - hotfix-1
 
 jobs:
   uniro-ci:
